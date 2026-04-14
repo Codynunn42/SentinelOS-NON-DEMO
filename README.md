@@ -39,3 +39,11 @@ Sentinel OS executes it.
   "target": "nexus-ui",
   "env": "production"
 }
+
+Example Response:
+{
+  "status": "executed",
+  "durationMs": 842,
+  "attempts": 1,
+  "audit": "verified"
+}
