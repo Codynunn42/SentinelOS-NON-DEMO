@@ -1,0 +1,22 @@
+# SentinelOS NON-DEMO - Azure Container Apps
+# COMM: Sentinel AI by Cody Nunn | Nunn Cloud
+
+name: sentinel-api
+location: eastus2
+
+type: Microsoft.App/containerApps
+
+properties:
+  managedEnvironmentId: <REPLACE_WITH_ENVIRONMENT_ID>
+  configuration:
+    ingress:
+      external: true
+      targetPort: 3000
+    registries: []
+  template:
+    containers:
+      - name: sentinel-api
+        image: <REPLACE_WITH_IMAGE>
+        resources:
+          cpu: 0.5
+          memory: 1Gi
