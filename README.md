@@ -1,49 +1,93 @@
-# SentinelOS
+# SentinelOS NON-DEMO
 
-**A command-driven AI operating system for executing real-world workflows with governance and verification.**
+**COMM:** Sentinel AI by Cody Nunn | Nunn Cloud
 
----
-
-## ⚡ What This Is
-
-Sentinel OS enables organizations to run operations through AI-driven commands.
-
-Every action is:
-- validated before execution  
-- governed by policy  
-- tracked in real time  
-- returned with a verifiable receipt  
+**Client operating repository for the post-demo SentinelOS system.**
 
 ---
 
-## 🎯 Why It Matters
+## Overview
+SentinelOS NON-DEMO is the client-facing operational repository for the system after demo validation. This repository is intended to mature into the governed, production-direction environment where clients, operators, and stakeholders access SentinelOS capabilities beyond the demo lane.
 
-Most AI tools assist work.
+This repository is not intended to be a temporary proof shell. It is the starting point for the real operating surface that clients will use once the platform transitions from demonstration into structured deployment.
 
-Sentinel OS executes it.
+## Mission
+SentinelOS is designed to support command-driven execution with governance, accountability, and verification. The NON-DEMO repository exists to carry that model into a client-ready environment.
 
----
+Core intent:
+- provide a trustworthy client entry point
+- support governed operational workflows
+- maintain clear deployment and security posture
+- document readiness, controls, and change direction
+- establish a stable foundation for production buildout
 
-## 🔥 Live Demo
+## Client Use Direction
+This is the repository that should back the next stage of system use after demo adoption.
 
-👉 Demo: https://your-demo-url.com  
-👉 Request Access: https://your-waitlist-url.com  
+Target outcomes:
+- clients access the real operating surface
+- workflows move from demo proof to controlled execution
+- documentation supports stakeholder trust
+- repo discipline reflects enterprise expectations
+- deployment, governance, and security posture remain visible
 
----
+## Current State
+The repository is in bootstrap mode.
 
-## ⚙️ Example Command
+Current condition:
+- repository initialized and active
+- baseline documentation established
+- non-demo positioning defined
+- status reporting path introduced
+- security baseline introduced
 
-```json
-{
-  "op": "deploy.promote",
-  "target": "nexus-ui",
-  "env": "production"
-}
+## Immediate Priorities
+1. Define runtime and deployment architecture
+2. Add CI/CD workflow coverage
+3. Establish authentication and authorization model
+4. Add health, readiness, and rollback posture
+5. Create implementation backlog for client operating path
+6. Connect release controls and operational reporting
 
-Example Response:
-{
-  "status": "executed",
-  "durationMs": 842,
-  "attempts": 1,
-  "audit": "verified"
-}
+## Suggested Repository Shape
+```text
+.github/
+apps/
+services/
+docs/
+infrastructure/
+security/
+README.md
+SECURITY.md
+STATUS_REPORT.md
+```
+
+## Governance Direction
+This repository should remain aligned with Sentinel operating principles:
+- secure by default
+- auditable execution
+- production-first discipline
+- role-aware access control
+- visible operational trust signals
+- controlled change management
+
+## Production Readiness Standard
+Before broad client onboarding, this repository should contain:
+- deployment and runtime documentation
+- CI/CD automation
+- security reporting path
+- environment definitions
+- health and readiness checks
+- access model documentation
+- release and rollback guidance
+- incident response references
+
+## Next Actions
+- add baseline workflow automation
+- define application and service structure
+- document runtime and environment requirements
+- create bootstrap issue backlog
+- begin non-demo client path implementation
+
+## Status
+SentinelOS NON-DEMO is now established as the **post-demo client repository baseline** and is ready for structured buildout.
