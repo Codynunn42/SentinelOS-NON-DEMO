@@ -1,0 +1,13 @@
+{
+  "name": "sentinelos-non-demo",
+  "private": true,
+  "version": "0.1.0",
+  "description": "SentinelOS NON-DEMO client operating repository",
+  "scripts": {
+    "start": "node apps/api/server.js",
+    "healthcheck": "node scripts/healthcheck.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
