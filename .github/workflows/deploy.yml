@@ -1,0 +1,23 @@
+name: Deploy to Azure Container Apps
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Azure Login
+        run: echo "Azure login step (to be configured)"
+
+      - name: Build Container
+        run: echo "Build Docker image step (to be configured)"
+
+      - name: Deploy to Azure
+        run: echo "Deploy to Azure Container Apps step (to be configured)"
