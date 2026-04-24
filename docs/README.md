@@ -9,6 +9,7 @@ This folder will contain:
 - Microsoft Sentinel integration guidance
 - daily operating goals
 - current next-step tracker
+- ownership and structure handout
 - proof-case planning documents
 - OwnerFi proof-case blueprint
 - surface-plane model and system positioning

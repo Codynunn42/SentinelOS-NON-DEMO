@@ -12,7 +12,7 @@ The operating direction is now broader than a single protected API. Daily execut
 
 The current deployed system now includes a working audit layer, a protected `/v1/audit` retrieval endpoint, and a live Postgres-backed OwnerFi proof path that has been verified end-to-end.
 
-On 2026-04-24, `/proof` was upgraded into a business-readable proof surface and deployed as `acrncdevsentinel.azurecr.io/sentinel-api:proof-ui-v2` on Container App revision `ca-sentinelos-proof--0000002`.
+On 2026-04-24, `/proof` was upgraded into a business-readable proof surface and deployed. The current live image is `acrncdevsentinel.azurecr.io/sentinel-api:proof-rate-limit-v1` on Container App revision `ca-sentinelos-proof--0000003`.
 
 ## Completed
 - repository initialized
@@ -45,17 +45,22 @@ On 2026-04-24, `/proof` was upgraded into a business-readable proof surface and 
 - `ca-sentinelos-proof--0000002` deployed, active, running, and healthy
 - live `/health` verified with `database: "enabled"`
 - live protected OwnerFi submit, evaluate, execute, and audit retrieval verified
+- `SENTINEL_API_KEY` rotated before broader sharing
+- old shared proof key verified as rejected with `401`
+- basic per-IP rate limiting added to `/v1/command` and `/command`
+- `proof-rate-limit-v1` built through ACR remote build run `ch17`
+- `ca-sentinelos-proof--0000003` deployed, active, running, and healthy
+- live same-IP command request 31 verified as `429`
+- one-page ownership handout added for Saturday meeting
 
 ## In Progress
 - Container Apps diagnostics to Sentinel-backed workspace
-- production key rotation and sharing discipline
 - platform contract definition beyond the first surface-plane docs
 - proof-case planning for first real company onboarding
 - surface-plane expansion beyond OwnerFi on the shared core
 - Saturday meeting/demo preparation
 
 ## Gaps
-- no basic rate limit on protected command routes yet
 - no role-based key model yet
 - live Sentinel analytics rules not yet created
 - no operator-facing control plane yet
@@ -64,17 +69,15 @@ On 2026-04-24, `/proof` was upgraded into a business-readable proof surface and 
 - broader API/audit/database implementation work exists in the worktree but still needs a separate clean release commit
 
 ## Next Actions
-1. rotate `SENTINEL_API_KEY` before broader sharing
-2. add basic per-IP rate limiting to `/v1/command`
-3. connect Container Apps diagnostics to the Sentinel-enabled workspace
-4. verify `command.auth.denied` and `command.executed` events in Log Analytics
-5. prepare Saturday demo script and ownership/structure one-pager
-6. decide and commit the broader API/audit/database implementation work separately from the proof UI commit
-7. define the next platform contracts: tenant model, scope model, role/key model, and receipt/audit retrieval model
-8. begin the next surface-plane proof after OwnerFi, using `hotelops` as the placeholder expansion path
+1. connect Container Apps diagnostics to the Sentinel-enabled workspace
+2. verify `command.auth.denied`, `command.executed`, and `command.rate_limited` events in Log Analytics
+3. rehearse the Saturday demo flow without expanding scope
+4. decide and commit the broader API/audit/database implementation work separately from the proof UI commit
+5. define the next platform contracts: tenant model, scope model, role/key model, and receipt/audit retrieval model
+6. begin the next surface-plane proof after OwnerFi, using `hotelops` as the placeholder expansion path
 
 ## Risk Level
-Moderate (live proof is verified; key rotation, rate limiting, and monitoring visibility remain open)
+Low to moderate (live proof, key rotation, and rate limiting are verified; monitoring visibility remains open)
 
 ## Direction
 Proceed with monitored command execution, audit visibility, tighter control-plane hardening, and platform-oriented extraction of reusable contracts, policy, and integration surfaces.
