@@ -21,6 +21,17 @@ Make SentinelOS feel like a product and platform, not only an OwnerFi demo.
 - active revision: `ca-sentinelos-proof--0000002`
 - live proof URL: `https://ca-sentinelos-proof.calmhill-388e1d39.eastus2.azurecontainerapps.io/proof`
 
+## Meeting Hardening
+- docs/status commit: `713d35b`
+- `SENTINEL_API_KEY` rotated in Azure and active revision restarted
+- old shared proof key now returns `401`
+- current live image: `acrncdevsentinel.azurecr.io/sentinel-api:proof-rate-limit-v1`
+- digest: `sha256:a951fab5fe5e87cb917535e3e7a73e8c849a2dadceada9fa144202f946ba76e6`
+- ACR remote build run: `ch17`
+- active revision: `ca-sentinelos-proof--0000003`
+- same-IP command request 31 returns `429`
+- one-page ownership handout added at `docs/OWNERSHIP_HANDOUT.md`
+
 ## Live Verification
 - `/health` returned `200` with `database: "enabled"`
 - `/proof` returned `200` and served the business-result UI
@@ -46,8 +57,5 @@ SentinelOS is a multi-tenant execution system that deploys business operations a
 We are not waiting for the deal to move forward. We are making the system stronger so the deal becomes obvious.
 
 ## Carry Forward
-- rotate the shared proof API key before broader external sharing
-- add basic rate limiting to protected command routes
 - connect Container Apps diagnostics to the Sentinel-backed Log Analytics workspace
-- create the Saturday demo handout or ownership/structure one-pager
 - decide whether to commit the broader pre-existing API, audit, database, and deployment work as a separate release commit

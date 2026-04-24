@@ -19,24 +19,22 @@ Live verification completed on 2026-04-24:
 - no-key audit access returns `401 Unauthorized`
 
 ## Immediate Meeting Prep
-1. Rotate the proof API key before wider sharing.
-2. Keep the Saturday demo to the controlled 5-minute flow:
+1. Keep the Saturday demo to the controlled 5-minute flow:
    - open `/proof`
    - run no-key demo mode
    - point to Application Submitted, Decision, Deal, and Audit Trail
    - briefly open Technical details
    - close with surface-plane architecture
-3. Prepare a one-page Ownership & Structure handout.
-4. Keep the core ownership language short:
+2. Bring the one-page Ownership & Structure handout.
+3. Keep the core ownership language short:
    - OwnerFi owns brand, workflows, and data.
    - SentinelOS is the system layer that lets the business scale without rebuilding.
 
 ## Engineering Next
-1. Add basic per-IP rate limiting to `/v1/command`.
-2. Connect Container Apps diagnostics to the Sentinel-backed Log Analytics workspace.
-3. Verify `command.auth.denied` and `command.executed` events in Log Analytics.
-4. Decide whether to commit the broader API, audit, database, and deployment files as one separate release commit.
-5. Add a clean operator-facing receipt/audit lookup path.
+1. Connect Container Apps diagnostics to the Sentinel-backed Log Analytics workspace.
+2. Verify `command.auth.denied`, `command.executed`, and `command.rate_limited` events in Log Analytics.
+3. Decide whether to commit the broader API, audit, database, and deployment files as one separate release commit.
+4. Add a clean operator-facing receipt/audit lookup path.
 
 ## Platform Next
 1. Formalize tenant and scope contracts.
@@ -49,4 +47,5 @@ Live verification completed on 2026-04-24:
 - The live proof is real, deployed, and verified.
 - The proof surface now speaks business first and technical detail second.
 - OwnerFi is the first active surface plane, not the whole system.
-- The next work should harden sharing, monitoring, and ownership clarity before expanding features.
+- Key rotation and basic command rate limiting are meeting-readiness hardening, not expansion.
+- The next work should harden monitoring and ownership clarity before expanding features.
