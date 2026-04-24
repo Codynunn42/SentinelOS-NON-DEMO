@@ -14,6 +14,8 @@ As of 2026-04-24:
 - rotated API key verified live
 - per-IP command rate limiting verified live
 - command history, tenant switch, and replay verified live
+- Log Analytics workspace: `log-nc-dev-sentinel`
+- verified event types: `command.auth.denied`, `command.executed`, `command.rate_limited`, OwnerFi workflow events
 
 ## Required GitHub Secrets
 Add the following under Settings → Secrets → Actions:
@@ -70,6 +72,4 @@ See [MICROSOFT_SENTINEL.md](./MICROSOFT_SENTINEL.md) for the Log Analytics and M
 ## Next Steps
 - add custom domain (.io)
 - enable TLS and secure ingress
-- connect Container Apps diagnostics to the Sentinel-backed Log Analytics workspace
-- verify `command.auth.denied`, `command.executed`, and `command.rate_limited` in Log Analytics
 - expand audit logging and control-plane visibility

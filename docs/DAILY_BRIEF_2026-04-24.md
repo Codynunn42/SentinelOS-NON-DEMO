@@ -42,6 +42,8 @@ Make SentinelOS feel like a product and platform, not only an OwnerFi demo.
 - `/proof` now includes Replay Last Workflow
 - live no-key OwnerFi demo plus replay verified
 - live no-key HotelOps placeholder surface verified as registered but blocked
+- Log Analytics verified for `command.auth.denied`, `command.executed`, `command.rate_limited`, and OwnerFi workflow events
+- Saturday demo script added at `docs/SATURDAY_DEMO_SCRIPT.md`
 
 ## Live Verification
 - `/health` returned `200` with `database: "enabled"`
@@ -68,5 +70,5 @@ SentinelOS is a multi-tenant execution system that deploys business operations a
 We are not waiting for the deal to move forward. We are making the system stronger so the deal becomes obvious.
 
 ## Carry Forward
-- connect Container Apps diagnostics to the Sentinel-backed Log Analytics workspace
-- decide whether to commit the broader pre-existing API, audit, database, and deployment work as a separate release commit
+- avoid expansion before the meeting
+- decide after the meeting whether to commit the remaining planning docs

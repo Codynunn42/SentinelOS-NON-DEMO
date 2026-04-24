@@ -18,6 +18,7 @@ Live verification completed on 2026-04-24:
 - `/health` returns `database: "enabled"`
 - protected OwnerFi submit, evaluate, execute, and audit retrieval work live
 - no-key audit access returns `401 Unauthorized`
+- Log Analytics contains `command.auth.denied`, `command.executed`, `command.rate_limited`, and OwnerFi workflow events
 
 ## Immediate Meeting Prep
 1. Keep the Saturday demo to the controlled 5-minute flow:
@@ -27,15 +28,15 @@ Live verification completed on 2026-04-24:
    - briefly open Technical details
    - close with surface-plane architecture
 2. Bring the one-page Ownership & Structure handout.
-3. Keep the core ownership language short:
+3. Use `docs/SATURDAY_DEMO_SCRIPT.md` as the guardrail.
+4. Keep the core ownership language short:
    - OwnerFi owns brand, workflows, and data.
    - SentinelOS is the system layer that lets the business scale without rebuilding.
 
 ## Engineering Next
-1. Connect Container Apps diagnostics to the Sentinel-backed Log Analytics workspace.
-2. Verify `command.auth.denied`, `command.executed`, and `command.rate_limited` events in Log Analytics.
-3. Decide whether to commit the broader API, audit, database, and deployment files as one separate release commit.
-4. Add a clean operator-facing receipt/audit lookup path.
+1. Decide whether to commit the remaining planning docs as a separate docs-only cleanup.
+2. Add a clean operator-facing receipt/audit lookup path after the meeting.
+3. Consider a custom domain only after the meeting path is stable.
 
 ## Platform Next
 1. Formalize tenant and scope contracts.
@@ -49,4 +50,5 @@ Live verification completed on 2026-04-24:
 - The proof surface now speaks business first and technical detail second.
 - OwnerFi is the first active surface plane, not the whole system.
 - Key rotation and basic command rate limiting are meeting-readiness hardening, not expansion.
-- The next work should harden monitoring and ownership clarity before expanding features.
+- Monitoring and ownership clarity are now proven enough for the meeting.
+- The next work should avoid expansion until after the room gives direction.

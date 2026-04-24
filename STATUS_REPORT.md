@@ -59,9 +59,11 @@ On 2026-04-24, `/proof` was upgraded into a business-readable proof surface and 
 - `ca-sentinelos-proof--0000004` deployed, active, running, and healthy
 - live no-key OwnerFi demo plus replay verified
 - live no-key HotelOps placeholder surface verified as registered but blocked
+- Container Apps environment confirmed wired to Log Analytics workspace `log-nc-dev-sentinel`
+- Log Analytics verified for `command.auth.denied`, `command.executed`, `command.rate_limited`, and OwnerFi workflow events
+- Saturday demo script added
 
 ## In Progress
-- Container Apps diagnostics to Sentinel-backed workspace
 - platform contract definition beyond the first surface-plane docs
 - proof-case planning for first real company onboarding
 - surface-plane expansion beyond OwnerFi on the shared core
@@ -76,15 +78,14 @@ On 2026-04-24, `/proof` was upgraded into a business-readable proof surface and 
 - broader API/audit/database implementation work exists in the worktree but still needs a separate clean release commit
 
 ## Next Actions
-1. connect Container Apps diagnostics to the Sentinel-enabled workspace
-2. verify `command.auth.denied`, `command.executed`, and `command.rate_limited` events in Log Analytics
-3. rehearse the Saturday demo flow without expanding scope
-4. decide and commit the broader API/audit/database implementation work separately from the proof UI commit
-5. define the next platform contracts: tenant model, scope model, role/key model, and receipt/audit retrieval model
-6. begin the next surface-plane proof after OwnerFi, using `hotelops` as the placeholder expansion path
+1. rehearse the Saturday demo flow without expanding scope
+2. bring the ownership handout and keep the ownership answer short
+3. decide after the meeting whether to commit the remaining planning docs
+4. define the next platform contracts: tenant model, scope model, role/key model, and receipt/audit retrieval model
+5. begin the next surface-plane proof after OwnerFi, using `hotelops` as the placeholder expansion path
 
 ## Risk Level
-Low to moderate (live proof, key rotation, and rate limiting are verified; monitoring visibility remains open)
+Low to moderate (live proof, key rotation, rate limiting, and monitoring visibility are verified; remaining risk is meeting discipline)
 
 ## Direction
 Proceed with monitored command execution, audit visibility, tighter control-plane hardening, and platform-oriented extraction of reusable contracts, policy, and integration surfaces.
