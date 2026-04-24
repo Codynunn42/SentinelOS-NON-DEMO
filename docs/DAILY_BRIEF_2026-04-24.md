@@ -25,12 +25,23 @@ Make SentinelOS feel like a product and platform, not only an OwnerFi demo.
 - docs/status commit: `713d35b`
 - `SENTINEL_API_KEY` rotated in Azure and active revision restarted
 - old shared proof key now returns `401`
-- current live image: `acrncdevsentinel.azurecr.io/sentinel-api:proof-rate-limit-v1`
-- digest: `sha256:a951fab5fe5e87cb917535e3e7a73e8c849a2dadceada9fa144202f946ba76e6`
+- rate-limit image: `acrncdevsentinel.azurecr.io/sentinel-api:proof-rate-limit-v1`
+- rate-limit digest: `sha256:a951fab5fe5e87cb917535e3e7a73e8c849a2dadceada9fa144202f946ba76e6`
 - ACR remote build run: `ch17`
-- active revision: `ca-sentinelos-proof--0000003`
 - same-IP command request 31 returns `429`
 - one-page ownership handout added at `docs/OWNERSHIP_HANDOUT.md`
+
+## Proof Signals
+- proof-signals commit: `a79fc22`
+- current live image: `acrncdevsentinel.azurecr.io/sentinel-api:proof-signals-v1`
+- digest: `sha256:a672e2ed501b8b78df94eb238802032f4eec2e6672908f2b997d10579ce7caed`
+- ACR remote build run: `ch18`
+- active revision: `ca-sentinelos-proof--0000004`
+- `/proof` now includes command history
+- `/proof` now includes tenant switch for `ownerfi` and `hotelops`
+- `/proof` now includes Replay Last Workflow
+- live no-key OwnerFi demo plus replay verified
+- live no-key HotelOps placeholder surface verified as registered but blocked
 
 ## Live Verification
 - `/health` returned `200` with `database: "enabled"`

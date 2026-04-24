@@ -14,6 +14,7 @@ The deployed image is:
 Live verification completed on 2026-04-24:
 - `/proof` returns the business-result UI
 - no-key demo mode runs without external writes
+- command history, tenant switch, and workflow replay are live
 - `/health` returns `database: "enabled"`
 - protected OwnerFi submit, evaluate, execute, and audit retrieval work live
 - no-key audit access returns `401 Unauthorized`

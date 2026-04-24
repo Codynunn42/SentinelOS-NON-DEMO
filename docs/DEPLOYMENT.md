@@ -7,12 +7,13 @@ This guide walks through completing Azure deployment for the Sentinel API.
 As of 2026-04-24:
 
 - Container App: `ca-sentinelos-proof`
-- active revision: `ca-sentinelos-proof--0000003`
-- image: `acrncdevsentinel.azurecr.io/sentinel-api:proof-rate-limit-v1`
+- active revision: `ca-sentinelos-proof--0000004`
+- image: `acrncdevsentinel.azurecr.io/sentinel-api:proof-signals-v1`
 - live proof URL: `https://ca-sentinelos-proof.calmhill-388e1d39.eastus2.azurecontainerapps.io/proof`
 - `/health` verified with `database: "enabled"`
 - rotated API key verified live
 - per-IP command rate limiting verified live
+- command history, tenant switch, and replay verified live
 
 ## Required GitHub Secrets
 Add the following under Settings → Secrets → Actions:

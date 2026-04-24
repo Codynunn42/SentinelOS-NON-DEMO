@@ -12,7 +12,7 @@ The operating direction is now broader than a single protected API. Daily execut
 
 The current deployed system now includes a working audit layer, a protected `/v1/audit` retrieval endpoint, and a live Postgres-backed OwnerFi proof path that has been verified end-to-end.
 
-On 2026-04-24, `/proof` was upgraded into a business-readable proof surface and deployed. The current live image is `acrncdevsentinel.azurecr.io/sentinel-api:proof-rate-limit-v1` on Container App revision `ca-sentinelos-proof--0000003`.
+On 2026-04-24, `/proof` was upgraded into a business-readable proof surface and deployed. The current live image is `acrncdevsentinel.azurecr.io/sentinel-api:proof-signals-v1` on Container App revision `ca-sentinelos-proof--0000004`.
 
 ## Completed
 - repository initialized
@@ -52,6 +52,13 @@ On 2026-04-24, `/proof` was upgraded into a business-readable proof surface and 
 - `ca-sentinelos-proof--0000003` deployed, active, running, and healthy
 - live same-IP command request 31 verified as `429`
 - one-page ownership handout added for Saturday meeting
+- proof command history added to `/proof`
+- tenant switch added for `ownerfi` and `hotelops`
+- Replay Last Workflow added to `/proof`
+- `proof-signals-v1` built through ACR remote build run `ch18`
+- `ca-sentinelos-proof--0000004` deployed, active, running, and healthy
+- live no-key OwnerFi demo plus replay verified
+- live no-key HotelOps placeholder surface verified as registered but blocked
 
 ## In Progress
 - Container Apps diagnostics to Sentinel-backed workspace
