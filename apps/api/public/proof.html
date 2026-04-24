@@ -102,7 +102,8 @@
       margin-bottom: 6px;
     }
 
-    input {
+    input,
+    select {
       width: 100%;
       border-radius: 10px;
       border: 1px solid var(--line);
@@ -194,6 +195,55 @@
       padding-left: 4px;
     }
 
+    .history-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .history-row {
+      display: grid;
+      grid-template-columns: minmax(120px, 1fr) minmax(90px, auto) minmax(150px, auto);
+      gap: 10px;
+      align-items: center;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: rgba(31, 41, 55, 0.42);
+      padding: 10px 12px;
+      font-size: 12px;
+    }
+
+    .history-row strong {
+      overflow-wrap: anywhere;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      min-width: 76px;
+      padding: 4px 8px;
+      text-transform: uppercase;
+      font-size: 11px;
+    }
+
+    .pill.executed {
+      color: var(--accent);
+      border-color: rgba(126, 231, 135, 0.45);
+    }
+
+    .pill.blocked {
+      color: var(--warn);
+      border-color: rgba(242, 204, 96, 0.45);
+    }
+
+    .pill.error {
+      color: var(--danger);
+      border-color: rgba(255, 123, 114, 0.45);
+    }
+
     .empty-state {
       color: var(--muted);
       margin: 0;
@@ -246,8 +296,8 @@
         governance, and audit visibility in one place.
       </p>
       <div class="badges">
-        <span class="badge">Tenant: <strong>ownerfi</strong></span>
-        <span class="badge">Surface: <strong>OwnerFi</strong></span>
+        <span class="badge">Tenant: <strong id="tenantBadge">ownerfi</strong></span>
+        <span class="badge">Surface: <strong id="surfaceBadge">OwnerFi</strong></span>
         <span class="badge">Mode: <strong id="modeBadge">Demo</strong></span>
       </div>
     </div>
@@ -257,6 +307,13 @@
         <div>
           <label for="apiKey">API Key</label>
           <input id="apiKey" placeholder="Optional for browser-only demo">
+        </div>
+        <div>
+          <label for="tenant">Tenant Surface</label>
+          <select id="tenant">
+            <option value="ownerfi">ownerfi / OwnerFi</option>
+            <option value="hotelops">hotelops / HotelOps</option>
+          </select>
         </div>
         <div>
           <label for="actor">Actor</label>
@@ -286,6 +343,7 @@
 
       <div class="actions">
         <button onclick="runFullFlow()">Run Full Flow</button>
+        <button class="secondary" onclick="replayLastFlow()">Replay Last Workflow</button>
         <button class="secondary" onclick="runForbiddenFlow()">Run Forbidden Deal Test</button>
         <button class="secondary" onclick="loadAudit()">Refresh Audit</button>
       </div>
@@ -321,23 +379,55 @@
         <pre id="out">No results yet.</pre>
       </details>
     </section>
+
+    <section class="panel">
+      <div class="result-card">
+        <span>Command History</span>
+        <div id="history" class="history-list">
+          <p class="empty-state">No commands yet.</p>
+        </div>
+      </div>
+    </section>
   </main>
 
   <script>
-    const TENANT = 'ownerfi';
+    const SURFACES = {
+      ownerfi: {
+        name: 'OwnerFi',
+        workflow: 'Submit -> Evaluate -> Execute Deal'
+      },
+      hotelops: {
+        name: 'HotelOps',
+        workflow: 'Registered placeholder surface'
+      }
+    };
     let lastApplicationId = null;
     let demoAuditTrail = [];
     let demoDealId = null;
+    let commandHistory = [];
+    let lastFlowInput = null;
 
     function getApiKey() {
       return document.getElementById('apiKey').value.trim();
     }
 
-    function isDemoOnlyMode() {
-      return !getApiKey();
+    function getTenant() {
+      return document.getElementById('tenant').value;
     }
 
-    function updateModeBadge() {
+    function getSurface() {
+      return SURFACES[getTenant()] || SURFACES.ownerfi;
+    }
+
+    function isDemoOnlyMode() {
+      return !getApiKey() || getTenant() !== 'ownerfi';
+    }
+
+    function updateSurfaceBadges() {
+      const tenant = getTenant();
+      const surface = getSurface();
+      document.getElementById('tenantBadge').textContent = tenant;
+      document.getElementById('surfaceBadge').textContent = surface.name;
       document.getElementById('modeBadge').textContent = isDemoOnlyMode() ? 'Demo' : 'Live';
     }
 
@@ -356,30 +446,58 @@
       };
     }
 
+    function getCurrentInput() {
+      return {
+        tenant: getTenant(),
+        actor: document.getElementById('actor').value.trim(),
+        role: document.getElementById('role').value.trim(),
+        name: document.getElementById('name').value.trim(),
+        vehicle: document.getElementById('vehicle').value.trim(),
+        amount: document.getElementById('amount').value,
+        creditScore: document.getElementById('creditScore').value
+      };
+    }
+
+    function applyFlowInput(input) {
+      document.getElementById('tenant').value = input.tenant || 'ownerfi';
+      document.getElementById('actor').value = input.actor || 'demo.operator';
+      document.getElementById('role').value = input.role || 'approver';
+      document.getElementById('name').value = input.name || 'John Doe';
+      document.getElementById('vehicle').value = input.vehicle || '2019 Honda Civic';
+      document.getElementById('amount').value = input.amount || '18000';
+      document.getElementById('creditScore').value = input.creditScore || '680';
+      updateSurfaceBadges();
+    }
+
     async function command(commandName, payload, roleOverride) {
+      let result;
+
       if (isDemoOnlyMode()) {
-        return runDemoCommand(commandName, payload, roleOverride);
+        result = runDemoCommand(commandName, payload, roleOverride);
+      } else {
+        const response = await fetch('/v1/command', {
+          method: 'POST',
+          headers: getHeaders(),
+          body: JSON.stringify({
+            tenant: getTenant(),
+            command: commandName,
+            payload,
+            metadata: getMetadata(roleOverride)
+          })
+        });
+
+        result = await response.json();
       }
 
-      const response = await fetch('/v1/command', {
-        method: 'POST',
-        headers: getHeaders(),
-        body: JSON.stringify({
-          tenant: TENANT,
-          command: commandName,
-          payload,
-          metadata: getMetadata(roleOverride)
-        })
-      });
-
-      return response.json();
+      recordCommand(commandName, result);
+      return result;
     }
 
     async function getAudit() {
       if (isDemoOnlyMode()) {
         return {
           status: 'ok',
-          tenant: TENANT,
+          tenant: getTenant(),
           applicationId: lastApplicationId,
           count: demoAuditTrail.length,
           entries: demoAuditTrail
@@ -387,8 +505,8 @@
       }
 
       const url = lastApplicationId
-        ? `/v1/audit/${encodeURIComponent(lastApplicationId)}?tenant=${encodeURIComponent(TENANT)}`
-        : `/v1/audit?tenant=${encodeURIComponent(TENANT)}`;
+        ? `/v1/audit/${encodeURIComponent(lastApplicationId)}?tenant=${encodeURIComponent(getTenant())}`
+        : `/v1/audit?tenant=${encodeURIComponent(getTenant())}`;
       const response = await fetch(url, {
         headers: {
           'x-api-key': getApiKey()
@@ -404,7 +522,7 @@
 
     function addDemoAudit(commandName, payload, result, roleOverride) {
       demoAuditTrail.push({
-        tenant: TENANT,
+        tenant: getTenant(),
         command: commandName,
         payload,
         result,
@@ -414,6 +532,17 @@
     }
 
     function runDemoCommand(commandName, payload, roleOverride) {
+      if (getTenant() === 'hotelops') {
+        const result = {
+          status: 'blocked',
+          error: 'Surface registered; workflow not installed',
+          tenant: getTenant(),
+          surface: getSurface().name
+        };
+        addDemoAudit(commandName, payload, result, roleOverride);
+        return result;
+      }
+
       if (commandName === 'application.submit') {
         lastApplicationId = shortId('app');
         const result = {
@@ -488,6 +617,60 @@
       return value || 'Not available';
     }
 
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function normalizeCommandStatus(result) {
+      if (!result) {
+        return 'error';
+      }
+
+      if (result.status === 'blocked' || result.error) {
+        return 'blocked';
+      }
+
+      return result.status || 'executed';
+    }
+
+    function recordCommand(commandName, result) {
+      commandHistory.unshift({
+        command: commandName,
+        status: normalizeCommandStatus(result),
+        tenant: getTenant(),
+        timestamp: new Date().toLocaleTimeString([], {
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit'
+        })
+      });
+
+      commandHistory = commandHistory.slice(0, 8);
+      renderHistory();
+    }
+
+    function renderHistory() {
+      const history = document.getElementById('history');
+
+      if (!commandHistory.length) {
+        history.innerHTML = '<p class="empty-state">No commands yet.</p>';
+        return;
+      }
+
+      history.innerHTML = commandHistory.map((entry) => `
+        <div class="history-row">
+          <strong>${escapeHtml(entry.command)}</strong>
+          <span class="pill ${escapeHtml(entry.status)}">${escapeHtml(entry.status)}</span>
+          <span>${escapeHtml(entry.tenant)} / ${escapeHtml(entry.timestamp)}</span>
+        </div>
+      `).join('');
+    }
+
     function renderSummary(value) {
       const applicationId =
         value.applicationId ||
@@ -502,22 +685,22 @@
         (value.forbiddenDeal && value.forbiddenDeal.status === 'blocked' ? 'blocked' : null);
       const entries = value.audit && Array.isArray(value.audit.entries) ? value.audit.entries : [];
       const auditItems = entries.length
-        ? entries.map((entry) => `<li>${getCommandLabel(entry.command)}</li>`).join('')
+        ? entries.map((entry) => `<li>${escapeHtml(getCommandLabel(entry.command))}</li>`).join('')
         : '<li>No audit entries loaded</li>';
 
       document.getElementById('summary').innerHTML = `
         <div class="result-grid">
           <div class="result-card">
             <span>Application Submitted</span>
-            <strong>${valueOrDash(applicationId)}</strong>
+            <strong>${escapeHtml(valueOrDash(applicationId))}</strong>
           </div>
           <div class="result-card">
             <span>Decision</span>
-            <strong>${valueOrDash(decision).toUpperCase()}</strong>
+            <strong>${escapeHtml(valueOrDash(decision).toUpperCase())}</strong>
           </div>
           <div class="result-card">
             <span>Deal</span>
-            <strong>${valueOrDash(dealStatus).toUpperCase()}</strong>
+            <strong>${escapeHtml(valueOrDash(dealStatus).toUpperCase())}</strong>
           </div>
         </div>
         <div class="result-card">
@@ -533,20 +716,33 @@
     }
 
     function setStatus(text, cls) {
-      updateModeBadge();
+      updateSurfaceBadges();
       const el = document.getElementById('status');
       el.textContent = text;
       el.className = `status ${cls || ''}`.trim();
     }
 
-    document.getElementById('apiKey').addEventListener('input', updateModeBadge);
-    updateModeBadge();
+    document.getElementById('apiKey').addEventListener('input', updateSurfaceBadges);
+    document.getElementById('tenant').addEventListener('change', () => {
+      lastApplicationId = null;
+      demoAuditTrail = [];
+      demoDealId = null;
+      setOutput({
+        applicationId: null,
+        decision: null,
+        dealStatus: null,
+        audit: { entries: [] }
+      });
+      setStatus(`${getSurface().name} surface selected.`, 'warn');
+    });
+    updateSurfaceBadges();
 
     async function runFullFlow() {
       try {
+        lastFlowInput = getCurrentInput();
         demoAuditTrail = isDemoOnlyMode() ? [] : demoAuditTrail;
         demoDealId = isDemoOnlyMode() ? null : demoDealId;
-        const mode = isDemoOnlyMode() ? 'demo-only OwnerFi proof flow' : 'full OwnerFi proof flow';
+        const mode = isDemoOnlyMode() ? `demo-only ${getSurface().name} proof flow` : `full ${getSurface().name} proof flow`;
         setStatus(`Running ${mode}...`, 'warn');
 
         const submit = await command('application.submit', {
@@ -577,6 +773,7 @@
 
     async function runForbiddenFlow() {
       try {
+        lastFlowInput = getCurrentInput();
         demoAuditTrail = isDemoOnlyMode() ? [] : demoAuditTrail;
         demoDealId = isDemoOnlyMode() ? null : demoDealId;
         setStatus('Running forbidden governance test...', 'warn');
@@ -618,6 +815,17 @@
       } catch (error) {
         setStatus(`Audit load failed: ${error.message}`, 'bad');
       }
+    }
+
+    async function replayLastFlow() {
+      if (!lastFlowInput) {
+        setStatus('No workflow to replay yet.', 'warn');
+        return;
+      }
+
+      applyFlowInput(lastFlowInput);
+      setStatus('Replaying last workflow...', 'warn');
+      await runFullFlow();
     }
   </script>
 </body>
