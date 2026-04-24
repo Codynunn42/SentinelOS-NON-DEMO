@@ -9,7 +9,7 @@ SentinelOS NON-DEMO has a live, shareable OwnerFi proof surface deployed at:
 
 The deployed image is:
 
-`acrncdevsentinel.azurecr.io/sentinel-api:proof-ui-v2`
+`acrncdevsentinel.azurecr.io/sentinel-api:governance-preflight-v1`
 
 Live verification completed on 2026-04-24:
 - `/proof` returns the business-result UI
@@ -18,6 +18,7 @@ Live verification completed on 2026-04-24:
 - governance preflight now blocks invalid or unauthorized commands before handlers run
 - `/health` returns `database: "enabled"`
 - protected OwnerFi submit, evaluate, execute, and audit retrieval work live
+- protected audit retrieval shows governance preflight blocks
 - no-key audit access returns `401 Unauthorized`
 - Log Analytics contains `command.auth.denied`, `command.executed`, `command.rate_limited`, and OwnerFi workflow events
 
