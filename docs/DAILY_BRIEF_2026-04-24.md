@@ -46,11 +46,20 @@ Make SentinelOS feel like a product and platform, not only an OwnerFi demo.
 - Saturday demo script added at `docs/SATURDAY_DEMO_SCRIPT.md`
 
 ## Governance Preflight
+- governance-preflight commit: `405549c`
+- current live image: `acrncdevsentinel.azurecr.io/sentinel-api:governance-preflight-v1`
+- digest: `sha256:431129351841205a408463a2f27cadcbabcc20da82d5c4c325b7af436563cff0`
+- ACR remote build run: `ch19`
+- active revision: `ca-sentinelos-proof--0000005`
 - governance preflight now runs before surface-plane handlers
 - `tenant`, `command`, `metadata.actor`, and `metadata.role` are required
 - `deal.execute` is blocked unless the role is `approver`
 - blocked commands are audited with `result.governance = "preflight"`
 - governance principle documented at `docs/GOVERNANCE_PREFLIGHT.md`
+- live missing-actor command verified as `400 METADATA_INCOMPLETE`
+- live operator `deal.execute` verified as `403 FORBIDDEN`
+- live valid OwnerFi submit verified as `200`
+- live audit retrieval verified with two `preflight` entries
 
 ## Live Verification
 - `/health` returned `200` with `database: "enabled"`

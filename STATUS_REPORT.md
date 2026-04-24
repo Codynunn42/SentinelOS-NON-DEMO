@@ -12,7 +12,7 @@ The operating direction is now broader than a single protected API. Daily execut
 
 The current deployed system now includes a working audit layer, a protected `/v1/audit` retrieval endpoint, and a live Postgres-backed OwnerFi proof path that has been verified end-to-end.
 
-On 2026-04-24, `/proof` was upgraded into a business-readable proof surface and deployed. The current live image is `acrncdevsentinel.azurecr.io/sentinel-api:proof-signals-v1` on Container App revision `ca-sentinelos-proof--0000004`.
+On 2026-04-24, `/proof` was upgraded into a business-readable proof surface and deployed. The current live image is `acrncdevsentinel.azurecr.io/sentinel-api:governance-preflight-v1` on Container App revision `ca-sentinelos-proof--0000005`.
 
 The next hardening layer is governance preflight: command requests are checked for tenant, command, actor, role, and role-based execution rights before a surface-plane handler can run.
 
@@ -67,6 +67,9 @@ The next hardening layer is governance preflight: command requests are checked f
 - governance preflight layer added before handler execution
 - command metadata now requires `actor` and `role`
 - `deal.execute` RBAC now blocks before handler execution and records the block in audit
+- `governance-preflight-v1` built through ACR remote build run `ch19`
+- `ca-sentinelos-proof--0000005` deployed, active, running, and healthy
+- live governance preflight verified for missing actor, forbidden role, valid submit, and protected audit retrieval
 
 ## In Progress
 - platform contract definition beyond the first surface-plane docs
