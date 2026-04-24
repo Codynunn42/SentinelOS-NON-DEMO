@@ -3,9 +3,11 @@
 **COMM:** Sentinel AI by Cody Nunn | Nunn Cloud
 
 ## Focus
+
 Move SentinelOS NON-DEMO from protected API work into a proof-backed platform shape.
 
 ## What Moved
+
 - OwnerFi became the first concrete proof surface.
 - `/v1/command` now supports the OwnerFi submit, evaluate, and deal execution chain.
 - `/v1/audit` exposes command history for review and proof.
@@ -13,14 +15,17 @@ Move SentinelOS NON-DEMO from protected API work into a proof-backed platform sh
 - Tenant identifiers were added to workflow and audit data so future client surfaces can stay isolated.
 
 ## Proof
+
 - OwnerFi proof flow can submit an application, evaluate it, execute an approved deal, and retrieve audit history.
 - Deal execution is governed by role: `deal.execute` requires `metadata.role = approver`.
 - The platform direction is no longer one client app; it is one SentinelOS core with tenant-specific surface planes.
 
 ## Open Risks
-- Live deployment still needs full verification against the current code path.
-- Deployment `DATABASE_URL` and schema application still need to be proven in the target environment.
+
+- Live deployment still needs full verification against the current code path. Resolved on 2026-04-24 with `proof-ui-v2` on `ca-sentinelos-proof`.
+- Deployment `DATABASE_URL` and schema application still need to be proven in the target environment. Resolved on 2026-04-24 when live `/health` returned `database: "enabled"`.
 - Surface-plane expansion needs to stay registry-driven so new clients do not fork the core.
 
 ## Next Best Move
-Make `/proof` understandable in 10-15 seconds for non-technical viewers.
+
+Make `/proof` understandable in 10-15 seconds for non-technical viewers. Completed on 2026-04-24 with the business-result view, technical details toggle, and demo-safe browser mode.
