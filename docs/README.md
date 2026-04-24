@@ -10,6 +10,7 @@ This folder will contain:
 - daily operating goals
 - current next-step tracker
 - ownership and structure handout
+- Saturday demo script
 - proof-case planning documents
 - OwnerFi proof-case blueprint
 - surface-plane model and system positioning
