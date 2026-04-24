@@ -3,11 +3,12 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-COPY package.json ./
-COPY apps ./apps
-COPY scripts ./scripts
+COPY package.json pnpm-lock.yaml ./
+RUN npm install -g pnpm && pnpm install --frozen-lockfile
+
+COPY . .
 
 ENV PORT=3000
 EXPOSE 3000
 
-CMD ["npm", "start"]
+CMD ["node", "apps/api/server.js"]
