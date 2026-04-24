@@ -14,6 +14,8 @@ The current deployed system now includes a working audit layer, a protected `/v1
 
 On 2026-04-24, `/proof` was upgraded into a business-readable proof surface and deployed. The current live image is `acrncdevsentinel.azurecr.io/sentinel-api:proof-signals-v1` on Container App revision `ca-sentinelos-proof--0000004`.
 
+The next hardening layer is governance preflight: command requests are checked for tenant, command, actor, role, and role-based execution rights before a surface-plane handler can run.
+
 ## Completed
 - repository initialized
 - README upgraded to client-operational positioning
@@ -62,6 +64,9 @@ On 2026-04-24, `/proof` was upgraded into a business-readable proof surface and 
 - Container Apps environment confirmed wired to Log Analytics workspace `log-nc-dev-sentinel`
 - Log Analytics verified for `command.auth.denied`, `command.executed`, `command.rate_limited`, and OwnerFi workflow events
 - Saturday demo script added
+- governance preflight layer added before handler execution
+- command metadata now requires `actor` and `role`
+- `deal.execute` RBAC now blocks before handler execution and records the block in audit
 
 ## In Progress
 - platform contract definition beyond the first surface-plane docs
@@ -70,7 +75,7 @@ On 2026-04-24, `/proof` was upgraded into a business-readable proof surface and 
 - Saturday meeting/demo preparation
 
 ## Gaps
-- no role-based key model yet
+- no full role-based key model yet
 - live Sentinel analytics rules not yet created
 - no operator-facing control plane yet
 - no formal tenant or scope model yet

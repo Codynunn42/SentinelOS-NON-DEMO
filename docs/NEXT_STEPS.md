@@ -15,6 +15,7 @@ Live verification completed on 2026-04-24:
 - `/proof` returns the business-result UI
 - no-key demo mode runs without external writes
 - command history, tenant switch, and workflow replay are live
+- governance preflight now blocks invalid or unauthorized commands before handlers run
 - `/health` returns `database: "enabled"`
 - protected OwnerFi submit, evaluate, execute, and audit retrieval work live
 - no-key audit access returns `401 Unauthorized`
@@ -36,7 +37,8 @@ Live verification completed on 2026-04-24:
 ## Engineering Next
 1. Decide whether to commit the remaining planning docs as a separate docs-only cleanup.
 2. Add a clean operator-facing receipt/audit lookup path after the meeting.
-3. Consider a custom domain only after the meeting path is stable.
+3. Extend governance from the first preflight rules into a formal role/key model after the meeting.
+4. Consider a custom domain only after the meeting path is stable.
 
 ## Platform Next
 1. Formalize tenant and scope contracts.
@@ -51,4 +53,5 @@ Live verification completed on 2026-04-24:
 - OwnerFi is the first active surface plane, not the whole system.
 - Key rotation and basic command rate limiting are meeting-readiness hardening, not expansion.
 - Monitoring and ownership clarity are now proven enough for the meeting.
+- Governance is now pre-execution control, not just post-execution logging.
 - The next work should avoid expansion until after the room gives direction.

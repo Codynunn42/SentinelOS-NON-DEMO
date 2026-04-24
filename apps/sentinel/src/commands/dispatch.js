@@ -1,24 +1,36 @@
 const { getSurfaceRegistry } = require('./registry');
 const { normalizeCommandEnvelope } = require('../types/command');
 const { auditLogger } = require('../audit/auditLogger');
+const { governanceCheck } = require('../governance/preflight');
+
+async function auditGovernanceBlock(envelope, result) {
+  await auditLogger.log({
+    tenant: envelope.tenant || null,
+    command: envelope.command || envelope.legacyCommand || 'unknown',
+    payload: envelope.payload,
+    result: {
+      governance: 'preflight',
+      ...result
+    },
+    actor: envelope.metadata && envelope.metadata.actor ? envelope.metadata.actor : undefined,
+    timestamp: new Date().toISOString()
+  });
+}
 
 async function dispatchCommand(body, context) {
   const envelope = normalizeCommandEnvelope(body);
 
-  if (!envelope.tenant) {
-    return {
+  const governance = governanceCheck(envelope);
+  if (!governance.allowed) {
+    const failure = {
       success: false,
-      statusCode: 400,
-      error: 'Tenant is required'
+      statusCode: governance.statusCode,
+      error: governance.error,
+      details: governance.details
     };
-  }
 
-  if (!envelope.command) {
-    return {
-      success: false,
-      statusCode: 400,
-      error: 'Command is required'
-    };
+    await auditGovernanceBlock(envelope, failure);
+    return failure;
   }
 
   const surfaceRegistry = getSurfaceRegistry();
@@ -38,31 +50,6 @@ async function dispatchCommand(body, context) {
       statusCode: 400,
       error: `Unknown command: ${envelope.command}`
     };
-  }
-
-  if (
-    envelope.command === 'deal.execute' &&
-    (!envelope.metadata || envelope.metadata.role !== 'approver')
-  ) {
-    const failure = {
-      success: false,
-      statusCode: 403,
-      error: 'FORBIDDEN',
-      details: {
-        requiredRole: 'approver'
-      }
-    };
-
-    await auditLogger.log({
-      tenant: envelope.tenant,
-      command: envelope.command,
-      payload: envelope.payload,
-      result: failure,
-      actor: envelope.metadata && envelope.metadata.actor ? envelope.metadata.actor : undefined,
-      timestamp: new Date().toISOString()
-    });
-
-    return failure;
   }
 
   try {
