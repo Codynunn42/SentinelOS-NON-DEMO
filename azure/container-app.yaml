@@ -13,10 +13,16 @@ properties:
       external: true
       targetPort: 3000
     registries: []
+    secrets:
+      - name: sentinel-api-key
+        value: <REPLACE_WITH_SENTINEL_API_KEY>
   template:
     containers:
       - name: sentinel-api
         image: <REPLACE_WITH_IMAGE>
+        env:
+          - name: SENTINEL_API_KEY
+            secretRef: sentinel-api-key
         resources:
           cpu: 0.5
           memory: 1Gi
