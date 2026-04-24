@@ -45,6 +45,13 @@ Make SentinelOS feel like a product and platform, not only an OwnerFi demo.
 - Log Analytics verified for `command.auth.denied`, `command.executed`, `command.rate_limited`, and OwnerFi workflow events
 - Saturday demo script added at `docs/SATURDAY_DEMO_SCRIPT.md`
 
+## Governance Preflight
+- governance preflight now runs before surface-plane handlers
+- `tenant`, `command`, `metadata.actor`, and `metadata.role` are required
+- `deal.execute` is blocked unless the role is `approver`
+- blocked commands are audited with `result.governance = "preflight"`
+- governance principle documented at `docs/GOVERNANCE_PREFLIGHT.md`
+
 ## Live Verification
 - `/health` returned `200` with `database: "enabled"`
 - `/proof` returned `200` and served the business-result UI
