@@ -83,6 +83,7 @@ The next hardening layer is governance preflight: command requests are checked f
 - no operator-facing control plane yet
 - no formal tenant or scope model yet
 - no reusable integration framework yet
+- no active billing, checkout, payment, or funnel execution path in this repo
 - broader API/audit/database implementation work exists in the worktree but still needs a separate clean release commit
 
 ## Next Actions
