@@ -270,6 +270,7 @@ const server = http.createServer((req, res) => {
         command: '/v1/command',
         policy: '/policy/evaluate',
         audit: '/audit/events',
+        receipts: '/v1/receipts/:receiptId',
         agent: '/agent/run',
         approvals: '/approvals',
         learning: '/learning/suggestions',
@@ -302,6 +303,47 @@ const server = http.createServer((req, res) => {
       count: entries.length,
       entries
     });
+  }
+
+  if (pathname.startsWith('/v1/receipts/') && req.method === 'GET') {
+    if (!authenticateCommand(req, '/v1/receipts/:receiptId', res)) {
+      return;
+    }
+
+    const receiptId = decodeURIComponent(pathname.replace('/v1/receipts/', '')).trim();
+    const tenant = requestUrl.searchParams.get('tenant');
+
+    if (!receiptId) {
+      return sendJson(res, 400, {
+        status: 'error',
+        error: 'Receipt ID is required'
+      });
+    }
+
+    return auditLogger.getByReceiptId(receiptId, tenant || undefined)
+      .then((match) => {
+        if (!match) {
+          return sendJson(res, 404, {
+            status: 'error',
+            error: 'Receipt not found',
+            receiptId,
+            tenant: tenant || null
+          });
+        }
+
+        return sendJson(res, 200, {
+          status: 'ok',
+          tenant: tenant || match.entry.tenant || null,
+          receiptId,
+          source: match.source,
+          receipt: match.receipt,
+          entry: match.entry
+        });
+      })
+      .catch((error) => sendJson(res, 500, {
+        status: 'error',
+        error: error instanceof Error ? error.message : 'Receipt lookup failed'
+      }));
   }
 
   if (pathname === '/v1/command' && req.method === 'POST') {

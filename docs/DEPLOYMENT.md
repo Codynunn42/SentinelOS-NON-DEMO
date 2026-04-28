@@ -75,6 +75,23 @@ Expected:
 }
 ```
 
+GET /v1/receipts/:receiptId with `x-api-key`
+
+Expected:
+
+```json
+{
+  "status": "ok",
+  "receiptId": "rcpt_...",
+  "receipt": {
+    "receiptId": "rcpt_..."
+  },
+  "entry": {
+    "command": "application.submit"
+  }
+}
+```
+
 Protected OwnerFi proof workflow:
 
 ```bash
