@@ -24,8 +24,18 @@
 ## Ownership Answer
 "You fully own OwnerFi: brand, workflows, customers, and data. SentinelOS is the system layer underneath it so the company can scale without rebuilding the engine later."
 
+## Governed Block Moment
+Use only if the conversation turns to control, risk, or trust.
+
+Say: "The system will block execution if risk is high, even if everything else is working."
+
+Then show the pending approval and stop. Do not approve it in the room.
+
+Reference: [Governed Block Demo Moment](./GOVERNED_BLOCK_DEMO_MOMENT.md)
+
 ## Do Not Do
 - do not open Azure unless asked
 - do not use the API key in the room unless asked for live protected proof
+- do not approve or reject the pending high-risk approval in the room
 - do not add new features during the meeting
 - do not over-explain the architecture before they see it run
