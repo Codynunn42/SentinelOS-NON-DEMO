@@ -11,6 +11,7 @@
     "healthcheck": "node scripts/healthcheck.js",
     "check:cdnlux": "node scripts/check-cdnlux-integration.js",
     "check:docking": "node scripts/check-docking-protocol.js",
+    "check:receipts": "node scripts/check-receipt-lookup.js",
     "db:apply-schema": "node scripts/db-apply-schema.js",
     "db:smoke": "node scripts/db-smoke.js"
   },
