@@ -1,5 +1,6 @@
 const { ownerfiHandlers } = require('../commands/ownerfiHandlers');
 const { hotelHandlers } = require('./hotelops');
+const { nunncloudHandlers } = require('./nunncloud');
 
 const surfaceRegistry = {
   ownerfi: {
@@ -9,6 +10,10 @@ const surfaceRegistry = {
   hotelops: {
     name: 'HotelOps',
     handlers: hotelHandlers
+  },
+  nunncloud: {
+    name: 'Nunn Cloud',
+    handlers: nunncloudHandlers
   }
 };
 
