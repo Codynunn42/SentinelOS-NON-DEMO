@@ -136,3 +136,15 @@ Docs exist. Continue enforcing during implementation.
 - agent execution beyond blocked/dry-run paths
 - one-off OwnerFi-only logic inside Sentinel Core
 - live automation while OwnerFi remains in `human_review_required`
+
+## Demo Narrative
+
+The strongest signal today is not that SentinelOS can run the OwnerFi workflow.
+
+The strongest signal is that SentinelOS refused to keep executing when its own policy and security context said to stop.
+
+Demo artifact:
+
+```txt
+docs/GOVERNED_BLOCK_DEMO_MOMENT.md
+```
