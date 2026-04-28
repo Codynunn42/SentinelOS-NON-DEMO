@@ -6,24 +6,24 @@
 
 SentinelOS NON-DEMO has a live, shareable OwnerFi proof surface deployed at:
 
-`https://ca-sentinelos-proof.calmhill-388e1d39.eastus2.azurecontainerapps.io/proof`
+`https://ca-nc-dev-sentinel.calmhill-388e1d39.eastus2.azurecontainerapps.io/proof`
 
 The deployed image is:
 
-`acrncdevsentinel.azurecr.io/sentinel-api:governance-preflight-v1`
+`acrncdevsentinel.azurecr.io/sentinelos:latest`
 
-Live verification completed on 2026-04-25:
+Live verification completed on 2026-04-28:
 
 - `/proof` returns the business-result UI
+- `/health` returns `database: "enabled"`
+- Container App revision `ca-nc-dev-sentinel--decision-signing-v1` is healthy, provisioned, and receiving 100 percent traffic
+- no-key audit access on `/v1/audit` returns `401 Unauthorized`
 - no-key demo mode runs without external writes
 - command history, tenant switch, and workflow replay are live
 - governance preflight now blocks invalid or unauthorized commands before handlers run
-- `/health` returns `database: "enabled"`
-- Container App revision `ca-sentinelos-proof--0000005` is running image `acrncdevsentinel.azurecr.io/sentinel-api:governance-preflight-v1`
-- protected OwnerFi submit, evaluate, execute, and audit retrieval work live
-- protected audit retrieval shows governance preflight blocks
-- no-key audit access returns `401 Unauthorized`
-- Log Analytics contains `command.auth.denied`, `command.executed`, `command.rate_limited`, and OwnerFi workflow events
+- protected OwnerFi submit, evaluate, execute, and audit retrieval work live against this current endpoint
+- latest protected proof run returned application `app_86a2d463-e6e2-4571-af40-fef2d9cd20b2`, deal `deal_236eea28-421c-4348-a806-515decd010c1`, and three tenant-scoped audit entries
+- `ca-sentinelos-proof` is not the current shareable proof target
 
 ## Hardening Focus
 
@@ -36,10 +36,10 @@ Live verification completed on 2026-04-25:
 
 ## Engineering Next
 
-1. Decide whether to commit the remaining planning docs as a separate docs-only cleanup.
-2. Add a clean operator-facing receipt/audit lookup path after the meeting.
-3. Extend governance from the first preflight rules into a formal role/key model after the meeting.
-4. Document billing and funnel readiness without implementing them yet.
+1. Package the current hardening work into a clean release batch.
+2. Rehearse the no-key browser proof flow at the current `ca-nc-dev-sentinel` URL before any meeting or share.
+3. Add a clean operator-facing receipt/audit lookup path after the current proof path is fully verified.
+4. Extend governance from the first preflight rules into a formal role/key model after the current proof path is fully verified.
 5. Consider a custom domain only after the meeting path is stable.
 
 ## Platform Next
