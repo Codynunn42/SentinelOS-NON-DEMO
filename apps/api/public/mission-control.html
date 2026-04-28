@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sentinel Mission Control</title>
+  <style>
+    :root {
+      --bg: #0b0f14;
+      --surface: #111821;
+      --surface-2: #16202b;
+      --line: #2a3645;
+      --text: #edf4fb;
+      --muted: #91a3b5;
+      --green: #6ee7a8;
+      --yellow: #f6d365;
+      --red: #ff7b72;
+      --blue: #7db7ff;
+      --ink: #071019;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    button {
+      border: 1px solid transparent;
+      border-radius: 6px;
+      padding: 9px 12px;
+      min-height: 38px;
+      cursor: pointer;
+      font-weight: 700;
+      background: var(--green);
+      color: var(--ink);
+    }
+
+    button.secondary {
+      background: transparent;
+      color: var(--text);
+      border-color: var(--line);
+    }
+
+    button.danger {
+      background: var(--red);
+      color: var(--ink);
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.55;
+    }
+
+    input,
+    select {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #0f151d;
+      color: var(--text);
+      padding: 10px 11px;
+      min-height: 40px;
+    }
+
+    label {
+      display: grid;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    main {
+      width: min(1280px, calc(100vw - 32px));
+      margin: 0 auto;
+      padding: 28px 0 40px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 20px;
+    }
+
+    .eyebrow {
+      margin: 0 0 7px;
+      color: var(--green);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 30px;
+      letter-spacing: 0;
+      line-height: 1.12;
+    }
+
+    .subtitle {
+      margin: 9px 0 0;
+      max-width: 720px;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .status-strip {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 28px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 5px 10px;
+      color: var(--muted);
+      background: rgba(17, 24, 33, 0.8);
+      font-size: 12px;
+      font-weight: 750;
+      white-space: nowrap;
+    }
+
+    .chip.good {
+      color: var(--green);
+      border-color: rgba(110, 231, 168, 0.45);
+    }
+
+    .chip.warn {
+      color: var(--yellow);
+      border-color: rgba(246, 211, 101, 0.45);
+    }
+
+    .chip.bad {
+      color: var(--red);
+      border-color: rgba(255, 123, 114, 0.45);
+    }
+
+    .toolbar {
+      display: grid;
+      grid-template-columns: minmax(170px, 220px) minmax(240px, 1fr) auto auto;
+      gap: 10px;
+      align-items: end;
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      padding: 14px 0;
+      margin-bottom: 18px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 14px;
+    }
+
+    .panel {
+      border: 1px solid var(--line);
+      background: var(--surface);
+      border-radius: 8px;
+      padding: 16px;
+      min-width: 0;
+    }
+
+    .span-4 {
+      grid-column: span 4;
+    }
+
+    .span-6 {
+      grid-column: span 6;
+    }
+
+    .span-8 {
+      grid-column: span 8;
+    }
+
+    .span-12 {
+      grid-column: span 12;
+    }
+
+    .panel-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 15px;
+      letter-spacing: 0;
+    }
+
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .metric {
+      border: 1px solid var(--line);
+      background: var(--surface-2);
+      border-radius: 6px;
+      padding: 11px;
+      min-height: 76px;
+    }
+
+    .metric span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 6px;
+    }
+
+    .metric strong {
+      display: block;
+      font-size: 17px;
+      line-height: 1.25;
+      overflow-wrap: anywhere;
+    }
+
+    .copy {
+      color: var(--muted);
+      line-height: 1.55;
+      margin: 0;
+    }
+
+    .queue {
+      display: grid;
+      gap: 10px;
+    }
+
+    .approval-row {
+      display: grid;
+      grid-template-columns: minmax(180px, 1fr) 110px 160px;
+      gap: 10px;
+      align-items: center;
+      border: 1px solid var(--line);
+      background: var(--surface-2);
+      border-radius: 6px;
+      padding: 11px;
+    }
+
+    .approval-row strong {
+      display: block;
+      overflow-wrap: anywhere;
+    }
+
+    .approval-row small {
+      display: block;
+      margin-top: 5px;
+      color: var(--muted);
+      line-height: 1.35;
+    }
+
+    .row-actions {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+
+    .row-actions button {
+      width: 38px;
+      padding: 0;
+    }
+
+    .feed {
+      display: grid;
+      gap: 9px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .feed li {
+      border-left: 3px solid var(--line);
+      padding: 2px 0 3px 11px;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .feed strong {
+      color: var(--text);
+      font-weight: 800;
+    }
+
+    .pipeline-section {
+      margin-bottom: 14px;
+    }
+
+    .pipeline-head {
+      margin-bottom: 6px;
+    }
+
+    .pipeline-stage-label {
+      margin: 0 0 10px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .pipeline-stages {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 8px;
+    }
+
+    .analysis-section-label {
+      margin: 0 0 4px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+    }
+
+    .analysis-copy {
+      margin: 0 0 12px;
+    }
+
+    .analysis-copy-sm {
+      margin: 0 0 12px;
+      font-size: 13px;
+    }
+
+    .analysis-divider {
+      border: none;
+      border-top: 1px solid var(--line);
+      margin: 0 0 12px;
+    }
+
+    .decision-reason {
+      margin: 0;
+      font-size: 13px;
+    }
+
+    .approval-reason {
+      color: var(--text);
+      margin-top: 4px;
+    }
+
+    @keyframes pulse-warn {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.45; }
+    }
+
+    .pipeline-paused {
+      animation: pulse-warn 1.4s ease-in-out infinite;
+      background: rgba(246,211,101,0.15) !important;
+      color: var(--yellow) !important;
+      border-color: rgba(246,211,101,0.5) !important;
+    }
+
+    .error {
+      color: var(--red);
+      margin: 10px 0 0;
+      line-height: 1.45;
+    }
+
+    .empty {
+      margin: 0;
+      color: var(--muted);
+      border: 1px dashed var(--line);
+      border-radius: 6px;
+      padding: 14px;
+      background: rgba(22, 32, 43, 0.42);
+    }
+
+    @media (max-width: 920px) {
+      .topbar {
+        display: grid;
+      }
+
+      .status-strip {
+        justify-content: flex-start;
+      }
+
+      .toolbar {
+        grid-template-columns: 1fr;
+      }
+
+      .span-4,
+      .span-6,
+      .span-8 {
+        grid-column: span 12;
+      }
+
+      .approval-row {
+        grid-template-columns: 1fr;
+      }
+
+      .row-actions {
+        justify-content: flex-start;
+      }
+    }
+
+    @media (max-width: 560px) {
+      main {
+        width: min(100vw - 22px, 1280px);
+        padding-top: 18px;
+      }
+
+      h1 {
+        font-size: 25px;
+      }
+
+      .metric-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">SentinelOS</p>
+        <h1>Mission Control</h1>
+        <p class="subtitle">Live operating surface for learning state, Sentinel Analysis, decisions, and human approval gates.</p>
+      </div>
+      <div class="status-strip">
+        <span id="connectionChip" class="chip warn">Disconnected</span>
+        <span id="databaseChip" class="chip">Database unknown</span>
+        <span id="updatedChip" class="chip">Not refreshed</span>
+      </div>
+    </header>
+
+    <section class="toolbar" aria-label="Mission Control settings">
+      <label>
+        Tenant
+        <input id="tenantInput" value="ownerfi" autocomplete="off">
+      </label>
+      <label>
+        API Key
+        <input id="apiKeyInput" type="password" placeholder="Required for operator endpoints" autocomplete="off">
+      </label>
+      <button id="refreshButton" type="button">Refresh</button>
+      <button id="pollButton" class="secondary" type="button">Start Polling</button>
+    </section>
+
+    <section id="pipelineSection" class="panel pipeline-section">
+      <div class="panel-head pipeline-head">
+        <h2>Execution Pipeline</h2>
+        <span id="pipelineChip" class="chip">idle</span>
+      </div>
+      <p id="stageLabel" class="pipeline-stage-label">Current Stage: —</p>
+      <div id="pipelineStages" class="pipeline-stages"></div>
+    </section>
+
+    <section class="grid">
+      <article class="panel span-4">
+        <div class="panel-head">
+          <h2>System State</h2>
+          <span id="stateChip" class="chip">unknown</span>
+        </div>
+        <div class="metric-grid">
+          <div class="metric">
+            <span>State</span>
+            <strong id="learningState">-</strong>
+          </div>
+          <div class="metric">
+            <span>Confidence</span>
+            <strong id="confidence">-</strong>
+          </div>
+          <div class="metric">
+            <span>Risk</span>
+            <strong id="riskLevel">-</strong>
+          </div>
+          <div class="metric">
+            <span>Alignment</span>
+            <strong id="alignmentScore">-</strong>
+          </div>
+        </div>
+      </article>
+
+      <article class="panel span-4">
+        <div class="panel-head">
+          <h2>Decision Engine</h2>
+          <span id="decisionChip" class="chip">pending</span>
+        </div>
+        <div class="metric-grid">
+          <div class="metric">
+            <span>Decision</span>
+            <strong id="decision">-</strong>
+          </div>
+          <div class="metric">
+            <span>Execution Mode</span>
+            <strong id="executionMode">-</strong>
+          </div>
+          <div class="metric">
+            <span>Approval</span>
+            <strong id="approvalRequired">-</strong>
+          </div>
+          <div class="metric">
+            <span>Gate</span>
+            <strong id="actionGate">-</strong>
+          </div>
+          <div class="metric">
+            <span>Trust Score</span>
+            <strong id="trustScore">-</strong>
+          </div>
+          <div class="metric">
+            <span>Decision Integrity</span>
+            <strong id="decisionIntegrity">-</strong>
+          </div>
+        </div>
+      </article>
+
+      <article class="panel span-4">
+        <div class="panel-head">
+          <h2>Sentinel Analysis</h2>
+          <span id="reviewChip" class="chip">review unknown</span>
+        </div>
+        <p class="analysis-section-label">State Reason</p>
+        <p id="framedSuggestion" class="copy analysis-copy">Connect to load Sentinel Analysis output.</p>
+        <p id="reasonText" class="copy analysis-copy-sm"></p>
+        <hr class="analysis-divider">
+        <p class="analysis-section-label">Decision Rationale</p>
+        <p id="decisionReason" class="copy decision-reason">—</p>
+      </article>
+
+      <article class="panel span-4">
+        <div class="panel-head">
+          <h2>Security Governance</h2>
+          <span id="securityChip" class="chip">no signal</span>
+        </div>
+        <div class="metric-grid">
+          <div class="metric">
+            <span>User Risk</span>
+            <strong id="securityRisk">-</strong>
+          </div>
+          <div class="metric">
+            <span>Identity Events</span>
+            <strong id="identityEvents">-</strong>
+          </div>
+          <div class="metric">
+            <span>App Consent</span>
+            <strong id="appConsentEvents">-</strong>
+          </div>
+          <div class="metric">
+            <span>Last Signal</span>
+            <strong id="latestSecurityEvent">-</strong>
+          </div>
+        </div>
+      </article>
+
+      <article class="panel span-8">
+        <div class="panel-head">
+          <h2>Approval Queue</h2>
+          <span id="approvalCount" class="chip">0 pending</span>
+        </div>
+        <div id="approvalQueue" class="queue">
+          <p class="empty">No approvals loaded.</p>
+        </div>
+      </article>
+
+      <article class="panel span-4">
+        <div class="panel-head">
+          <h2>Activity Feed</h2>
+          <span class="chip">v1 polling</span>
+        </div>
+        <ul id="activityFeed" class="feed"></ul>
+      </article>
+
+      <article class="panel span-12">
+        <div class="panel-head">
+          <h2>Evidence</h2>
+          <span id="windowChip" class="chip">window unknown</span>
+        </div>
+        <ul id="evidenceFeed" class="feed"></ul>
+        <p id="errorText" class="error"></p>
+      </article>
+    </section>
+  </main>
+
+  <script>
+    const PIPELINE_STAGES = ['API', 'Security', 'Governance', 'Learning', 'Analysis', 'Decision', 'Approval', 'Execution'];
+
+    const STAGE_MAP = { api:0, security:1, governance:2, learning:3, analysis:4, decision:5, approval:6, execution:7 };
+
+    function renderPipeline(activeIndex, paused) {
+      const container = document.getElementById('pipelineStages');
+      container.innerHTML = '';
+      PIPELINE_STAGES.forEach((label, i) => {
+        const div = document.createElement('div');
+        div.style.cssText = 'padding:10px 6px;text-align:center;border-radius:8px;font-size:12px;font-weight:700;border:1px solid;';
+        if (i === activeIndex) {
+          if (paused) {
+            div.className = 'pipeline-paused';
+            div.style.cssText = 'padding:10px 6px;text-align:center;border-radius:8px;font-size:12px;font-weight:700;border:1px solid;';
+          } else {
+            div.style.background = 'var(--green)';
+            div.style.color = 'var(--ink)';
+            div.style.borderColor = 'var(--green)';
+          }
+        } else if (i < activeIndex) {
+          div.style.background = 'rgba(110,231,168,0.08)';
+          div.style.color = 'var(--green)';
+          div.style.borderColor = 'rgba(110,231,168,0.25)';
+        } else {
+          div.style.background = 'var(--surface-2)';
+          div.style.color = 'var(--muted)';
+          div.style.borderColor = 'var(--line)';
+        }
+        div.textContent = label;
+        container.appendChild(div);
+      });
+    }
+
+    renderPipeline(-1);
+
+    const state = {
+      apiKey: sessionStorage.getItem('sentinelMissionControlKey') || '',
+      tenant: sessionStorage.getItem('sentinelMissionControlTenant') || 'ownerfi',
+      polling: false,
+      pollHandle: null,
+      busyApproval: null
+    };
+
+    const el = {
+      apiKeyInput: document.getElementById('apiKeyInput'),
+      tenantInput: document.getElementById('tenantInput'),
+      refreshButton: document.getElementById('refreshButton'),
+      pollButton: document.getElementById('pollButton'),
+      connectionChip: document.getElementById('connectionChip'),
+      databaseChip: document.getElementById('databaseChip'),
+      updatedChip: document.getElementById('updatedChip'),
+      stateChip: document.getElementById('stateChip'),
+      decisionChip: document.getElementById('decisionChip'),
+      reviewChip: document.getElementById('reviewChip'),
+      securityChip: document.getElementById('securityChip'),
+      learningState: document.getElementById('learningState'),
+      confidence: document.getElementById('confidence'),
+      riskLevel: document.getElementById('riskLevel'),
+      alignmentScore: document.getElementById('alignmentScore'),
+      decision: document.getElementById('decision'),
+      executionMode: document.getElementById('executionMode'),
+      approvalRequired: document.getElementById('approvalRequired'),
+      actionGate: document.getElementById('actionGate'),
+      decisionIntegrity: document.getElementById('decisionIntegrity'),
+      framedSuggestion: document.getElementById('framedSuggestion'),
+      reasonText: document.getElementById('reasonText'),
+      securityRisk: document.getElementById('securityRisk'),
+      identityEvents: document.getElementById('identityEvents'),
+      appConsentEvents: document.getElementById('appConsentEvents'),
+      latestSecurityEvent: document.getElementById('latestSecurityEvent'),
+      approvalQueue: document.getElementById('approvalQueue'),
+      approvalCount: document.getElementById('approvalCount'),
+      activityFeed: document.getElementById('activityFeed'),
+      evidenceFeed: document.getElementById('evidenceFeed'),
+      windowChip: document.getElementById('windowChip'),
+      errorText: document.getElementById('errorText')
+    };
+
+    el.apiKeyInput.value = state.apiKey;
+    el.tenantInput.value = state.tenant;
+
+    function classify(value) {
+      if (['stable', 'allow', 'auto', 'low', 'ok', 'connected'].includes(value)) return 'good';
+      if (['unknown', 'restrict', 'restricted', 'medium', 'pending'].includes(value)) return 'warn';
+      if (['drift', 'block', 'blocked', 'high', 'error', 'disconnected'].includes(value)) return 'bad';
+      return '';
+    }
+
+    function setChip(node, text, tone) {
+      node.textContent = text;
+      node.className = `chip ${tone || classify(String(text).toLowerCase())}`;
+    }
+
+    function formatPercent(value) {
+      if (typeof value !== 'number') return '-';
+      return `${Math.round(value * 100)}%`;
+    }
+
+    function formatTime(value) {
+      if (!value) return '-';
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return value;
+      return date.toLocaleString();
+    }
+
+    function headers() {
+      return {
+        'content-type': 'application/json',
+        'x-api-key': state.apiKey
+      };
+    }
+
+    async function api(path, options = {}) {
+      const response = await fetch(path, {
+        ...options,
+        headers: {
+          ...headers(),
+          ...(options.headers || {})
+        }
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(payload.error || `Request failed with ${response.status}`);
+      }
+      return payload;
+    }
+
+    async function loadHealth() {
+      const response = await fetch('/health');
+      const payload = await response.json();
+      setChip(el.databaseChip, `Database ${payload.database || 'unknown'}`, payload.database === 'enabled' ? 'good' : 'warn');
+    }
+
+    async function loadState() {
+      const tenant = encodeURIComponent(state.tenant || 'ownerfi');
+      return api(`/learning/suggestions?tenant=${tenant}&createApproval=false`);
+    }
+
+    async function loadApprovals() {
+      return api('/approvals');
+    }
+
+    function renderState(payload) {
+      const learningState = payload.learning && payload.learning.summary && payload.learning.summary.learningState
+        ? payload.learning.summary.learningState
+        : {};
+      const analysis = payload.analysis || (payload.state && payload.state.analysis) || {};
+      const decision = payload.decision || {};
+      const security = payload.learning && payload.learning.summary && payload.learning.summary.security
+        ? payload.learning.summary.security
+        : {};
+
+      el.learningState.textContent = learningState.state || '-';
+      el.confidence.textContent = formatPercent(learningState.confidence);
+      el.riskLevel.textContent = analysis.riskLevel || learningState.riskLevel || '-';
+      el.alignmentScore.textContent = formatPercent(analysis.alignmentScore);
+      el.decision.textContent = decision.decision || '-';
+      el.executionMode.textContent = decision.executionMode || '-';
+      el.approvalRequired.textContent = decision.approvalRequired ? 'required' : 'not required';
+      el.actionGate.textContent = decision.actionGate || learningState.actionGate || '-';
+      el.framedSuggestion.textContent = analysis.framedSuggestion || '-';
+      el.reasonText.textContent = learningState.reason || '';
+      document.getElementById('decisionReason').textContent = decision.reason || '—';
+
+      const trustScore = typeof decision.trustScore === 'number' ? decision.trustScore : null;
+      document.getElementById('trustScore').textContent = trustScore !== null ? formatPercent(trustScore) : '-';
+      el.decisionIntegrity.textContent = decision.signature ? 'signed' : 'unsigned';
+
+      const stageName = payload.pipeline && payload.pipeline.currentStage ? payload.pipeline.currentStage : null;
+      const pipelineStep = stageName !== null ? (STAGE_MAP[stageName] ?? 5) : (decision.approvalRequired ? 6 : decision.decision === 'allow' ? 7 : 5);
+      const paused = decision.approvalRequired === true;
+      renderPipeline(pipelineStep, paused);
+      const activeLabel = PIPELINE_STAGES[pipelineStep] || 'Unknown';
+      const stageSuffix = paused ? ' — Waiting for human action' : pipelineStep === 7 ? ' — Proceeding' : '';
+      document.getElementById('stageLabel').textContent = `Current Stage: ${activeLabel}${stageSuffix}`;
+      document.getElementById('stageLabel').style.color = paused ? 'var(--yellow)' : pipelineStep === 7 ? 'var(--green)' : 'var(--muted)';
+      setChip(document.getElementById('pipelineChip'), activeLabel, paused ? 'warn' : '');
+      el.securityRisk.textContent = security.highRiskEvents > 0 ? 'high' : security.totalEvents > 0 ? 'medium' : 'none';
+      el.identityEvents.textContent = security.identityRiskEvents || 0;
+      el.appConsentEvents.textContent = security.appConsentEvents || 0;
+      el.latestSecurityEvent.textContent = security.latestEvent
+        ? `${security.latestEvent.type} / ${security.latestEvent.riskLevel}`
+        : '-';
+
+      setChip(el.stateChip, learningState.state || 'unknown');
+      setChip(el.decisionChip, decision.decision || 'pending');
+      el.decisionIntegrity.style.color = decision.signature ? 'var(--green)' : 'var(--yellow)';
+      setChip(el.reviewChip, analysis.requiresHumanReview ? 'human review' : 'within limits', analysis.requiresHumanReview ? 'bad' : 'good');
+      setChip(
+        el.securityChip,
+        security.highRiskEvents > 0 ? 'high risk' : security.totalEvents > 0 ? 'security signal' : 'no signal',
+        security.highRiskEvents > 0 ? 'bad' : security.totalEvents > 0 ? 'warn' : ''
+      );
+      setChip(el.windowChip, `window ${payload.learning ? payload.learning.windowSize : 0}`);
+
+      renderList(el.evidenceFeed, learningState.evidence || [], 'Evidence');
+      renderList(el.activityFeed, buildActivity(payload), 'Activity');
+    }
+
+    function buildActivity(payload) {
+      const learningState = payload.learning && payload.learning.summary && payload.learning.summary.learningState
+        ? payload.learning.summary.learningState
+        : {};
+      const decision = payload.decision || {};
+      const analysis = payload.analysis || (payload.state && payload.state.analysis) || {};
+      const stageName = payload.pipeline && payload.pipeline.currentStage ? payload.pipeline.currentStage : null;
+      const now = new Date().toLocaleTimeString();
+      const entries = [
+        `[${now}] Stage: Learning — classified as ${learningState.state || 'unknown'}`,
+        `[${now}] Stage: Analysis — risk ${analysis.riskLevel || 'unknown'}`,
+        `[${now}] Stage: Decision — ${decision.decision || 'pending'} / ${decision.executionMode || 'pending'}`
+      ];
+      if (decision.approvalRequired) {
+        entries.push(`[${now}] Stage: Approval (paused — waiting for human action)`);
+      } else if (stageName === 'execution') {
+        entries.push(`[${now}] Stage: Execution — proceeding`);
+      } else {
+        entries.push(`[${now}] No approval gate required`);
+      }
+      return entries;
+    }
+
+    function renderList(node, items, label) {
+      node.innerHTML = '';
+      if (!items.length) {
+        const item = document.createElement('li');
+        item.textContent = `No ${label.toLowerCase()} available.`;
+        node.appendChild(item);
+        return;
+      }
+
+      items.forEach((entry) => {
+        const item = document.createElement('li');
+        item.innerHTML = `<strong>${label}</strong> ${entry}`;
+        node.appendChild(item);
+      });
+    }
+
+    function renderApprovals(payload) {
+      const approvals = Array.isArray(payload.approvals) ? payload.approvals : [];
+      setChip(el.approvalCount, `${approvals.length} pending`, approvals.length ? 'warn' : 'good');
+      el.approvalQueue.innerHTML = '';
+
+      if (!approvals.length) {
+        const empty = document.createElement('p');
+        empty.className = 'empty';
+        empty.textContent = 'No pending approvals.';
+        el.approvalQueue.appendChild(empty);
+        return;
+      }
+
+      approvals.forEach((approval) => {
+        const row = document.createElement('div');
+        row.className = 'approval-row';
+        const risk = approval.decision && approval.decision.riskLevel ? approval.decision.riskLevel : 'unknown';
+        const approvalReason = approval.decision && approval.decision.reason ? approval.decision.reason : null;
+        const approvalContext = approval.context && approval.context.approvalType ? approval.context.approvalType : null;
+        row.innerHTML = `
+          <div>
+            <strong>${approval.id}</strong>
+            <small>${approval.decision ? approval.decision.decision : 'decision unknown'} / ${approval.decision ? approval.decision.executionMode : 'mode unknown'}</small>
+            ${approvalReason ? `<small class="approval-reason">Reason: ${approvalReason}</small>` : ''}
+            ${approvalContext ? `<small>Requested Action: ${approvalContext}</small>` : ''}
+            <small>Created ${formatTime(approval.createdAt)}</small>
+          </div>
+          <span class="chip ${classify(risk)}">${risk}</span>
+          <div class="row-actions">
+            <button type="button" title="Approve" data-action="approve" data-id="${approval.id}">&#10003;</button>
+            <button class="danger" type="button" title="Reject" data-action="reject" data-id="${approval.id}">&#215;</button>
+          </div>
+        `;
+        el.approvalQueue.appendChild(row);
+      });
+    }
+
+    async function resolveApproval(id, action) {
+      state.busyApproval = id;
+      el.errorText.textContent = '';
+      try {
+        await api(`/approvals/${encodeURIComponent(id)}/${action}`, {
+          method: 'POST',
+          body: JSON.stringify({
+            metadata: { actor: 'mission-control' },
+            reason: `Resolved from Mission Control as ${action}`
+          })
+        });
+        await refresh();
+      } catch (error) {
+        el.errorText.textContent = error.message;
+      } finally {
+        state.busyApproval = null;
+      }
+    }
+
+    async function refresh() {
+      state.apiKey = el.apiKeyInput.value.trim();
+      state.tenant = el.tenantInput.value.trim() || 'ownerfi';
+      sessionStorage.setItem('sentinelMissionControlKey', state.apiKey);
+      sessionStorage.setItem('sentinelMissionControlTenant', state.tenant);
+      el.errorText.textContent = '';
+
+      if (!state.apiKey) {
+        setChip(el.connectionChip, 'API key required', 'warn');
+        el.errorText.textContent = 'Enter the Sentinel API key to load operator endpoints.';
+        return;
+      }
+
+      try {
+        await loadHealth();
+        const [systemState, approvals] = await Promise.all([loadState(), loadApprovals()]);
+        renderState(systemState);
+        renderApprovals(approvals);
+        setChip(el.connectionChip, 'Connected', 'good');
+        setChip(el.updatedChip, `Updated ${new Date().toLocaleTimeString()}`, 'good');
+      } catch (error) {
+        setChip(el.connectionChip, 'Error', 'bad');
+        el.errorText.textContent = error.message;
+      }
+    }
+
+    function togglePolling() {
+      state.polling = !state.polling;
+      if (state.polling) {
+        el.pollButton.textContent = 'Stop Polling';
+        state.pollHandle = setInterval(refresh, 10000);
+        refresh();
+      } else {
+        el.pollButton.textContent = 'Start Polling';
+        clearInterval(state.pollHandle);
+        state.pollHandle = null;
+      }
+    }
+
+    el.refreshButton.addEventListener('click', refresh);
+    el.pollButton.addEventListener('click', togglePolling);
+    el.approvalQueue.addEventListener('click', (event) => {
+      const button = event.target.closest('button[data-action]');
+      if (!button) return;
+      resolveApproval(button.dataset.id, button.dataset.action);
+    });
+
+    if (state.apiKey) {
+      refresh();
+    }
+  </script>
+</body>
+</html>

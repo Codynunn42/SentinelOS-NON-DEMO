@@ -1,0 +1,16 @@
+{
+  "type": "cdnlux.token.transfer_requested",
+  "tenant": "nunncloud",
+  "symbol": "CDNLUX",
+  "network": "base-sepolia",
+  "contractAddress": null,
+  "walletAddress": "0x0000000000000000000000000000000000000000",
+  "action": "transfer",
+  "amount": 25,
+  "requestedBy": "sentinel-operator",
+  "evidence": [
+    "source=nunncorp-global-mono/apps/nunnpay-wallet",
+    "contracts=WalletKernel,SentinelGuard",
+    "approvalRequired=true"
+  ]
+}

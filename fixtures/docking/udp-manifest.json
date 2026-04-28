@@ -1,0 +1,18 @@
+{
+  "udpVersion": "1.0",
+  "systemId": "SYS-CDNLUX-UTILITY",
+  "adapterId": "ADAPTER-CDNLUX-BASE-SEPOLIA",
+  "name": "CDNLUX Utility Token Adapter",
+  "owner": "Nunn Corporation",
+  "requestedTrustTier": "TIER_1",
+  "capabilities": [
+    "READ_STATUS",
+    "READ_BALANCE",
+    "REQUEST_CDLUX_TRANSFER"
+  ],
+  "metadata": {
+    "source": "nunncorp-global-mono",
+    "system": "cdnlux",
+    "runtime": "sentinel-adapter"
+  }
+}
