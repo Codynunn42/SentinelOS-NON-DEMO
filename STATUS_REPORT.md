@@ -12,7 +12,7 @@ The operating direction is now broader than a single protected API. Daily execut
 
 The current deployed system now includes a working audit layer, a protected `/v1/audit` retrieval endpoint, and a live Postgres-backed OwnerFi proof path that has been verified end-to-end.
 
-On 2026-04-24, `/proof` was upgraded into a business-readable proof surface and deployed. The current live image is `acrncdevsentinel.azurecr.io/sentinel-api:governance-preflight-v1` on Container App revision `ca-sentinelos-proof--0000005`.
+On 2026-04-28, the current shareable proof surface was verified on `ca-nc-dev-sentinel`, not the older `ca-sentinelos-proof` host. The live public proof URL is `https://ca-nc-dev-sentinel.calmhill-388e1d39.eastus2.azurecontainerapps.io/proof`. The current active revision is `ca-nc-dev-sentinel--decision-signing-v1`, running image `acrncdevsentinel.azurecr.io/sentinelos:latest`, healthy, provisioned, and receiving 100 percent traffic.
 
 The next hardening layer is governance preflight: command requests are checked for tenant, command, actor, role, and role-based execution rights before a surface-plane handler can run.
 
@@ -70,12 +70,16 @@ The next hardening layer is governance preflight: command requests are checked f
 - `governance-preflight-v1` built through ACR remote build run `ch19`
 - `ca-sentinelos-proof--0000005` deployed, active, running, and healthy
 - live governance preflight verified for missing actor, forbidden role, valid submit, and protected audit retrieval
+- `ca-nc-dev-sentinel--decision-signing-v1` verified live on 2026-04-28 as healthy, provisioned, and receiving 100 percent traffic
+- live `/proof` verified on `ca-nc-dev-sentinel` with the business-result UI
+- live `/health` verified on `ca-nc-dev-sentinel` with `database: "enabled"`
+- live no-key `/v1/audit` verified on `ca-nc-dev-sentinel` as `401 Unauthorized`
+- live protected OwnerFi submit, evaluate, execute, and audit retrieval verified on `ca-nc-dev-sentinel` on 2026-04-28
+- latest protected proof run produced application `app_86a2d463-e6e2-4571-af40-fef2d9cd20b2`, approved it, executed deal `deal_236eea28-421c-4348-a806-515decd010c1`, and returned three tenant-scoped audit entries
 
 ## In Progress
+- packaging the existing hardening work into a clean release batch
 - platform contract definition beyond the first surface-plane docs
-- proof-case planning for first real company onboarding
-- surface-plane expansion beyond OwnerFi on the shared core
-- Saturday meeting/demo preparation
 
 ## Gaps
 - no full role-based key model yet
@@ -85,16 +89,17 @@ The next hardening layer is governance preflight: command requests are checked f
 - no reusable integration framework yet
 - no active billing, checkout, payment, or funnel execution path in this repo
 - broader API/audit/database implementation work exists in the worktree but still needs a separate clean release commit
+- `ca-sentinelos-proof` appears to be an older health-only host and should not be used as the current shareable proof URL
 
 ## Next Actions
-1. rehearse the Saturday demo flow without expanding scope
-2. bring the ownership handout and keep the ownership answer short
-3. decide after the meeting whether to commit the remaining planning docs
+1. package the current hardening work into a clean release batch
+2. rehearse the no-key browser proof flow at the current `ca-nc-dev-sentinel` URL before any meeting or share
+3. keep the ownership answer short and avoid billing/funnel claims
 4. define the next platform contracts: tenant model, scope model, role/key model, and receipt/audit retrieval model
-5. begin the next surface-plane proof after OwnerFi, using `hotelops` as the placeholder expansion path
+5. keep `hotelops` as a registered placeholder only until the OwnerFi proof lane is accepted
 
 ## Risk Level
-Low to moderate (live proof, key rotation, rate limiting, and monitoring visibility are verified; remaining risk is meeting discipline)
+Low (live proof route, health, revision traffic, unauthenticated audit blocking, and authenticated OwnerFi workflow execution are verified; remaining risk is release packaging discipline)
 
 ## Direction
 Proceed with monitored command execution, audit visibility, tighter control-plane hardening, and platform-oriented extraction of reusable contracts, policy, and integration surfaces.

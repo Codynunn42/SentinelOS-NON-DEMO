@@ -1,15 +1,18 @@
-// simple health check for CI
 const http = require('http');
+const https = require('https');
 
-http.get('http://localhost:3000/health', (res) => {
+const healthcheckUrl = process.env.HEALTHCHECK_URL || `http://localhost:${process.env.PORT || 3000}/health`;
+const client = healthcheckUrl.startsWith('https://') ? https : http;
+
+client.get(healthcheckUrl, (res) => {
   if (res.statusCode === 200) {
-    console.log('Health check passed');
+    console.log(`Health check passed: ${healthcheckUrl}`);
     process.exit(0);
   } else {
-    console.error('Health check failed with status:', res.statusCode);
+    console.error(`Health check failed: ${healthcheckUrl} returned ${res.statusCode}`);
     process.exit(1);
   }
 }).on('error', (err) => {
-  console.error('Health check error:', err.message);
+  console.error(`Health check error for ${healthcheckUrl}:`, err.message);
   process.exit(1);
 });

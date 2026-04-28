@@ -1,0 +1,133 @@
+# SentinelOS - Azure Container Apps health fix
+# Removes stale TCP probes on port 4000 and replaces them with HTTP /health probes on port 80.
+#
+# Apply with:
+# az containerapp update --name ca-nc-dev-sentinel --resource-group rg-nc-dev-sentinel --yaml azure/container-app-healthfix.yaml
+
+id: /subscriptions/82bd72d4-00ef-400d-839b-e168e980c510/resourceGroups/rg-nc-dev-sentinel/providers/Microsoft.App/containerapps/ca-nc-dev-sentinel
+identity:
+  type: UserAssigned
+  userAssignedIdentities:
+    /subscriptions/82bd72d4-00ef-400d-839b-e168e980c510/resourcegroups/rg-nc-dev-sentinel/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id-nc-dev-sentinel: {}
+location: East US 2
+name: ca-nc-dev-sentinel
+resourceGroup: rg-nc-dev-sentinel
+tags:
+  azd-env-name: dev
+  azd-service-name: sentinel
+  nunncorp-phase: sentinel-first
+  nunncorp-role: control-plane
+  nunncorp-scope: monorepo-foundation
+  nunncorp-workload: sentinel-core
+type: Microsoft.App/containerApps
+
+properties:
+  managedEnvironmentId: /subscriptions/82bd72d4-00ef-400d-839b-e168e980c510/resourceGroups/rg-nc-dev-sentinel/providers/Microsoft.App/managedEnvironments/cae-nc-dev-sentinel
+  configuration:
+    activeRevisionsMode: Single
+    ingress:
+      external: true
+      targetPort: 80
+      transport: Auto
+      allowInsecure: false
+      traffic:
+        - latestRevision: true
+          weight: 100
+    registries:
+      - server: acrncdevsentinel.azurecr.io
+        identity: /subscriptions/82bd72d4-00ef-400d-839b-e168e980c510/resourcegroups/rg-nc-dev-sentinel/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id-nc-dev-sentinel
+    secrets:
+      - name: billing-sign-key
+        keyVaultUrl: https://kv-nc-dev-sentinel.vault.azure.net/secrets/billing-sign-key
+        identity: /subscriptions/82bd72d4-00ef-400d-839b-e168e980c510/resourceGroups/rg-nc-dev-sentinel/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id-nc-dev-sentinel
+      - name: database-url
+        keyVaultUrl: https://kv-nc-dev-sentinel.vault.azure.net/secrets/billing-database-url
+        identity: /subscriptions/82bd72d4-00ef-400d-839b-e168e980c510/resourceGroups/rg-nc-dev-sentinel/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id-nc-dev-sentinel
+      - name: sentinel-api-key
+      - name: sentinel-github-token
+      - name: stripe-secret-key
+        keyVaultUrl: https://kv-nc-dev-sentinel.vault.azure.net/secrets/stripe-secret-key
+        identity: /subscriptions/82bd72d4-00ef-400d-839b-e168e980c510/resourceGroups/rg-nc-dev-sentinel/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id-nc-dev-sentinel
+      - name: azure-client-secret
+        keyVaultUrl: https://kv-nc-dev-sentinel.vault.azure.net/secrets/sentinel-client-secret
+        identity: /subscriptions/82bd72d4-00ef-400d-839b-e168e980c510/resourceGroups/rg-nc-dev-sentinel/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id-nc-dev-sentinel
+  template:
+    revisionSuffix: healthfix80
+    containers:
+      - name: sentinel
+        image: acrncdevsentinel.azurecr.io/sentinelos:latest
+        env:
+          - name: NODE_ENV
+            value: staging
+          - name: PORT
+            value: "80"
+          - name: SENTINEL_VERSION
+            value: command-ledger-live-20260405-061515
+          - name: AZURE_TENANT_ID
+            value: 762ce366-c9c0-449a-adec-1b7608b4ce2a
+          - name: AZURE_API_AUDIENCE
+            value: api://a9f534fe-9f3b-42db-a03f-f7bdd958f601
+          - name: AZURE_AUTHORITY
+            value: ""
+          - name: AZURE_REDIRECT_URI
+            value: ""
+          - name: AZURE_CLIENT_ID
+            value: ""
+          - name: AZURE_CLIENT_SECRET
+            secretRef: azure-client-secret
+          - name: APPLICATIONINSIGHTS_CONNECTION_STRING
+            value: InstrumentationKey=852508c8-d6a1-4c45-8aee-1bf2b980675f;IngestionEndpoint=https://eastus2-3.in.applicationinsights.azure.com/;LiveEndpoint=https://eastus2.livediagnostics.monitor.azure.com/;ApplicationId=0df7e269-64f9-4e43-bb1a-f06c909988de
+          - name: REPORTING_WEBHOOK_URL
+            value: ""
+          - name: DATABASE_URL
+            secretRef: database-url
+          - name: STRIPE_SECRET_KEY
+            secretRef: stripe-secret-key
+          - name: BILLING_SIGN_KEY
+            secretRef: billing-sign-key
+          - name: APPCONFIG_ENDPOINT
+            value: https://appcs-nc-dev-sentinel.azconfig.io
+          - name: SENTINEL_AUTH_MODE
+            value: smoke
+          - name: SENTINEL_SMOKE_AUTH
+            value: "1"
+          - name: SENTINEL_ENV
+            value: staging
+          - name: SENTINEL_GITHUB_TOKEN
+            secretRef: sentinel-github-token
+          - name: SENTINEL_API_KEY
+            secretRef: sentinel-api-key
+        probes:
+          - type: Startup
+            httpGet:
+              path: /health
+              port: 80
+              scheme: HTTP
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 30
+          - type: Readiness
+            httpGet:
+              path: /health
+              port: 80
+              scheme: HTTP
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          - type: Liveness
+            httpGet:
+              path: /health
+              port: 80
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 30
+            timeoutSeconds: 3
+            failureThreshold: 3
+        resources:
+          cpu: 0.5
+          memory: 1Gi
+    scale:
+      minReplicas: 1
+      maxReplicas: 2

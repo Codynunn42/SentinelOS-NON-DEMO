@@ -3,7 +3,7 @@
 **Goal:** show a real system executing, auditing, and scaling without over-explaining.
 
 ## Setup
-- Open: `https://ca-sentinelos-proof.calmhill-388e1d39.eastus2.azurecontainerapps.io/proof`
+- Open: `https://ca-nc-dev-sentinel.calmhill-388e1d39.eastus2.azurecontainerapps.io/proof`
 - Leave API Key empty.
 - Tenant Surface: `ownerfi / OwnerFi`
 
