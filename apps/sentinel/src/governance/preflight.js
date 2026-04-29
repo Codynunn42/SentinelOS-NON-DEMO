@@ -1,8 +1,4 @@
-const REQUIRED_METADATA = ['actor', 'role'];
-
-function hasText(value) {
-  return typeof value === 'string' && value.trim() !== '';
-}
+const { evaluatePolicy } = require('./policyEngine');
 
 function blocked(statusCode, error, details = {}) {
   return {
@@ -13,46 +9,36 @@ function blocked(statusCode, error, details = {}) {
   };
 }
 
-function governanceCheck(envelope) {
-  if (!hasText(envelope.tenant)) {
-    return blocked(400, 'TENANT_REQUIRED', {
-      required: ['tenant']
-    });
+function getLegacyError(policy) {
+  if (policy.reason.includes('TENANT_REQUIRED')) return 'TENANT_REQUIRED';
+  if (policy.reason.includes('COMMAND_REQUIRED')) return 'COMMAND_REQUIRED';
+  if (policy.reason.includes('METADATA_REQUIRED')) return 'METADATA_REQUIRED';
+  if (policy.reason.includes('ACTOR_REQUIRED') || policy.reason.includes('ROLE_REQUIRED')) {
+    return policy.state === 'invalid' ? 'METADATA_INCOMPLETE' : 'FORBIDDEN';
   }
 
-  if (!hasText(envelope.command)) {
-    return blocked(400, 'COMMAND_REQUIRED', {
-      required: ['command']
-    });
-  }
+  if (policy.reason === 'impossible_travel') return 'IDENTITY_RISK_BLOCKED';
 
-  if (!envelope.metadata || typeof envelope.metadata !== 'object') {
-    return blocked(400, 'METADATA_REQUIRED', {
-      required: REQUIRED_METADATA
-    });
-  }
+  return policy.reason || 'POLICY_BLOCKED';
+}
 
-  const missingMetadata = REQUIRED_METADATA.filter((field) => !hasText(envelope.metadata[field]));
-  if (missingMetadata.length) {
-    return blocked(400, 'METADATA_INCOMPLETE', {
-      required: REQUIRED_METADATA,
-      missing: missingMetadata
-    });
-  }
+function governanceCheck(envelope, signals = {}) {
+  const policy = evaluatePolicy(envelope, signals);
 
-  if (envelope.command === 'deal.execute' && envelope.metadata.role !== 'approver') {
-    return blocked(403, 'FORBIDDEN', {
-      requiredRole: 'approver',
-      actor: envelope.metadata.actor,
-      role: envelope.metadata.role
+  if (!policy.allowed) {
+    return blocked(policy.statusCode || 400, getLegacyError(policy), {
+      ...policy.details,
+      policy
     });
   }
 
   return {
-    allowed: true
+    allowed: true,
+    policy
   };
 }
 
 module.exports = {
-  governanceCheck
+  governanceCheck,
+  evaluatePolicy
 };

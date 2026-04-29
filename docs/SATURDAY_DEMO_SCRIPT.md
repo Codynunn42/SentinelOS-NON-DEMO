@@ -27,9 +27,19 @@
 ## Governed Block Moment
 Use only if the conversation turns to control, risk, or trust.
 
-Say: "The system will block execution if risk is high, even if everything else is working."
+Point to the `Execution Blocked` card.
 
-Then show the pending approval and stop. Do not approve it in the room.
+Say: "Here's the difference. The system detected a high-risk identity event and blocked execution."
+
+Pause.
+
+Say: "State: drift. Risk: high. Decision: block."
+
+Pause.
+
+Say: "It requires human approval before anything continues."
+
+Then show the disabled approval buttons and stop. Do not approve it in the room.
 
 Reference: [Governed Block Demo Moment](./GOVERNED_BLOCK_DEMO_MOMENT.md)
 
