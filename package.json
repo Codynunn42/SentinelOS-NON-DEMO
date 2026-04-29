@@ -11,6 +11,7 @@
     "healthcheck": "node scripts/healthcheck.js",
     "check:cdnlux": "node scripts/check-cdnlux-integration.js",
     "check:docking": "node scripts/check-docking-protocol.js",
+    "check:idempotency": "node scripts/check-idempotency.js",
     "check:keys": "node scripts/check-key-registry.js",
     "check:policy": "node scripts/check-policy-engine.js",
     "check:receipts": "node scripts/check-receipt-lookup.js",

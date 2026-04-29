@@ -55,6 +55,8 @@ dispatchCommand(
     assert.strictEqual(match.source, 'memory');
     assert.strictEqual(match.receipt.receiptId, 'rcpt_local_receipt_lookup_check');
     assert.strictEqual(match.entry.command, 'application.submit');
+    assert.ok(match.entry.auditHash);
+    assert.ok(Object.prototype.hasOwnProperty.call(match.entry, 'prevHash'));
 
     console.log('Receipt lookup check passed');
   })

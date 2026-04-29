@@ -153,6 +153,23 @@ Expected:
 - `deal.dealStatus` is `active`
 - `audit.count` is `3`
 
+Idempotency check:
+
+```bash
+node scripts/check-idempotency.js
+```
+
+Expected:
+
+- duplicate `commandId` and identical payload returns `idempotentReplay: true`
+- duplicate `commandId` with changed payload returns `IDEMPOTENCY_CONFLICT`
+
+Trust-test evidence:
+
+```txt
+docs/TRUST_TESTS_2026-04-29.md
+```
+
 Revision health:
 
 ```bash

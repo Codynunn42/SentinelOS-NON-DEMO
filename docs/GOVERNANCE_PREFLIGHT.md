@@ -67,6 +67,42 @@ Blocked commands are audited with:
 - `result.error`
 - `result.details`
 
+Allowed policy preflight is also audited before handler execution.
+
+Each audit entry receives:
+
+- `prevHash`
+- `auditHash`
+
+This creates a lightweight tamper-evident chain for the in-process audit stream and persisted audit result payloads.
+
+## Idempotency
+
+`/v1/command` supports idempotency through:
+
+- `commandId`
+- `metadata.idempotencyKey`
+
+The idempotency cache key is:
+
+```txt
+tenant + command + keyId + idempotency key
+```
+
+Same key and same payload returns the original result as an idempotent replay.
+
+Same key and different payload returns `IDEMPOTENCY_CONFLICT`.
+
+## Rate Limits
+
+Protected write routes are rate-limited by:
+
+```txt
+route + tenant + keyId
+```
+
+Unauthenticated traffic falls back to IP-based limiting.
+
 ## Principle
 SentinelOS does not only log what happened. It controls what is allowed to happen before execution, then audits the result.
 

@@ -55,6 +55,14 @@ approval.review       -> approval:review
 
 The resolved API key, not caller-supplied metadata, is the source of truth for actor, role, and scopes.
 
+## Idempotency Standard
+
+Commands that may execute business workflow steps should carry a `commandId` or `metadata.idempotencyKey`.
+
+The platform treats the same tenant, command, key, idempotency key, and payload as a replay.
+
+The platform treats the same tenant, command, key, idempotency key, and changed payload as a conflict.
+
 ## Shared Receipt Shape
 Every command should return a receipt that can be stored, queried, and presented to operators:
 
@@ -72,6 +80,8 @@ Every command should return a receipt that can be stored, queried, and presented
   "timestamp": "2026-04-23T00:00:00.000Z"
 }
 ```
+
+Receipts may include `prevHash` so operators can connect the receipt to the audit chain head at the time of execution.
 
 ## Workflow 1: Application Intake
 
