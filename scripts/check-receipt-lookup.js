@@ -34,7 +34,15 @@ dispatchCommand(
   },
   {
     buildReceipt,
-    emitSecurityEvent: () => {}
+    emitSecurityEvent: () => {},
+    principal: {
+      keyId: 'key_local_check',
+      tenant: 'ownerfi',
+      actor: 'local-check',
+      role: 'approver',
+      scopes: ['application:submit', 'receipt:read'],
+      status: 'active'
+    }
   }
 )
   .then(async (result) => {

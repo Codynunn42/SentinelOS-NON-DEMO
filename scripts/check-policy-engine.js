@@ -1,26 +1,30 @@
 const assert = require('assert');
 const { evaluatePolicy } = require('../apps/sentinel/src/governance/policyEngine');
 
-const baseEnvelope = {
+const baseContext = {
   tenant: 'ownerfi',
   command: 'application.submit',
-  metadata: {
-    actor: 'operator@example.com',
-    role: 'approver'
-  }
+  actor: 'operator@example.com',
+  role: 'approver',
+  scopes: ['application:submit'],
+  requiredScope: 'application:submit'
 };
 
-assert.deepStrictEqual(evaluatePolicy(baseEnvelope), {
+assert.deepStrictEqual(evaluatePolicy(baseContext), {
   allowed: true,
   state: 'clean',
   riskLevel: 'low',
   decision: 'allow',
-  approvalRequired: false
+  approvalRequired: false,
+  receiptRequired: true
 });
 
-const identityBlock = evaluatePolicy(baseEnvelope, {
-  identity: {
-    impossibleTravel: true
+const identityBlock = evaluatePolicy({
+  ...baseContext,
+  signals: {
+    identity: {
+      impossibleTravel: true
+    }
   }
 });
 
@@ -34,10 +38,10 @@ assert.strictEqual(identityBlock.approvalRequired, true);
 const roleBlock = evaluatePolicy({
   tenant: 'ownerfi',
   command: 'deal.execute',
-  metadata: {
-    actor: 'operator@example.com',
-    role: 'operator'
-  }
+  actor: 'operator@example.com',
+  role: 'operator',
+  scopes: ['deal:execute'],
+  requiredScope: 'deal:execute'
 });
 
 assert.strictEqual(roleBlock.allowed, false);
@@ -48,11 +52,24 @@ assert.strictEqual(roleBlock.approvalRequired, true);
 const invalid = evaluatePolicy({
   tenant: 'ownerfi',
   command: 'application.submit',
-  metadata: {}
+  scopes: ['application:submit'],
+  requiredScope: 'application:submit'
 });
 
 assert.strictEqual(invalid.allowed, false);
 assert.strictEqual(invalid.state, 'invalid');
 assert.strictEqual(invalid.reason, 'ACTOR_REQUIRED,ROLE_REQUIRED');
+
+const missingScope = evaluatePolicy({
+  tenant: 'ownerfi',
+  command: 'application.evaluate',
+  actor: 'operator@example.com',
+  role: 'operator',
+  scopes: ['application:submit'],
+  requiredScope: 'application:evaluate'
+});
+
+assert.strictEqual(missingScope.allowed, false);
+assert.strictEqual(missingScope.reason, 'SCOPE_REQUIRED');
 
 console.log('Policy engine check passed');

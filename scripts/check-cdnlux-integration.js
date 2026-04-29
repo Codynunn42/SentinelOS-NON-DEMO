@@ -39,6 +39,15 @@ dispatchCommand({
     actor: 'local-check',
     role: 'operator'
   }
+}, {
+  principal: {
+    keyId: 'key_local_platform_check',
+    tenant: 'nunncloud',
+    actor: 'local-check',
+    role: 'platform',
+    scopes: ['platform:admin'],
+    status: 'active'
+  }
 }).then((result) => {
   assert.strictEqual(result.success, true);
   assert.strictEqual(result.data.integration, 'cdnlux');

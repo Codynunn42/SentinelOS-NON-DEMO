@@ -40,6 +40,21 @@ Every proof-case command should eventually follow a common shape:
 }
 ```
 
+## Command Scope Map
+
+Every command must map to a scope before execution:
+
+```txt
+application.submit    -> application:submit
+application.evaluate  -> application:evaluate
+deal.execute          -> deal:execute
+audit.read            -> audit:read
+receipt.read          -> receipt:read
+approval.review       -> approval:review
+```
+
+The resolved API key, not caller-supplied metadata, is the source of truth for actor, role, and scopes.
+
 ## Shared Receipt Shape
 Every command should return a receipt that can be stored, queried, and presented to operators:
 

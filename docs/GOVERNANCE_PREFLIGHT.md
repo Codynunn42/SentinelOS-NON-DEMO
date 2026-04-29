@@ -6,9 +6,49 @@
 Governance preflight is the required control layer that evaluates every command before a surface-plane handler can execute.
 
 ## Command Flow
-`request -> governance preflight -> handler -> audit`
+`request -> authenticate key -> resolve tenant / actor / role / scopes -> policy preflight -> handler -> audit receipt`
 
 The preflight layer uses `evaluatePolicy` in `apps/sentinel/src/governance/policyEngine.js` so policy outcomes are shaped consistently before handler execution.
+
+## Role-Scoped Key Rule
+
+No protected request runs from only a secret value.
+
+The key must resolve to:
+
+```txt
+tenant + actor + role + scopes
+```
+
+If the key cannot resolve all of those fields, SentinelOS blocks the request before execution.
+
+Current role vocabulary:
+
+```txt
+viewer
+operator
+approver
+admin
+platform
+```
+
+Current scope vocabulary:
+
+```txt
+application:submit
+application:evaluate
+application:read
+deal:execute
+audit:read
+receipt:read
+approval:review
+tenant:admin
+platform:admin
+learning:read
+learning:write
+security:write
+policy:evaluate
+```
 
 ## Current Rules
 - `tenant` is required.
@@ -17,6 +57,8 @@ The preflight layer uses `evaluatePolicy` in `apps/sentinel/src/governance/polic
 - `metadata.role` is required.
 - `deal.execute` requires `metadata.role` to be `approver`.
 - high-risk identity signals, such as impossible travel, block execution and require human review.
+- protected routes require the matching scope before reading, writing, approving, or executing.
+- caller-supplied metadata cannot elevate the actor or role resolved from the API key.
 
 ## Audit Behavior
 Blocked commands are audited with:
@@ -27,3 +69,7 @@ Blocked commands are audited with:
 
 ## Principle
 SentinelOS does not only log what happened. It controls what is allowed to happen before execution, then audits the result.
+
+## Protection Statement
+
+SentinelOS is protected by governed execution, tenant isolation, role-scoped access, policy preflight, audit receipts, and platform ownership terms.
