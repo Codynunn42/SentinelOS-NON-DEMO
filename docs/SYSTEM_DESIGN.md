@@ -25,7 +25,7 @@ SentinelOS should stay organized as six planes:
 - Learning Plane: execution memory, outcome analysis, suggestions, and runbook generation
 - Infrastructure Plane: Container Apps, ACR, Key Vault, App Configuration, Log Analytics, and Application Insights
 
-The rule is simple: a request reaches execution only after identity, policy, and audit context are present. Learning can recommend actions, but policy still decides whether action is allowed.
+The rule is simple: a request reaches execution only after a key resolves to tenant, actor, role, and scopes, then policy and audit context are present. Learning can recommend actions, but policy still decides whether action is allowed.
 
 ## Live API Contract
 
@@ -73,9 +73,11 @@ Legacy commands such as `ownerfi.application.submit` remain supported through th
 ```txt
 HTTP request
 -> API key / identity check
+-> tenant / actor / role / scope resolution
 -> rate limit
 -> normalize command envelope
 -> governance preflight
+-> required scope check
 -> tenant surface registry
 -> command handler
 -> audit log

@@ -42,6 +42,14 @@ That means OwnerFi can have its own workflow language, proof surface, data, and 
 
 "You fully own OwnerFi: brand, workflows, customers, and data. SentinelOS is the system layer underneath it so the company can scale without rebuilding the engine later."
 
+## Platform Ownership Boundary
+
+OwnerFi owns its brand, customer data, business workflows, and company-specific operating materials.
+
+Nunn Corporation retains SentinelOS: the command system, policy engine, workflow execution layer, audit framework, governance logic, deployment infrastructure, surface-plane model, and related platform improvements.
+
+Reference: [PLATFORM_CONTRACT_OWNERSHIP.md](./PLATFORM_CONTRACT_OWNERSHIP.md)
+
 ## Current Proof
 
 - live proof surface is deployed

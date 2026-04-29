@@ -32,6 +32,39 @@ Add the following under Settings → Secrets → Actions:
 
 `AZURE_CREDENTIALS` must have permission to push to `acrncdevsentinel` and update `ca-nc-dev-sentinel`. The Container App pulls from ACR with the user-assigned managed identity `id-nc-dev-sentinel`, which should keep `AcrPull` on the registry.
 
+## Role-Scoped API Keys
+
+Preferred production configuration is `SENTINEL_API_KEYS`, a JSON array of key records:
+
+```json
+[
+  {
+    "keyId": "key_ownerfi_operator_001",
+    "secret": "<secret-value>",
+    "tenant": "ownerfi",
+    "actor": "gregg@ownerfi.com",
+    "role": "operator",
+    "scopes": [
+      "application:submit",
+      "application:read",
+      "audit:read",
+      "receipt:read"
+    ],
+    "status": "active",
+    "createdAt": "2026-04-29T00:00:00.000Z",
+    "expiresAt": "2026-07-29T00:00:00.000Z"
+  }
+]
+```
+
+`SENTINEL_API_KEY` remains as a compatibility bridge, but the server still resolves it into a full principal before protected routes or commands can run.
+
+Every protected request must resolve:
+
+```txt
+tenant + actor + role + scopes
+```
+
 ## Deployment Flow
 1. Push to main
 2. GitHub Actions builds `acrncdevsentinel.azurecr.io/sentinelos:<commit-sha>`
@@ -72,6 +105,18 @@ Expected:
 {
   "status": "blocked",
   "error": "Unauthorized"
+}
+```
+
+POST /v1/command with an operator-scoped key trying to execute `deal.execute`
+
+Expected:
+
+```json
+{
+  "status": "blocked",
+  "error": "SCOPE_REQUIRED",
+  "requiredScope": "deal:execute"
 }
 ```
 

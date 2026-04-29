@@ -17,10 +17,31 @@ async function auditGovernanceBlock(envelope, result) {
   });
 }
 
+async function auditPolicyAllow(envelope, policy, policyContext) {
+  await auditLogger.log({
+    tenant: envelope.tenant || null,
+    command: 'policy.preflight',
+    payload: {
+      command: envelope.command || envelope.legacyCommand || 'unknown',
+      requiredScope: policyContext && policyContext.requiredScope ? policyContext.requiredScope : null
+    },
+    result: {
+      success: true,
+      decision: policy.decision,
+      state: policy.state,
+      riskLevel: policy.riskLevel,
+      approvalRequired: policy.approvalRequired,
+      receiptRequired: policy.receiptRequired
+    },
+    actor: policyContext && policyContext.actor ? policyContext.actor : undefined,
+    timestamp: new Date().toISOString()
+  });
+}
+
 async function dispatchCommand(body, context) {
   const envelope = normalizeCommandEnvelope(body);
 
-  const governance = governanceCheck(envelope);
+  const governance = governanceCheck(envelope, context && context.signals ? context.signals : {}, context ? context.principal : null);
   if (!governance.allowed) {
     const failure = {
       success: false,
@@ -32,6 +53,8 @@ async function dispatchCommand(body, context) {
     await auditGovernanceBlock(envelope, failure);
     return failure;
   }
+
+  await auditPolicyAllow(envelope, governance.policy, governance.policyContext);
 
   const surfaceRegistry = getSurfaceRegistry();
   const surface = surfaceRegistry[envelope.tenant];

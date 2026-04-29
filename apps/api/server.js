@@ -20,9 +20,10 @@ const {
   rejectRequest
 } = require('../sentinel/src/approval/approval');
 const { normalizeCommandEnvelope } = require('../sentinel/src/types/command');
+const { resolveApiKey } = require('../sentinel/src/security/keyRegistry');
+const { buildPolicyContext, evaluatePolicy } = require('../sentinel/src/governance/policyEngine');
 
 const PORT = process.env.PORT || 3000;
-const REQUIRED_API_KEY = process.env.SENTINEL_API_KEY;
 const PROOF_PAGE_PATH = path.join(__dirname, 'public', 'proof.html');
 const MISSION_CONTROL_PATH = path.join(__dirname, 'public', 'mission-control.html');
 const RATE_LIMIT_WINDOW_MS = 60 * 1000;
@@ -117,10 +118,39 @@ function buildReceipt(command) {
   };
 }
 
+function auditRoutePolicy(route, principal, policy, policyContext) {
+  auditLogger.log({
+    tenant: policyContext.tenant || (principal ? principal.tenant : null),
+    command: 'policy.route',
+    payload: {
+      route,
+      command: policyContext.command,
+      requiredScope: policyContext.requiredScope || null
+    },
+    result: {
+      success: policy.allowed,
+      decision: policy.decision,
+      state: policy.state,
+      riskLevel: policy.riskLevel,
+      reason: policy.reason || null,
+      approvalRequired: policy.approvalRequired,
+      receiptRequired: policy.receiptRequired
+    },
+    actor: policyContext.actor || (principal ? principal.actor : undefined),
+    timestamp: new Date().toISOString()
+  }).catch((error) => {
+    emitSecurityEvent('policy.audit_failed', {
+      route,
+      error: error instanceof Error ? error.message : 'Unknown policy audit failure'
+    });
+  });
+}
+
 function authenticateCommand(req, route, res) {
   const apiKey = req.headers['x-api-key'];
+  const resolved = resolveApiKey(apiKey);
 
-  if (!REQUIRED_API_KEY) {
+  if (!resolved.ok && resolved.error === 'KEY_REGISTRY_MISSING') {
     emitSecurityEvent('command.auth.misconfigured', {
       route,
       method: req.method
@@ -134,22 +164,69 @@ function authenticateCommand(req, route, res) {
     return false;
   }
 
-  if (!apiKey || apiKey !== REQUIRED_API_KEY) {
+  if (!resolved.ok) {
     emitSecurityEvent('command.auth.denied', {
       route,
       method: req.method,
-      reason: 'invalid_api_key'
+      reason: resolved.error,
+      keyId: resolved.keyId || null
     });
 
     sendJson(res, 401, {
       status: 'blocked',
-      error: 'Unauthorized'
+      error: 'Unauthorized',
+      reason: resolved.error
     });
 
     return false;
   }
 
-  return true;
+  return resolved.principal;
+}
+
+function authorizeRoute(req, res, route, options = {}) {
+  const principal = authenticateCommand(req, route, res);
+
+  if (!principal) {
+    return null;
+  }
+
+  const policyContext = buildPolicyContext({}, principal, {
+    tenant: options.tenant || principal.tenant,
+    command: options.command || route,
+    requiredScope: options.requiredScope,
+    signals: options.signals || {}
+  });
+  const policy = evaluatePolicy(policyContext);
+
+  auditRoutePolicy(route, principal, policy, policyContext);
+
+  if (!policy.allowed) {
+    emitSecurityEvent('policy.route.blocked', {
+      route,
+      method: req.method,
+      keyId: principal.keyId,
+      tenant: policyContext.tenant,
+      actor: policyContext.actor,
+      role: policyContext.role,
+      requiredScope: policyContext.requiredScope || null,
+      reason: policy.reason
+    });
+
+    sendJson(res, policy.statusCode || 403, {
+      status: 'blocked',
+      error: policy.reason,
+      policy
+    });
+
+    return null;
+  }
+
+  return {
+    principal,
+    policy,
+    policyContext
+  };
 }
 
 function getClientIp(req) {
@@ -221,11 +298,17 @@ function getSurfaceSummary() {
 }
 
 function sendAuditEvents(req, res, route, requestUrl) {
-  if (!authenticateCommand(req, route, res)) {
+  const tenant = requestUrl.searchParams.get('tenant');
+  const access = authorizeRoute(req, res, route, {
+    tenant: tenant || undefined,
+    command: 'audit.read',
+    requiredScope: 'audit:read'
+  });
+
+  if (!access) {
     return;
   }
 
-  const tenant = requestUrl.searchParams.get('tenant');
   const entries = tenant ? auditLogger.getByTenant(tenant) : auditLogger.getAll();
 
   return sendJson(res, 200, {
@@ -289,11 +372,17 @@ const server = http.createServer((req, res) => {
   }
 
   if (pathname.startsWith('/v1/audit/') && req.method === 'GET') {
-    if (!authenticateCommand(req, '/v1/audit/:applicationId', res)) {
+    const tenant = requestUrl.searchParams.get('tenant');
+    const access = authorizeRoute(req, res, '/v1/audit/:applicationId', {
+      tenant: tenant || undefined,
+      command: 'audit.read',
+      requiredScope: 'audit:read'
+    });
+
+    if (!access) {
       return;
     }
     const applicationId = decodeURIComponent(pathname.replace('/v1/audit/', '')).trim();
-    const tenant = requestUrl.searchParams.get('tenant');
     const entries = auditLogger.getByApplicationId(applicationId, tenant || undefined);
 
     return sendJson(res, 200, {
@@ -306,12 +395,18 @@ const server = http.createServer((req, res) => {
   }
 
   if (pathname.startsWith('/v1/receipts/') && req.method === 'GET') {
-    if (!authenticateCommand(req, '/v1/receipts/:receiptId', res)) {
+    const tenant = requestUrl.searchParams.get('tenant');
+    const access = authorizeRoute(req, res, '/v1/receipts/:receiptId', {
+      tenant: tenant || undefined,
+      command: 'receipt.read',
+      requiredScope: 'receipt:read'
+    });
+
+    if (!access) {
       return;
     }
 
     const receiptId = decodeURIComponent(pathname.replace('/v1/receipts/', '')).trim();
-    const tenant = requestUrl.searchParams.get('tenant');
 
     if (!receiptId) {
       return sendJson(res, 400, {
@@ -351,7 +446,9 @@ const server = http.createServer((req, res) => {
       return;
     }
 
-    if (!authenticateCommand(req, '/v1/command', res)) {
+    const principal = authenticateCommand(req, '/v1/command', res);
+
+    if (!principal) {
       return;
     }
 
@@ -368,9 +465,22 @@ const server = http.createServer((req, res) => {
         });
       }
 
-      const result = await dispatchCommand(body, {
+      const requestBody = {
+        ...body,
+        tenant: body.tenant || principal.tenant,
+        metadata: {
+          ...(body.metadata && typeof body.metadata === 'object' ? body.metadata : {}),
+          actor: principal.actor,
+          role: principal.role,
+          keyId: principal.keyId,
+          scopes: principal.scopes
+        }
+      };
+
+      const result = await dispatchCommand(requestBody, {
         buildReceipt: buildWorkflowReceipt,
-        emitSecurityEvent
+        emitSecurityEvent,
+        principal
       });
 
       if (!result.success) {
@@ -394,7 +504,12 @@ const server = http.createServer((req, res) => {
       return;
     }
 
-    if (!authenticateCommand(req, '/command', res)) {
+    const access = authorizeRoute(req, res, '/command', {
+      command: 'platform.admin',
+      requiredScope: 'platform:admin'
+    });
+
+    if (!access) {
       return;
     }
 
@@ -452,7 +567,12 @@ const server = http.createServer((req, res) => {
       return;
     }
 
-    if (!authenticateCommand(req, '/policy/evaluate', res)) {
+    const access = authorizeRoute(req, res, '/policy/evaluate', {
+      command: 'policy.evaluate',
+      requiredScope: 'policy:evaluate'
+    });
+
+    if (!access) {
       return;
     }
 
@@ -469,8 +589,18 @@ const server = http.createServer((req, res) => {
         });
       }
 
-      const envelope = normalizeCommandEnvelope(body);
-      const decision = governanceCheck(envelope);
+      const envelope = normalizeCommandEnvelope({
+        ...body,
+        tenant: body.tenant || access.principal.tenant,
+        metadata: {
+          ...(body.metadata && typeof body.metadata === 'object' ? body.metadata : {}),
+          actor: access.principal.actor,
+          role: access.principal.role,
+          keyId: access.principal.keyId,
+          scopes: access.principal.scopes
+        }
+      });
+      const decision = governanceCheck(envelope, {}, access.principal);
       const payload = {
         status: 'ok',
         decision: decision.allowed ? 'allowed' : 'blocked',
@@ -495,7 +625,7 @@ const server = http.createServer((req, res) => {
           error: payload.error || null,
           details: payload.details || null
         },
-        actor: envelope.metadata && envelope.metadata.actor ? envelope.metadata.actor : undefined,
+        actor: access.principal.actor,
         timestamp: new Date().toISOString()
       });
 
@@ -516,7 +646,12 @@ const server = http.createServer((req, res) => {
       return;
     }
 
-    if (!authenticateCommand(req, '/agent/run', res)) {
+    const access = authorizeRoute(req, res, '/agent/run', {
+      command: 'platform.admin',
+      requiredScope: 'platform:admin'
+    });
+
+    if (!access) {
       return;
     }
 
@@ -533,10 +668,7 @@ const server = http.createServer((req, res) => {
         });
       }
 
-      const actor =
-        body && body.metadata && typeof body.metadata.actor === 'string'
-          ? body.metadata.actor
-          : 'unknown';
+      const actor = access.principal.actor;
 
       await auditLogger.log({
         tenant: body && typeof body.tenant === 'string' ? body.tenant : null,
@@ -567,11 +699,17 @@ const server = http.createServer((req, res) => {
   }
 
   if (pathname === '/learning/suggestions' && req.method === 'GET') {
-    if (!authenticateCommand(req, '/learning/suggestions', res)) {
+    const tenant = requestUrl.searchParams.get('tenant');
+    const access = authorizeRoute(req, res, '/learning/suggestions', {
+      tenant: tenant || undefined,
+      command: 'learning.read',
+      requiredScope: 'learning:read'
+    });
+
+    if (!access) {
       return;
     }
 
-    const tenant = requestUrl.searchParams.get('tenant');
     const shouldCreateApproval = requestUrl.searchParams.get('createApproval') !== 'false';
     const learning = analyzeExecutionHistory(auditLogger.getAll(), { tenant });
     const analysis = evaluateAnalysis(learning, {
@@ -655,7 +793,12 @@ const server = http.createServer((req, res) => {
   }
 
   if (pathname === '/approvals' && req.method === 'GET') {
-    if (!authenticateCommand(req, '/approvals', res)) {
+    const access = authorizeRoute(req, res, '/approvals', {
+      command: 'approval.review',
+      requiredScope: 'approval:review'
+    });
+
+    if (!access) {
       return;
     }
 
@@ -683,7 +826,12 @@ const server = http.createServer((req, res) => {
       });
     }
 
-    if (!authenticateCommand(req, `/approvals/:id/${action}`, res)) {
+    const access = authorizeRoute(req, res, `/approvals/:id/${action}`, {
+      command: 'approval.review',
+      requiredScope: 'approval:review'
+    });
+
+    if (!access) {
       return;
     }
 
@@ -696,10 +844,7 @@ const server = http.createServer((req, res) => {
       }
 
       const metadata = {
-        actor:
-          body && body.metadata && typeof body.metadata.actor === 'string'
-            ? body.metadata.actor
-            : 'operator',
+        actor: access.principal.actor,
         reason: body && typeof body.reason === 'string' ? body.reason : undefined
       };
       const approval =
@@ -749,7 +894,12 @@ const server = http.createServer((req, res) => {
       return;
     }
 
-    if (!authenticateCommand(req, '/events/security', res)) {
+    const access = authorizeRoute(req, res, '/events/security', {
+      command: 'security.write',
+      requiredScope: 'security:write'
+    });
+
+    if (!access) {
       return;
     }
 
@@ -777,10 +927,7 @@ const server = http.createServer((req, res) => {
         typeof body.riskLevel === 'string' && ['low', 'medium', 'high'].includes(body.riskLevel)
           ? body.riskLevel
           : 'medium';
-      const actor =
-        body && body.metadata && typeof body.metadata.actor === 'string'
-          ? body.metadata.actor
-          : 'security-ingestion';
+      const actor = access.principal.actor;
 
       if (!allowedTypes.includes(eventType)) {
         return sendJson(res, 400, {
@@ -866,7 +1013,12 @@ const server = http.createServer((req, res) => {
       return;
     }
 
-    if (!authenticateCommand(req, '/learning/events', res)) {
+    const access = authorizeRoute(req, res, '/learning/events', {
+      command: 'learning.write',
+      requiredScope: 'learning:write'
+    });
+
+    if (!access) {
       return;
     }
 
@@ -884,10 +1036,7 @@ const server = http.createServer((req, res) => {
       }
 
       const eventType = typeof body.event === 'string' && body.event.trim() ? body.event.trim() : '';
-      const actor =
-        body && body.metadata && typeof body.metadata.actor === 'string'
-          ? body.metadata.actor
-          : 'system';
+      const actor = access.principal.actor;
 
       if (!eventType) {
         return sendJson(res, 400, {
