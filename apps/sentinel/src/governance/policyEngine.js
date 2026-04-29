@@ -6,6 +6,7 @@ const commandScopes = {
   'deal.execute': 'deal:execute',
   'audit.read': 'audit:read',
   'receipt.read': 'receipt:read',
+  'approval.read': 'approval:read',
   'approval.review': 'approval:review',
   'tenant.admin': 'tenant:admin',
   'platform.admin': 'platform:admin',
@@ -90,6 +91,7 @@ function evaluatePolicy(input = {}, signals = {}) {
         signals: input.signals || signals
       }
     : buildPolicyContext(input, null, { signals });
+  ctx.requiredScope = ctx.requiredScope || getRequiredScope(ctx.command);
   const missing = [];
 
   if (!hasText(ctx.tenant)) {

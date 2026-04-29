@@ -16,6 +16,7 @@ const { evaluateDecision } = require('../sentinel/src/decision/decision');
 const {
   approveRequest,
   createApprovalRequest,
+  getApproval,
   getPendingApprovals,
   rejectRequest
 } = require('../sentinel/src/approval/approval');
@@ -236,6 +237,35 @@ function authorizeRoute(req, res, route, options = {}) {
     policy,
     policyContext
   };
+}
+
+function getApprovalTenant(principal, requestUrl) {
+  if (principal && principal.tenant === 'platform') {
+    return requestUrl.searchParams.get('tenant') || null;
+  }
+
+  return principal ? principal.tenant : null;
+}
+
+async function auditApprovalViewed(approval, principal, route) {
+  await auditLogger.log({
+    tenant: approval && approval.context && approval.context.tenant ? approval.context.tenant : null,
+    command: 'approval.viewed',
+    payload: {
+      route,
+      approvalId: approval ? approval.id : null
+    },
+    result: {
+      success: true,
+      event: 'policy.decision',
+      approvalId: approval ? approval.id : null,
+      status: approval ? approval.status : null,
+      decision: approval && approval.decision ? approval.decision.decision : null,
+      reason: approval && approval.decision ? approval.decision.reason : null
+    },
+    actor: principal ? principal.actor : undefined,
+    timestamp: new Date().toISOString()
+  });
 }
 
 function getClientIp(req) {
@@ -921,23 +951,87 @@ const server = http.createServer((req, res) => {
 
   if (pathname === '/approvals' && req.method === 'GET') {
     const access = authorizeRoute(req, res, '/approvals', {
-      command: 'approval.review',
-      requiredScope: 'approval:review'
+      command: 'approval.read',
+      requiredScope: 'approval:read'
     });
 
     if (!access) {
       return;
     }
 
-    return getPendingApprovals()
-      .then((approvals) => sendJson(res, 200, {
-        status: 'ok',
-        count: approvals.length,
-        approvals
-      }))
+    const tenant = getApprovalTenant(access.principal, requestUrl);
+
+    return getPendingApprovals(tenant)
+      .then(async (approvals) => {
+        await auditLogger.log({
+          tenant,
+          command: 'approval.viewed',
+          payload: {
+            route: '/approvals',
+            status: 'pending'
+          },
+          result: {
+            success: true,
+            event: 'policy.decision',
+            count: approvals.length
+          },
+          actor: access.principal.actor,
+          timestamp: new Date().toISOString()
+        });
+
+        return sendJson(res, 200, {
+          status: 'ok',
+          count: approvals.length,
+          approvals
+        });
+      })
       .catch((error) => sendJson(res, 500, {
         status: 'error',
         error: error instanceof Error ? error.message : 'Unable to list approvals'
+      }));
+  }
+
+  if (pathname.startsWith('/approvals/') && req.method === 'GET') {
+    const approvalPath = pathname.split('/').filter(Boolean);
+    const id = approvalPath[1];
+
+    if (!id || approvalPath.length !== 2) {
+      return sendJson(res, 404, {
+        status: 'error',
+        error: 'Not Found'
+      });
+    }
+
+    const access = authorizeRoute(req, res, '/approvals/:id', {
+      command: 'approval.read',
+      requiredScope: 'approval:read'
+    });
+
+    if (!access) {
+      return;
+    }
+
+    const tenant = getApprovalTenant(access.principal, requestUrl);
+
+    return getApproval(id, tenant)
+      .then(async (approval) => {
+        if (!approval) {
+          return sendJson(res, 404, {
+            status: 'error',
+            error: 'Approval not found'
+          });
+        }
+
+        await auditApprovalViewed(approval, access.principal, '/approvals/:id');
+
+        return sendJson(res, 200, {
+          status: 'ok',
+          approval
+        });
+      })
+      .catch((error) => sendJson(res, 500, {
+        status: 'error',
+        error: error instanceof Error ? error.message : 'Unable to read approval'
       }));
   }
 
@@ -974,8 +1068,11 @@ const server = http.createServer((req, res) => {
         actor: access.principal.actor,
         reason: body && typeof body.reason === 'string' ? body.reason : undefined
       };
+      const tenant = getApprovalTenant(access.principal, requestUrl);
       const approval =
-        action === 'approve' ? await approveRequest(id, metadata) : await rejectRequest(id, metadata);
+        action === 'approve'
+          ? await approveRequest(id, metadata, tenant)
+          : await rejectRequest(id, metadata, tenant);
 
       if (!approval) {
         return sendJson(res, 404, {

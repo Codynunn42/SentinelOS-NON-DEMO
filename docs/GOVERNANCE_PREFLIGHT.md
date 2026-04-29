@@ -41,6 +41,7 @@ application:read
 deal:execute
 audit:read
 receipt:read
+approval:read
 approval:review
 tenant:admin
 platform:admin
@@ -59,6 +60,9 @@ policy:evaluate
 - high-risk identity signals, such as impossible travel, block execution and require human review.
 - protected routes require the matching scope before reading, writing, approving, or executing.
 - caller-supplied metadata cannot elevate the actor or role resolved from the API key.
+- approval reads require `approval:read`.
+- approval resolution requires `approval:review`.
+- approval list and lookup routes are tenant-filtered.
 
 ## Audit Behavior
 Blocked commands are audited with:
@@ -68,6 +72,8 @@ Blocked commands are audited with:
 - `result.details`
 
 Allowed policy preflight is also audited before handler execution.
+
+Approval reads are audited with `command = approval.viewed` and `result.event = policy.decision`.
 
 Each audit entry receives:
 

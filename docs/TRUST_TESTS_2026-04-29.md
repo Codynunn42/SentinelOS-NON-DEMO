@@ -119,3 +119,24 @@ audit entry includes prevHash
 Conclusion:
 
 Receipts are queryable, and the audit stream is tamper-evident at the application layer.
+
+## Test 6: Approval Read Versus Review Access
+
+Check:
+
+```txt
+node scripts/check-approval-access.js
+```
+
+Result:
+
+```txt
+operator key + approval:read: GET /approvals returns 200
+operator key without approval:review: POST /approvals/:id/approve returns SCOPE_REQUIRED
+approver key + approval:review: POST /approvals/:id/approve returns 200 in local non-demo smoke
+approval reads emit approval.viewed audit entries
+```
+
+Conclusion:
+
+Operators can review the approval queue without gaining authority to resolve protected decisions.

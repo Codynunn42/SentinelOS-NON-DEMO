@@ -72,4 +72,14 @@ const missingScope = evaluatePolicy({
 assert.strictEqual(missingScope.allowed, false);
 assert.strictEqual(missingScope.reason, 'SCOPE_REQUIRED');
 
+const approvalRead = evaluatePolicy({
+  tenant: 'ownerfi',
+  command: 'approval.read',
+  actor: 'operator@example.com',
+  role: 'operator',
+  scopes: ['approval:read']
+});
+
+assert.strictEqual(approvalRead.allowed, true);
+
 console.log('Policy engine check passed');

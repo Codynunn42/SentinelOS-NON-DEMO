@@ -53,31 +53,56 @@ async function saveApproval(request) {
   return result && result.rows && result.rows[0] ? fromRow(result.rows[0]) : null;
 }
 
-async function getApproval(id) {
-  const result = await query('SELECT * FROM approvals WHERE id = $1', [id]);
+async function getApproval(id, tenantId = null) {
+  const result = tenantId
+    ? await query('SELECT * FROM approvals WHERE id = $1 AND tenant_id = $2', [id, tenantId])
+    : await query('SELECT * FROM approvals WHERE id = $1', [id]);
+
   return result && result.rows && result.rows[0] ? fromRow(result.rows[0]) : null;
 }
 
-async function listApprovals(status) {
-  const result = status
-    ? await query('SELECT * FROM approvals WHERE status = $1 ORDER BY created_at DESC', [status])
-    : await query('SELECT * FROM approvals ORDER BY created_at DESC', []);
+async function listApprovals(status, tenantId = null) {
+  let result = null;
+
+  if (status && tenantId) {
+    result = await query(
+      'SELECT * FROM approvals WHERE status = $1 AND tenant_id = $2 ORDER BY created_at DESC LIMIT 50',
+      [status, tenantId]
+    );
+  } else if (status) {
+    result = await query('SELECT * FROM approvals WHERE status = $1 ORDER BY created_at DESC LIMIT 50', [status]);
+  } else if (tenantId) {
+    result = await query('SELECT * FROM approvals WHERE tenant_id = $1 ORDER BY created_at DESC LIMIT 50', [tenantId]);
+  } else {
+    result = await query('SELECT * FROM approvals ORDER BY created_at DESC LIMIT 50', []);
+  }
 
   return result && result.rows ? result.rows.map(fromRow) : null;
 }
 
-async function updateApproval(id, status, metadata = {}) {
+async function updateApproval(id, status, metadata = {}, tenantId = null) {
   const resolvedAt = new Date().toISOString();
-  const result = await query(
-    `UPDATE approvals
-     SET status = $2,
-         resolution = $3::jsonb,
-         updated_at = $4,
-         resolved_at = $4
-     WHERE id = $1
-     RETURNING *`,
-    [id, status, JSON.stringify(metadata || {}), resolvedAt]
-  );
+  const result = tenantId
+    ? await query(
+        `UPDATE approvals
+         SET status = $2,
+             resolution = $3::jsonb,
+             updated_at = $4,
+             resolved_at = $4
+         WHERE id = $1 AND tenant_id = $5
+         RETURNING *`,
+        [id, status, JSON.stringify(metadata || {}), resolvedAt, tenantId]
+      )
+    : await query(
+        `UPDATE approvals
+         SET status = $2,
+             resolution = $3::jsonb,
+             updated_at = $4,
+             resolved_at = $4
+         WHERE id = $1
+         RETURNING *`,
+        [id, status, JSON.stringify(metadata || {}), resolvedAt]
+      );
 
   return result && result.rows && result.rows[0] ? fromRow(result.rows[0]) : null;
 }

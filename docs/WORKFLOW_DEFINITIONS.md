@@ -50,6 +50,7 @@ application.evaluate  -> application:evaluate
 deal.execute          -> deal:execute
 audit.read            -> audit:read
 receipt.read          -> receipt:read
+approval.read         -> approval:read
 approval.review       -> approval:review
 ```
 
