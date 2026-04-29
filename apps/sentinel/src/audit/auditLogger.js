@@ -1,6 +1,38 @@
 const { query, getDatabaseStatus } = require('../db/client');
+const crypto = require('crypto');
 
 const auditLog = [];
+let lastAuditHash = null;
+
+function stableStringify(value) {
+  if (Array.isArray(value)) {
+    return `[${value.map(stableStringify).join(',')}]`;
+  }
+
+  if (value && typeof value === 'object') {
+    return `{${Object.keys(value)
+      .sort()
+      .map((key) => `${JSON.stringify(key)}:${stableStringify(value[key])}`)
+      .join(',')}}`;
+  }
+
+  return JSON.stringify(value);
+}
+
+function hashAuditEntry(entry, prevHash) {
+  return crypto
+    .createHash('sha256')
+    .update(stableStringify({
+      tenant: entry.tenant || null,
+      command: entry.command,
+      payload: entry.payload || {},
+      result: entry.result || {},
+      actor: entry.actor || null,
+      timestamp: entry.timestamp || null,
+      prevHash: prevHash || null
+    }))
+    .digest('hex');
+}
 
 function fromAuditRow(row) {
   if (!row) {
@@ -39,18 +71,35 @@ function getReceipt(entry) {
 
 const auditLogger = {
   async log(entry) {
-    auditLog.push(entry);
+    const timestampedEntry = {
+      ...entry,
+      timestamp: entry.timestamp || new Date().toISOString()
+    };
+    const prevHash = lastAuditHash;
+    const auditHash = hashAuditEntry(timestampedEntry, prevHash);
+    const hashedEntry = {
+      ...timestampedEntry,
+      prevHash,
+      auditHash
+    };
+    lastAuditHash = auditHash;
+
+    auditLog.push(hashedEntry);
 
     try {
       await query(
         `INSERT INTO audit_logs (tenant_id, command, payload, result, actor)
          VALUES ($1, $2, $3::jsonb, $4::jsonb, $5)`,
         [
-          entry.tenant || null,
-          entry.command,
-          JSON.stringify(entry.payload || {}),
-          JSON.stringify(entry.result || {}),
-          entry.actor || null
+          hashedEntry.tenant || null,
+          hashedEntry.command,
+          JSON.stringify(hashedEntry.payload || {}),
+          JSON.stringify({
+            ...(hashedEntry.result || {}),
+            prevHash: hashedEntry.prevHash,
+            auditHash: hashedEntry.auditHash
+          }),
+          hashedEntry.actor || null
         ]
       );
     } catch (error) {
@@ -66,6 +115,8 @@ const auditLogger = {
         timestamp: new Date().toISOString()
       });
     }
+
+    return hashedEntry;
   },
 
   getAll() {

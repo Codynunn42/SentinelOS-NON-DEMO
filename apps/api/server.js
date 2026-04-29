@@ -29,6 +29,7 @@ const MISSION_CONTROL_PATH = path.join(__dirname, 'public', 'mission-control.htm
 const RATE_LIMIT_WINDOW_MS = 60 * 1000;
 const RATE_LIMIT_MAX_REQUESTS = 30;
 const commandRateLimits = new Map();
+const commandIdempotencyCache = new Map();
 
 function sendJson(res, statusCode, payload) {
   res.writeHead(statusCode, { 'Content-Type': 'application/json' });
@@ -81,6 +82,12 @@ function readJsonBody(req, callback) {
   });
 }
 
+function getAuditChainHead() {
+  const entries = auditLogger.getAll();
+  const latest = entries.length ? entries[entries.length - 1] : null;
+  return latest && latest.auditHash ? latest.auditHash : null;
+}
+
 function buildWorkflowReceipt(command, entity, outcome, tenantId = 'ownerfi') {
   return {
     receiptId: `rcpt_${crypto.randomUUID()}`,
@@ -92,6 +99,7 @@ function buildWorkflowReceipt(command, entity, outcome, tenantId = 'ownerfi') {
     verified: true,
     entity,
     outcome,
+    prevHash: getAuditChainHead(),
     timestamp: new Date().toISOString()
   };
 }
@@ -110,6 +118,7 @@ function buildReceipt(command) {
     target: command.target,
     status: 'executed',
     verified: true,
+    prevHash: getAuditChainHead(),
     timestamp: now,
     outcome: {
       message: `Operation ${command.op} accepted for target ${command.target}`,
@@ -238,10 +247,18 @@ function getClientIp(req) {
   return req.socket && req.socket.remoteAddress ? req.socket.remoteAddress : 'unknown';
 }
 
-function enforceRateLimit(req, route, res) {
+function getRateLimitKey(req, route, principal) {
+  if (principal) {
+    return `${route}:${principal.tenant}:${principal.keyId}`;
+  }
+
+  return `${route}:ip:${getClientIp(req)}`;
+}
+
+function enforceRateLimit(req, route, res, principal) {
   const now = Date.now();
   const clientIp = getClientIp(req);
-  const bucketKey = `${route}:${clientIp}`;
+  const bucketKey = getRateLimitKey(req, route, principal);
   const current = commandRateLimits.get(bucketKey);
 
   if (!current || now > current.resetAt) {
@@ -259,6 +276,8 @@ function enforceRateLimit(req, route, res) {
       route,
       method: req.method,
       clientIp,
+      tenant: principal ? principal.tenant : null,
+      keyId: principal ? principal.keyId : null,
       windowMs: RATE_LIMIT_WINDOW_MS,
       maxRequests: RATE_LIMIT_MAX_REQUESTS
     });
@@ -277,6 +296,93 @@ function enforceRateLimit(req, route, res) {
   }
 
   return true;
+}
+
+function stableStringify(value) {
+  if (Array.isArray(value)) {
+    return `[${value.map(stableStringify).join(',')}]`;
+  }
+
+  if (value && typeof value === 'object') {
+    return `{${Object.keys(value)
+      .sort()
+      .map((key) => `${JSON.stringify(key)}:${stableStringify(value[key])}`)
+      .join(',')}}`;
+  }
+
+  return JSON.stringify(value);
+}
+
+function getIdempotencyKey(envelope, principal) {
+  const rawKey =
+    envelope.commandId ||
+    (envelope.metadata && typeof envelope.metadata.idempotencyKey === 'string'
+      ? envelope.metadata.idempotencyKey
+      : null);
+
+  if (rawKey) {
+    return `${envelope.tenant}:${envelope.command}:${principal.keyId}:${rawKey}`;
+  }
+
+  return null;
+}
+
+function getPayloadHash(envelope) {
+  return crypto
+    .createHash('sha256')
+    .update(stableStringify(envelope.payload || {}))
+    .digest('hex');
+}
+
+function checkIdempotency(envelope, principal) {
+  const idempotencyKey = getIdempotencyKey(envelope, principal);
+
+  if (!idempotencyKey) {
+    return {
+      duplicate: false,
+      idempotencyKey: null,
+      payloadHash: getPayloadHash(envelope)
+    };
+  }
+
+  const payloadHash = getPayloadHash(envelope);
+  const existing = commandIdempotencyCache.get(idempotencyKey);
+
+  if (existing && existing.payloadHash === payloadHash) {
+    return {
+      duplicate: true,
+      idempotencyKey,
+      payloadHash,
+      existing
+    };
+  }
+
+  if (existing && existing.payloadHash !== payloadHash) {
+    return {
+      conflict: true,
+      idempotencyKey,
+      payloadHash,
+      existing
+    };
+  }
+
+  return {
+    duplicate: false,
+    idempotencyKey,
+    payloadHash
+  };
+}
+
+function rememberIdempotency(check, result) {
+  if (!check.idempotencyKey || !result.success) {
+    return;
+  }
+
+  commandIdempotencyCache.set(check.idempotencyKey, {
+    payloadHash: check.payloadHash,
+    result,
+    timestamp: new Date().toISOString()
+  });
 }
 
 function resolvePipelineStage(decision) {
@@ -442,13 +548,13 @@ const server = http.createServer((req, res) => {
   }
 
   if (pathname === '/v1/command' && req.method === 'POST') {
-    if (!enforceRateLimit(req, '/v1/command', res)) {
-      return;
-    }
-
     const principal = authenticateCommand(req, '/v1/command', res);
 
     if (!principal) {
+      return;
+    }
+
+    if (!enforceRateLimit(req, '/v1/command', res, principal)) {
       return;
     }
 
@@ -476,12 +582,33 @@ const server = http.createServer((req, res) => {
           scopes: principal.scopes
         }
       };
+      const envelope = normalizeCommandEnvelope(requestBody);
+      const idempotency = checkIdempotency(envelope, principal);
+
+      if (idempotency.conflict) {
+        return sendJson(res, 409, {
+          status: 'blocked',
+          error: 'IDEMPOTENCY_CONFLICT',
+          idempotencyKey: idempotency.idempotencyKey
+        });
+      }
+
+      if (idempotency.duplicate) {
+        return sendJson(res, idempotency.existing.result.statusCode || 200, {
+          status: idempotency.existing.result.success ? 'executed' : 'blocked',
+          idempotentReplay: true,
+          idempotencyKey: idempotency.idempotencyKey,
+          ...(idempotency.existing.result.data || {}),
+          ...(idempotency.existing.result.error ? { error: idempotency.existing.result.error } : {})
+        });
+      }
 
       const result = await dispatchCommand(requestBody, {
         buildReceipt: buildWorkflowReceipt,
         emitSecurityEvent,
         principal
       });
+      rememberIdempotency(idempotency, result);
 
       if (!result.success) {
         return sendJson(res, result.statusCode || 400, {
@@ -500,16 +627,16 @@ const server = http.createServer((req, res) => {
   }
 
   if (pathname === '/command' && req.method === 'POST') {
-    if (!enforceRateLimit(req, '/command', res)) {
-      return;
-    }
-
     const access = authorizeRoute(req, res, '/command', {
       command: 'platform.admin',
       requiredScope: 'platform:admin'
     });
 
     if (!access) {
+      return;
+    }
+
+    if (!enforceRateLimit(req, '/command', res, access.principal)) {
       return;
     }
 
@@ -563,16 +690,16 @@ const server = http.createServer((req, res) => {
   }
 
   if (pathname === '/policy/evaluate' && req.method === 'POST') {
-    if (!enforceRateLimit(req, '/policy/evaluate', res)) {
-      return;
-    }
-
     const access = authorizeRoute(req, res, '/policy/evaluate', {
       command: 'policy.evaluate',
       requiredScope: 'policy:evaluate'
     });
 
     if (!access) {
+      return;
+    }
+
+    if (!enforceRateLimit(req, '/policy/evaluate', res, access.principal)) {
       return;
     }
 
@@ -642,16 +769,16 @@ const server = http.createServer((req, res) => {
   }
 
   if (pathname === '/agent/run' && req.method === 'POST') {
-    if (!enforceRateLimit(req, '/agent/run', res)) {
-      return;
-    }
-
     const access = authorizeRoute(req, res, '/agent/run', {
       command: 'platform.admin',
       requiredScope: 'platform:admin'
     });
 
     if (!access) {
+      return;
+    }
+
+    if (!enforceRateLimit(req, '/agent/run', res, access.principal)) {
       return;
     }
 
@@ -890,16 +1017,16 @@ const server = http.createServer((req, res) => {
   }
 
   if (pathname === '/events/security' && req.method === 'POST') {
-    if (!enforceRateLimit(req, '/events/security', res)) {
-      return;
-    }
-
     const access = authorizeRoute(req, res, '/events/security', {
       command: 'security.write',
       requiredScope: 'security:write'
     });
 
     if (!access) {
+      return;
+    }
+
+    if (!enforceRateLimit(req, '/events/security', res, access.principal)) {
       return;
     }
 
@@ -1009,16 +1136,16 @@ const server = http.createServer((req, res) => {
   }
 
   if (pathname === '/learning/events' && req.method === 'POST') {
-    if (!enforceRateLimit(req, '/learning/events', res)) {
-      return;
-    }
-
     const access = authorizeRoute(req, res, '/learning/events', {
       command: 'learning.write',
       requiredScope: 'learning:write'
     });
 
     if (!access) {
+      return;
+    }
+
+    if (!enforceRateLimit(req, '/learning/events', res, access.principal)) {
       return;
     }
 
@@ -1079,13 +1206,19 @@ const server = http.createServer((req, res) => {
   });
 });
 
-ensureSchema()
-  .then(() => {
-    server.listen(PORT, () => {
-      console.log(`Sentinel API running on port ${PORT}`);
+if (require.main === module) {
+  ensureSchema()
+    .then(() => {
+      server.listen(PORT, () => {
+        console.log(`Sentinel API running on port ${PORT}`);
+      });
+    })
+    .catch((error) => {
+      console.error(`Database bootstrap failed: ${error.message}`);
+      process.exit(1);
     });
-  })
-  .catch((error) => {
-    console.error(`Database bootstrap failed: ${error.message}`);
-    process.exit(1);
-  });
+}
+
+module.exports = {
+  server
+};
