@@ -15,6 +15,8 @@
       --accent: #7ee787;
       --warn: #f2cc60;
       --danger: #ff7b72;
+      --danger-soft: rgba(255, 123, 114, 0.12);
+      --warn-soft: rgba(242, 204, 96, 0.12);
     }
 
     * {
@@ -86,6 +88,72 @@
       padding: 18px;
       margin-bottom: 18px;
       box-shadow: 0 18px 40px rgba(0, 0, 0, 0.24);
+    }
+
+    .decision-panel {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(280px, 0.9fr);
+      gap: 14px;
+      align-items: stretch;
+    }
+
+    .decision-card {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 14px;
+      background: rgba(31, 41, 55, 0.55);
+    }
+
+    .decision-card.danger {
+      background: var(--danger-soft);
+      border-color: rgba(255, 123, 114, 0.5);
+    }
+
+    .decision-card.warn {
+      background: var(--warn-soft);
+      border-color: rgba(242, 204, 96, 0.5);
+    }
+
+    .decision-title {
+      margin-bottom: 12px;
+      font-size: 13px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .decision-card.danger .decision-title {
+      color: var(--danger);
+    }
+
+    .decision-card.warn .decision-title {
+      color: var(--warn);
+    }
+
+    .kv {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 7px 0;
+      border-top: 1px solid rgba(139, 155, 176, 0.14);
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .kv b {
+      color: var(--text);
+      text-align: right;
+      overflow-wrap: anywhere;
+    }
+
+    .badge.pending {
+      color: var(--warn);
+      border-color: rgba(242, 204, 96, 0.45);
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.48;
     }
 
     .grid {
@@ -283,6 +351,20 @@
     .good { color: var(--accent); }
     .warn { color: var(--warn); }
     .bad { color: var(--danger); }
+
+    @media (max-width: 760px) {
+      .decision-panel {
+        grid-template-columns: 1fr;
+      }
+
+      .kv {
+        display: grid;
+      }
+
+      .kv b {
+        text-align: left;
+      }
+    }
   </style>
 </head>
 <body>
@@ -301,6 +383,29 @@
         <span class="badge">Mode: <strong id="modeBadge">Demo</strong></span>
       </div>
     </div>
+
+    <section class="panel">
+      <div class="decision-panel">
+        <div class="decision-card danger">
+          <div class="decision-title">Execution Blocked</div>
+          <div class="kv">State <b>drift</b></div>
+          <div class="kv">Risk <b>high</b></div>
+          <div class="kv">Decision <b>block</b></div>
+          <div class="kv">Reason <b>impossible travel</b></div>
+          <div class="kv">Actor <b>admin@ownerfi.test</b></div>
+        </div>
+        <div class="decision-card warn">
+          <div class="decision-title">Human Review Required</div>
+          <div class="kv">Approval ID <b id="approvalId">approval_8c1941da-cc90-4c54-801f-aa64f56c8802</b></div>
+          <div class="kv">Status <b><span class="pill blocked">Pending</span></b></div>
+          <div class="actions">
+            <button disabled title="Disabled in demo">Approve</button>
+            <button class="secondary" disabled title="Disabled in demo">Reject</button>
+          </div>
+          <p class="status">Actions disabled in demo. Boundary preserved.</p>
+        </div>
+      </div>
+    </section>
 
     <section class="panel">
       <div class="grid">
@@ -368,6 +473,23 @@
       </div>
 
       <div id="status" class="status">Waiting to run proof flow.</div>
+    </section>
+
+    <section class="panel">
+      <div class="result-card">
+        <span>Receipt Lookup</span>
+        <div class="grid">
+          <div>
+            <label for="receiptInput">Receipt ID</label>
+            <input id="receiptInput" placeholder="rcpt_...">
+          </div>
+        </div>
+        <div class="actions">
+          <button class="secondary" onclick="lookupReceipt()">Lookup Receipt</button>
+        </div>
+        <p class="status">Uses the API key field above. No unauthenticated receipt access.</p>
+        <pre id="receiptOut">No receipt loaded.</pre>
+      </div>
     </section>
 
     <section class="panel">
@@ -514,6 +636,33 @@
       });
 
       return response.json();
+    }
+
+    async function lookupReceipt() {
+      const receiptId = document.getElementById('receiptInput').value.trim();
+      const output = document.getElementById('receiptOut');
+
+      if (!receiptId) {
+        output.textContent = 'Enter a receiptId first.';
+        return;
+      }
+
+      if (!getApiKey()) {
+        output.textContent = 'API key required. Receipt lookup stays behind the protected boundary.';
+        return;
+      }
+
+      try {
+        const response = await fetch(`/v1/receipts/${encodeURIComponent(receiptId)}?tenant=${encodeURIComponent(getTenant())}`, {
+          headers: {
+            'x-api-key': getApiKey()
+          }
+        });
+        const data = await response.json();
+        output.textContent = JSON.stringify(data, null, 2);
+      } catch (error) {
+        output.textContent = `Receipt lookup failed: ${error.message}`;
+      }
     }
 
     function shortId(prefix) {

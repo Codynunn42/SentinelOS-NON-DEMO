@@ -148,3 +148,9 @@ Demo artifact:
 ```txt
 docs/GOVERNED_BLOCK_DEMO_MOMENT.md
 ```
+
+UI status:
+
+```txt
+/proof now shows the decision card, pending approval panel, disabled approve/reject actions, and protected receipt lookup.
+```

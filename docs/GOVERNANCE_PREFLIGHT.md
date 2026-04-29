@@ -8,12 +8,15 @@ Governance preflight is the required control layer that evaluates every command 
 ## Command Flow
 `request -> governance preflight -> handler -> audit`
 
+The preflight layer uses `evaluatePolicy` in `apps/sentinel/src/governance/policyEngine.js` so policy outcomes are shaped consistently before handler execution.
+
 ## Current Rules
 - `tenant` is required.
 - `command` is required.
 - `metadata.actor` is required.
 - `metadata.role` is required.
 - `deal.execute` requires `metadata.role` to be `approver`.
+- high-risk identity signals, such as impossible travel, block execution and require human review.
 
 ## Audit Behavior
 Blocked commands are audited with:

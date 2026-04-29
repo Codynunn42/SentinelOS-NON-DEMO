@@ -264,6 +264,8 @@ The current audit routes are:
 - `GET /v1/audit/:applicationId`
 - `GET /v1/receipts/:receiptId`
 
+Receipt lookup remains protected by `SENTINEL_API_KEY`.
+
 Both routes are protected by `x-api-key` using `SENTINEL_API_KEY`.
 
 ## Current Governance Rule

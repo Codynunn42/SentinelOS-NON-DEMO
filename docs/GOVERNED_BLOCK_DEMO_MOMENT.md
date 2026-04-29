@@ -67,7 +67,9 @@ The important behavior is:
 
 ## What To Show
 
-If asked, show the pending approval and the decision fields:
+Open `/proof`. The decision card and approval panel show the live governed-block moment without requiring any action.
+
+Show the decision fields:
 
 - `state: drift`
 - `riskLevel: high`
@@ -75,7 +77,22 @@ If asked, show the pending approval and the decision fields:
 - `executionMode: blocked`
 - `approvalRequired: true`
 
+Then show:
+
+- pending approval ID
+- disabled approve/reject buttons
+- receipt lookup panel
+
 Do not resolve the approval during the demo.
+
+## Screen Flow
+
+1. Open `/proof`.
+2. Point to `Execution Blocked`.
+3. Say the demo line.
+4. Point to `Human Review Required`.
+5. Point to the disabled buttons.
+6. Stop.
 
 ## What Not To Do
 
