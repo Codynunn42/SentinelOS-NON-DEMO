@@ -4,18 +4,18 @@
 This guide walks through completing Azure deployment for the Sentinel API.
 
 ## Current Live Deployment
-As of 2026-04-28:
+As of 2026-04-29:
 
 - Container App: `ca-nc-dev-sentinel`
-- active revision: `ca-nc-dev-sentinel--decision-signing-v1`
-- image: `acrncdevsentinel.azurecr.io/sentinelos:latest`
+- active revision: `ca-nc-dev-sentinel--approval-access-682b4cb`
+- image: `acrncdevsentinel.azurecr.io/sentinelos:approval-access-682b4cb`
 - live URL: `https://ca-nc-dev-sentinel.calmhill-388e1d39.eastus2.azurecontainerapps.io/`
 - live proof URL: `https://ca-nc-dev-sentinel.calmhill-388e1d39.eastus2.azurecontainerapps.io/proof`
 - health URL: `https://ca-nc-dev-sentinel.calmhill-388e1d39.eastus2.azurecontainerapps.io/health`
 - ingress target port: `80`
 - container port: `80`
 - health probes: HTTP `/health` on port `80`
-- traffic: 100 percent to `ca-nc-dev-sentinel--decision-signing-v1`
+- traffic: 100 percent to `ca-nc-dev-sentinel--approval-access-682b4cb`
 - Log Analytics workspace: `log-nc-dev-sentinel`
 
 Do not use `ca-sentinelos-proof` as the current shareable proof target. It appears to be an older health-only host and is not the current release path.
