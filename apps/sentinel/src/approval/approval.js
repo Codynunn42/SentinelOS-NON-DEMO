@@ -33,8 +33,8 @@ async function createApprovalRequest(decisionOutput, context = {}) {
   return persistOrFallback(request);
 }
 
-async function approveRequest(id, metadata = {}) {
-  const stored = await updateApproval(id, 'approved', metadata);
+async function approveRequest(id, metadata = {}, tenant = null) {
+  const stored = await updateApproval(id, 'approved', metadata, tenant);
   if (stored) {
     pendingApprovals.set(id, stored);
     return stored;
@@ -42,6 +42,10 @@ async function approveRequest(id, metadata = {}) {
 
   const request = pendingApprovals.get(id);
   if (!request) {
+    return null;
+  }
+
+  if (tenant && (!request.context || request.context.tenant !== tenant)) {
     return null;
   }
 
@@ -53,8 +57,8 @@ async function approveRequest(id, metadata = {}) {
   return request;
 }
 
-async function rejectRequest(id, metadata = {}) {
-  const stored = await updateApproval(id, 'rejected', metadata);
+async function rejectRequest(id, metadata = {}, tenant = null) {
+  const stored = await updateApproval(id, 'rejected', metadata, tenant);
   if (stored) {
     pendingApprovals.set(id, stored);
     return stored;
@@ -62,6 +66,10 @@ async function rejectRequest(id, metadata = {}) {
 
   const request = pendingApprovals.get(id);
   if (!request) {
+    return null;
+  }
+
+  if (tenant && (!request.context || request.context.tenant !== tenant)) {
     return null;
   }
 
@@ -73,24 +81,37 @@ async function rejectRequest(id, metadata = {}) {
   return request;
 }
 
-async function getPendingApprovals() {
-  const stored = await listApprovals('pending');
+async function getPendingApprovals(tenant = null) {
+  const stored = await listApprovals('pending', tenant);
   if (stored) {
     stored.forEach((request) => pendingApprovals.set(request.id, request));
     return stored;
   }
 
-  return Array.from(pendingApprovals.values()).filter((request) => request.status === 'pending');
+  return Array.from(pendingApprovals.values()).filter((request) => {
+    const matchesStatus = request.status === 'pending';
+    const matchesTenant = !tenant || (request.context && request.context.tenant === tenant);
+    return matchesStatus && matchesTenant;
+  });
 }
 
-async function getApproval(id) {
-  const stored = await getStoredApproval(id);
+async function getApproval(id, tenant = null) {
+  const stored = await getStoredApproval(id, tenant);
   if (stored) {
     pendingApprovals.set(id, stored);
     return stored;
   }
 
-  return pendingApprovals.get(id) || null;
+  const fallback = pendingApprovals.get(id) || null;
+  if (!fallback) {
+    return null;
+  }
+
+  if (tenant && (!fallback.context || fallback.context.tenant !== tenant)) {
+    return null;
+  }
+
+  return fallback;
 }
 
 module.exports = {

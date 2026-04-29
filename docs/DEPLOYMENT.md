@@ -48,7 +48,8 @@ Preferred production configuration is `SENTINEL_API_KEYS`, a JSON array of key r
       "application:submit",
       "application:read",
       "audit:read",
-      "receipt:read"
+      "receipt:read",
+      "approval:read"
     ],
     "status": "active",
     "createdAt": "2026-04-29T00:00:00.000Z",
@@ -163,6 +164,19 @@ Expected:
 
 - duplicate `commandId` and identical payload returns `idempotentReplay: true`
 - duplicate `commandId` with changed payload returns `IDEMPOTENCY_CONFLICT`
+
+Approval access check:
+
+```bash
+node scripts/check-approval-access.js
+```
+
+Expected:
+
+- operator key with `approval:read` can list and read pending approvals
+- operator key without `approval:review` cannot approve or reject approvals
+- approver key with `approval:review` can resolve approvals outside the demo boundary
+- approval reads create `approval.viewed` audit events
 
 Trust-test evidence:
 

@@ -15,7 +15,7 @@ process.env.SENTINEL_API_KEYS = JSON.stringify([
     tenant: 'ownerfi',
     actor: 'gregg@ownerfi.com',
     role: 'operator',
-    scopes: ['application:submit', 'application:read', 'audit:read'],
+    scopes: ['application:submit', 'application:read', 'audit:read', 'approval:read'],
     status: 'active',
     createdAt: '2026-04-29T00:00:00.000Z',
     expiresAt: '2099-01-01T00:00:00.000Z'
@@ -38,6 +38,7 @@ assert.strictEqual(resolved.principal.tenant, 'ownerfi');
 assert.strictEqual(resolved.principal.actor, 'gregg@ownerfi.com');
 assert.strictEqual(resolved.principal.role, 'operator');
 assert.strictEqual(principalHasScope(resolved.principal, 'application:submit'), true);
+assert.strictEqual(principalHasScope(resolved.principal, 'approval:read'), true);
 assert.strictEqual(principalHasScope(resolved.principal, 'deal:execute'), false);
 
 const inactive = resolveApiKey('inactive-secret');

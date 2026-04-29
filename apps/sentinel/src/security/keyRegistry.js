@@ -5,6 +5,7 @@ const DEFAULT_OWNERFI_SCOPES = [
   'deal:execute',
   'audit:read',
   'receipt:read',
+  'approval:read',
   'approval:review'
 ];
 
