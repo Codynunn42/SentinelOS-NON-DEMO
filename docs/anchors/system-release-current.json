@@ -1,0 +1,35 @@
+{
+  "type": "SYSTEM_RELEASE",
+  "status": "PENDING_EXTERNAL_ANCHOR",
+  "hash": "7b8b6ae0518ae68e16fdd3249dd28989930f6f686a9fa240b3b147e6d975a90a",
+  "canonical": "{\"apiBase\":\"https://ca-nc-dev-sentinel.calmhill-388e1d39.eastus2.azurecontainerapps.io/v1\",\"features\":[\"workflow orchestration\",\"approval enforcement\",\"telemetry harmonizer\",\"governed billing\",\"nunn cloud control surface\"],\"image\":\"acrncdevsentinel.azurecr.io/sentinel-api:control-surface-20260505-0128\",\"releaseRevision\":\"ca-nc-dev-sentinel--control-surface-0128\",\"status\":\"RUNNING\",\"timestamp\":\"2026-05-05T05:53:21.906Z\",\"type\":\"SYSTEM_RELEASE\",\"version\":\"control-surface-20260505-0128\"}",
+  "state": {
+    "type": "SYSTEM_RELEASE",
+    "version": "control-surface-20260505-0128",
+    "apiBase": "https://ca-nc-dev-sentinel.calmhill-388e1d39.eastus2.azurecontainerapps.io/v1",
+    "features": [
+      "workflow orchestration",
+      "approval enforcement",
+      "telemetry harmonizer",
+      "governed billing",
+      "nunn cloud control surface"
+    ],
+    "releaseRevision": "ca-nc-dev-sentinel--control-surface-0128",
+    "image": "acrncdevsentinel.azurecr.io/sentinel-api:control-surface-20260505-0128",
+    "status": "RUNNING",
+    "timestamp": "2026-05-05T05:53:21.906Z"
+  },
+  "external": {
+    "txId": null,
+    "blockNumber": null,
+    "anchoredAt": null
+  },
+  "clientLanguage": "We create verifiable records of key system states so they can be independently validated.",
+  "nextAnchors": [
+    "PILOT_START",
+    "EXECUTION_APPROVED",
+    "BILLING_ACTIVATED",
+    "CONTRACT_RENEWAL_TRANSITION"
+  ],
+  "createdAt": "2026-05-05T05:53:21.906Z"
+}

@@ -7,6 +7,11 @@ const {
   buildSentinelDockingEvent,
   evaluateDocking
 } = require('../integrations/docking/protocol');
+const { handleDealFlowDemo } = require('../commands/dealFlow/runDemo');
+const { handleRepoUpdate } = require('../commands/repo/updateStructure');
+const { handleProductReframe } = require('../commands/system/productReframe');
+const { handleSystemValidate } = require('../commands/system/validateIntegrity');
+const { handleUiSync } = require('../commands/ui/syncLabels');
 
 async function evaluateCdnluxToken(payload = {}) {
   const cdnluxEvent = buildCdnluxEvent(payload);
@@ -25,6 +30,12 @@ async function evaluateCdnluxToken(payload = {}) {
 }
 
 const nunncloudHandlers = {
+  'system.reframe.product': handleProductReframe,
+  'repo.update.structure': handleRepoUpdate,
+  'system.validate.integrity': handleSystemValidate,
+  'dealFlow.run.demo': handleDealFlowDemo,
+  'ui.sync.labels': handleUiSync,
+
   'cdnlux.token.evaluate': evaluateCdnluxToken,
   'cdnlux.contract.evaluate': evaluateCdnluxToken,
   'docking.evaluate': async (payload = {}) => {

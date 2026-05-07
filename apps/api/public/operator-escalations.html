@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SentinelOS Operator Escalations</title>
+  <style>
+    :root {
+      --bg: #0b0f14;
+      --panel: #141a21;
+      --panel-2: #1b232d;
+      --line: #2b3644;
+      --text: #e8eef6;
+      --muted: #95a3b5;
+      --accent: #58d68d;
+      --warn: #f4c95d;
+      --danger: #ff6b6b;
+      --input: #10161d;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      min-height: 100vh;
+    }
+
+    header {
+      border-bottom: 1px solid var(--line);
+      background: #0f151c;
+      padding: 18px 24px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(260px, 360px);
+      gap: 16px;
+      align-items: end;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 22px;
+      letter-spacing: 0;
+    }
+
+    .sub {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    label {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 6px;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: var(--input);
+      color: var(--text);
+      border-radius: 6px;
+      padding: 10px;
+      font: inherit;
+      min-height: 40px;
+    }
+
+    textarea {
+      min-height: 96px;
+      resize: vertical;
+    }
+
+    button {
+      border: 1px solid var(--line);
+      background: var(--panel-2);
+      color: var(--text);
+      min-height: 40px;
+      padding: 9px 12px;
+      border-radius: 6px;
+      font: inherit;
+      cursor: pointer;
+    }
+
+    button.primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #06140b;
+      font-weight: 700;
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    main {
+      display: grid;
+      grid-template-columns: minmax(320px, 420px) minmax(0, 1fr);
+      min-height: calc(100vh - 96px);
+    }
+
+    aside {
+      border-right: 1px solid var(--line);
+      background: #0f151c;
+      overflow: auto;
+    }
+
+    .toolbar {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      padding: 12px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .case-row {
+      border-bottom: 1px solid var(--line);
+      padding: 14px;
+      cursor: pointer;
+      background: transparent;
+    }
+
+    .case-row.active {
+      background: var(--panel);
+      border-left: 4px solid var(--accent);
+    }
+
+    .case-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      font-weight: 700;
+      font-size: 13px;
+    }
+
+    .case-meta {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      margin-top: 10px;
+    }
+
+    .metric {
+      border: 1px solid var(--line);
+      background: var(--panel-2);
+      border-radius: 6px;
+      padding: 8px;
+      min-height: 56px;
+    }
+
+    .metric span {
+      display: block;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .metric b {
+      display: block;
+      margin-top: 4px;
+      font-size: 14px;
+      overflow-wrap: anywhere;
+    }
+
+    section {
+      padding: 18px;
+      overflow: auto;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .panel {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      border-radius: 8px;
+      padding: 14px;
+      margin-bottom: 12px;
+    }
+
+    h2 {
+      margin: 0 0 12px;
+      font-size: 15px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    th, td {
+      text-align: left;
+      border-top: 1px solid var(--line);
+      padding: 8px;
+      vertical-align: top;
+    }
+
+    th {
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      padding: 3px 8px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      font-size: 12px;
+    }
+
+    .state-2 { color: var(--warn); border-color: rgba(244, 201, 93, 0.5); }
+    .state-3 { color: var(--danger); border-color: rgba(255, 107, 107, 0.5); }
+    .muted { color: var(--muted); }
+    .status { min-height: 20px; color: var(--muted); font-size: 13px; }
+
+    .decision-grid {
+      display: grid;
+      grid-template-columns: minmax(180px, 240px) minmax(180px, 240px) 1fr;
+      gap: 10px;
+      align-items: end;
+    }
+
+    .checkline {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .checkline input {
+      width: 18px;
+      min-height: 18px;
+    }
+
+    @media (max-width: 860px) {
+      header, main, .decision-grid {
+        grid-template-columns: 1fr;
+      }
+
+      aside {
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+        max-height: 46vh;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>SentinelOS Operator Escalations</h1>
+      <div class="sub">Vendor onboarding review station</div>
+    </div>
+    <div>
+      <label for="apiKey">API key</label>
+      <input id="apiKey" type="password" autocomplete="off" placeholder="x-api-key">
+    </div>
+  </header>
+
+  <main>
+    <aside>
+      <div class="toolbar">
+        <button id="loadBtn" class="primary">Load Queue</button>
+        <select id="sortMode">
+          <option value="risk">Highest Risk</option>
+          <option value="oldest">Oldest First</option>
+          <option value="tier">Domain Tier</option>
+        </select>
+      </div>
+      <div id="queue"></div>
+    </aside>
+
+    <section>
+      <div class="status" id="status">Load the queue to begin review.</div>
+      <div id="detail"></div>
+    </section>
+  </main>
+
+  <script>
+    const state = {
+      cases: [],
+      selected: null
+    };
+
+    const els = {
+      apiKey: document.getElementById('apiKey'),
+      loadBtn: document.getElementById('loadBtn'),
+      sortMode: document.getElementById('sortMode'),
+      queue: document.getElementById('queue'),
+      detail: document.getElementById('detail'),
+      status: document.getElementById('status')
+    };
+
+    function headers() {
+      return {
+        'Content-Type': 'application/json',
+        'x-api-key': els.apiKey.value.trim()
+      };
+    }
+
+    function setStatus(text) {
+      els.status.textContent = text;
+    }
+
+    function sortCases(items) {
+      const mode = els.sortMode.value;
+      return [...items].sort((a, b) => {
+        if (mode === 'oldest') return new Date(a.queueTimestamp) - new Date(b.queueTimestamp);
+        if (mode === 'tier') return b.domainTier - a.domainTier || b.riskIndex - a.riskIndex;
+        return b.riskIndex - a.riskIndex;
+      });
+    }
+
+    function renderQueue() {
+      const items = sortCases(state.cases);
+      els.queue.innerHTML = items.map((item) => `
+        <div class="case-row ${state.selected && state.selected.workflowId === item.workflowId ? 'active' : ''}" data-id="${item.workflowId}">
+          <div class="case-top">
+            <span>${item.workflowId}</span>
+            <span class="pill state-${item.nvopState}">State ${item.nvopState}</span>
+          </div>
+          <div class="muted" style="margin-top: 6px;">${item.vendorName}</div>
+          <div class="case-meta">
+            <div class="metric"><span>Risk</span><b>${item.riskIndex}</b></div>
+            <div class="metric"><span>Tier</span><b>${item.domainTier}</b></div>
+            <div class="metric"><span>Queue</span><b>${item.timeInQueueMinutes}m</b></div>
+          </div>
+        </div>
+      `).join('');
+
+      els.queue.querySelectorAll('.case-row').forEach((row) => {
+        row.addEventListener('click', () => loadCase(row.dataset.id));
+      });
+    }
+
+    function renderRules(title, rules) {
+      return `
+        <div class="panel">
+          <h2>${title}</h2>
+          <table>
+            <thead><tr><th>Rule</th><th>Severity</th><th>Trigger</th><th>Condition</th></tr></thead>
+            <tbody>
+              ${rules.map((rule) => `
+                <tr>
+                  <td>${rule.rule_id}</td>
+                  <td>${rule.severity}</td>
+                  <td>${rule.log_trigger}</td>
+                  <td>${rule.condition}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    function renderDetail(item) {
+      state.selected = item;
+      renderQueue();
+      const decision = item.decision;
+
+      els.detail.innerHTML = `
+        <div class="grid">
+          <div class="metric"><span>Risk Index</span><b>${item.riskIndex}</b></div>
+          <div class="metric"><span>Verifiability</span><b>${item.verifiabilityScore}</b></div>
+          <div class="metric"><span>Impact Rating</span><b>${item.impactRating}</b></div>
+          <div class="metric"><span>Domain Tier</span><b>${item.domainTier}</b></div>
+          <div class="metric"><span>Latency Class</span><b>${item.latencyClass}</b></div>
+          <div class="metric"><span>Rule Set</span><b>${item.ruleSetVersion}</b></div>
+        </div>
+
+        <div class="panel">
+          <h2>Risk Replay</h2>
+          <table>
+            <tbody>
+              <tr><th>Formula</th><td>${item.riskFormula}</td></tr>
+              <tr><th>C</th><td>${item.riskInputs.C}</td></tr>
+              <tr><th>I</th><td>${item.riskInputs.I}</td></tr>
+              <tr><th>D</th><td>${item.riskInputs.D}</td></tr>
+              <tr><th>V</th><td>${item.riskInputs.V}</td></tr>
+              <tr><th>Recommended Action</th><td>${item.recommendedAction}</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        ${renderRules('Failed Rules', item.failedRules)}
+        ${renderRules('Ambiguity Flags', item.ambiguityFlags)}
+
+        <div class="panel">
+          <h2>Workflow Timeline</h2>
+          <table>
+            <tbody>
+              ${item.timeline.map((entry) => `
+                <tr><th>${entry.event}</th><td>${entry.timestamp}</td><td>${entry.latencyClass || entry.state || ''}</td></tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="panel">
+          <h2>Operator Decision</h2>
+          ${decision ? `
+            <table>
+              <tbody>
+                <tr><th>Decision</th><td>${decision.decision}</td></tr>
+                <tr><th>Transition</th><td>${decision.transition}</td></tr>
+                <tr><th>Operator</th><td>${decision.operatorId}</td></tr>
+                <tr><th>Decision Hash</th><td>${decision.decisionHash}</td></tr>
+                <tr><th>Ledger Hash</th><td>${decision.ledgerEntry.hash}</td></tr>
+              </tbody>
+            </table>
+          ` : `
+            <div class="decision-grid">
+              <div>
+                <label for="decision">Decision</label>
+                <select id="decision">
+                  <option value="approve">Approve</option>
+                  <option value="require_correction">Require Correction</option>
+                  <option value="escalate_further">Escalate Further</option>
+                  <option value="refuse">Refuse</option>
+                  <option value="confirm_refusal">Confirm Refusal</option>
+                </select>
+              </div>
+              <div>
+                <label for="policyReferenceCode">Policy Reference Code</label>
+                <input id="policyReferenceCode" value="POL-VEND-001">
+              </div>
+              <div>
+                <label for="decisionRationale">Rationale</label>
+                <textarea id="decisionRationale" placeholder="Required"></textarea>
+              </div>
+            </div>
+            <label class="checkline">
+              <input id="riskAcceptanceAcknowledged" type="checkbox">
+              <span>Risk acceptance acknowledgment</span>
+            </label>
+            <div style="margin-top: 10px;">
+              <button class="primary" id="submitDecision">Submit Decision</button>
+            </div>
+          `}
+        </div>
+      `;
+
+      const submit = document.getElementById('submitDecision');
+      if (submit) {
+        submit.addEventListener('click', submitDecision);
+      }
+    }
+
+    async function loadQueue() {
+      setStatus('Loading escalation queue...');
+      const response = await fetch('/operator/escalations', { headers: headers() });
+      const payload = await response.json();
+      if (!response.ok) {
+        setStatus(payload.error || 'Unable to load queue');
+        return;
+      }
+
+      state.cases = payload.cases || [];
+      renderQueue();
+      setStatus(`${state.cases.length} escalated cases loaded.`);
+      if (state.cases.length > 0) {
+        await loadCase(sortCases(state.cases)[0].workflowId);
+      }
+    }
+
+    async function loadCase(workflowId) {
+      setStatus(`Loading ${workflowId}...`);
+      const response = await fetch(`/operator/escalations/${encodeURIComponent(workflowId)}`, { headers: headers() });
+      const payload = await response.json();
+      if (!response.ok) {
+        setStatus(payload.error || 'Unable to load case');
+        return;
+      }
+
+      renderDetail(payload.case);
+      setStatus(`${workflowId} ready for review.`);
+    }
+
+    async function submitDecision() {
+      const item = state.selected;
+      if (!item) return;
+
+      const body = {
+        decision: document.getElementById('decision').value,
+        policyReferenceCode: document.getElementById('policyReferenceCode').value,
+        decisionRationale: document.getElementById('decisionRationale').value,
+        riskAcceptanceAcknowledged: document.getElementById('riskAcceptanceAcknowledged').checked
+      };
+
+      setStatus('Submitting operator decision...');
+      const response = await fetch(`/operator/escalations/${encodeURIComponent(item.workflowId)}/decision`, {
+        method: 'POST',
+        headers: headers(),
+        body: JSON.stringify(body)
+      });
+      const payload = await response.json();
+      if (!response.ok) {
+        setStatus(payload.error || 'Decision blocked');
+        return;
+      }
+
+      state.cases = state.cases.map((caseItem) => (
+        caseItem.workflowId === payload.case.workflowId ? payload.case : caseItem
+      ));
+      renderDetail(payload.case);
+      setStatus(`Decision recorded. Hash ${payload.decision.decisionHash}`);
+    }
+
+    els.loadBtn.addEventListener('click', loadQueue);
+    els.sortMode.addEventListener('change', renderQueue);
+  </script>
+</body>
+</html>

@@ -1,0 +1,44 @@
+{
+  "facePlaneId": "governed-workflow",
+  "tenantId": "nunncloud",
+  "name": "Governed Workflow Face Plane",
+  "purpose": "Operator surface for governed workflow execution under SentinelOS.",
+  "owner": "Nunn Cloud",
+  "gaasPolicyPack": "gaas.core.workflow.v1",
+  "requestedCapabilities": [
+    "FACEPLANE_READ",
+    "FACEPLANE_WRITE",
+    "FACEPLANE_EXECUTE",
+    "GAAS_POLICY_APPLY",
+    "DOCKING_MANIFEST_REGISTER"
+  ],
+  "approvalModel": "approval_before_execution",
+  "telemetryMode": "LIMITED",
+  "dataClasses": [
+    "workflow_state",
+    "approval_state",
+    "audit_summary"
+  ],
+  "evidence": [
+    "policy_map",
+    "approval_boundary",
+    "audit_receipt",
+    "docking_decision"
+  ],
+  "complianceMandates": [
+    "internal_governance",
+    "operator_rbac"
+  ],
+  "routes": [
+    "/mission-control",
+    "/v1/workflow/init",
+    "/approvals",
+    "/v1/audit"
+  ],
+  "controls": [
+    "tenant_scope_required",
+    "approval_before_execution",
+    "telemetry_export_blocked_by_default",
+    "surface_view_audited"
+  ]
+}

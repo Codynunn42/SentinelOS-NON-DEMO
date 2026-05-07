@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>SentinelOS Checkout Status</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="/billing/stripe-complete.css" />
+    <script src="/billing/stripe-complete.js" defer></script>
+  </head>
+  <body>
+    <main id="payment-status">
+      <div id="status-icon"></div>
+      <h1 id="status-text">Checking payment status</h1>
+      <div id="details-table">
+        <table>
+          <tbody>
+            <tr>
+              <td class="table-label">Checkout Status</td>
+              <td id="intent-status" class="table-content"></td>
+            </tr>
+            <tr>
+              <td class="table-label">Payment Status</td>
+              <td id="session-status" class="table-content"></td>
+            </tr>
+            <tr>
+              <td class="table-label">Payment Intent ID</td>
+              <td id="intent-id" class="table-content"></td>
+            </tr>
+            <tr>
+              <td class="table-label">Payment Intent Status</td>
+              <td id="payment-intent-status" class="table-content"></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <a href="/billing/checkout" id="retry-button">Return to checkout</a>
+    </main>
+  </body>
+</html>

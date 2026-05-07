@@ -1,0 +1,283 @@
+{
+  "review_date": "2026-05-05",
+  "source_folders": [
+    "/Users/codynunn/Downloads/AI financial Management /",
+    "/Users/codynunn/Downloads/Payroll (ME)/"
+  ],
+  "classification": {
+    "status": "PAYROLL_EXECUTION_REVIEW",
+    "working_classification": "authorized_compensation_structure_with_internal_execution_records",
+    "execution_state": "external_payroll_not_executed_by_operator_statement",
+    "primary_risk": "payroll_execution_integrity"
+  },
+  "lanes": [
+    {
+      "lane": "governance_authority",
+      "support_level": "strong",
+      "files": [
+        "AI_Financial_Management_Board_Chair_Brief.pdf",
+        "AI_Financial_Management_Baseline_Certificate.pdf",
+        "AI_Financial_Management_Dual_Anchor_Governance_Memo.pdf",
+        "Governance_Verification_Memo_v1.3.31.pdf",
+        "Governance_Orchestration_Plan_v1.3.31.json"
+      ],
+      "proves": [
+        "dual-anchor governance model",
+        "internal baseline and public anchor separation",
+        "board/audit/compliance oversight intent",
+        "append-only lineage and approval controls"
+      ],
+      "does_not_prove": [
+        "specific payroll run",
+        "tax withholding",
+        "paystub generation"
+      ]
+    },
+    {
+      "lane": "founder_executive_certification",
+      "support_level": "strong_for_authority_limited_for_execution",
+      "files": [
+        "AI_Financial_Management_Founder_Certificate.pdf",
+        "AI_Financial_Management_Vault_Seal_Certificate.pdf",
+        "AI_Financial_Management_Vault_Certificate.pdf"
+      ],
+      "proves": [
+        "founder certification of release",
+        "executive authority over governance package",
+        "vault-sealed release posture"
+      ],
+      "does_not_prove": [
+        "specific compensation amount",
+        "processor execution",
+        "payroll tax handling"
+      ]
+    },
+    {
+      "lane": "employee_role_compliance",
+      "support_level": "moderate",
+      "files": [
+        "AI_Financial_Management_Employee_Brief.pdf",
+        "AI_Financial_Management_Internal_Launch_Memo.pdf",
+        "NunnCorp_LMS_Manifest_v1.3.37.json",
+        "NunnCorp_LMS_Role_Issuance_v1.3.38.json",
+        "NunnCorp_Compliance_Certificate_Finance.pdf",
+        "NunnCorp_Compliance_Certificate_HR_&_People.pdf",
+        "NunnCorp_Compliance_Certificate_Executives_&_Managers.pdf"
+      ],
+      "proves": [
+        "employee-facing governance expectations",
+        "role-specific compliance issuance rules",
+        "finance, HR, and executive compliance roles"
+      ],
+      "does_not_prove": [
+        "employee payroll classification",
+        "pay period execution",
+        "payroll register inclusion"
+      ]
+    },
+    {
+      "lane": "payroll_design_financial_controls",
+      "support_level": "moderate",
+      "files": [
+        "AI_Financial_Management_Playbook.pdf",
+        "AI_Financial_Management_Playbook_with_Diagram.pdf",
+        "AI_Financial_Management_Playbook_OnePager.pdf",
+        "AI_Financial_Management_Playbook_OnePager_Branded.pdf",
+        "AI_Financial_Management_Playbook_OnePager_VaultSealed.pdf"
+      ],
+      "proves": [
+        "payroll included as financial input rail",
+        "governed payroll execution design",
+        "manual override logging expectation"
+      ],
+      "does_not_prove": [
+        "specific payroll event completed",
+        "specific correction completed"
+      ]
+    },
+    {
+      "lane": "vault_lineage_integrity",
+      "support_level": "strong",
+      "files": [
+        "AI_Financial_Management_README.txt",
+        "AI_Financial_Management_CHANGELOG.md",
+        "AI_Financial_Management_Lineage_Ledger.csv",
+        "AI_Financial_Management_Version_Hashes.json",
+        "AI_Financial_Management_Vault_Index.json",
+        "AI_Financial_Management_Vault_Index_v1.2.json",
+        "AI_Financial_Management_Vault_SOP.pdf",
+        "AI_Financial_Management_Master_Distribution_Index.pdf",
+        "Dual_Anchor_Governance_Map.png"
+      ],
+      "proves": [
+        "hash manifest",
+        "lineage ledger",
+        "vault filing SOP",
+        "chain of custody for governance package"
+      ],
+      "does_not_prove": [
+        "bank transaction treatment",
+        "payroll provider reporting"
+      ]
+    },
+    {
+      "lane": "oversight_external_assurance",
+      "support_level": "supporting_context",
+      "files": [
+        "AI_Financial_Management_US_Oversight_Brief.pdf",
+        "AI_Financial_Management_EU_Oversight_Brief.pdf",
+        "AI_Financial_Management_APAC_Oversight_Brief.pdf",
+        "AI_Financial_Management_Regulator_Brief.pdf",
+        "AI_Financial_Management_Regulatory_Submission_Cover_Letter.pdf",
+        "AI_Financial_Management_ISO22301_Alignment_Brief.pdf",
+        "AI_Financial_Management_ISO27001_Alignment_Brief.pdf",
+        "AI_Financial_Management_ISO37301_Alignment_Brief.pdf"
+      ],
+      "proves": [
+        "jurisdictional oversight framing",
+        "standards alignment framing"
+      ],
+      "does_not_prove": [
+        "actual payroll compliance filing"
+      ]
+    },
+    {
+      "lane": "founder_compensation_authorization",
+      "support_level": "strong",
+      "files": [
+        "Board_Confirmation_Memo.pdf",
+        "Board_Founder_Compensation_Execution_Certification.pdf",
+        "Founder_Pay_Authorization_Packet_Cody_Nunn.pdf",
+        "CEO_Personal_Archive_Founder_Compensation_Record.pdf",
+        "Court_Submission_Founder_Compensation_Record.pdf",
+        "Regulator_Ready_Founder_Compensation_Certification.pdf",
+        "Nunn_Corporation_Founder_Compensation_Omnibus_Record.pdf"
+      ],
+      "proves": [
+        "founder compensation authorization",
+        "earned-compensation scope",
+        "exclusion of bonus, equity, new payee, and discretionary expansion",
+        "requirement to record release to payroll ledger"
+      ],
+      "does_not_prove": [
+        "external settlement",
+        "payroll tax remittance",
+        "payroll provider run"
+      ]
+    },
+    {
+      "lane": "payroll_packet_withholding_nacha_preparation",
+      "support_level": "strong_for_preparation",
+      "files": [
+        "Current Founder_Payroll_Packet_Aug_Sep_2025.pdf",
+        "Corporate_Package_Exception_and_Directory.pdf",
+        "Founder_Pay_Execution_Summary_Sealed.pdf",
+        "Founder_Disbursement_Calendar_2025_2026.csv",
+        "Founder_Disbursement_Calendar_2025_2026_Prioritized.csv"
+      ],
+      "proves": [
+        "gross pay and withholding calculations",
+        "net pay calculations",
+        "NACHA hash recorded",
+        "future payroll cadence and backlog catch-up plan"
+      ],
+      "does_not_prove": [
+        "settled ACH",
+        "tax deposits made",
+        "paystub generated by payroll provider"
+      ]
+    },
+    {
+      "lane": "command_routing_direct_deposit",
+      "support_level": "moderate_to_strong_for_staged_execution",
+      "files": [
+        "founder_payroll_receipt.pdf",
+        "Founder_Pay_Routing_Setup_Sheet_Cody_Nunn.pdf",
+        "DirectDepositForm.pdf",
+        "DirectDepositForm01:20.pdf",
+        "nunn_payroll_onetap.html",
+        "nunn_comm_signer.html",
+        "Payroll___Liquidity_Wire_ACH_Report.csv"
+      ],
+      "proves": [
+        "Sentinel payroll command acceptance",
+        "routing setup",
+        "local signed command tooling",
+        "ACH/liquidity tracking records"
+      ],
+      "does_not_prove": [
+        "final bank settlement",
+        "trace-confirmed ACH",
+        "payroll provider confirmation"
+      ]
+    },
+    {
+      "lane": "exception_discrepancy_settlement_gap",
+      "support_level": "critical_risk_evidence",
+      "files": [
+        "Founder_Payroll_Exception_Memo.pdf",
+        "Payroll_Discrepancy_Log.pdf",
+        "Disbursement_Documentation_Sept2025_Signed.pdf",
+        "SoFi_Wire_Escalation_Packet.pdf",
+        "Sentinel_Funds_Report.pdf"
+      ],
+      "proves": [
+        "Sentinel staged and internally recorded disbursements",
+        "ACH batch IDs or ODFI trace numbers were missing at the time of exception memo",
+        "some ACH/backpay status was scheduled or in progress rather than settled",
+        "wire escalation required bank/Fedwire investigation"
+      ],
+      "does_not_prove": [
+        "fully completed payroll settlement",
+        "tax remittance completion"
+      ]
+    },
+    {
+      "lane": "founder_vs_employee_settlement_split",
+      "support_level": "external_payroll_not_executed_by_operator_statement",
+      "files": [
+        "operator_statement_2026-05-05",
+        "Payroll___Liquidity_Wire_ACH_Report.csv",
+        "Founder_Payroll_Exception_Memo.pdf",
+        "Payroll_Discrepancy_Log.pdf"
+      ],
+      "proves": [
+        "founder reports no external founder compensation payment received",
+        "employee payroll cannot be inferred from founder compensation records",
+        "operator states external employee payroll never happened and does not exist"
+      ],
+      "does_not_prove": [
+        "which employees were paid",
+        "employee payroll settlement",
+        "tax remittance completion"
+      ]
+    }
+  ],
+  "execution_evidence_required": [
+    "payroll processor record",
+    "payroll register",
+    "payslip or paystub",
+    "gross wages and net pay detail",
+    "tax withholding record",
+    "employer tax record",
+    "bank transaction record",
+    "ACH batch ID or ODFI trace number",
+    "Fedwire IMAD/OMAD or bank-settled confirmation",
+    "federal and Arizona tax remittance confirmation",
+    "employee recipient/payee list",
+    "employee payroll provider settlement report",
+    "accounting classification entry",
+    "compensation memo naming pay period, amount, role, and treatment"
+  ],
+  "current_finding": {
+    "authority": "supported",
+    "payroll_design": "supported",
+    "employee_compliance_model": "supported",
+    "founder_compensation_authorization": "supported",
+    "internal_execution_record": "supported",
+    "founder_external_settlement": "not_received_by_operator_statement",
+    "employee_external_settlement": "not_executed_by_operator_statement",
+    "tax_remittance": "unverified",
+    "correction_need": "conditional_on_settlement_and_processor_records"
+  }
+}

@@ -1,0 +1,20 @@
+flowchart TB
+  command[Command Envelope]
+  auth[Auth]
+  policy[Policy]
+  risk[Risk]
+  gate{Decision Gate}
+  blocked[BLOCK<br/>Human Approval Required]
+  execute[Execute]
+  audit[Log]
+  sign[Sign]
+
+  command --> auth
+  auth --> policy
+  policy --> risk
+  risk --> gate
+  gate -- blocked --> blocked
+  gate -- approved --> execute
+  blocked --> audit
+  execute --> audit
+  audit --> sign
