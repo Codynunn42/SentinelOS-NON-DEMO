@@ -1,0 +1,9 @@
+FROM acrncdevsentinel.azurecr.io/sentinel-api:xe-command-plane-20260507-2055
+
+WORKDIR /app
+COPY . .
+
+ENV PORT=80
+EXPOSE 80
+
+CMD ["node", "apps/api/server.js"]

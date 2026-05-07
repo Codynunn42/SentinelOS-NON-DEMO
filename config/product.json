@@ -1,0 +1,12 @@
+{
+  "productName": "SentinelOS Deal Execution Engine",
+  "positioning": "We ensure deals only execute when they are valid, approved, and safe.",
+  "languageMap": {
+    "Trust Score": "Decision Score",
+    "Governance Signals": "Risk Alerts",
+    "Audit Feed": "Activity Feed",
+    "Workflow": "Deal Flow"
+  },
+  "tenant": "nunncloud",
+  "updatedAt": "2026-05-07T07:12:30.094Z"
+}

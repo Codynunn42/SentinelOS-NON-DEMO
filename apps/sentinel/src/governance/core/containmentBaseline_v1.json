@@ -1,0 +1,24 @@
+{
+  "baselineVersion": "containmentBaseline_v1",
+  "ruleSetVersion": "vendorOnboarding_v1",
+  "escalationRate": 0.03,
+  "refusalRate": 0.006,
+  "advisoryRate": 0.069,
+  "distribution": {
+    "state0": 0.901,
+    "state1": 0.069,
+    "state2": 0.024,
+    "state3": 0.006
+  },
+  "latencyProfile": {
+    "queuePeakPer1000": 30,
+    "averageReviewSecondsByState": {
+      "state0": 1,
+      "state1": 3.7,
+      "state2": 19.38,
+      "state3": 60
+    }
+  },
+  "distributionShape": "smooth_low_risk_dominant",
+  "createdAt": "2026-05-02"
+}

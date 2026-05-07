@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>SentinelOS Checkout</title>
+    <meta name="description" content="SentinelOS governed Stripe checkout" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="/billing/stripe-checkout.css" />
+    <script src="https://js.stripe.com/dahlia/stripe.js"></script>
+    <script src="/billing/stripe-checkout.js" defer></script>
+  </head>
+  <body>
+    <main class="shell">
+      <section class="context">
+        <p class="eyebrow">SentinelOS Billing</p>
+        <h1>Governed Checkout</h1>
+        <p class="lede">Payment starts only after Sentinel confirms the configured price, server-side key posture, and checkout approval boundary.</p>
+        <div class="status-strip" aria-label="Checkout safeguards">
+          <span>Fixed price</span>
+          <span>Server-side key</span>
+          <span>Audited session</span>
+        </div>
+      </section>
+
+      <form id="payment-form" class="checkout-panel">
+        <label for="email">Email</label>
+        <input type="email" id="email" autocomplete="email" placeholder="you@example.com" />
+        <div id="email-errors" role="alert"></div>
+
+        <div class="payment-heading">
+          <h2>Payment</h2>
+          <span id="checkout-state">Initializing</span>
+        </div>
+
+        <div id="payment-element"></div>
+
+        <button id="submit" type="submit" disabled>
+          <span class="spinner hidden" id="spinner"></span>
+          <span id="button-text">Continue</span>
+        </button>
+
+        <div id="payment-message" class="hidden" role="status"></div>
+      </form>
+    </main>
+  </body>
+</html>

@@ -3,20 +3,19 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>SentinelOS OwnerFi Proof</title>
+  <title>SentinelOS Deal Execution</title>
   <style>
     :root {
-      --bg: #0d1117;
-      --panel: #161b22;
-      --panel-2: #1f2937;
-      --line: #2f3a4a;
-      --text: #e6edf3;
-      --muted: #8b9bb0;
-      --accent: #7ee787;
-      --warn: #f2cc60;
-      --danger: #ff7b72;
-      --danger-soft: rgba(255, 123, 114, 0.12);
-      --warn-soft: rgba(242, 204, 96, 0.12);
+      --bg: #0f1216;
+      --surface: #171b21;
+      --surface-2: #20262e;
+      --line: #343c46;
+      --text: #f1f5f9;
+      --muted: #a6b0bd;
+      --ok: #47c27c;
+      --warn: #e5b84b;
+      --bad: #e25d55;
+      --info: #6aa3ff;
     }
 
     * {
@@ -25,745 +24,654 @@
 
     body {
       margin: 0;
-      font-family: "SFMono-Regular", "Menlo", "Consolas", monospace;
-      background:
-        radial-gradient(circle at top left, rgba(126, 231, 135, 0.14), transparent 32%),
-        linear-gradient(180deg, #0a0f16 0%, var(--bg) 100%);
-      color: var(--text);
       min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
 
     main {
-      max-width: 960px;
-      margin: 0 auto;
-      padding: 32px 20px 48px;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
     }
 
-    .header {
-      margin-bottom: 24px;
+    .container {
+      width: min(1120px, 100%);
+    }
+
+    .topbar {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 14px;
     }
 
     .eyebrow {
-      color: var(--accent);
+      color: var(--info);
+      font-size: 12px;
+      font-weight: 800;
       letter-spacing: 0.08em;
       text-transform: uppercase;
-      font-size: 12px;
+    }
+
+    h1,
+    h2,
+    h3,
+    p {
+      margin: 0;
     }
 
     h1 {
-      margin: 8px 0 12px;
-      font-size: 34px;
-      line-height: 1.1;
+      margin-top: 5px;
+      font-size: clamp(28px, 4vw, 44px);
+      line-height: 1.04;
+      letter-spacing: 0;
     }
 
-    p {
+    .subhead {
+      margin-top: 8px;
       color: var(--muted);
-      max-width: 760px;
+      max-width: 680px;
+      font-size: 15px;
+      line-height: 1.5;
     }
 
-    .badges {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 16px;
-    }
-
-    .badge {
+    .status {
       border: 1px solid var(--line);
-      border-radius: 999px;
-      color: var(--text);
-      background: rgba(31, 41, 55, 0.55);
-      padding: 6px 10px;
-      font-size: 12px;
-    }
-
-    .badge strong {
-      color: var(--accent);
-    }
-
-    .panel {
-      background: rgba(22, 27, 34, 0.92);
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      padding: 18px;
-      margin-bottom: 18px;
-      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.24);
-    }
-
-    .decision-panel {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) minmax(280px, 0.9fr);
-      gap: 14px;
-      align-items: stretch;
-    }
-
-    .decision-card {
-      border: 1px solid var(--line);
-      border-radius: 12px;
-      padding: 14px;
-      background: rgba(31, 41, 55, 0.55);
-    }
-
-    .decision-card.danger {
-      background: var(--danger-soft);
-      border-color: rgba(255, 123, 114, 0.5);
-    }
-
-    .decision-card.warn {
-      background: var(--warn-soft);
-      border-color: rgba(242, 204, 96, 0.5);
-    }
-
-    .decision-title {
-      margin-bottom: 12px;
-      font-size: 13px;
+      border-radius: 8px;
+      background: var(--surface);
+      padding: 10px 12px;
+      color: var(--muted);
+      font-size: 14px;
       font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
+      white-space: nowrap;
     }
 
-    .decision-card.danger .decision-title {
-      color: var(--danger);
+    .status.ok {
+      color: var(--ok);
+      border-color: rgba(71, 194, 124, 0.5);
     }
 
-    .decision-card.warn .decision-title {
-      color: var(--warn);
+    .status.blocked {
+      color: var(--bad);
+      border-color: rgba(226, 93, 85, 0.55);
     }
 
-    .kv {
-      display: flex;
-      justify-content: space-between;
-      gap: 14px;
-      padding: 7px 0;
-      border-top: 1px solid rgba(139, 155, 176, 0.14);
+    .xe-launch {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 12px;
       color: var(--muted);
       font-size: 13px;
+      font-weight: 750;
     }
 
-    .kv b {
+    .kbd {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 34px;
+      min-height: 24px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: var(--surface-2);
       color: var(--text);
-      text-align: right;
-      overflow-wrap: anywhere;
-    }
-
-    .badge.pending {
-      color: var(--warn);
-      border-color: rgba(242, 204, 96, 0.45);
-    }
-
-    button:disabled {
-      cursor: not-allowed;
-      opacity: 0.48;
+      padding: 2px 7px;
+      font-size: 12px;
+      font-weight: 850;
     }
 
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 12px;
-      margin-bottom: 14px;
+      grid-template-columns: minmax(260px, 0.8fr) minmax(340px, 1.2fr);
+      gap: 14px;
     }
 
-    label {
-      display: block;
-      font-size: 12px;
-      color: var(--muted);
-      margin-bottom: 6px;
-    }
-
-    input,
-    select {
-      width: 100%;
-      border-radius: 10px;
+    .panel {
       border: 1px solid var(--line);
-      background: var(--panel-2);
-      color: var(--text);
-      padding: 10px 12px;
-      font: inherit;
+      border-radius: 8px;
+      background: var(--surface);
+      padding: 16px;
     }
 
-    .actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
+    .panel.full {
       margin-top: 14px;
     }
 
+    .panel h2,
+    .panel h3 {
+      font-size: 15px;
+      margin-bottom: 12px;
+      letter-spacing: 0;
+    }
+
+    .actions {
+      display: grid;
+      gap: 10px;
+    }
+
+    .actions.two {
+      grid-template-columns: 1fr 1fr;
+      margin-top: 10px;
+    }
+
     button {
-      border: 0;
-      border-radius: 999px;
-      padding: 10px 14px;
-      font: inherit;
+      min-height: 42px;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      padding: 10px 12px;
+      background: var(--info);
+      color: #07111f;
       cursor: pointer;
-      background: var(--accent);
-      color: #07210c;
-      font-weight: 700;
+      font: inherit;
+      font-weight: 850;
+      text-align: left;
+    }
+
+    button:hover {
+      filter: brightness(1.06);
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.62;
+    }
+
+    button.danger {
+      background: var(--bad);
+      color: #fff;
+    }
+
+    button.success {
+      background: var(--ok);
+      color: #06130b;
     }
 
     button.secondary {
       background: transparent;
+      border-color: var(--line);
       color: var(--text);
-      border: 1px solid var(--line);
     }
 
-    .meta {
+    .field {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 10px;
+      gap: 6px;
       margin-top: 12px;
     }
 
-    .meta-card {
+    label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 750;
+    }
+
+    input {
+      width: 100%;
+      min-height: 38px;
       border: 1px solid var(--line);
-      border-radius: 12px;
-      padding: 12px;
-      background: rgba(31, 41, 55, 0.55);
+      border-radius: 8px;
+      background: var(--surface-2);
+      color: var(--text);
+      padding: 8px 10px;
+      font: inherit;
     }
 
-    .meta-card strong {
-      display: block;
-      margin-bottom: 6px;
+    select {
+      width: 100%;
+      min-height: 38px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface-2);
+      color: var(--text);
+      padding: 8px 10px;
+      font: inherit;
     }
 
-    .result-grid {
+    .hint {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .stream-line {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .decision-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 12px;
-      margin-bottom: 18px;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 12px;
     }
 
-    .result-card {
+    .metric {
       border: 1px solid var(--line);
-      border-radius: 12px;
-      padding: 14px;
-      background: rgba(31, 41, 55, 0.55);
+      border-radius: 8px;
+      background: var(--surface-2);
+      padding: 12px;
+      min-height: 86px;
     }
 
-    .result-card span {
+    .metric span {
       display: block;
       color: var(--muted);
       font-size: 12px;
-      margin-bottom: 8px;
+      font-weight: 800;
+      text-transform: uppercase;
     }
 
-    .result-card strong {
+    .metric strong {
       display: block;
-      font-size: 18px;
-      line-height: 1.25;
+      margin-top: 8px;
+      font-size: 22px;
       overflow-wrap: anywhere;
     }
 
-    .audit-list {
-      margin: 0;
-      padding-left: 22px;
+    .metric.bad strong {
+      color: var(--bad);
+    }
+
+    .metric.ok strong {
+      color: var(--ok);
+    }
+
+    .reason-box {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface-2);
+      padding: 12px;
+      min-height: 86px;
+    }
+
+    .reason-box span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .reason-box p {
       color: var(--text);
-      line-height: 1.8;
+      line-height: 1.45;
+      overflow-wrap: anywhere;
     }
 
-    .audit-list li {
-      padding-left: 4px;
-    }
-
-    .history-list {
+    .feed {
       display: grid;
-      gap: 10px;
-      margin-top: 12px;
+      gap: 8px;
+      min-height: 154px;
+      max-height: 252px;
+      overflow: auto;
     }
 
-    .history-row {
+    .feed-item {
       display: grid;
-      grid-template-columns: minmax(120px, 1fr) minmax(90px, auto) minmax(150px, auto);
+      grid-template-columns: 92px minmax(0, 1fr) auto;
       gap: 10px;
       align-items: center;
       border: 1px solid var(--line);
-      border-radius: 12px;
-      background: rgba(31, 41, 55, 0.42);
-      padding: 10px 12px;
-      font-size: 12px;
+      border-radius: 8px;
+      background: var(--surface-2);
+      padding: 9px 10px;
+      color: var(--muted);
+      font-size: 13px;
     }
 
-    .history-row strong {
+    .feed-item strong {
+      color: var(--text);
       overflow-wrap: anywhere;
     }
 
     .pill {
       display: inline-flex;
       align-items: center;
-      justify-content: center;
-      border: 1px solid var(--line);
       border-radius: 999px;
-      min-width: 76px;
-      padding: 4px 8px;
-      text-transform: uppercase;
+      border: 1px solid var(--line);
+      padding: 3px 8px;
       font-size: 11px;
+      font-weight: 850;
+      text-transform: uppercase;
     }
 
-    .pill.executed {
-      color: var(--accent);
-      border-color: rgba(126, 231, 135, 0.45);
+    .pill.ok {
+      color: var(--ok);
+      border-color: rgba(71, 194, 124, 0.5);
     }
 
     .pill.blocked {
+      color: var(--bad);
+      border-color: rgba(226, 93, 85, 0.55);
+    }
+
+    .pill.warn {
       color: var(--warn);
-      border-color: rgba(242, 204, 96, 0.45);
-    }
-
-    .pill.error {
-      color: var(--danger);
-      border-color: rgba(255, 123, 114, 0.45);
-    }
-
-    .empty-state {
-      color: var(--muted);
-      margin: 0;
+      border-color: rgba(229, 184, 75, 0.55);
     }
 
     details {
-      border-top: 1px solid var(--line);
-      padding-top: 14px;
+      margin-top: 12px;
+      color: var(--muted);
     }
 
     summary {
       cursor: pointer;
-      color: var(--muted);
-      margin-bottom: 12px;
+      font-weight: 800;
     }
 
     pre {
-      margin: 0;
-      white-space: pre-wrap;
-      word-break: break-word;
-      font-size: 12px;
-      line-height: 1.5;
-      background: #091018;
+      margin: 10px 0 0;
       border: 1px solid var(--line);
-      border-radius: 14px;
-      padding: 16px;
-      min-height: 280px;
+      border-radius: 8px;
+      background: #0b0e12;
+      color: #d7dee8;
+      padding: 12px;
       overflow: auto;
+      max-height: 220px;
+      font-size: 12px;
     }
 
-    .status {
+    .xe-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      display: none;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 14vh 18px 18px;
+      background: rgba(6, 8, 11, 0.68);
+    }
+
+    .xe-backdrop.open {
+      display: flex;
+    }
+
+    .xe-panel {
+      width: min(560px, 100%);
+      border: 1px solid rgba(106, 163, 255, 0.38);
+      border-radius: 8px;
+      background: #10151c;
+      box-shadow: 0 22px 80px rgba(0, 0, 0, 0.52);
+      padding: 14px;
+    }
+
+    .xe-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .xe-title {
+      display: grid;
+      gap: 2px;
+    }
+
+    .xe-title strong {
+      font-size: 14px;
+    }
+
+    .xe-title span {
       color: var(--muted);
-      font-size: 13px;
+      font-size: 12px;
+    }
+
+    .xe-panel input {
+      min-height: 48px;
+      border-color: rgba(106, 163, 255, 0.44);
+      background: #0b0f15;
+      font-size: 15px;
+    }
+
+    .xe-suggestions {
+      display: grid;
+      gap: 8px;
       margin-top: 12px;
     }
 
-    .good { color: var(--accent); }
-    .warn { color: var(--warn); }
-    .bad { color: var(--danger); }
+    .xe-suggestion {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: center;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      padding: 10px 12px;
+      color: var(--muted);
+      font-size: 13px;
+      cursor: pointer;
+    }
 
-    @media (max-width: 760px) {
-      .decision-panel {
+    .xe-suggestion:hover {
+      border-color: rgba(106, 163, 255, 0.52);
+      color: var(--text);
+    }
+
+    .xe-suggestion strong {
+      display: block;
+      color: var(--text);
+      font-size: 13px;
+    }
+
+    @media (max-width: 860px) {
+      main {
+        align-items: flex-start;
+      }
+
+      .topbar {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .status {
+        white-space: normal;
+      }
+
+      .grid,
+      .decision-grid {
         grid-template-columns: 1fr;
       }
 
-      .kv {
-        display: grid;
-      }
-
-      .kv b {
-        text-align: left;
+      .feed-item {
+        grid-template-columns: 1fr;
       }
     }
   </style>
 </head>
 <body>
   <main>
-    <div class="header">
-      <div class="eyebrow">SentinelOS Proof Surface</div>
-      <h1>OwnerFi Governed Workflow Demo</h1>
-      <p>
-        This page runs a real SentinelOS command chain through <code>/v1/command</code>,
-        then reads back the audit trail through <code>/v1/audit</code>. It proves execution,
-        governance, and audit visibility in one place.
-      </p>
-      <div class="badges">
-        <span class="badge">Tenant: <strong id="tenantBadge">ownerfi</strong></span>
-        <span class="badge">Surface: <strong id="surfaceBadge">OwnerFi</strong></span>
-        <span class="badge">Mode: <strong id="modeBadge">Demo</strong></span>
-      </div>
-    </div>
-
-    <section class="panel">
-      <div class="decision-panel">
-        <div class="decision-card danger">
-          <div class="decision-title">Execution Blocked</div>
-          <div class="kv">State <b>drift</b></div>
-          <div class="kv">Risk <b>high</b></div>
-          <div class="kv">Decision <b>block</b></div>
-          <div class="kv">Reason <b>impossible travel</b></div>
-          <div class="kv">Actor <b>admin@ownerfi.test</b></div>
-        </div>
-        <div class="decision-card warn">
-          <div class="decision-title">Human Review Required</div>
-          <div class="kv">Approval ID <b id="approvalId">approval_8c1941da-cc90-4c54-801f-aa64f56c8802</b></div>
-          <div class="kv">Status <b><span class="pill blocked">Pending</span></b></div>
-          <div class="actions">
-            <button disabled title="Disabled in demo">Approve</button>
-            <button class="secondary" disabled title="Disabled in demo">Reject</button>
+    <div class="container">
+      <div class="topbar">
+        <div>
+          <div class="eyebrow">SentinelOS Proof Surface</div>
+          <h1>Deal Execution Engine</h1>
+          <p class="subhead">Bad deals do not get through. Every button sends an intent through the Control Plane into <code>/v1/command</code>, then Sentinel decides.</p>
+          <div class="xe-launch" aria-label="XE Command Plane shortcut">
+            <span class="kbd">Ctrl</span>
+            <span class="kbd">K</span>
+            <span>XE Command Plane</span>
           </div>
-          <p class="status">Actions disabled in demo. Boundary preserved.</p>
         </div>
+        <div id="status" class="status ok">System Status: Controlled</div>
       </div>
-    </section>
 
-    <section class="panel">
       <div class="grid">
-        <div>
-          <label for="apiKey">API Key</label>
-          <input id="apiKey" placeholder="Optional for browser-only demo">
-        </div>
-        <div>
-          <label for="tenant">Tenant Surface</label>
-          <select id="tenant">
-            <option value="ownerfi">ownerfi / OwnerFi</option>
-            <option value="hotelops">hotelops / HotelOps</option>
-          </select>
-        </div>
-        <div>
-          <label for="actor">Actor</label>
-          <input id="actor" value="demo.operator">
-        </div>
-        <div>
-          <label for="role">Role</label>
-          <input id="role" value="approver">
-        </div>
-        <div>
-          <label for="name">Applicant</label>
-          <input id="name" value="John Doe">
-        </div>
-        <div>
-          <label for="vehicle">Vehicle</label>
-          <input id="vehicle" value="2019 Honda Civic">
-        </div>
-        <div>
-          <label for="amount">Amount</label>
-          <input id="amount" type="number" value="18000">
-        </div>
-        <div>
-          <label for="creditScore">Credit Score</label>
-          <input id="creditScore" type="number" value="680">
-        </div>
+        <section class="panel">
+          <h2>Deal Actions</h2>
+          <div class="actions">
+            <button id="submitButton" type="button" onclick="submitDeal()">Submit Deal</button>
+            <button id="executeButton" type="button" class="danger" onclick="executeDeal()">Execute Deal</button>
+            <button id="approveButton" type="button" class="success" onclick="approveDeal()">Approve Deal</button>
+          </div>
+          <div class="actions two">
+            <button id="runDemoButton" type="button" class="secondary" onclick="runDemo()">Run Demo</button>
+            <button id="resetButton" type="button" class="secondary" onclick="resetDemo()">Reset</button>
+          </div>
+
+          <div class="field">
+            <label for="roleSelect">Current Role</label>
+            <select id="roleSelect">
+              <option value="operator">operator</option>
+              <option value="approver">approver</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="apiKey">Protected Run Key</label>
+            <input id="apiKey" autocomplete="off" placeholder="Uses server key when configured">
+            <p class="hint">The browser calls only <code>/api/control/execute</code>. The Control Plane builds the command envelope and calls Sentinel Core.</p>
+          </div>
+        </section>
+
+        <section class="panel">
+          <h2>Decision Panel</h2>
+          <div class="decision-grid">
+            <div id="scoreMetric" class="metric">
+              <span>Score</span>
+              <strong id="decisionScore">--</strong>
+            </div>
+            <div id="alertMetric" class="metric">
+              <span>Alerts</span>
+              <strong id="riskAlert">--</strong>
+            </div>
+            <div id="stateMetric" class="metric ok">
+              <span>State</span>
+              <strong id="decisionState">Controlled</strong>
+            </div>
+          </div>
+          <div class="reason-box">
+            <span>Reason</span>
+            <p id="reason">Waiting for a deal action.</p>
+          </div>
+          <details>
+            <summary>Structured result</summary>
+            <pre id="technicalResult">No command has run yet.</pre>
+          </details>
+        </section>
       </div>
 
-      <div class="actions">
-        <button onclick="runFullFlow()">Run Full Flow</button>
-        <button class="secondary" onclick="replayLastFlow()">Replay Last Workflow</button>
-        <button class="secondary" onclick="runForbiddenFlow()">Run Forbidden Deal Test</button>
-        <button class="secondary" onclick="loadAudit()">Refresh Audit</button>
-      </div>
-
-      <div class="meta">
-        <div class="meta-card">
-          <strong>Workflow</strong>
-          Submit -> Evaluate -> Execute Deal
-        </div>
-        <div class="meta-card">
-          <strong>Governance</strong>
-          Deal execution requires <code>metadata.role = approver</code>
-        </div>
-        <div class="meta-card">
-          <strong>Audit</strong>
-          Actor, payload, result, and filtered application history
-        </div>
-        <div class="meta-card">
-          <strong>Fallback</strong>
-          No key runs demo-only commands in this browser with no external writes
-        </div>
-      </div>
-
-      <div id="status" class="status">Waiting to run proof flow.</div>
-    </section>
-
-    <section class="panel">
-      <div class="result-card">
-        <span>Receipt Lookup</span>
-        <div class="grid">
-          <div>
-            <label for="receiptInput">Receipt ID</label>
-            <input id="receiptInput" placeholder="rcpt_...">
+      <section class="panel full">
+        <h2>Activity Feed</h2>
+        <div id="activityFeed" class="feed" aria-live="polite">
+          <div class="feed-item">
+            <span>Ready</span>
+            <strong>Control Plane online</strong>
+            <span class="pill ok">controlled</span>
           </div>
         </div>
-        <div class="actions">
-          <button class="secondary" onclick="lookupReceipt()">Lookup Receipt</button>
+        <div class="stream-line">
+          <span id="streamStatus">Audit stream: waiting for key</span>
+          <span>real-time audit feed</span>
         </div>
-        <p class="status">Uses the API key field above. No unauthenticated receipt access.</p>
-        <pre id="receiptOut">No receipt loaded.</pre>
-      </div>
-    </section>
-
-    <section class="panel">
-      <div id="summary">
-        <p class="empty-state">No results yet.</p>
-      </div>
-      <details>
-        <summary>Technical details</summary>
-        <pre id="out">No results yet.</pre>
-      </details>
-    </section>
-
-    <section class="panel">
-      <div class="result-card">
-        <span>Command History</span>
-        <div id="history" class="history-list">
-          <p class="empty-state">No commands yet.</p>
-        </div>
-      </div>
-    </section>
+      </section>
+    </div>
   </main>
 
+  <div id="xeOverlay" class="xe-backdrop" aria-hidden="true">
+    <section class="xe-panel" role="dialog" aria-modal="true" aria-labelledby="xeTitle">
+      <div class="xe-header">
+        <div class="xe-title">
+          <strong id="xeTitle">XE Command Plane</strong>
+          <span>Intent launcher -> Control Plane -> governed execution</span>
+        </div>
+        <span class="kbd">Esc</span>
+      </div>
+      <input id="xeInput" autocomplete="off" placeholder="Type: submit deal, execute deal, approve deal">
+      <div class="xe-suggestions" aria-label="XE command suggestions">
+        <div class="xe-suggestion" data-xe-command="submit deal">
+          <strong>submit deal</strong>
+          <span class="pill ok">deal.submit</span>
+        </div>
+        <div class="xe-suggestion" data-xe-command="execute deal">
+          <strong>execute deal</strong>
+          <span class="pill blocked">deal.execute</span>
+        </div>
+        <div class="xe-suggestion" data-xe-command="approve deal">
+          <strong>approve deal</strong>
+          <span class="pill warn">deal.approve</span>
+        </div>
+      </div>
+    </section>
+  </div>
+
   <script>
-    const SURFACES = {
-      ownerfi: {
-        name: 'OwnerFi',
-        workflow: 'Submit -> Evaluate -> Execute Deal'
-      },
-      hotelops: {
-        name: 'HotelOps',
-        workflow: 'Registered placeholder surface'
-      }
+    const state = {
+      applicationId: null,
+      dealId: null,
+      approved: false,
+      busy: false,
+      lastEnvelope: null,
+      xeOpen: false,
+      auditStream: null
     };
-    let lastApplicationId = null;
-    let demoAuditTrail = [];
-    let demoDealId = null;
-    let commandHistory = [];
-    let lastFlowInput = null;
 
     function getApiKey() {
       return document.getElementById('apiKey').value.trim();
     }
 
-    function getTenant() {
-      return document.getElementById('tenant').value;
+    function getSelectedRole() {
+      return document.getElementById('roleSelect').value;
     }
 
-    function getSurface() {
-      return SURFACES[getTenant()] || SURFACES.ownerfi;
+    function setSelectedRole(role) {
+      document.getElementById('roleSelect').value = role;
     }
 
-    function isDemoOnlyMode() {
-      return !getApiKey() || getTenant() !== 'ownerfi';
+    function setBusy(busy) {
+      state.busy = busy;
+      document.getElementById('submitButton').disabled = busy;
+      document.getElementById('executeButton').disabled = busy;
+      document.getElementById('approveButton').disabled = busy || !state.applicationId;
+      document.getElementById('runDemoButton').disabled = busy;
     }
 
-    function updateSurfaceBadges() {
-      const tenant = getTenant();
-      const surface = getSurface();
-      document.getElementById('tenantBadge').textContent = tenant;
-      document.getElementById('surfaceBadge').textContent = surface.name;
-      document.getElementById('modeBadge').textContent = isDemoOnlyMode() ? 'Demo' : 'Live';
-    }
-
-    function getHeaders() {
-      return {
-        'Content-Type': 'application/json',
-        'x-api-key': getApiKey()
-      };
-    }
-
-    function getMetadata(roleOverride) {
-      return {
-        actor: document.getElementById('actor').value.trim() || 'demo.operator',
-        role: roleOverride || document.getElementById('role').value.trim() || 'approver',
-        timestamp: new Date().toISOString()
-      };
-    }
-
-    function getCurrentInput() {
-      return {
-        tenant: getTenant(),
-        actor: document.getElementById('actor').value.trim(),
-        role: document.getElementById('role').value.trim(),
-        name: document.getElementById('name').value.trim(),
-        vehicle: document.getElementById('vehicle').value.trim(),
-        amount: document.getElementById('amount').value,
-        creditScore: document.getElementById('creditScore').value
-      };
-    }
-
-    function applyFlowInput(input) {
-      document.getElementById('tenant').value = input.tenant || 'ownerfi';
-      document.getElementById('actor').value = input.actor || 'demo.operator';
-      document.getElementById('role').value = input.role || 'approver';
-      document.getElementById('name').value = input.name || 'John Doe';
-      document.getElementById('vehicle').value = input.vehicle || '2019 Honda Civic';
-      document.getElementById('amount').value = input.amount || '18000';
-      document.getElementById('creditScore').value = input.creditScore || '680';
-      updateSurfaceBadges();
-    }
-
-    async function command(commandName, payload, roleOverride) {
-      let result;
-
-      if (isDemoOnlyMode()) {
-        result = runDemoCommand(commandName, payload, roleOverride);
-      } else {
-        const response = await fetch('/v1/command', {
-          method: 'POST',
-          headers: getHeaders(),
-          body: JSON.stringify({
-            tenant: getTenant(),
-            command: commandName,
-            payload,
-            metadata: getMetadata(roleOverride)
-          })
-        });
-
-        result = await response.json();
-      }
-
-      recordCommand(commandName, result);
-      return result;
-    }
-
-    async function getAudit() {
-      if (isDemoOnlyMode()) {
-        return {
-          status: 'ok',
-          tenant: getTenant(),
-          applicationId: lastApplicationId,
-          count: demoAuditTrail.length,
-          entries: demoAuditTrail
-        };
-      }
-
-      const url = lastApplicationId
-        ? `/v1/audit/${encodeURIComponent(lastApplicationId)}?tenant=${encodeURIComponent(getTenant())}`
-        : `/v1/audit?tenant=${encodeURIComponent(getTenant())}`;
-      const response = await fetch(url, {
-        headers: {
-          'x-api-key': getApiKey()
-        }
-      });
-
-      return response.json();
-    }
-
-    async function lookupReceipt() {
-      const receiptId = document.getElementById('receiptInput').value.trim();
-      const output = document.getElementById('receiptOut');
-
-      if (!receiptId) {
-        output.textContent = 'Enter a receiptId first.';
-        return;
-      }
-
-      if (!getApiKey()) {
-        output.textContent = 'API key required. Receipt lookup stays behind the protected boundary.';
-        return;
-      }
-
-      try {
-        const response = await fetch(`/v1/receipts/${encodeURIComponent(receiptId)}?tenant=${encodeURIComponent(getTenant())}`, {
-          headers: {
-            'x-api-key': getApiKey()
-          }
-        });
-        const data = await response.json();
-        output.textContent = JSON.stringify(data, null, 2);
-      } catch (error) {
-        output.textContent = `Receipt lookup failed: ${error.message}`;
-      }
-    }
-
-    function shortId(prefix) {
-      return `${prefix}_${Math.random().toString(36).slice(2, 8)}`;
-    }
-
-    function addDemoAudit(commandName, payload, result, roleOverride) {
-      demoAuditTrail.push({
-        tenant: getTenant(),
-        command: commandName,
-        payload,
-        result,
-        actor: getMetadata(roleOverride).actor,
-        timestamp: new Date().toISOString()
+    function now() {
+      return new Date().toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
       });
     }
 
-    function runDemoCommand(commandName, payload, roleOverride) {
-      if (getTenant() === 'hotelops') {
-        const result = {
-          status: 'blocked',
-          error: 'Surface registered; workflow not installed',
-          tenant: getTenant(),
-          surface: getSurface().name
-        };
-        addDemoAudit(commandName, payload, result, roleOverride);
-        return result;
-      }
-
-      if (commandName === 'application.submit') {
-        lastApplicationId = shortId('app');
-        const result = {
-          status: 'executed',
-          result: {
-            applicationId: lastApplicationId,
-            status: 'submitted'
-          },
-          applicationId: lastApplicationId,
-          applicationStatus: 'submitted'
-        };
-        addDemoAudit(commandName, payload, result, roleOverride);
-        return result;
-      }
-
-      if (commandName === 'application.evaluate') {
-        const decision = Number(document.getElementById('creditScore').value) > 650 ? 'approved' : 'review';
-        const result = {
-          status: 'executed',
-          result: {
-            applicationId: payload.applicationId,
-            status: decision
-          },
-          applicationId: payload.applicationId,
-          applicationStatus: decision
-        };
-        addDemoAudit(commandName, payload, result, roleOverride);
-        return result;
-      }
-
-      if (commandName === 'deal.execute') {
-        if ((roleOverride || document.getElementById('role').value.trim()) !== 'approver') {
-          const blocked = {
-            status: 'blocked',
-            error: 'FORBIDDEN',
-            requiredRole: 'approver',
-            applicationId: payload.applicationId
-          };
-          addDemoAudit(commandName, payload, blocked, roleOverride);
-          return blocked;
-        }
-
-        demoDealId = shortId('deal');
-        const result = {
-          status: 'executed',
-          result: {
-            dealId: demoDealId,
-            status: 'active'
-          },
-          applicationId: payload.applicationId,
-          dealId: demoDealId,
-          dealStatus: 'active'
-        };
-        addDemoAudit(commandName, payload, result, roleOverride);
-        return result;
-      }
-
-      return {
-        status: 'blocked',
-        error: `Demo command not allowed: ${commandName}`
-      };
+    function setStatus(text, kind) {
+      const status = document.getElementById('status');
+      status.textContent = text;
+      status.className = `status ${kind || ''}`.trim();
     }
 
-    function getCommandLabel(commandName) {
-      return String(commandName || '')
-        .replace('application.submit', 'submit')
-        .replace('application.evaluate', 'evaluate')
-        .replace('deal.execute', 'execute');
+    function setDecision({ score = '--', alert = '--', stateText = 'Controlled', reason = 'Waiting for a deal action.', kind = 'ok' }) {
+      document.getElementById('decisionScore').textContent = score;
+      document.getElementById('riskAlert').textContent = alert;
+      document.getElementById('decisionState').textContent = stateText;
+      document.getElementById('reason').textContent = reason;
+      document.getElementById('scoreMetric').className = `metric ${kind === 'blocked' ? 'bad' : kind === 'ok' ? 'ok' : ''}`.trim();
+      document.getElementById('alertMetric').className = `metric ${kind === 'blocked' ? 'bad' : ''}`.trim();
+      document.getElementById('stateMetric').className = `metric ${kind === 'blocked' ? 'bad' : 'ok'}`.trim();
     }
 
-    function valueOrDash(value) {
-      return value || 'Not available';
+    function logActivity(message, kind = 'ok') {
+      const feed = document.getElementById('activityFeed');
+      const item = document.createElement('div');
+      item.className = 'feed-item';
+      item.innerHTML = `
+        <span>${now()}</span>
+        <strong>${escapeHtml(message)}</strong>
+        <span class="pill ${kind}">${kind}</span>
+      `;
+      feed.prepend(item);
     }
 
     function escapeHtml(value) {
@@ -775,207 +683,336 @@
         .replace(/'/g, '&#39;');
     }
 
-    function normalizeCommandStatus(result) {
-      if (!result) {
-        return 'error';
-      }
-
-      if (result.status === 'blocked' || result.error) {
-        return 'blocked';
-      }
-
-      return result.status || 'executed';
+    function getResultReason(result) {
+      return result.reason ||
+        result.error ||
+        result.raw && result.raw.error ||
+        result.policy && result.policy.reason ||
+        result.details && result.details.reason ||
+        'Sentinel blocked the action.';
     }
 
-    function recordCommand(commandName, result) {
-      commandHistory.unshift({
-        command: commandName,
-        status: normalizeCommandStatus(result),
-        tenant: getTenant(),
-        timestamp: new Date().toLocaleTimeString([], {
-          hour: '2-digit',
-          minute: '2-digit',
-          second: '2-digit'
+    function getTrustScore(result, fallback) {
+      if (typeof result.decisionScore === 'number') return result.decisionScore;
+      if (typeof result.trustScore === 'number') return result.trustScore;
+      if (result.data && typeof result.data.trustScore === 'number') return result.data.trustScore;
+      return fallback;
+    }
+
+    function getAlerts(result, fallback) {
+      if (Array.isArray(result.alerts)) return result.alerts.join(', ') || 'None';
+      return fallback;
+    }
+
+    function getHeaders() {
+      const headers = { 'Content-Type': 'application/json' };
+      const apiKey = getApiKey();
+      if (apiKey) {
+        headers['x-api-key'] = apiKey;
+      }
+      return headers;
+    }
+
+    async function runIntent(intent, context, role = getSelectedRole()) {
+      const action = intent.split('.')[1];
+      const res = await fetch('/api/control/execute', {
+        method: 'POST',
+        headers: getHeaders(),
+        body: JSON.stringify({
+          intent,
+          entity: 'deal',
+          action,
+          context,
+          actor: {
+            role,
+            userId: role === 'approver'
+              ? 'approval.operator@ownerfi.local'
+              : 'deal.operator@ownerfi.local'
+          },
+          tenantId: 'ownerfi',
+          metadata: {
+            sessionId: 'proof-ui',
+            source: 'proof-ui'
+          }
         })
       });
 
-      commandHistory = commandHistory.slice(0, 8);
-      renderHistory();
+      const body = await res.json();
+      state.lastEnvelope = body.envelope || null;
+      document.getElementById('technicalResult').textContent = JSON.stringify(body, null, 2);
+      return body;
     }
 
-    function renderHistory() {
-      const history = document.getElementById('history');
+    async function submitDeal() {
+      setBusy(true);
+      setStatus('Submitting deal through Control Plane...', '');
 
-      if (!commandHistory.length) {
-        history.innerHTML = '<p class="empty-state">No commands yet.</p>';
+      try {
+        const response = await runIntent('deal.submit', {
+          name: 'Jordan Lee',
+          vehicle: '2022 Ford F-150',
+          amount: 42000,
+          creditScore: 612
+        });
+        const result = response.result || {};
+
+        if (result.status === 'submitted') {
+          state.applicationId = result.applicationId || result.result && result.result.applicationId;
+          state.approved = false;
+          state.dealId = null;
+          setStatus('Deal Submitted - Awaiting Control', 'ok');
+          setDecision({
+            score: getTrustScore(result, 72),
+            alert: getAlerts(result, 'Review Needed'),
+            stateText: 'Submitted',
+            reason: `Application ${state.applicationId || 'created'} is staged. Execution remains controlled until approval.`
+          });
+          logActivity('Deal submitted through Control Plane', 'ok');
+        } else {
+          showBlocked(result, 'Deal submission blocked');
+        }
+      } catch (error) {
+        showBlocked({ error: error.message }, 'Deal submission failed');
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    async function executeDeal() {
+      setBusy(true);
+      setStatus('Sentinel is deciding before execution...', '');
+
+      try {
+        const response = await runIntent('deal.execute', {
+          applicationId: state.applicationId || 'missing-application'
+        });
+        const result = response.result || {};
+
+        if (result.status === 'blocked') {
+          showBlocked(result, 'Deal Blocked');
+          logActivity('Deal blocked before execution', 'blocked');
+        } else if (result.status === 'executed') {
+          state.dealId = result.dealId || result.result && result.result.dealId;
+          setStatus('Deal Executed - Approved Path', 'ok');
+          setDecision({
+            score: getTrustScore(result, 96),
+            alert: getAlerts(result, 'None'),
+            stateText: 'Executed',
+            reason: 'Deal executed safely.'
+          });
+          logActivity('Approved deal executed through Sentinel Core', 'ok');
+        } else {
+          showBlocked(result, 'Execution returned review state');
+        }
+      } catch (error) {
+        showBlocked({ error: error.message }, 'Execution failed');
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    async function approveDeal() {
+      if (!state.applicationId) {
+        showBlocked({ error: 'Submit a deal before approval.' }, 'Approval unavailable');
         return;
       }
 
-      history.innerHTML = commandHistory.map((entry) => `
-        <div class="history-row">
-          <strong>${escapeHtml(entry.command)}</strong>
-          <span class="pill ${escapeHtml(entry.status)}">${escapeHtml(entry.status)}</span>
-          <span>${escapeHtml(entry.tenant)} / ${escapeHtml(entry.timestamp)}</span>
-        </div>
-      `).join('');
+      setBusy(true);
+      setStatus('Routing approval through Control Plane...', '');
+
+      try {
+        const response = await runIntent('deal.approve', {
+          applicationId: state.applicationId
+        });
+        const result = response.result || {};
+
+        if (result.status === 'approved') {
+          state.approved = true;
+          setStatus('Deal Approved - Ready To Execute', 'ok');
+          setDecision({
+            score: getTrustScore(result, 88),
+            alert: getAlerts(result, 'Approval Recorded'),
+            stateText: 'Approved',
+            reason: 'Approval recorded.'
+          });
+          logActivity('Deal approval recorded', 'warn');
+        } else {
+          showBlocked(result, 'Approval blocked');
+        }
+      } catch (error) {
+        showBlocked({ error: error.message }, 'Approval failed');
+      } finally {
+        setBusy(false);
+      }
     }
 
-    function renderSummary(value) {
-      const applicationId =
-        value.applicationId ||
-        (value.submit && (value.submit.applicationId || value.submit.result && value.submit.result.applicationId)) ||
-        lastApplicationId;
-      const decision =
-        value.decision ||
-        (value.evaluate && (value.evaluate.applicationStatus || value.evaluate.result && value.evaluate.result.status));
-      const dealStatus =
-        value.dealStatus ||
-        (value.deal && (value.deal.dealStatus || value.deal.result && value.deal.result.status)) ||
-        (value.forbiddenDeal && value.forbiddenDeal.status === 'blocked' ? 'blocked' : null);
-      const entries = value.audit && Array.isArray(value.audit.entries) ? value.audit.entries : [];
-      const auditItems = entries.length
-        ? entries.map((entry) => `<li>${escapeHtml(getCommandLabel(entry.command))}</li>`).join('')
-        : '<li>No audit entries loaded</li>';
+    function showBlocked(result, label) {
+      const reason = getResultReason(result);
+      setStatus(label, 'blocked');
+      setDecision({
+        score: getTrustScore(result, 40),
+        alert: getAlerts(result, 'Approval Required'),
+        stateText: 'Blocked',
+        reason: reason === 'approval_required' ? 'Approval required before execution.' : reason,
+        kind: 'blocked'
+      });
+      logActivity(`${label}: ${reason}`, 'blocked');
+    }
 
-      document.getElementById('summary').innerHTML = `
-        <div class="result-grid">
-          <div class="result-card">
-            <span>Application Submitted</span>
-            <strong>${escapeHtml(valueOrDash(applicationId))}</strong>
-          </div>
-          <div class="result-card">
-            <span>Decision</span>
-            <strong>${escapeHtml(valueOrDash(decision).toUpperCase())}</strong>
-          </div>
-          <div class="result-card">
-            <span>Deal</span>
-            <strong>${escapeHtml(valueOrDash(dealStatus).toUpperCase())}</strong>
-          </div>
-        </div>
-        <div class="result-card">
-          <span>Audit Trail</span>
-          <ol class="audit-list">${auditItems}</ol>
+    function resetDemo() {
+      state.applicationId = null;
+      state.dealId = null;
+      state.approved = false;
+      state.lastEnvelope = null;
+      setSelectedRole('operator');
+      setStatus('System Status: Controlled', 'ok');
+      setDecision({
+        score: '--',
+        alert: '--',
+        stateText: 'Controlled',
+        reason: 'Waiting for a deal action.'
+      });
+      document.getElementById('technicalResult').textContent = 'No command has run yet.';
+      document.getElementById('activityFeed').innerHTML = `
+        <div class="feed-item">
+          <span>Ready</span>
+          <strong>Control Plane online</strong>
+          <span class="pill ok">controlled</span>
         </div>
       `;
+      setBusy(false);
+      logActivity('Demo reset', 'ok');
     }
 
-    function setOutput(value) {
-      renderSummary(value);
-      document.getElementById('out').textContent = JSON.stringify(value, null, 2);
-    }
-
-    function setStatus(text, cls) {
-      updateSurfaceBadges();
-      const el = document.getElementById('status');
-      el.textContent = text;
-      el.className = `status ${cls || ''}`.trim();
-    }
-
-    document.getElementById('apiKey').addEventListener('input', updateSurfaceBadges);
-    document.getElementById('tenant').addEventListener('change', () => {
-      lastApplicationId = null;
-      demoAuditTrail = [];
-      demoDealId = null;
-      setOutput({
-        applicationId: null,
-        decision: null,
-        dealStatus: null,
-        audit: { entries: [] }
-      });
-      setStatus(`${getSurface().name} surface selected.`, 'warn');
-    });
-    updateSurfaceBadges();
-
-    async function runFullFlow() {
+    async function runDemo() {
+      resetDemo();
+      setBusy(true);
       try {
-        lastFlowInput = getCurrentInput();
-        demoAuditTrail = isDemoOnlyMode() ? [] : demoAuditTrail;
-        demoDealId = isDemoOnlyMode() ? null : demoDealId;
-        const mode = isDemoOnlyMode() ? `demo-only ${getSurface().name} proof flow` : `full ${getSurface().name} proof flow`;
-        setStatus(`Running ${mode}...`, 'warn');
-
-        const submit = await command('application.submit', {
-          name: document.getElementById('name').value.trim(),
-          vehicle: document.getElementById('vehicle').value.trim(),
-          amount: Number(document.getElementById('amount').value),
-          creditScore: Number(document.getElementById('creditScore').value)
-        });
-
-        lastApplicationId = submit.applicationId || (submit.result && submit.result.applicationId) || null;
-
-        const evaluate = await command('application.evaluate', {
-          applicationId: lastApplicationId
-        });
-
-        const deal = await command('deal.execute', {
-          applicationId: lastApplicationId
-        });
-
-        const audit = await getAudit();
-
-        setOutput({ submit, evaluate, deal, audit });
-        setStatus(isDemoOnlyMode() ? 'Demo-only proof flow completed with no external writes.' : 'Full proof flow completed.', 'good');
-      } catch (error) {
-        setStatus(`Flow failed: ${error.message}`, 'bad');
+        setSelectedRole('operator');
+        await submitDeal();
+        await executeDeal();
+        setSelectedRole('approver');
+        await approveDeal();
+        setSelectedRole('operator');
+        await executeDeal();
+      } finally {
+        setBusy(false);
       }
     }
 
-    async function runForbiddenFlow() {
-      try {
-        lastFlowInput = getCurrentInput();
-        demoAuditTrail = isDemoOnlyMode() ? [] : demoAuditTrail;
-        demoDealId = isDemoOnlyMode() ? null : demoDealId;
-        setStatus('Running forbidden governance test...', 'warn');
-
-        const submit = await command('application.submit', {
-          name: document.getElementById('name').value.trim(),
-          vehicle: document.getElementById('vehicle').value.trim(),
-          amount: Number(document.getElementById('amount').value),
-          creditScore: Number(document.getElementById('creditScore').value)
-        });
-
-        lastApplicationId = submit.applicationId || (submit.result && submit.result.applicationId) || null;
-
-        const evaluate = await command('application.evaluate', {
-          applicationId: lastApplicationId
-        });
-
-        const forbiddenDeal = await command(
-          'deal.execute',
-          { applicationId: lastApplicationId },
-          'operator'
-        );
-
-        const audit = await getAudit();
-
-        setOutput({ submit, evaluate, forbiddenDeal, audit });
-        setStatus('Forbidden governance test completed.', 'good');
-      } catch (error) {
-        setStatus(`Governance test failed: ${error.message}`, 'bad');
+    function connectAuditStream() {
+      const apiKey = getApiKey();
+      const streamStatus = document.getElementById('streamStatus');
+      if (state.auditStream) {
+        state.auditStream.close();
+        state.auditStream = null;
       }
-    }
-
-    async function loadAudit() {
-      try {
-        setStatus('Loading audit trail...', 'warn');
-        const audit = await getAudit();
-        setOutput({ applicationId: lastApplicationId, audit });
-        setStatus('Audit trail loaded.', 'good');
-      } catch (error) {
-        setStatus(`Audit load failed: ${error.message}`, 'bad');
-      }
-    }
-
-    async function replayLastFlow() {
-      if (!lastFlowInput) {
-        setStatus('No workflow to replay yet.', 'warn');
+      if (!apiKey) {
+        streamStatus.textContent = 'Audit stream: waiting for key';
         return;
       }
 
-      applyFlowInput(lastFlowInput);
-      setStatus('Replaying last workflow...', 'warn');
-      await runFullFlow();
+      const url = `/v1/audit/stream?tenant=ownerfi&key=${encodeURIComponent(apiKey)}`;
+      const stream = new EventSource(url);
+      state.auditStream = stream;
+      streamStatus.textContent = 'Audit stream: connecting';
+
+      stream.onopen = () => {
+        streamStatus.textContent = 'Audit stream: live';
+      };
+
+      stream.onmessage = (event) => {
+        const auditEvent = JSON.parse(event.data);
+        if (auditEvent.type !== 'audit.event') return;
+        const result = auditEvent.result || {};
+        const status = result.status || result.data && result.data.status || result.decision || 'recorded';
+        logActivity(`${auditEvent.command || 'audit'} -> ${status}`, status === 'blocked' ? 'blocked' : 'ok');
+      };
+
+      stream.onerror = () => {
+        streamStatus.textContent = 'Audit stream: unavailable';
+      };
     }
+
+    function parseXEIntent(text) {
+      const command = String(text || '').trim().toLowerCase();
+      if (!command) return null;
+      if (command.includes('execute')) return 'deal.execute';
+      if (command.includes('approve')) return 'deal.approve';
+      if (command.includes('submit') || command.includes('new deal')) return 'deal.submit';
+      return null;
+    }
+
+    function setXEOpen(open) {
+      const overlay = document.getElementById('xeOverlay');
+      const input = document.getElementById('xeInput');
+      state.xeOpen = open;
+      overlay.classList.toggle('open', open);
+      overlay.setAttribute('aria-hidden', open ? 'false' : 'true');
+      if (open) {
+        input.value = '';
+        requestAnimationFrame(() => input.focus());
+      }
+    }
+
+    function toggleXE() {
+      setXEOpen(!state.xeOpen);
+    }
+
+    async function executeXECommand(text) {
+      const intent = parseXEIntent(text);
+      if (!intent) {
+        showBlocked({ error: `Unknown XE command: ${text || 'empty command'}` }, 'XE command unavailable');
+        return;
+      }
+
+      logActivity(`XE -> ${intent}`, 'warn');
+      setXEOpen(false);
+
+      if (intent === 'deal.submit') {
+        await submitDeal();
+      } else if (intent === 'deal.execute') {
+        await executeDeal();
+      } else if (intent === 'deal.approve') {
+        await approveDeal();
+      }
+    }
+
+    document.addEventListener('keydown', (event) => {
+      const key = event.key.toLowerCase();
+      if ((event.ctrlKey || event.metaKey) && key === 'k') {
+        event.preventDefault();
+        toggleXE();
+        return;
+      }
+
+      if (event.key === 'Escape' && state.xeOpen) {
+        event.preventDefault();
+        setXEOpen(false);
+      }
+    });
+
+    document.getElementById('xeInput').addEventListener('keydown', async (event) => {
+      if (event.key !== 'Enter') return;
+      event.preventDefault();
+      await executeXECommand(event.currentTarget.value);
+    });
+
+    document.querySelectorAll('[data-xe-command]').forEach((item) => {
+      item.addEventListener('click', async () => {
+        await executeXECommand(item.getAttribute('data-xe-command'));
+      });
+    });
+
+    document.getElementById('xeOverlay').addEventListener('click', (event) => {
+      if (event.target.id === 'xeOverlay') {
+        setXEOpen(false);
+      }
+    });
+
+    document.getElementById('apiKey').addEventListener('change', connectAuditStream);
+
+    setBusy(false);
   </script>
 </body>
 </html>

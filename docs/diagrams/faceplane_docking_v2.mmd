@@ -1,0 +1,17 @@
+flowchart LR
+  faceplane[Face Plane<br/>UI / Entry]
+  xe[XE<br/>Validation Layer]
+  gaas[GaaS<br/>Policy Mapping]
+  docking[Docking<br/>API + RBAC Boundary]
+  decision{Allowed?}
+  register[Allowed to Register]
+  approval[Needs Approval]
+  restricted[Blocked]
+
+  faceplane --> xe
+  xe --> gaas
+  gaas --> docking
+  docking --> decision
+  decision -- yes --> register
+  decision -- needs human --> approval
+  decision -- no --> restricted

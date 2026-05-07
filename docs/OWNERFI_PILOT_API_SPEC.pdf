@@ -1,0 +1,546 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [5 0 R 7 0 R 9 0 R 11 0 R 13 0 R] /Count 5 >>
+endobj
+3 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+4 0 obj
+<< /Length 1186 >>
+stream
+BT
+/F1 10 Tf
+50 760 Td
+14 TL
+(SentinelOS Pilot API - OwnerFi) Tj
+T*
+() Tj
+T*
+(Status: Pilot validation spec) Tj
+T*
+() Tj
+T*
+(Audience: OwnerFi technical validation) Tj
+T*
+() Tj
+T*
+(Overview) Tj
+T*
+() Tj
+T*
+(This pilot API allows OwnerFi to initialize and execute workflows through SentinelOS) Tj
+T*
+(  using governed commands. All actions are policy-enforced, auditable, tenant-scoped, and) Tj
+T*
+(  approval-gated where applicable.) Tj
+T*
+() Tj
+T*
+(Base URL) Tj
+T*
+() Tj
+T*
+(text) Tj
+T*
+(https://ca-nc-dev-sentinel.calmhill-388e1d39.eastus2.azurecontainerapps.io/v1) Tj
+T*
+() Tj
+T*
+() Tj
+T*
+(Authentication) Tj
+T*
+() Tj
+T*
+(http) Tj
+T*
+(Authorization: Bearer <OWNERFI_PILOT_KEY>) Tj
+T*
+() Tj
+T*
+() Tj
+T*
+(Compatibility header:) Tj
+T*
+() Tj
+T*
+(http) Tj
+T*
+(x-api-key: <OWNERFI_PILOT_KEY>) Tj
+T*
+() Tj
+T*
+() Tj
+T*
+(Pilot key scope:) Tj
+T*
+() Tj
+T*
+(- tenant: `ownerfi`) Tj
+T*
+(- execution: sandbox validation) Tj
+T*
+(- rate limited) Tj
+T*
+(- approval and audit scoped) Tj
+T*
+() Tj
+T*
+(1. Initialize Workflow) Tj
+T*
+() Tj
+T*
+(http) Tj
+T*
+(POST /workflow/init) Tj
+T*
+() Tj
+T*
+() Tj
+T*
+(Creates a governed execution session from submitted workflow tasks.) Tj
+T*
+() Tj
+T*
+(Request) Tj
+T*
+ET
+endstream
+endobj
+5 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R >> >> /Contents 4 0 R >>
+endobj
+6 0 obj
+<< /Length 1038 >>
+stream
+BT
+/F1 10 Tf
+50 760 Td
+14 TL
+() Tj
+T*
+(json) Tj
+T*
+({) Tj
+T*
+("runId": "ownerfi-pilot-run-001",) Tj
+T*
+("tasks": [) Tj
+T*
+({ "type": "application.submit" },) Tj
+T*
+({ "type": "deal.execute", "amount": 15000 }) Tj
+T*
+(]) Tj
+T*
+(}) Tj
+T*
+() Tj
+T*
+() Tj
+T*
+(Response) Tj
+T*
+() Tj
+T*
+(json) Tj
+T*
+({) Tj
+T*
+("runId": "ownerfi-pilot-run-001",) Tj
+T*
+("timeline": [],) Tj
+T*
+("requiresApproval": [) Tj
+T*
+({) Tj
+T*
+("step": "deal.execute",) Tj
+T*
+("reason": "Conditional items need evidence, verification, and a final human decision.",) Tj
+T*
+("status": "PENDING_APPROVAL") Tj
+T*
+(}) Tj
+T*
+(],) Tj
+T*
+("xeActions": [) Tj
+T*
+({) Tj
+T*
+("step": "application.submit",) Tj
+T*
+("status": "READY_FOR_XE") Tj
+T*
+(}) Tj
+T*
+(],) Tj
+T*
+("blockedActions": ["deal.execute"],) Tj
+T*
+("telemetry": {) Tj
+T*
+("status": "HARMONIZED",) Tj
+T*
+("summary": {) Tj
+T*
+("safe": 0,) Tj
+T*
+("requiresApproval": 0,) Tj
+T*
+("blocked": 0) Tj
+T*
+(}) Tj
+T*
+(}) Tj
+T*
+(}) Tj
+T*
+() Tj
+T*
+() Tj
+T*
+(2. Execute Step) Tj
+T*
+() Tj
+T*
+(http) Tj
+T*
+(POST /workflow/execute) Tj
+T*
+ET
+endstream
+endobj
+7 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R >> >> /Contents 6 0 R >>
+endobj
+8 0 obj
+<< /Length 924 >>
+stream
+BT
+/F1 10 Tf
+50 760 Td
+14 TL
+() Tj
+T*
+() Tj
+T*
+(Attempts to execute a workflow step.) Tj
+T*
+() Tj
+T*
+(Request) Tj
+T*
+() Tj
+T*
+(json) Tj
+T*
+({) Tj
+T*
+("runId": "ownerfi-pilot-run-001",) Tj
+T*
+("step": "deal.execute") Tj
+T*
+(}) Tj
+T*
+() Tj
+T*
+() Tj
+T*
+(Blocked Response) Tj
+T*
+() Tj
+T*
+(json) Tj
+T*
+({) Tj
+T*
+("status": "BLOCKED",) Tj
+T*
+("reason": "Approval required",) Tj
+T*
+("requiredRole": "approver",) Tj
+T*
+("command": "task.template.execute") Tj
+T*
+(}) Tj
+T*
+() Tj
+T*
+() Tj
+T*
+(Success Response) Tj
+T*
+() Tj
+T*
+(json) Tj
+T*
+({) Tj
+T*
+("status": "SUCCESS",) Tj
+T*
+("step": "deal.execute",) Tj
+T*
+("command": "task.template.execute",) Tj
+T*
+("timestamp": "2026-05-04T14:00:00.000Z") Tj
+T*
+(}) Tj
+T*
+() Tj
+T*
+() Tj
+T*
+(3. Resolve Approval) Tj
+T*
+() Tj
+T*
+(http) Tj
+T*
+(POST /approvals/resolve) Tj
+T*
+() Tj
+T*
+() Tj
+T*
+(Approves or rejects a pending workflow action.) Tj
+T*
+() Tj
+T*
+(Request) Tj
+T*
+() Tj
+T*
+(json) Tj
+T*
+ET
+endstream
+endobj
+9 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R >> >> /Contents 8 0 R >>
+endobj
+10 0 obj
+<< /Length 953 >>
+stream
+BT
+/F1 10 Tf
+50 760 Td
+14 TL
+({) Tj
+T*
+("runId": "ownerfi-pilot-run-001",) Tj
+T*
+("step": "deal.execute",) Tj
+T*
+("approved": true,) Tj
+T*
+("reason": "Pilot validation approval") Tj
+T*
+(}) Tj
+T*
+() Tj
+T*
+() Tj
+T*
+(4. Audit Trail) Tj
+T*
+() Tj
+T*
+(http) Tj
+T*
+(GET /audit/:runId) Tj
+T*
+() Tj
+T*
+() Tj
+T*
+(Returns:) Tj
+T*
+() Tj
+T*
+(- execution history) Tj
+T*
+(- approval records) Tj
+T*
+(- telemetry review) Tj
+T*
+(- audit entries) Tj
+T*
+() Tj
+T*
+(5. Telemetry Harmonizer) Tj
+T*
+() Tj
+T*
+(http) Tj
+T*
+(POST /telemetry/harmonize) Tj
+T*
+() Tj
+T*
+() Tj
+T*
+(Evaluates what system activity can be observed or exported under policy.) Tj
+T*
+() Tj
+T*
+(Request) Tj
+T*
+() Tj
+T*
+(json) Tj
+T*
+({) Tj
+T*
+("telemetryState": "LIMITED",) Tj
+T*
+("activities": [) Tj
+T*
+({ "type": "workflow.metrics" },) Tj
+T*
+({ "type": "deal.execution" },) Tj
+T*
+({ "type": "external.export" }) Tj
+T*
+(]) Tj
+T*
+(}) Tj
+T*
+() Tj
+T*
+() Tj
+T*
+(Response) Tj
+T*
+() Tj
+T*
+(json) Tj
+T*
+({) Tj
+T*
+ET
+endstream
+endobj
+11 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R >> >> /Contents 10 0 R >>
+endobj
+12 0 obj
+<< /Length 1384 >>
+stream
+BT
+/F1 10 Tf
+50 760 Td
+14 TL
+("status": "HARMONIZED",) Tj
+T*
+("mode": "GUARDED_VISIBILITY",) Tj
+T*
+("summary": {) Tj
+T*
+("safe": 1,) Tj
+T*
+("requiresApproval": 1,) Tj
+T*
+("blocked": 1) Tj
+T*
+(},) Tj
+T*
+("details": [) Tj
+T*
+({) Tj
+T*
+("action": "telemetry.metric.write",) Tj
+T*
+("status": "SAFE_TO_SEND") Tj
+T*
+(},) Tj
+T*
+({) Tj
+T*
+("action": "deal.execute",) Tj
+T*
+("status": "APPROVAL_REQUIRED",) Tj
+T*
+("reason": "Financial execution visibility requires human approval.") Tj
+T*
+(},) Tj
+T*
+({) Tj
+T*
+("action": "telemetry.export.external",) Tj
+T*
+("status": "BLOCKED",) Tj
+T*
+("reason": "External export is blocked when telemetry is off or limited.") Tj
+T*
+(}) Tj
+T*
+(]) Tj
+T*
+(}) Tj
+T*
+() Tj
+T*
+() Tj
+T*
+(Existing Internal Route Mapping) Tj
+T*
+() Tj
+T*
+(| Pilot API | SentinelOS runtime |) Tj
+T*
+(| --- | --- |) Tj
+T*
+(| `POST /v1/workflow/init` | `POST /task-templates/ingest` |) Tj
+T*
+(| `POST /v1/workflow/execute` | `task.template.execute` |) Tj
+T*
+(| `POST /v1/approvals/resolve` | approval store + approval resolution |) Tj
+T*
+(| `GET /v1/audit/:runId` | audit stream + execution session lookup |) Tj
+T*
+(| `POST /v1/telemetry/harmonize` | Governed Telemetry Harmonizer |) Tj
+T*
+() Tj
+T*
+(Key Principle) Tj
+T*
+() Tj
+T*
+(All actions are executed through governed commands.) Tj
+T*
+() Tj
+T*
+(Nothing executes, and nothing sensitive is exposed, without policy alignment.) Tj
+T*
+ET
+endstream
+endobj
+13 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R >> >> /Contents 12 0 R >>
+endobj
+xref
+0 14
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000141 00000 n 
+0000000211 00000 n 
+0000001449 00000 n 
+0000001575 00000 n 
+0000002665 00000 n 
+0000002791 00000 n 
+0000003766 00000 n 
+0000003892 00000 n 
+0000004897 00000 n 
+0000005025 00000 n 
+0000006462 00000 n 
+trailer
+<< /Size 14 /Root 1 0 R >>
+startxref
+6590
+%%EOF

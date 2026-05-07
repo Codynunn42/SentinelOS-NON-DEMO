@@ -1,0 +1,18 @@
+flowchart LR
+  user[User Action]
+  faceplane[Face Plane<br/>UI / Surface]
+  command[/v1/command<br/>Command Envelope]
+  governance[Governance Pipeline<br/>Auth + Policy + Risk]
+  execution[Execution]
+  audit[/v1/audit<br/>Audit Log]
+  response[Verified Outcome]
+
+  user --> faceplane
+  faceplane --> command
+  command --> governance
+  governance --> execution
+  execution --> audit
+  audit --> response
+
+  health[/health<br/>Live Proof]
+  health -. proves uptime .-> faceplane

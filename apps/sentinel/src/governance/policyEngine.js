@@ -3,6 +3,8 @@ const { principalHasScope } = require('../security/keyRegistry');
 const commandScopes = {
   'application.submit': 'application:submit',
   'application.evaluate': 'application:evaluate',
+  'deal.submit': 'deal:submit',
+  'deal.approve': 'deal:approve',
   'deal.execute': 'deal:execute',
   'audit.read': 'audit:read',
   'receipt.read': 'receipt:read',
@@ -12,6 +14,26 @@ const commandScopes = {
   'platform.admin': 'platform:admin',
   'learning.read': 'learning:read',
   'learning.write': 'learning:write',
+  'media.polish': 'media:polish',
+  'sentinel.media.polish': 'media:polish',
+  'openai.faceplane.execute': 'openai:execute',
+  'openai.faceplane.read': 'openai:read',
+  'task.template.orchestrate': 'task:orchestrate',
+  'task.template.read': 'task:read',
+  'task.template.execute': 'task:execute',
+  'telemetry.metric.write': 'telemetry:write',
+  'telemetry.audit.summary': 'telemetry:write',
+  'telemetry.harmonize': 'telemetry:write',
+  'telemetry.export.external': 'telemetry:export',
+  'telemetry.payload.sensitive': 'telemetry:export',
+  'billing.checkout.session.create': 'billing:write',
+  'billing.checkout.session.status': 'billing:read',
+  'billing.webhook.receive': 'billing:webhook',
+  'system.reframe.product': 'platform:admin',
+  'repo.update.structure': 'platform:admin',
+  'system.validate.integrity': 'platform:admin',
+  'dealFlow.run.demo': 'platform:admin',
+  'ui.sync.labels': 'platform:admin',
   'security.write': 'security:write',
   'policy.evaluate': 'policy:evaluate',
   'cdnlux.token.evaluate': 'platform:admin',
@@ -128,6 +150,15 @@ function evaluatePolicy(input = {}, signals = {}) {
       command: ctx.command,
       approvalRequired: false,
       statusCode: 400
+    });
+  }
+
+  if (ctx.command === 'telemetry.export.external' || ctx.command === 'telemetry.payload.sensitive') {
+    return blocked('visibility', 'high', 'Telemetry export requires approval', {
+      requiredScope: ctx.requiredScope,
+      command: ctx.command,
+      approvalRequired: true,
+      statusCode: 403
     });
   }
 

@@ -307,6 +307,154 @@
       font-weight: 800;
     }
 
+    .live-feed {
+      display: grid;
+      gap: 8px;
+      max-height: 280px;
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #071019;
+      padding: 10px;
+    }
+
+    .live-event {
+      border-left: 3px solid var(--line);
+      padding: 8px 0 8px 10px;
+      color: var(--muted);
+      font: 12px/1.45 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+
+    .live-event.good {
+      border-left-color: var(--green);
+    }
+
+    .live-event.warn {
+      border-left-color: var(--yellow);
+    }
+
+    .live-event.bad {
+      border-left-color: var(--red);
+    }
+
+    .live-event strong {
+      display: block;
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 13px;
+    }
+
+    .signal-list {
+      display: grid;
+      gap: 8px;
+      max-height: 240px;
+      overflow: auto;
+    }
+
+    .signal {
+      border: 1px solid var(--line);
+      border-left: 3px solid var(--line);
+      border-radius: 6px;
+      padding: 9px 10px;
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .signal.high {
+      border-left-color: var(--red);
+    }
+
+    .signal.medium {
+      border-left-color: var(--yellow);
+    }
+
+    .signal.low {
+      border-left-color: var(--green);
+    }
+
+    .signal strong {
+      display: block;
+      color: var(--text);
+      font-size: 13px;
+      margin-bottom: 3px;
+    }
+
+    .control-form {
+      display: grid;
+      gap: 10px;
+    }
+
+    .control-form textarea {
+      width: 100%;
+      min-height: 138px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #0f151d;
+      color: var(--text);
+      padding: 10px 11px;
+      font: 13px/1.45 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      resize: vertical;
+    }
+
+    .output-box {
+      min-height: 138px;
+      max-height: 320px;
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #071019;
+      color: var(--muted);
+      padding: 12px;
+      font: 12px/1.45 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      white-space: pre-wrap;
+    }
+
+    .mini-board {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .board-column {
+      min-width: 0;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: var(--surface-2);
+      padding: 11px;
+    }
+
+    .board-column h3 {
+      margin: 0 0 9px;
+      font-size: 13px;
+    }
+
+    .board-item {
+      border-top: 1px solid rgba(145, 163, 181, 0.18);
+      padding-top: 8px;
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .board-item strong {
+      display: block;
+      color: var(--text);
+      overflow-wrap: anywhere;
+    }
+
+    .story-row {
+      display: grid;
+      grid-template-columns: 170px 1fr 120px;
+      gap: 10px;
+      border-top: 1px solid rgba(145, 163, 181, 0.16);
+      padding: 9px 0;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
     .pipeline-section {
       margin-bottom: 14px;
     }
@@ -411,6 +559,11 @@
         grid-template-columns: 1fr;
       }
 
+      .mini-board,
+      .story-row {
+        grid-template-columns: 1fr;
+      }
+
       .row-actions {
         justify-content: flex-start;
       }
@@ -470,6 +623,52 @@
     </section>
 
     <section class="grid">
+      <article class="panel span-6">
+        <div class="panel-head">
+          <h2>Command Console</h2>
+          <span id="commandChip" class="chip">idle</span>
+        </div>
+        <div class="control-form">
+          <label>
+            Governed Command Payload
+            <textarea id="commandPayload">{
+  "runId": "nunn_control_surface",
+  "tasks": [
+    { "type": "application.submit" },
+    { "type": "deal.execute", "amount": 15000 },
+    { "type": "billing.checkout.create" }
+  ]
+}</textarea>
+          </label>
+          <div class="row-actions" style="justify-content:flex-start">
+            <button id="runWorkflowButton" type="button">Initialize Workflow</button>
+            <button id="executeWorkflowButton" class="secondary" type="button">Attempt Blocked Step</button>
+          </div>
+          <pre id="commandOutput" class="output-box">No command run yet.</pre>
+        </div>
+      </article>
+
+      <article class="panel span-6">
+        <div class="panel-head">
+          <h2>Workflow Board</h2>
+          <span id="workflowChip" class="chip">not initialized</span>
+        </div>
+        <div id="workflowBoard" class="mini-board">
+          <div class="board-column">
+            <h3>Ready</h3>
+            <p class="empty">No ready actions.</p>
+          </div>
+          <div class="board-column">
+            <h3>Blocked</h3>
+            <p class="empty">No blocked actions.</p>
+          </div>
+          <div class="board-column">
+            <h3>Timeline</h3>
+            <p class="empty">No timeline loaded.</p>
+          </div>
+        </div>
+      </article>
+
       <article class="panel span-4">
         <div class="panel-head">
           <h2>System State</h2>
@@ -584,6 +783,165 @@
         <ul id="activityFeed" class="feed"></ul>
       </article>
 
+      <article class="panel span-4">
+        <div class="panel-head">
+          <h2>Trust Dashboard</h2>
+          <span id="metricsChip" class="chip">not loaded</span>
+        </div>
+        <div class="metric-grid">
+          <div class="metric">
+            <span>Total Events</span>
+            <strong id="metricTotalEvents">-</strong>
+          </div>
+          <div class="metric">
+            <span>Approved</span>
+            <strong id="metricApproved">-</strong>
+          </div>
+          <div class="metric">
+            <span>Blocked</span>
+            <strong id="metricBlocked">-</strong>
+          </div>
+          <div class="metric">
+            <span>Avg Trust</span>
+            <strong id="metricAvgTrust">-</strong>
+          </div>
+        </div>
+        <div class="actions" style="margin-top:12px">
+          <button id="loadMetricsButton" class="secondary" type="button">Load Metrics</button>
+        </div>
+      </article>
+
+      <article class="panel span-4">
+        <div class="panel-head">
+          <h2>Governance Signals</h2>
+          <span id="signalsChip" class="chip">not loaded</span>
+        </div>
+        <div class="metric-grid">
+          <div class="metric">
+            <span>High</span>
+            <strong id="signalHigh">-</strong>
+          </div>
+          <div class="metric">
+            <span>Medium</span>
+            <strong id="signalMedium">-</strong>
+          </div>
+          <div class="metric">
+            <span>Low</span>
+            <strong id="signalLow">-</strong>
+          </div>
+          <div class="metric">
+            <span>Total</span>
+            <strong id="signalTotal">-</strong>
+          </div>
+        </div>
+        <div class="actions" style="margin-top:12px">
+          <button id="loadSignalsButton" class="secondary" type="button">Load Signals</button>
+          <button id="connectSignalsStreamButton" class="secondary" type="button">Connect Signals</button>
+        </div>
+        <div id="governanceSignals" class="signal-list" style="margin-top:12px">
+          <p class="empty">No governance signals loaded.</p>
+        </div>
+      </article>
+
+      <article class="panel span-4">
+        <div class="panel-head">
+          <h2>Live Audit Feed</h2>
+          <span id="auditStreamChip" class="chip">disconnected</span>
+        </div>
+        <div class="actions" style="margin-top:0;margin-bottom:10px">
+          <button id="connectAuditStreamButton" class="secondary" type="button">Connect Stream</button>
+        </div>
+        <div id="liveAuditFeed" class="live-feed">
+          <p class="empty">No live audit events yet.</p>
+        </div>
+      </article>
+
+      <article class="panel span-4">
+        <div class="panel-head">
+          <h2>Telemetry Harmonizer</h2>
+          <span id="telemetryChip" class="chip">not run</span>
+        </div>
+        <div class="metric-grid">
+          <div class="metric">
+            <span>Safe</span>
+            <strong id="telemetrySafe">-</strong>
+          </div>
+          <div class="metric">
+            <span>Approval</span>
+            <strong id="telemetryApproval">-</strong>
+          </div>
+          <div class="metric">
+            <span>Blocked</span>
+            <strong id="telemetryBlocked">-</strong>
+          </div>
+          <div class="metric">
+            <span>Mode</span>
+            <strong id="telemetryMode">-</strong>
+          </div>
+        </div>
+        <div class="actions" style="margin-top:12px">
+          <button id="runTelemetryButton" class="secondary" type="button">Run Harmonizer</button>
+        </div>
+      </article>
+
+      <article class="panel span-4">
+        <div class="panel-head">
+          <h2>Billing Controls</h2>
+          <span id="billingChip" class="chip">not checked</span>
+        </div>
+        <div class="metric-grid">
+          <div class="metric">
+            <span>Checkout</span>
+            <strong id="billingStatus">-</strong>
+          </div>
+          <div class="metric">
+            <span>Config Gate</span>
+            <strong id="billingGate">-</strong>
+          </div>
+        </div>
+        <div class="actions" style="margin-top:12px">
+          <button id="loadBillingButton" class="secondary" type="button">Check Billing</button>
+          <button id="attemptBillingButton" class="secondary" type="button">Attempt Checkout</button>
+        </div>
+      </article>
+
+      <article class="panel span-4">
+        <div class="panel-head">
+          <h2>Audit Timeline</h2>
+          <span id="auditChip" class="chip">not loaded</span>
+        </div>
+        <div class="actions" style="margin-top:0;margin-bottom:10px">
+          <button id="loadAuditButton" class="secondary" type="button">Load Audit</button>
+        </div>
+        <div id="auditTimeline">
+          <p class="empty">No audit story loaded.</p>
+        </div>
+      </article>
+
+      <article class="panel span-12">
+        <div class="panel-head">
+          <h2>Anchored States</h2>
+          <span id="anchorChip" class="chip">not loaded</span>
+        </div>
+        <div class="actions" style="margin-top:0;margin-bottom:10px">
+          <button id="loadAnchorsButton" class="secondary" type="button">Load Anchors</button>
+        </div>
+        <div id="anchorBoard" class="mini-board">
+          <div class="board-column">
+            <h3>System Release</h3>
+            <p class="empty">No anchor loaded.</p>
+          </div>
+          <div class="board-column">
+            <h3>External Proof</h3>
+            <p class="empty">No transaction recorded.</p>
+          </div>
+          <div class="board-column">
+            <h3>Next Anchors</h3>
+            <p class="empty">No roadmap loaded.</p>
+          </div>
+        </div>
+      </article>
+
       <article class="panel span-12">
         <div class="panel-head">
           <h2>Evidence</h2>
@@ -636,7 +994,11 @@
       tenant: sessionStorage.getItem('sentinelMissionControlTenant') || 'ownerfi',
       polling: false,
       pollHandle: null,
-      busyApproval: null
+      busyApproval: null,
+      auditStream: null,
+      signalStream: null,
+      liveEvents: [],
+      workflow: null
     };
 
     const el = {
@@ -644,6 +1006,30 @@
       tenantInput: document.getElementById('tenantInput'),
       refreshButton: document.getElementById('refreshButton'),
       pollButton: document.getElementById('pollButton'),
+      commandPayload: document.getElementById('commandPayload'),
+      commandOutput: document.getElementById('commandOutput'),
+      runWorkflowButton: document.getElementById('runWorkflowButton'),
+      executeWorkflowButton: document.getElementById('executeWorkflowButton'),
+      commandChip: document.getElementById('commandChip'),
+      workflowChip: document.getElementById('workflowChip'),
+      workflowBoard: document.getElementById('workflowBoard'),
+      runTelemetryButton: document.getElementById('runTelemetryButton'),
+      telemetryChip: document.getElementById('telemetryChip'),
+      telemetrySafe: document.getElementById('telemetrySafe'),
+      telemetryApproval: document.getElementById('telemetryApproval'),
+      telemetryBlocked: document.getElementById('telemetryBlocked'),
+      telemetryMode: document.getElementById('telemetryMode'),
+      loadBillingButton: document.getElementById('loadBillingButton'),
+      attemptBillingButton: document.getElementById('attemptBillingButton'),
+      billingChip: document.getElementById('billingChip'),
+      billingStatus: document.getElementById('billingStatus'),
+      billingGate: document.getElementById('billingGate'),
+      loadAuditButton: document.getElementById('loadAuditButton'),
+      auditChip: document.getElementById('auditChip'),
+      auditTimeline: document.getElementById('auditTimeline'),
+      loadAnchorsButton: document.getElementById('loadAnchorsButton'),
+      anchorChip: document.getElementById('anchorChip'),
+      anchorBoard: document.getElementById('anchorBoard'),
       connectionChip: document.getElementById('connectionChip'),
       databaseChip: document.getElementById('databaseChip'),
       updatedChip: document.getElementById('updatedChip'),
@@ -669,6 +1055,23 @@
       approvalQueue: document.getElementById('approvalQueue'),
       approvalCount: document.getElementById('approvalCount'),
       activityFeed: document.getElementById('activityFeed'),
+      metricsChip: document.getElementById('metricsChip'),
+      metricTotalEvents: document.getElementById('metricTotalEvents'),
+      metricApproved: document.getElementById('metricApproved'),
+      metricBlocked: document.getElementById('metricBlocked'),
+      metricAvgTrust: document.getElementById('metricAvgTrust'),
+      loadMetricsButton: document.getElementById('loadMetricsButton'),
+      signalsChip: document.getElementById('signalsChip'),
+      signalHigh: document.getElementById('signalHigh'),
+      signalMedium: document.getElementById('signalMedium'),
+      signalLow: document.getElementById('signalLow'),
+      signalTotal: document.getElementById('signalTotal'),
+      loadSignalsButton: document.getElementById('loadSignalsButton'),
+      connectSignalsStreamButton: document.getElementById('connectSignalsStreamButton'),
+      governanceSignals: document.getElementById('governanceSignals'),
+      auditStreamChip: document.getElementById('auditStreamChip'),
+      connectAuditStreamButton: document.getElementById('connectAuditStreamButton'),
+      liveAuditFeed: document.getElementById('liveAuditFeed'),
       evidenceFeed: document.getElementById('evidenceFeed'),
       windowChip: document.getElementById('windowChip'),
       errorText: document.getElementById('errorText')
@@ -699,6 +1102,15 @@
       const date = new Date(value);
       if (Number.isNaN(date.getTime())) return value;
       return date.toLocaleString();
+    }
+
+    function escapeHtml(value) {
+      return String(value === undefined || value === null ? '' : value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
     }
 
     function headers() {
@@ -834,6 +1246,451 @@
       });
     }
 
+    function eventTone(event) {
+      const result = event && event.result ? event.result : {};
+      const status = String(result.status || result.decision || event.type || '').toLowerCase();
+      if (result.success === false || status.includes('block') || status.includes('error')) return 'bad';
+      if (result.approvalRequired || status.includes('pending') || status.includes('approval')) return 'warn';
+      if (result.success === true || status.includes('success') || status.includes('approved') || status.includes('connected')) return 'good';
+      return '';
+    }
+
+    function renderLiveAuditFeed() {
+      if (!state.liveEvents.length) {
+        el.liveAuditFeed.innerHTML = '<p class="empty">No live audit events yet.</p>';
+        return;
+      }
+
+      el.liveAuditFeed.innerHTML = state.liveEvents.slice(0, 20).map((event) => {
+        const result = event.result || {};
+        const trust = typeof event.trustScore === 'number' ? event.trustScore : '-';
+        const reasons = Array.isArray(event.reasons) && event.reasons.length ? ` / ${event.reasons.join(', ')}` : '';
+        return `
+          <div class="live-event ${eventTone(event)}">
+            <strong>${escapeHtml(event.command || event.type || 'audit.event')}</strong>
+            <span>${escapeHtml(formatTime(event.timestamp))} / ${escapeHtml(event.tenant || state.tenant || 'tenant')} / Trust: ${escapeHtml(trust)}</span>
+            <span>${escapeHtml(result.status || result.decision || (result.success === false ? 'blocked' : result.success === true ? 'recorded' : 'recorded'))}${escapeHtml(reasons)}</span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderGovernanceSignals(signals) {
+      if (!signals || !signals.length) {
+        el.governanceSignals.innerHTML = '<p class="empty">No active governance signals.</p>';
+        return;
+      }
+
+      el.governanceSignals.innerHTML = signals.slice(0, 8).map((signal) => `
+        <div class="signal ${escapeHtml(signal.severity || '')}">
+          <strong>${escapeHtml(signal.type || 'governance_signal')}</strong>
+          <span>${escapeHtml(signal.message || 'Signal raised')}</span>
+          <span>${escapeHtml(formatTime(signal.timestamp))} / ${escapeHtml(signal.command || 'unknown')}</span>
+        </div>
+      `).join('');
+    }
+
+    async function connectAuditStream() {
+      state.apiKey = el.apiKeyInput.value.trim();
+      state.tenant = el.tenantInput.value.trim() || 'ownerfi';
+
+      if (!state.apiKey) {
+        setChip(el.auditStreamChip, 'API key required', 'warn');
+        el.errorText.textContent = 'Enter the Sentinel API key before connecting the audit stream.';
+        return;
+      }
+
+      if (state.auditStream) {
+        state.auditStream.abort();
+        state.auditStream = null;
+        setChip(el.auditStreamChip, 'disconnected', 'bad');
+        el.connectAuditStreamButton.textContent = 'Connect Stream';
+        return;
+      }
+
+      const tenant = encodeURIComponent(state.tenant);
+      const controller = new AbortController();
+      state.auditStream = controller;
+      setChip(el.auditStreamChip, 'connecting', 'warn');
+      el.connectAuditStreamButton.textContent = 'Disconnect Stream';
+
+      try {
+        const response = await fetch(`/v1/audit/stream?tenant=${tenant}`, {
+          headers: { authorization: `Bearer ${state.apiKey}` },
+          signal: controller.signal
+        });
+
+        if (!response.ok || !response.body) {
+          throw new Error(`Audit stream unavailable (${response.status})`);
+        }
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+
+        while (state.auditStream === controller) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+          const messages = buffer.split('\n\n');
+          buffer = messages.pop() || '';
+
+          messages.forEach((message) => {
+            const line = message.split('\n').find((candidate) => candidate.startsWith('data: '));
+            if (!line) return;
+
+            const payload = JSON.parse(line.slice('data: '.length));
+            if (payload.type === 'stream.heartbeat') {
+              setChip(el.auditStreamChip, 'live', 'good');
+              return;
+            }
+
+            state.liveEvents = [payload, ...state.liveEvents].slice(0, 20);
+            setChip(el.auditStreamChip, 'live', 'good');
+            renderLiveAuditFeed();
+            loadMetrics().catch(() => {});
+            if (Array.isArray(payload.governanceSignals) && payload.governanceSignals.length) {
+              loadGovernanceSignals().catch(() => {});
+            }
+          });
+        }
+      } catch (error) {
+        if (controller.signal.aborted) return;
+        setChip(el.auditStreamChip, 'stream error', 'bad');
+        el.errorText.textContent = error.message;
+      } finally {
+        if (state.auditStream === controller) {
+          state.auditStream = null;
+          el.connectAuditStreamButton.textContent = 'Connect Stream';
+        }
+      }
+    }
+
+    async function loadMetrics() {
+      const tenant = encodeURIComponent(state.tenant || 'ownerfi');
+      const payload = await api(`/v1/metrics?tenant=${tenant}`, { method: 'GET' });
+      const metrics = payload.metrics || {};
+      el.metricTotalEvents.textContent = metrics.totalEvents ?? '-';
+      el.metricApproved.textContent = metrics.approved ?? '-';
+      el.metricBlocked.textContent = metrics.blocked ?? '-';
+      el.metricAvgTrust.textContent = typeof metrics.avgTrustScore === 'number' ? metrics.avgTrustScore : '-';
+      if (metrics.governanceSignals) {
+        el.signalHigh.textContent = metrics.governanceSignals.high ?? '-';
+        el.signalMedium.textContent = metrics.governanceSignals.medium ?? '-';
+        el.signalLow.textContent = metrics.governanceSignals.low ?? '-';
+        el.signalTotal.textContent = metrics.governanceSignals.totalSignals ?? '-';
+      }
+      setChip(el.metricsChip, `${metrics.totalEvents || 0} events`, metrics.blocked ? 'warn' : 'good');
+      return payload;
+    }
+
+    async function loadGovernanceSignals() {
+      const tenant = encodeURIComponent(state.tenant || 'ownerfi');
+      const payload = await api(`/v1/alerts?tenant=${tenant}`, { method: 'GET' });
+      const metrics = payload.metrics || {};
+      const signals = payload.signals || payload.alerts || [];
+
+      el.signalHigh.textContent = metrics.high ?? '-';
+      el.signalMedium.textContent = metrics.medium ?? '-';
+      el.signalLow.textContent = metrics.low ?? '-';
+      el.signalTotal.textContent = metrics.totalSignals ?? signals.length ?? '-';
+      setChip(el.signalsChip, `${signals.length || 0} signals`, metrics.high ? 'bad' : metrics.medium ? 'warn' : 'good');
+      renderGovernanceSignals(signals);
+      return payload;
+    }
+
+    async function connectSignalsStream() {
+      state.apiKey = el.apiKeyInput.value.trim();
+      state.tenant = el.tenantInput.value.trim() || 'ownerfi';
+
+      if (!state.apiKey) {
+        setChip(el.signalsChip, 'API key required', 'warn');
+        el.errorText.textContent = 'Enter the Sentinel API key before connecting the signal stream.';
+        return;
+      }
+
+      if (state.signalStream) {
+        state.signalStream.abort();
+        state.signalStream = null;
+        setChip(el.signalsChip, 'disconnected', 'bad');
+        el.connectSignalsStreamButton.textContent = 'Connect Signals';
+        return;
+      }
+
+      const tenant = encodeURIComponent(state.tenant);
+      const controller = new AbortController();
+      state.signalStream = controller;
+      setChip(el.signalsChip, 'connecting', 'warn');
+      el.connectSignalsStreamButton.textContent = 'Disconnect Signals';
+
+      try {
+        const response = await fetch(`/v1/signals/stream?tenant=${tenant}`, {
+          headers: { authorization: `Bearer ${state.apiKey}` },
+          signal: controller.signal
+        });
+
+        if (!response.ok || !response.body) {
+          throw new Error(`Signal stream unavailable (${response.status})`);
+        }
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+
+        while (state.signalStream === controller) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+          const messages = buffer.split('\n\n');
+          buffer = messages.pop() || '';
+
+          messages.forEach((message) => {
+            const line = message.split('\n').find((candidate) => candidate.startsWith('data: '));
+            if (!line) return;
+
+            const payload = JSON.parse(line.slice('data: '.length));
+            if (payload.type === 'signals.heartbeat') {
+              setChip(el.signalsChip, 'live', 'good');
+              return;
+            }
+
+            setChip(el.signalsChip, 'live', payload.signal && payload.signal.severity === 'high' ? 'bad' : 'warn');
+            loadGovernanceSignals().catch(() => {});
+          });
+        }
+      } catch (error) {
+        if (controller.signal.aborted) return;
+        setChip(el.signalsChip, 'stream error', 'bad');
+        el.errorText.textContent = error.message;
+      } finally {
+        if (state.signalStream === controller) {
+          state.signalStream = null;
+          el.connectSignalsStreamButton.textContent = 'Connect Signals';
+        }
+      }
+    }
+
+    function writeCommandOutput(payload) {
+      el.commandOutput.textContent = JSON.stringify(payload, null, 2);
+    }
+
+    function parseCommandPayload() {
+      try {
+        const parsed = JSON.parse(el.commandPayload.value || '{}');
+        return {
+          ...parsed,
+          tenant: state.tenant || parsed.tenant || 'ownerfi'
+        };
+      } catch (error) {
+        throw new Error(`Command payload is not valid JSON: ${error.message}`);
+      }
+    }
+
+    function renderWorkflowBoard(data) {
+      const ready = Array.isArray(data && data.xeActions) ? data.xeActions : [];
+      const blocked = Array.isArray(data && data.requiresApproval) ? data.requiresApproval : [];
+      const timeline = Array.isArray(data && data.timeline) ? data.timeline : [];
+      const item = (value, fallback) => `
+        <div class="board-item">
+          <strong>${escapeHtml(value.step || value.name || value.title || value.taskId || fallback)}</strong>
+          <span>${escapeHtml(value.status || value.badge || '')}</span>
+          <small>${escapeHtml(value.reason || value.nextStep || '')}</small>
+        </div>
+      `;
+      const empty = (text) => `<p class="empty">${escapeHtml(text)}</p>`;
+
+      el.workflowBoard.innerHTML = `
+        <div class="board-column">
+          <h3>Ready</h3>
+          ${ready.length ? ready.map((entry) => item(entry, 'ready action')).join('') : empty('No ready actions.')}
+        </div>
+        <div class="board-column">
+          <h3>Blocked</h3>
+          ${blocked.length ? blocked.map((entry) => item(entry, 'blocked action')).join('') : empty('No blocked actions.')}
+        </div>
+        <div class="board-column">
+          <h3>Timeline</h3>
+          ${timeline.length ? timeline.slice(0, 6).map((entry) => item(entry, 'timeline step')).join('') : empty('No timeline loaded.')}
+        </div>
+      `;
+      setChip(el.workflowChip, data && data.executionSession ? data.executionSession : 'not initialized', blocked.length ? 'warn' : ready.length ? 'good' : '');
+    }
+
+    async function initializeWorkflowFromConsole() {
+      state.apiKey = el.apiKeyInput.value.trim();
+      state.tenant = el.tenantInput.value.trim() || 'ownerfi';
+
+      if (!state.apiKey) {
+        throw new Error('API key required for workflow initialization.');
+      }
+
+      const payload = parseCommandPayload();
+      const result = await api('/v1/workflow/init', {
+        method: 'POST',
+        body: JSON.stringify(payload)
+      });
+      state.workflow = result;
+      renderWorkflowBoard(result);
+      writeCommandOutput(result);
+      setChip(el.commandChip, result.status || 'workflow initialized', result.requiresApproval && result.requiresApproval.length ? 'warn' : 'good');
+      return result;
+    }
+
+    async function attemptWorkflowExecution() {
+      if (!state.workflow) {
+        await initializeWorkflowFromConsole();
+      }
+
+      const blocked = state.workflow.requiresApproval && state.workflow.requiresApproval[0];
+      const ready = state.workflow.xeActions && state.workflow.xeActions[0];
+      const step = blocked || ready;
+
+      if (!step) {
+        throw new Error('No workflow step available to execute.');
+      }
+
+      const result = await api('/v1/workflow/execute', {
+        method: 'POST',
+        body: JSON.stringify({
+          runId: state.workflow.executionSession || state.workflow.runId,
+          step: step.step || step.taskId
+        })
+      });
+      writeCommandOutput({
+        workflow: state.workflow.executionSession || state.workflow.runId,
+        executionAttempt: result
+      });
+      setChip(el.commandChip, result.status || 'execution attempted', result.status === 'BLOCKED' ? 'warn' : 'good');
+      return result;
+    }
+
+    async function runTelemetry() {
+      const payload = await api('/v1/telemetry/harmonize', {
+        method: 'POST',
+        body: JSON.stringify({
+          telemetryState: 'LIMITED',
+          tenant: state.tenant || 'ownerfi',
+          activities: [
+            { type: 'workflow.metrics' },
+            { type: 'deal.execution' },
+            { type: 'billing.checkout' },
+            { type: 'external.export' }
+          ]
+        })
+      });
+      const summary = payload.summary || {};
+      el.telemetrySafe.textContent = summary.safe ?? '-';
+      el.telemetryApproval.textContent = summary.requiresApproval ?? '-';
+      el.telemetryBlocked.textContent = summary.blocked ?? '-';
+      el.telemetryMode.textContent = payload.mode || payload.status || '-';
+      setChip(el.telemetryChip, payload.status || 'harmonized', summary.blocked ? 'warn' : 'good');
+      renderList(el.activityFeed, buildActivity({ decision: { decision: 'telemetry.harmonized', executionMode: payload.mode } }), 'Activity');
+      return payload;
+    }
+
+    async function loadBillingStatus() {
+      const payload = await fetch('/billing/checkout/config').then((response) => response.json());
+      el.billingStatus.textContent = payload.status || '-';
+      el.billingGate.textContent = payload.enabled ? 'enabled' : (payload.missing || []).join(', ') || 'not enabled';
+      setChip(el.billingChip, payload.status || 'unknown', payload.status === 'ready' ? 'good' : 'warn');
+      return payload;
+    }
+
+    async function attemptBilling() {
+      const response = await fetch('/billing/checkout/session', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          tenant: state.tenant || 'ownerfi',
+          email: 'mission-control@nunncloud.local'
+        })
+      });
+      const payload = await response.json().catch(() => ({}));
+      el.billingStatus.textContent = payload.status || `HTTP ${response.status}`;
+      el.billingGate.textContent = payload.reason || payload.error || '-';
+      setChip(el.billingChip, payload.status || 'attempted', payload.status === 'BLOCKED' ? 'warn' : response.ok ? 'good' : 'bad');
+      writeCommandOutput({
+        billingAttempt: payload
+      });
+      return payload;
+    }
+
+    async function loadAuditTimeline() {
+      const tenant = encodeURIComponent(state.tenant || 'ownerfi');
+      const payload = await api(`/v1/audit?tenant=${tenant}`);
+      const entries = Array.isArray(payload.entries) ? payload.entries.slice(-8).reverse() : [];
+      setChip(el.auditChip, `${entries.length} events`, entries.length ? 'good' : '');
+
+      if (!entries.length) {
+        el.auditTimeline.innerHTML = '<p class="empty">No audit events loaded.</p>';
+        return payload;
+      }
+
+      el.auditTimeline.innerHTML = entries.map((entry) => `
+        <div class="story-row">
+          <strong>${escapeHtml(formatTime(entry.timestamp))}</strong>
+          <span>${escapeHtml(entry.command || 'audit.event')}</span>
+          <span>${escapeHtml(entry.result && entry.result.success === false ? 'blocked' : 'recorded')}</span>
+        </div>
+      `).join('');
+      return payload;
+    }
+
+    function renderAnchors(payload) {
+      const anchors = Array.isArray(payload && payload.anchors) ? payload.anchors : [];
+      const system = anchors.find((anchor) => anchor.type === 'SYSTEM_RELEASE') || anchors[0] || null;
+      const verified = system && system.status === 'VERIFIED';
+      setChip(el.anchorChip, system ? system.status : 'not loaded', verified ? 'good' : 'warn');
+
+      if (!system) {
+        el.anchorBoard.innerHTML = `
+          <div class="board-column"><h3>System Release</h3><p class="empty">No anchor loaded.</p></div>
+          <div class="board-column"><h3>External Proof</h3><p class="empty">No transaction recorded.</p></div>
+          <div class="board-column"><h3>Next Anchors</h3><p class="empty">No roadmap loaded.</p></div>
+        `;
+        return;
+      }
+
+      const hash = system.hash || '';
+      const external = system.external || {};
+      const nextAnchors = Array.isArray(system.nextAnchors) ? system.nextAnchors : [];
+      el.anchorBoard.innerHTML = `
+        <div class="board-column">
+          <h3>${escapeHtml(system.type)}</h3>
+          <div class="board-item">
+            <strong>Hash: ${escapeHtml(hash.slice(0, 12))}...</strong>
+            <span>${escapeHtml(system.state && system.state.version ? system.state.version : 'version unknown')}</span>
+            <small>${escapeHtml(system.clientLanguage || '')}</small>
+          </div>
+        </div>
+        <div class="board-column">
+          <h3>External Proof</h3>
+          <div class="board-item">
+            <strong>${escapeHtml(system.status)}</strong>
+            <span>TX: ${escapeHtml(external.txId || 'pending')}</span>
+            <small>Block: ${escapeHtml(external.blockNumber || 'pending')}</small>
+          </div>
+        </div>
+        <div class="board-column">
+          <h3>Next Anchors</h3>
+          ${nextAnchors.map((item) => `
+            <div class="board-item">
+              <strong>${escapeHtml(item)}</strong>
+              <span>decision anchor</span>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    async function loadAnchors() {
+      const payload = await fetch('/v1/anchors').then((response) => response.json());
+      renderAnchors(payload);
+      return payload;
+    }
+
     function renderApprovals(payload) {
       const approvals = Array.isArray(payload.approvals) ? payload.approvals : [];
       setChip(el.approvalCount, `${approvals.length} pending`, approvals.length ? 'warn' : 'good');
@@ -905,9 +1762,17 @@
 
       try {
         await loadHealth();
-        const [systemState, approvals] = await Promise.all([loadState(), loadApprovals()]);
+        const [systemState, approvals, billing, anchors] = await Promise.all([loadState(), loadApprovals(), loadBillingStatus(), loadAnchors()]);
         renderState(systemState);
         renderApprovals(approvals);
+        await loadMetrics().catch(() => null);
+        await loadGovernanceSignals().catch(() => null);
+        if (billing) {
+          setChip(el.billingChip, billing.status || 'unknown', billing.status === 'ready' ? 'good' : 'warn');
+        }
+        if (anchors) {
+          renderAnchors(anchors);
+        }
         setChip(el.connectionChip, 'Connected', 'good');
         setChip(el.updatedChip, `Updated ${new Date().toLocaleTimeString()}`, 'good');
       } catch (error) {
@@ -931,6 +1796,56 @@
 
     el.refreshButton.addEventListener('click', refresh);
     el.pollButton.addEventListener('click', togglePolling);
+    el.runWorkflowButton.addEventListener('click', () => initializeWorkflowFromConsole().catch((error) => {
+      setChip(el.commandChip, 'error', 'bad');
+      el.errorText.textContent = error.message;
+      writeCommandOutput({ status: 'error', error: error.message });
+    }));
+    el.executeWorkflowButton.addEventListener('click', () => attemptWorkflowExecution().catch((error) => {
+      setChip(el.commandChip, 'error', 'bad');
+      el.errorText.textContent = error.message;
+      writeCommandOutput({ status: 'error', error: error.message });
+    }));
+    el.runTelemetryButton.addEventListener('click', () => runTelemetry().then(writeCommandOutput).catch((error) => {
+      setChip(el.telemetryChip, 'error', 'bad');
+      el.errorText.textContent = error.message;
+    }));
+    el.loadBillingButton.addEventListener('click', () => loadBillingStatus().then((payload) => {
+      writeCommandOutput({ billingStatus: payload });
+    }).catch((error) => {
+      setChip(el.billingChip, 'error', 'bad');
+      el.errorText.textContent = error.message;
+    }));
+    el.attemptBillingButton.addEventListener('click', () => attemptBilling().catch((error) => {
+      setChip(el.billingChip, 'error', 'bad');
+      el.errorText.textContent = error.message;
+    }));
+    el.loadAuditButton.addEventListener('click', () => loadAuditTimeline().then((payload) => {
+      writeCommandOutput({ audit: { count: payload.count } });
+    }).catch((error) => {
+      setChip(el.auditChip, 'error', 'bad');
+      el.errorText.textContent = error.message;
+    }));
+    el.loadAnchorsButton.addEventListener('click', () => loadAnchors().then((payload) => {
+      writeCommandOutput({ anchors: payload.anchors });
+    }).catch((error) => {
+      setChip(el.anchorChip, 'error', 'bad');
+      el.errorText.textContent = error.message;
+    }));
+    el.loadMetricsButton.addEventListener('click', () => loadMetrics().then((payload) => {
+      writeCommandOutput({ metrics: payload.metrics });
+    }).catch((error) => {
+      setChip(el.metricsChip, 'error', 'bad');
+      el.errorText.textContent = error.message;
+    }));
+    el.loadSignalsButton.addEventListener('click', () => loadGovernanceSignals().then((payload) => {
+      writeCommandOutput({ governanceSignals: payload.signals || payload.alerts || [] });
+    }).catch((error) => {
+      setChip(el.signalsChip, 'error', 'bad');
+      el.errorText.textContent = error.message;
+    }));
+    el.connectSignalsStreamButton.addEventListener('click', connectSignalsStream);
+    el.connectAuditStreamButton.addEventListener('click', connectAuditStream);
     el.approvalQueue.addEventListener('click', (event) => {
       const button = event.target.closest('button[data-action]');
       if (!button) return;

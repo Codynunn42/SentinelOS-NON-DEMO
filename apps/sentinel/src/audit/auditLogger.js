@@ -1,7 +1,9 @@
 const { query, getDatabaseStatus } = require('../db/client');
+const { evaluateGovernanceSignals } = require('../governance/governanceSignals');
 const crypto = require('crypto');
 
 const auditLog = [];
+const subscribers = new Set();
 let lastAuditHash = null;
 
 function stableStringify(value) {
@@ -23,6 +25,7 @@ function hashAuditEntry(entry, prevHash) {
   return crypto
     .createHash('sha256')
     .update(stableStringify({
+      eventId: entry.eventId || null,
       tenant: entry.tenant || null,
       command: entry.command,
       payload: entry.payload || {},
@@ -69,22 +72,54 @@ function getReceipt(entry) {
   return null;
 }
 
+function publishAuditEvent(entry) {
+  for (const subscriber of subscribers) {
+    try {
+      subscriber(entry);
+    } catch (_) {
+      subscribers.delete(subscriber);
+    }
+  }
+}
+
+function subscribeAuditEvents(callback) {
+  subscribers.add(callback);
+
+  return () => {
+    subscribers.delete(callback);
+  };
+}
+
 const auditLogger = {
   async log(entry) {
     const timestampedEntry = {
       ...entry,
+      eventId: entry.eventId || crypto.randomUUID(),
       timestamp: entry.timestamp || new Date().toISOString()
     };
-    const prevHash = lastAuditHash;
-    const auditHash = hashAuditEntry(timestampedEntry, prevHash);
-    const hashedEntry = {
+    const governanceSignals = evaluateGovernanceSignals(timestampedEntry);
+    const result =
+      timestampedEntry.result && typeof timestampedEntry.result === 'object'
+        ? timestampedEntry.result
+        : {};
+    const signaledEntry = {
       ...timestampedEntry,
+      result: {
+        ...result,
+        governanceSignals
+      }
+    };
+    const prevHash = lastAuditHash;
+    const auditHash = hashAuditEntry(signaledEntry, prevHash);
+    const hashedEntry = {
+      ...signaledEntry,
       prevHash,
       auditHash
     };
     lastAuditHash = auditHash;
 
     auditLog.push(hashedEntry);
+    publishAuditEvent(hashedEntry);
 
     try {
       await query(
@@ -96,6 +131,7 @@ const auditLogger = {
           JSON.stringify(hashedEntry.payload || {}),
           JSON.stringify({
             ...(hashedEntry.result || {}),
+            eventId: hashedEntry.eventId,
             prevHash: hashedEntry.prevHash,
             auditHash: hashedEntry.auditHash
           }),
@@ -103,7 +139,8 @@ const auditLogger = {
         ]
       );
     } catch (error) {
-      auditLog.push({
+      const failureEntry = {
+        eventId: crypto.randomUUID(),
         command: 'system.audit.persist_failed',
         payload: { originalCommand: entry.command },
         result: {
@@ -113,7 +150,10 @@ const auditLogger = {
         },
         actor: 'system',
         timestamp: new Date().toISOString()
-      });
+      };
+      failureEntry.result.governanceSignals = evaluateGovernanceSignals(failureEntry);
+      auditLog.push(failureEntry);
+      publishAuditEvent(failureEntry);
     }
 
     return hashedEntry;
@@ -215,5 +255,6 @@ const auditLogger = {
 };
 
 module.exports = {
-  auditLogger
+  auditLogger,
+  subscribeAuditEvents
 };

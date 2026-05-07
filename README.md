@@ -49,6 +49,36 @@ Current condition:
 5. Create implementation backlog for client operating path
 6. Connect release controls and operational reporting
 
+## Phase Direction
+
+Phase 1 stays focused on the SentinelOS Deal Execution Engine:
+
+- Deal Plane buttons
+- XE Command Plane
+- Control Plane
+- governed `/v1/command`
+- audit, signals, score, and approvals
+
+Phase 2 should incorporate HERGLASS as a Perception Face Plane only after the first pilot or strong demo feedback confirms the core governed execution loop.
+
+Reference:
+
+- `docs/HERGLASS_FACEPLANE_PLAN.md`
+
+Phase 2 framing:
+
+```text
+Type -> Execute
+Click -> Execute
+Scan -> Execute
+```
+
+HERGLASS must remain a Face Plane:
+
+```text
+HERGLASS -> Intent -> Control Plane -> Sentinel Core
+```
+
 ## Suggested Repository Shape
 ```text
 .github/
