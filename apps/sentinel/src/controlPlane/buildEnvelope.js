@@ -1,4 +1,5 @@
 const crypto = require('crypto');
+const { signExecutionPassport } = require('../governance/executionPassport');
 
 function buildEnvelope(input) {
   const command = input.intent.trim();
@@ -7,19 +8,23 @@ function buildEnvelope(input) {
     ? metadata.sessionId.trim()
     : 'control-plane';
 
-  return {
+  const envelope = {
     commandId: crypto.randomUUID(),
     sessionId,
     tenant: input.tenantId.trim(),
     command,
+    source: 'sentinel',
     payload: input.context && typeof input.context === 'object' ? input.context : {},
     metadata: {
       role: input.actor.role.trim(),
       tenantId: input.tenantId.trim(),
       actor: input.actor.userId || metadata.actor,
-      ...metadata
+      ...metadata,
+      source: 'sentinel'
     }
   };
+
+  return signExecutionPassport(envelope);
 }
 
 module.exports = {

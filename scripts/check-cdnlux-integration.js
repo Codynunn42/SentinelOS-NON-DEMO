@@ -5,6 +5,12 @@ const {
   requiresApproval
 } = require('../apps/sentinel/src/integrations/cdnlux/cdnlux');
 const { dispatchCommand } = require('../apps/sentinel/src/commands/dispatch');
+const {
+  resetLocalPassportState,
+  signLocalCommand
+} = require('./lib/sentinelPassport');
+
+resetLocalPassportState();
 
 const transferEvent = buildCdnluxEvent({
   type: 'cdnlux.token.transfer_requested',
@@ -26,9 +32,10 @@ assert.ok(securityEvent.evidence.includes('utilityToken=CDNLUX'));
 
 console.log('CDNLUX SentinelOS integration scaffold passed');
 
-dispatchCommand({
+dispatchCommand(signLocalCommand({
   tenant: 'nunncloud',
   command: 'cdnlux.token.evaluate',
+  source: 'sentinel',
   payload: {
     type: 'cdnlux.token.transfer_requested',
     action: 'transfer',
@@ -36,10 +43,11 @@ dispatchCommand({
     requestedBy: 'sentinel-operator'
   },
   metadata: {
+    source: 'sentinel',
     actor: 'local-check',
     role: 'operator'
   }
-}, {
+}), {
   principal: {
     keyId: 'key_local_platform_check',
     tenant: 'nunncloud',
@@ -47,7 +55,8 @@ dispatchCommand({
     role: 'platform',
     scopes: ['platform:admin'],
     status: 'active'
-  }
+  },
+  source: 'sentinel'
 }).then((result) => {
   assert.strictEqual(result.success, true);
   assert.strictEqual(result.data.integration, 'cdnlux');

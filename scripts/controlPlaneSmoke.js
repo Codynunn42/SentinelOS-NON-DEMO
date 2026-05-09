@@ -5,6 +5,7 @@ const { executeIntent } = require('../apps/sentinel/src/controlPlane');
 const TEST_KEY = 'control-plane-smoke-secret';
 
 process.env.SENTINEL_API_KEY = TEST_KEY;
+process.env.SENTINEL_HMAC_SECRET = process.env.SENTINEL_HMAC_SECRET || 'control-plane-smoke-passport-secret';
 process.env.SENTINEL_API_KEY_TENANT = 'ownerfi';
 process.env.SENTINEL_API_KEY_ACTOR = 'control-plane-smoke@nunncloud.local';
 process.env.SENTINEL_API_KEY_ROLE = 'operator';

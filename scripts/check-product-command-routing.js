@@ -7,6 +7,7 @@ const TEST_KEY = 'product-command-test-secret';
 const PRODUCT_DOC = 'docs/DEAL_EXECUTION_ENGINE_POSITIONING.md';
 
 process.env.SENTINEL_API_KEY = TEST_KEY;
+process.env.SENTINEL_HMAC_SECRET = process.env.SENTINEL_HMAC_SECRET || 'product-command-passport-secret';
 process.env.SENTINEL_API_KEY_TENANT = 'nunncloud';
 process.env.SENTINEL_API_KEY_ACTOR = 'product-operator@nunncloud.local';
 process.env.SENTINEL_API_KEY_ROLE = 'platform';

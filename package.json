@@ -43,6 +43,7 @@
     "check:vendor-onboarding": "node scripts/check-vendor-onboarding-rules.js",
     "governance:heartbeat": "node scripts/write-governance-heartbeat.js",
     "repo:scan": "node scripts/sentinel-repo-organization-scan.js",
+    "check:repo-control": "node scripts/check-repo-control-layer.js",
     "release:anchor": "node scripts/generate-system-release-anchor.js",
     "posture:containment": "node scripts/check-containment-posture.js",
     "simulate:vendor-onboarding": "node scripts/simulate-vendor-onboarding.js",

@@ -6,6 +6,12 @@ const {
   evaluateDocking
 } = require('../apps/sentinel/src/integrations/docking/protocol');
 const { dispatchCommand } = require('../apps/sentinel/src/commands/dispatch');
+const {
+  resetLocalPassportState,
+  signLocalCommand
+} = require('./lib/sentinelPassport');
+
+resetLocalPassportState();
 
 const manifestPath = path.join(__dirname, '..', 'fixtures', 'docking', 'udp-manifest.json');
 const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
@@ -27,15 +33,17 @@ assert.ok(event.evidence.includes('systemId=SYS-CDNLUX-UTILITY'));
 
 console.log('Sentinel docking protocol scaffold passed');
 
-dispatchCommand({
+dispatchCommand(signLocalCommand({
   tenant: 'nunncloud',
   command: 'docking.evaluate',
+  source: 'sentinel',
   payload: manifest,
   metadata: {
+    source: 'sentinel',
     actor: 'local-check',
     role: 'operator'
   }
-}, {
+}), {
   principal: {
     keyId: 'key_local_platform_check',
     tenant: 'nunncloud',
@@ -43,7 +51,8 @@ dispatchCommand({
     role: 'platform',
     scopes: ['platform:admin'],
     status: 'active'
-  }
+  },
+  source: 'sentinel'
 }).then((result) => {
   assert.strictEqual(result.success, true);
   assert.strictEqual(result.data.integration, 'docking');

@@ -4,6 +4,11 @@
  * @property {string=} sessionId
  * @property {string} tenant
  * @property {string} command
+ * @property {string=} source
+ * @property {number=} timestamp
+ * @property {string=} nonce
+ * @property {Object=} meta
+ * @property {string=} sig
  * @property {string=} legacyCommand
  * @property {Object} payload
  * @property {{ actor?: string, role?: string, timestamp?: string }=} metadata
@@ -52,6 +57,11 @@ function normalizeCommandEnvelope(body) {
     sessionId: typeof body?.sessionId === 'string' ? body.sessionId : undefined,
     tenant,
     command,
+    source: typeof body?.source === 'string' ? body.source.trim() : undefined,
+    timestamp: Number.isFinite(body?.timestamp) ? body.timestamp : undefined,
+    nonce: typeof body?.nonce === 'string' ? body.nonce : undefined,
+    meta: body && typeof body.meta === 'object' ? body.meta : undefined,
+    sig: typeof body?.sig === 'string' ? body.sig : undefined,
     legacyCommand: rawCommand || undefined,
     payload,
     metadata: body && typeof body.metadata === 'object' ? body.metadata : undefined

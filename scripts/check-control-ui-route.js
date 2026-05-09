@@ -3,6 +3,7 @@ const assert = require('assert');
 const TEST_KEY = 'control-ui-route-secret';
 
 process.env.SENTINEL_API_KEY = TEST_KEY;
+process.env.SENTINEL_HMAC_SECRET = process.env.SENTINEL_HMAC_SECRET || 'control-ui-route-passport-secret';
 process.env.SENTINEL_API_KEY_TENANT = 'ownerfi';
 process.env.SENTINEL_API_KEY_ACTOR = 'control-ui-route@nunncloud.local';
 process.env.SENTINEL_API_KEY_ROLE = 'operator';

@@ -22,6 +22,10 @@ const {
 } = require('../sentinel/src/approval/approval');
 const { normalizeCommandEnvelope } = require('../sentinel/src/types/command');
 const { executeIntent } = require('../sentinel/src/controlPlane');
+const {
+  DEFAULT_SURFACE,
+  signExecutionPassport
+} = require('../sentinel/src/governance/executionPassport');
 const { resolveApiKey } = require('../sentinel/src/security/keyRegistry');
 const { buildPolicyContext, evaluatePolicy } = require('../sentinel/src/governance/policyEngine');
 const {
@@ -29,6 +33,7 @@ const {
   getGovernanceSignals,
   subscribeGovernanceSignals
 } = require('../sentinel/src/governance/governanceSignals');
+const { getAuthorityStatus } = require('../sentinel/src/governance/authorityState');
 const {
   getOperatorCase,
   listOperatorCases,
@@ -79,6 +84,13 @@ const commandIdempotencyCache = new Map();
 function sendJson(res, statusCode, payload) {
   res.writeHead(statusCode, { 'Content-Type': 'application/json' });
   res.end(JSON.stringify(payload));
+}
+
+function requireAuthoritySecret() {
+  if (!process.env.SENTINEL_HMAC_SECRET) {
+    console.error('FATAL: SENTINEL_HMAC_SECRET missing');
+    process.exit(1);
+  }
 }
 
 function sendSse(res, event) {
@@ -1812,6 +1824,13 @@ const server = http.createServer(async (req, res) => {
     return sendAuditEvents(req, res, '/audit/events', requestUrl);
   }
 
+  if (pathname === '/api/authority/status' && req.method === 'GET') {
+    return sendJson(res, 200, {
+      ...getAuthorityStatus(),
+      status: 'ok'
+    });
+  }
+
   if (pathname.startsWith('/v1/audit/') && req.method === 'GET') {
     const tenant = requestUrl.searchParams.get('tenant');
     const access = authorizeRoute(req, res, '/v1/audit/:applicationId', {
@@ -1927,17 +1946,39 @@ const server = http.createServer(async (req, res) => {
         });
       }
 
-      const requestBody = {
-        ...body,
-        tenant: body.tenant || principal.tenant,
-        metadata: {
-          ...(body.metadata && typeof body.metadata === 'object' ? body.metadata : {}),
-          actor: principal.actor,
-          role: principal.role,
-          keyId: principal.keyId,
-          scopes: principal.scopes
-        }
-      };
+      let requestBody;
+
+      try {
+        requestBody = signExecutionPassport({
+          ...body,
+          tenant: body.tenant || principal.tenant,
+          source: 'sentinel',
+          meta: {
+            tenantId: body.tenant || principal.tenant,
+            surface: DEFAULT_SURFACE
+          },
+          metadata: {
+            ...(body.metadata && typeof body.metadata === 'object' ? body.metadata : {}),
+            source: 'sentinel',
+            actor: principal.actor,
+            role: principal.role,
+            keyId: principal.keyId,
+            scopes: principal.scopes
+          }
+        });
+      } catch (passportError) {
+        emitSecurityEvent('command.passport.signing_failed', {
+          route: '/v1/command',
+          method: req.method,
+          reason: passportError.message
+        });
+
+        return sendJson(res, 500, {
+          status: 'blocked',
+          error: 'PASSPORT_SIGNING_FAILED',
+          reason: 'missing_execution_passport_secret'
+        });
+      }
       const envelope = normalizeCommandEnvelope(requestBody);
       const idempotency = checkIdempotency(envelope, principal);
 
@@ -1962,7 +2003,9 @@ const server = http.createServer(async (req, res) => {
       const result = await dispatchCommand(requestBody, {
         buildReceipt: buildWorkflowReceipt,
         emitSecurityEvent,
-        principal
+        principal,
+        route: '/v1/command',
+        source: 'sentinel'
       });
       rememberIdempotency(idempotency, result);
 
@@ -3245,6 +3288,8 @@ const server = http.createServer(async (req, res) => {
 });
 
 if (require.main === module) {
+  requireAuthoritySecret();
+
   ensureSchema()
     .then(() => {
       server.listen(PORT, () => {

@@ -1,6 +1,7 @@
 const { getSurfaceRegistry } = require('./registry');
 const { normalizeCommandEnvelope } = require('../types/command');
 const { auditLogger } = require('../audit/auditLogger');
+const { enforceSentinelExecution } = require('../governance/executionGuard');
 const { governanceCheck } = require('../governance/preflight');
 const { buildCommandTrustInput, buildTrustScoreResult } = require('../trustScore');
 
@@ -44,6 +45,26 @@ async function auditPolicyAllow(envelope, policy, policyContext) {
 async function dispatchCommand(body, context) {
   const startTime = Date.now();
   const envelope = normalizeCommandEnvelope(body);
+  const executionGuard = enforceSentinelExecution(envelope, context);
+
+  if (!executionGuard.allowed) {
+    const failure = {
+      success: false,
+      statusCode: executionGuard.statusCode,
+      error: executionGuard.error,
+      details: executionGuard.details,
+      data: {
+        trustScore: 0,
+        reasons: ['execution_guard_block']
+      }
+    };
+
+    await auditGovernanceBlock(envelope, failure, {
+      trustScore: 0,
+      reasons: ['execution_guard_block']
+    });
+    return failure;
+  }
 
   const governance = governanceCheck(envelope, context && context.signals ? context.signals : {}, context ? context.principal : null);
   if (!governance.allowed) {

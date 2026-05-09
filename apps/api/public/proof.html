@@ -247,6 +247,54 @@
       font-size: 12px;
     }
 
+    .authority-panel {
+      display: grid;
+      gap: 12px;
+      margin-top: 14px;
+      border-color: rgba(106, 163, 255, 0.42);
+    }
+
+    .authority-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .authority-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .authority-cell {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface-2);
+      padding: 10px;
+      min-height: 72px;
+    }
+
+    .authority-cell span {
+      display: block;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 850;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .authority-cell strong {
+      display: block;
+      font-size: 13px;
+      line-height: 1.35;
+      overflow-wrap: anywhere;
+    }
+
+    .authority-cell.status-cell strong {
+      color: var(--ok);
+    }
+
     .decision-grid {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -481,6 +529,7 @@
       }
 
       .grid,
+      .authority-grid,
       .decision-grid {
         grid-template-columns: 1fr;
       }
@@ -575,6 +624,35 @@
         <div class="stream-line">
           <span id="streamStatus">Audit stream: waiting for key</span>
           <span>real-time audit feed</span>
+        </div>
+      </section>
+
+      <section class="panel full authority-panel" aria-live="polite">
+        <div class="authority-head">
+          <h2>Authority Status</h2>
+          <span class="pill ok" id="authorityBadge">enforced</span>
+        </div>
+        <div class="authority-grid">
+          <div class="authority-cell status-cell">
+            <span>Status</span>
+            <strong id="authStatus">ENFORCED</strong>
+          </div>
+          <div class="authority-cell">
+            <span>Last Allowed</span>
+            <strong id="authAllowed">Waiting</strong>
+          </div>
+          <div class="authority-cell">
+            <span>Last Blocked</span>
+            <strong id="authBlocked">None</strong>
+          </div>
+          <div class="authority-cell">
+            <span>Drift</span>
+            <strong id="authDrift">none</strong>
+          </div>
+          <div class="authority-cell">
+            <span>Next Action</span>
+            <strong id="authNext">none</strong>
+          </div>
         </div>
       </section>
     </div>
@@ -702,6 +780,31 @@
     function getAlerts(result, fallback) {
       if (Array.isArray(result.alerts)) return result.alerts.join(', ') || 'None';
       return fallback;
+    }
+
+    function summarizeAuthorityEvent(event) {
+      if (!event) return 'None';
+      const command = event.command || 'unknown';
+      const reason = event.reason ? ` - ${event.reason}` : '';
+      const tenant = event.tenant ? ` (${event.tenant})` : '';
+      return `${command}${tenant}${reason}`;
+    }
+
+    async function updateAuthorityStatus() {
+      try {
+        const response = await fetch('/api/authority/status');
+        const data = await response.json();
+        document.getElementById('authStatus').textContent = data.authority || 'UNKNOWN';
+        document.getElementById('authAllowed').textContent = summarizeAuthorityEvent(data.lastAllowed);
+        document.getElementById('authBlocked').textContent = summarizeAuthorityEvent(data.lastBlocked);
+        document.getElementById('authDrift').textContent = data.drift || 'none';
+        document.getElementById('authNext').textContent = data.nextAction || 'none';
+        document.getElementById('authorityBadge').textContent = String(data.authority || 'unknown').toLowerCase();
+      } catch (error) {
+        document.getElementById('authStatus').textContent = 'UNAVAILABLE';
+        document.getElementById('authDrift').textContent = 'status_unavailable';
+        document.getElementById('authNext').textContent = 'check_api';
+      }
     }
 
     function getHeaders() {
@@ -1013,6 +1116,8 @@
     document.getElementById('apiKey').addEventListener('change', connectAuditStream);
 
     setBusy(false);
+    updateAuthorityStatus();
+    setInterval(updateAuthorityStatus, 2000);
   </script>
 </body>
 </html>
