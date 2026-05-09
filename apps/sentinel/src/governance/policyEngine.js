@@ -31,6 +31,8 @@ const commandScopes = {
   'billing.webhook.receive': 'billing:webhook',
   'system.reframe.product': 'platform:admin',
   'repo.update.structure': 'platform:admin',
+  'repo.control.workflow.diagnose': 'platform:admin',
+  'repo.control.workflow.retry': 'platform:admin',
   'system.validate.integrity': 'platform:admin',
   'dealFlow.run.demo': 'platform:admin',
   'ui.sync.labels': 'platform:admin',

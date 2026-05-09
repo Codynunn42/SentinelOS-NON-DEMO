@@ -3,6 +3,7 @@ const assert = require('assert');
 const TEST_KEY = 'proof-ui-flow-secret';
 
 process.env.SENTINEL_API_KEY = TEST_KEY;
+process.env.SENTINEL_HMAC_SECRET = process.env.SENTINEL_HMAC_SECRET || 'proof-ui-flow-passport-secret';
 process.env.SENTINEL_API_KEY_TENANT = 'ownerfi';
 process.env.SENTINEL_API_KEY_ACTOR = 'proof-ui-flow@nunncloud.local';
 process.env.SENTINEL_API_KEY_ROLE = 'approver';
@@ -75,6 +76,13 @@ async function main() {
     assert.strictEqual(executed.body.result.status, 'executed');
     assert.ok(Array.isArray(executed.body.result.alerts));
     assert.ok(executed.body.result.dealId);
+
+    const authority = await fetch(`${base}/api/authority/status`);
+    const authorityBody = await authority.json();
+    assert.strictEqual(authority.status, 200);
+    assert.strictEqual(authorityBody.authority, 'ENFORCED');
+    assert.strictEqual(authorityBody.lastAllowed.command, 'deal.execute');
+    assert.strictEqual(authorityBody.nextAction, null);
 
     console.log(JSON.stringify({
       status: 'proof-ui-flow-check-passed',

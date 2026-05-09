@@ -8,6 +8,10 @@ const {
   evaluateDocking
 } = require('../integrations/docking/protocol');
 const { handleDealFlowDemo } = require('../commands/dealFlow/runDemo');
+const {
+  handleRepoWorkflowDiagnose,
+  handleRepoWorkflowRetry
+} = require('../commands/repo/control');
 const { handleRepoUpdate } = require('../commands/repo/updateStructure');
 const { handleProductReframe } = require('../commands/system/productReframe');
 const { handleSystemValidate } = require('../commands/system/validateIntegrity');
@@ -32,6 +36,8 @@ async function evaluateCdnluxToken(payload = {}) {
 const nunncloudHandlers = {
   'system.reframe.product': handleProductReframe,
   'repo.update.structure': handleRepoUpdate,
+  'repo.control.workflow.diagnose': handleRepoWorkflowDiagnose,
+  'repo.control.workflow.retry': handleRepoWorkflowRetry,
   'system.validate.integrity': handleSystemValidate,
   'dealFlow.run.demo': handleDealFlowDemo,
   'ui.sync.labels': handleUiSync,

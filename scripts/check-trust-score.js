@@ -1,6 +1,10 @@
 const assert = require('assert');
 const { dispatchCommand } = require('../apps/sentinel/src/commands/dispatch');
 const {
+  resetLocalPassportState,
+  signLocalCommand
+} = require('./lib/sentinelPassport');
+const {
   buildCommandTrustInput,
   buildTrustScoreResult,
   computeTrustScore,
@@ -57,22 +61,27 @@ assert(trust.reasons.includes('role_mismatch'));
 assert(trust.reasons.includes('policy_blocked'));
 
 async function main() {
-  const blockedResult = await dispatchCommand({
+  resetLocalPassportState();
+
+  const blockedResult = await dispatchCommand(signLocalCommand({
     tenant: 'ownerfi',
     command: 'deal.execute',
+    source: 'sentinel',
     payload: { applicationId: 'app_missing' },
     metadata: {
+      source: 'sentinel',
       actor: 'operator@example.com',
       role: 'operator',
       scopes: ['deal:execute']
     }
-  }, {
+  }), {
     principal: {
       tenant: 'ownerfi',
       actor: 'operator@example.com',
       role: 'operator',
       scopes: ['deal:execute']
-    }
+    },
+    source: 'sentinel'
   });
 
   assert.strictEqual(blockedResult.success, false);

@@ -1,6 +1,12 @@
 const assert = require('assert');
 const { dispatchCommand } = require('../apps/sentinel/src/commands/dispatch');
 const { auditLogger } = require('../apps/sentinel/src/audit/auditLogger');
+const {
+  resetLocalPassportState,
+  signLocalCommand
+} = require('./lib/sentinelPassport');
+
+resetLocalPassportState();
 
 function buildReceipt(command, entity, outcome, tenantId = 'ownerfi') {
   return {
@@ -18,7 +24,7 @@ function buildReceipt(command, entity, outcome, tenantId = 'ownerfi') {
 }
 
 dispatchCommand(
-  {
+  signLocalCommand({
     tenant: 'ownerfi',
     command: 'application.submit',
     payload: {
@@ -31,7 +37,7 @@ dispatchCommand(
       actor: 'local-check',
       role: 'approver'
     }
-  },
+  }),
   {
     buildReceipt,
     emitSecurityEvent: () => {},

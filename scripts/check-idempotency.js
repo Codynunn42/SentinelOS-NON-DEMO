@@ -6,8 +6,10 @@ const PORT = 3199;
 const API_KEY = 'idempotency-secret';
 const previousKeys = process.env.SENTINEL_API_KEYS;
 const previousKey = process.env.SENTINEL_API_KEY;
+const previousHmac = process.env.SENTINEL_HMAC_SECRET;
 
 process.env.SENTINEL_API_KEY = '';
+process.env.SENTINEL_HMAC_SECRET = process.env.SENTINEL_HMAC_SECRET || 'idempotency-passport-secret';
 process.env.SENTINEL_API_KEYS = JSON.stringify([
   {
     keyId: 'key_ownerfi_approver_idempotency',
@@ -112,6 +114,12 @@ function close() {
     delete process.env.SENTINEL_API_KEY;
   } else {
     process.env.SENTINEL_API_KEY = previousKey;
+  }
+
+  if (previousHmac === undefined) {
+    delete process.env.SENTINEL_HMAC_SECRET;
+  } else {
+    process.env.SENTINEL_HMAC_SECRET = previousHmac;
   }
 
   console.log('Idempotency check passed');
