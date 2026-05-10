@@ -24,6 +24,8 @@ const PLATFORM_SCOPES = [
   'task:read',
   'task:execute',
   'telemetry:write',
+  'support:write',
+  'support:refund',
   'billing:read',
   'billing:write',
   'billing:webhook',

@@ -1,4 +1,5 @@
 const { getSurfaceRegistry } = require('./registry');
+const { handleCustomerOps } = require('./customeropsHandlers');
 const { normalizeCommandEnvelope } = require('../types/command');
 const { auditLogger } = require('../audit/auditLogger');
 const { enforceSentinelExecution } = require('../governance/executionGuard');
@@ -94,6 +95,19 @@ async function dispatchCommand(body, context) {
 
   await auditPolicyAllow(envelope, governance.policy, governance.policyContext);
 
+  if (envelope.command && envelope.command.startsWith('support.')) {
+    return executeHandler({
+      envelope,
+      context,
+      governance,
+      startTime,
+      handler: () => handleCustomerOps(envelope, {
+        ...context,
+        tenant: envelope.tenant
+      })
+    });
+  }
+
   const surfaceRegistry = getSurfaceRegistry();
   const surface = surfaceRegistry[envelope.tenant];
   if (!surface) {
@@ -113,15 +127,25 @@ async function dispatchCommand(body, context) {
     };
   }
 
-  try {
-    const result = await handler(
+  return executeHandler({
+    envelope,
+    context,
+    governance,
+    startTime,
+    handler: () => handler(
       envelope.payload,
       {
         ...context,
         tenant: envelope.tenant
       },
       envelope
-    );
+    )
+  });
+}
+
+async function executeHandler({ envelope, context, governance, startTime, handler }) {
+  try {
+    const result = await handler();
     const trust = buildTrustScoreResult(buildCommandTrustInput({
       envelope,
       policy: governance.policy,
