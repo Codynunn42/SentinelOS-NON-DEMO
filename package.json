@@ -11,6 +11,7 @@
     "healthcheck": "node scripts/healthcheck.js",
     "check:cdnlux": "node scripts/check-cdnlux-integration.js",
     "check:control-plane": "node scripts/check-control-plane.js",
+    "check:customerops": "node scripts/check-customerops-command-routing.js",
     "check:control-ui": "node scripts/check-control-ui.js",
     "check:control-ui-route": "node scripts/check-control-ui-route.js",
     "check:docking": "node scripts/check-docking-protocol.js",
