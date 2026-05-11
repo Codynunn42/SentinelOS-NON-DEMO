@@ -1,5 +1,9 @@
 # SentinelOS v1 Arizona SPO Modernization Brief Layout
 
+**METADATA:** `[ROADMAP] [GOVERNMENT-POSITIONING] [CONTROLLED-RELEASE]`
+
+**DISCLAIMER:** This document outlines strategic positioning for future government alignment. Current SentinelOS deployment is limited to enterprise pilots. No government deployment claims should be made.
+
 Approval badge: `[HOLD:REVIEW]`
 
 Document status: Discussion draft. Not approved for external publication.
