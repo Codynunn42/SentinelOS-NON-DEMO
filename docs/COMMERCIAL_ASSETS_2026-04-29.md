@@ -1,5 +1,9 @@
 # SentinelOS Commercial Assets 2026-04-29
 
+**METADATA:** `[ROADMAP] [COMMERCIAL-POSITIONING] [CONTROLLED-RELEASE]`
+
+**DISCLAIMER:** This document contains strategic positioning materials for enterprise alignment. Current SentinelOS capabilities are limited to verified proof-of-concept deployments. Do not present roadmap items as active capabilities.
+
 **COMM:** Sentinel AI by Cody Nunn | Nunn Cloud
 
 ## Purpose

@@ -1,5 +1,9 @@
 # SentinelOS Pilot API - OwnerFi
 
+**METADATA:** `[PILOT] [API-SPEC] [CONTROLLED-RELEASE]`
+
+**DISCLAIMER:** This is a pilot-phase API specification for validation purposes only. The API is subject to change and should not be considered production-ready.
+
 Status: Pilot validation spec
 
 Audience: OwnerFi technical validation
