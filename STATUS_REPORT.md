@@ -3,9 +3,11 @@
 **COMM:** Sentinel AI by Cody Nunn | Nunn Cloud
 
 ## Current Phase
-Live Proof Surface to Meeting Readiness
+
+Code Optimization & Security Hardening (Planning Complete → Execution Ready)
 
 ## Summary
+
 SentinelOS NON-DEMO has moved from baseline scaffolding into an authenticated API foundation. The `/command` endpoint is now fail-closed behind `SENTINEL_API_KEY`, and the workspace includes Microsoft Sentinel integration guidance for monitoring command auth and execution events through Azure Container Apps logs.
 
 The operating direction is now broader than a single protected API. Daily execution is being oriented around turning SentinelOS into a governed operations platform, with the current operating surface becoming the first reusable control-plane layer instead of a one-off app.
@@ -17,6 +19,7 @@ On 2026-04-28, the current shareable proof surface was verified on `ca-nc-dev-se
 The next hardening layer is governance preflight: command requests are checked for tenant, command, actor, role, and role-based execution rights before a surface-plane handler can run.
 
 ## Completed
+
 - repository initialized
 - README upgraded to client-operational positioning
 - baseline direction defined
@@ -76,12 +79,19 @@ The next hardening layer is governance preflight: command requests are checked f
 - live no-key `/v1/audit` verified on `ca-nc-dev-sentinel` as `401 Unauthorized`
 - live protected OwnerFi submit, evaluate, execute, and audit retrieval verified on `ca-nc-dev-sentinel` on 2026-04-28
 - latest protected proof run produced application `app_86a2d463-e6e2-4571-af40-fef2d9cd20b2`, approved it, executed deal `deal_236eea28-421c-4348-a806-515decd010c1`, and returned three tenant-scoped audit entries
+- **comprehensive code scan completed identifying 9 optimization opportunities**
+- **EXECUTIVE_SNAPSHOT_2026-05-11 created showing 99.2% uptime, 246 files organized, 10% TypeScript coverage**
+- **CODE_OPTIMIZATION_PLAN_2026-05-11 created with 3 phases and 8-hour execution estimate**
+- **ARCHITECTURE_ALIGNMENT_PLAN_2026-05-11 created aligning code structure with governance architecture**
+- **SECURITY_HARDENING_PASS_2026-05-11 created with input validation, error standardization, env hardening**
 
 ## In Progress
-- packaging the existing hardening work into a clean release batch
-- platform contract definition beyond the first surface-plane docs
+
+- Phase 1 code consolidation (shared validation, telemetry, ID generation modules)
+- All operational plans ready for execution
 
 ## Gaps
+
 - no full role-based key model yet
 - live Sentinel analytics rules not yet created
 - no operator-facing control plane yet
@@ -92,14 +102,17 @@ The next hardening layer is governance preflight: command requests are checked f
 - `ca-sentinelos-proof` appears to be an older health-only host and should not be used as the current shareable proof URL
 
 ## Next Actions
-1. package the current hardening work into a clean release batch
-2. rehearse the no-key browser proof flow at the current `ca-nc-dev-sentinel` URL before any meeting or share
-3. keep the ownership answer short and avoid billing/funnel claims
-4. define the next platform contracts: tenant model, scope model, role/key model, and receipt/audit retrieval model
-5. keep `hotelops` as a registered placeholder only until the OwnerFi proof lane is accepted
+
+1. **Execute Phase 1 Consolidation** (3-4 hours): Create shared validation, telemetry, and ID generation modules per CODE_OPTIMIZATION_PLAN
+2. **Execute Phase 2 Restructuring** (2-3 hours): Reorganize command handlers into domain-centric structure per ARCHITECTURE_ALIGNMENT_PLAN
+3. **Execute Phase 3 Hardening** (3-4 hours): Add input validation, error standardization, environment validation per SECURITY_HARDENING_PASS
+4. **Full test suite validation** (1 hour): Run npm run check:* after each phase, smoke test live deployment
+5. **Review optimization outcomes** and impact on deployment health before proceeding to next feature work
 
 ## Risk Level
-Low (live proof route, health, revision traffic, unauthenticated audit blocking, and authenticated OwnerFi workflow execution are verified; remaining risk is release packaging discipline)
+
+Low (live proof route, health, revision traffic, authenticated OwnerFi workflow execution verified; code consolidation and hardening are well-planned with testing strategies and risk mitigations; all changes can be validated with existing npm check suite before deployment)
 
 ## Direction
-Proceed with monitored command execution, audit visibility, tighter control-plane hardening, and platform-oriented extraction of reusable contracts, policy, and integration surfaces.
+
+Execute code consolidation (Phases 1-3) per operational plans with validation gates between phases. Focus on: (1) consolidating shared utilities into reusable modules, (2) aligning code structure with governance architecture for scalability, (3) hardening input validation and error handling for production robustness. After optimization completes, proceed with platform-oriented feature work (tenant model, billing integration, etc.) with cleaner architectural foundation.
