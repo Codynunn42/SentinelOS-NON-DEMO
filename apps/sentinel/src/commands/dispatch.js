@@ -6,6 +6,27 @@ const { enforceSentinelExecution } = require('../governance/executionGuard');
 const { governanceCheck } = require('../governance/preflight');
 const { buildCommandTrustInput, buildTrustScoreResult } = require('../trustScore');
 
+function emitBlockedPathEvent(envelope, reason, details = {}) {
+  // Emit distinct Log Analytics telemetry marker for governance denials
+  const blockedPathEvent = {
+    source: 'sentinel-api',
+    category: 'governance',
+    eventType: 'blocked-path',
+    timestamp: new Date().toISOString(),
+    command: envelope.command || envelope.legacyCommand || 'unknown',
+    tenant: envelope.tenant || null,
+    actor: (envelope.metadata && envelope.metadata.actor) || null,
+    reason,
+    trustScore: details.trustScore || 0,
+    blockingPolicy: details.blockingPolicy || null,
+    executionPath: details.executionPath || null,
+    ...details
+  };
+
+  // Log to console for Container App capture and Log Analytics ingestion
+  console.log(JSON.stringify(blockedPathEvent));
+}
+
 async function auditGovernanceBlock(envelope, result, trust = null) {
   await auditLogger.log({
     tenant: envelope.tenant || null,
@@ -60,6 +81,11 @@ async function dispatchCommand(body, context) {
       }
     };
 
+    emitBlockedPathEvent(envelope, 'execution_guard_block', {
+      trustScore: 0,
+      executionPath: executionGuard.details && executionGuard.details.executionPath
+    });
+
     await auditGovernanceBlock(envelope, failure, {
       trustScore: 0,
       reasons: ['execution_guard_block']
@@ -88,6 +114,12 @@ async function dispatchCommand(body, context) {
         reasons: trust.reasons
       }
     };
+
+    emitBlockedPathEvent(envelope, governance.policy ? governance.policy.reason : 'governance_preflight_block', {
+      trustScore: trust.trustScore,
+      blockingPolicy: blockedPolicy,
+      reasons: trust.reasons
+    });
 
     await auditGovernanceBlock(envelope, failure, trust);
     return failure;
