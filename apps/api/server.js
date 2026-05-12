@@ -65,6 +65,8 @@ const {
   updateExternalAnchor
 } = require('../sentinel/src/verification/stateAnchors');
 const { analyzeDrift } = require('../sentinel/src/drift/driftAnalyzer');
+const { list: listDriftRecommendations, getSummary: getDriftSummary } = require('../sentinel/src/drift/driftStore');
+const { createTrace, recordStage, completeTrace, getTrace, listTraces } = require('../sentinel/src/audit/executionTrace');
 const { enforceSovereignBoot } = require('../sentinel/src/sovereign/sovereignBoot');
 const { resolveTier, classifyOperation } = require('../sentinel/src/tiers/tierResolver');
 const { TIERS } = require('../sentinel/src/tiers/tierRegistry');
@@ -3353,6 +3355,66 @@ const server = http.createServer(async (req, res) => {
         event: eventType
       });
     });
+  }
+
+  if (pathname === '/drift/recommendations' && req.method === 'GET') {
+    const access = authorizeRoute(req, res, '/drift/recommendations', {
+      command: 'learning.read',
+      requiredScope: 'learning:read'
+    });
+
+    if (!access) return;
+
+    const tenant = requestUrl.searchParams.get('tenant');
+    const status = requestUrl.searchParams.get('status');
+    const recommendations = listDriftRecommendations({ tenant, status });
+    const summary = getDriftSummary(tenant);
+
+    return sendJson(res, 200, {
+      status: 'ok',
+      tenant: tenant || null,
+      summary,
+      count: recommendations.length,
+      recommendations
+    });
+  }
+
+  if (pathname === '/v1/traces' && req.method === 'GET') {
+    const access = authorizeRoute(req, res, '/v1/traces', {
+      command: 'audit.read',
+      requiredScope: 'audit:read'
+    });
+
+    if (!access) return;
+
+    const tenant = requestUrl.searchParams.get('tenant');
+    const limit = parseInt(requestUrl.searchParams.get('limit') || '50', 10);
+    const traceList = listTraces({ tenant, limit });
+
+    return sendJson(res, 200, {
+      status: 'ok',
+      tenant: tenant || null,
+      count: traceList.length,
+      traces: traceList
+    });
+  }
+
+  if (pathname.startsWith('/v1/traces/') && req.method === 'GET') {
+    const access = authorizeRoute(req, res, '/v1/traces/:correlationId', {
+      command: 'audit.read',
+      requiredScope: 'audit:read'
+    });
+
+    if (!access) return;
+
+    const correlationId = decodeURIComponent(pathname.replace('/v1/traces/', '')).trim();
+    const trace = getTrace(correlationId);
+
+    if (!trace) {
+      return sendJson(res, 404, { status: 'error', error: 'Trace not found', correlationId });
+    }
+
+    return sendJson(res, 200, { status: 'ok', trace });
   }
 
   return sendJson(res, 404, {

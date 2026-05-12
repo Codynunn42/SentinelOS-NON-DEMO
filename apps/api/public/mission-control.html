@@ -509,6 +509,82 @@
       margin-top: 4px;
     }
 
+    .drift-rec {
+      border: 1px solid var(--line);
+      border-left: 3px solid var(--yellow);
+      border-radius: 6px;
+      padding: 10px 12px;
+      background: rgba(246,211,101,0.04);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .drift-rec.approved {
+      border-left-color: var(--green);
+      background: rgba(110,231,168,0.04);
+    }
+
+    .drift-rec.rejected {
+      border-left-color: var(--red);
+      background: rgba(255,123,114,0.04);
+    }
+
+    .drift-rec strong {
+      display: block;
+      color: var(--text);
+      margin-bottom: 3px;
+    }
+
+    .drift-rec small {
+      display: block;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .trace-row {
+      border-left: 3px solid var(--line);
+      padding: 8px 0 8px 12px;
+      margin-bottom: 6px;
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    .trace-row strong {
+      display: block;
+      color: var(--text);
+      font-size: 13px;
+    }
+
+    .trace-stages {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-top: 6px;
+    }
+
+    .trace-stage {
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 700;
+      background: var(--surface-2);
+      color: var(--muted);
+      border: 1px solid var(--line);
+    }
+
+    .trace-stage.reached {
+      background: rgba(110,231,168,0.12);
+      color: var(--green);
+      border-color: rgba(110,231,168,0.3);
+    }
+
+    .trace-stage.blocked {
+      background: rgba(255,123,114,0.12);
+      color: var(--red);
+      border-color: rgba(255,123,114,0.3);
+    }
+
     @keyframes pulse-warn {
       0%, 100% { opacity: 1; }
       50% { opacity: 0.45; }
@@ -940,6 +1016,35 @@
             <p class="empty">No roadmap loaded.</p>
           </div>
         </div>
+      </article>
+
+      <article class="panel span-6">
+        <div class="panel-head">
+          <h2>Drift Recommendations</h2>
+          <span id="driftChip" class="chip">not loaded</span>
+        </div>
+        <div class="metric-grid" style="margin-bottom:12px;">
+          <div class="metric"><span>Proposed</span><strong id="driftProposed">-</strong></div>
+          <div class="metric"><span>Pending Approval</span><strong id="driftPending">-</strong></div>
+          <div class="metric"><span>Approved</span><strong id="driftApproved">-</strong></div>
+          <div class="metric"><span>Total</span><strong id="driftTotal">-</strong></div>
+        </div>
+        <div class="actions" style="margin-bottom:10px;">
+          <button id="loadDriftButton" class="secondary" type="button">Load Drift</button>
+          <button id="runDriftButton" class="secondary" type="button">Analyze Now</button>
+        </div>
+        <div id="driftList" class="signal-list"><p class="empty">No drift recommendations loaded.</p></div>
+      </article>
+
+      <article class="panel span-6">
+        <div class="panel-head">
+          <h2>Execution Trace</h2>
+          <span id="traceChip" class="chip">not loaded</span>
+        </div>
+        <div class="actions" style="margin-bottom:10px;">
+          <button id="loadTracesButton" class="secondary" type="button">Load Traces</button>
+        </div>
+        <div id="traceList" style="max-height:320px;overflow:auto;"><p class="empty">No traces loaded.</p></div>
       </article>
 
       <article class="panel span-12">
@@ -1794,6 +1899,78 @@
       }
     }
 
+    async function loadDriftRecommendations() {
+      const tenant = encodeURIComponent(state.tenant || 'ownerfi');
+      const payload = await api(`/drift/recommendations?tenant=${tenant}`);
+      const summary = payload.summary || {};
+      const recs = Array.isArray(payload.recommendations) ? payload.recommendations : [];
+      document.getElementById('driftProposed').textContent = summary.proposed ?? '-';
+      document.getElementById('driftPending').textContent = summary.pending_approval ?? '-';
+      document.getElementById('driftApproved').textContent = summary.approved ?? '-';
+      document.getElementById('driftTotal').textContent = summary.total ?? recs.length;
+      setChip(document.getElementById('driftChip'), `${recs.length} recommendations`, recs.length ? 'warn' : 'good');
+
+      const list = document.getElementById('driftList');
+      if (!recs.length) {
+        list.innerHTML = '<p class="empty">No drift recommendations. System is clean.</p>';
+        return payload;
+      }
+
+      list.innerHTML = recs.slice(0, 8).map((rec) => `
+        <div class="drift-rec ${escapeHtml(rec.status || '')}">
+          <strong>${escapeHtml(rec.type || 'drift_recommendation')}</strong>
+          <span>${escapeHtml(rec.detectedPattern || '')}</span>
+          <small>Action: ${escapeHtml(rec.recommendedAction || '')}</small>
+          <small>Risk: ${escapeHtml(rec.riskAssessment && rec.riskAssessment.governanceRisk || 'unknown')} / Impact: ${escapeHtml(rec.riskAssessment && rec.riskAssessment.operationalImpact || 'unknown')}</small>
+          <small>Status: ${escapeHtml(rec.status || 'proposed')} / ${escapeHtml(rec.timestamp ? new Date(rec.timestamp).toLocaleTimeString() : '')}</small>
+          ${rec.proposedFork ? `<small>Fork: ${escapeHtml(rec.proposedFork.branchName || '')}</small>` : ''}
+        </div>
+      `).join('');
+      return payload;
+    }
+
+    async function runDriftAnalysis() {
+      const tenant = encodeURIComponent(state.tenant || 'ownerfi');
+      const payload = await api(`/drift/analyze?tenant=${tenant}&routeApprovals=false`);
+      setChip(document.getElementById('driftChip'), payload.status || 'analyzed', payload.status === 'drift_detected' ? 'warn' : 'good');
+      await loadDriftRecommendations();
+      return payload;
+    }
+
+    async function loadTraces() {
+      const tenant = encodeURIComponent(state.tenant || 'ownerfi');
+      const payload = await api(`/v1/traces?tenant=${tenant}&limit=20`);
+      const traceItems = Array.isArray(payload.traces) ? payload.traces : [];
+      setChip(document.getElementById('traceChip'), `${traceItems.length} traces`, traceItems.length ? 'good' : '');
+
+      const list = document.getElementById('traceList');
+      if (!traceItems.length) {
+        list.innerHTML = '<p class="empty">No execution traces recorded yet.</p>';
+        return payload;
+      }
+
+      const STAGES = ['API', 'Security', 'Governance', 'Learning', 'Analysis', 'Decision', 'Approval', 'Execution'];
+      list.innerHTML = traceItems.slice(0, 10).map((trace) => {
+        const reachedStages = new Set((trace.stages || []).map((s) => s.stage));
+        const isBlocked = trace.outcome && trace.outcome.success === false;
+        const stageHtml = STAGES.map((label, i) => {
+          const key = label.toLowerCase();
+          const reached = reachedStages.has(key);
+          const blocked = reached && isBlocked && i === STAGES.length - 1;
+          return `<span class="trace-stage ${blocked ? 'blocked' : reached ? 'reached' : ''}">${escapeHtml(label)}</span>`;
+        }).join('');
+        return `
+          <div class="trace-row">
+            <strong>${escapeHtml(trace.command || 'unknown')} / ${escapeHtml(trace.tenant || '')}</strong>
+            <span>${escapeHtml(trace.correlationId || '')} / ${escapeHtml(trace.actor || 'unknown actor')}</span>
+            <span>${escapeHtml(new Date(trace.startedAt).toLocaleTimeString())} ${trace.completedAt ? '→ ' + escapeHtml(new Date(trace.completedAt).toLocaleTimeString()) : '(in progress)'}</span>
+            <div class="trace-stages">${stageHtml}</div>
+          </div>
+        `;
+      }).join('');
+      return payload;
+    }
+
     el.refreshButton.addEventListener('click', refresh);
     el.pollButton.addEventListener('click', togglePolling);
     el.runWorkflowButton.addEventListener('click', () => initializeWorkflowFromConsole().catch((error) => {
@@ -1846,6 +2023,9 @@
     }));
     el.connectSignalsStreamButton.addEventListener('click', connectSignalsStream);
     el.connectAuditStreamButton.addEventListener('click', connectAuditStream);
+    document.getElementById('loadDriftButton').addEventListener('click', () => loadDriftRecommendations().then((p) => writeCommandOutput({ drift: p.summary })).catch((e) => { el.errorText.textContent = e.message; }));
+    document.getElementById('runDriftButton').addEventListener('click', () => runDriftAnalysis().then((p) => writeCommandOutput({ driftAnalysis: p.summary })).catch((e) => { el.errorText.textContent = e.message; }));
+    document.getElementById('loadTracesButton').addEventListener('click', () => loadTraces().then((p) => writeCommandOutput({ traces: p.count })).catch((e) => { el.errorText.textContent = e.message; }));
     el.approvalQueue.addEventListener('click', (event) => {
       const button = event.target.closest('button[data-action]');
       if (!button) return;

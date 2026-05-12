@@ -12,6 +12,7 @@ const {
   emitRecommendationsGenerated,
   emitRecommendationRouted
 } = require('./driftTelemetry');
+const { saveAll } = require('./driftStore');
 
 async function analyzeDrift(auditLog, options = {}) {
   const tenant = options.tenant || null;
@@ -44,6 +45,9 @@ async function analyzeDrift(auditLog, options = {}) {
   }
 
   const forkProposals = buildForkProposals(recommendations);
+
+  // Persist recommendations before routing approvals
+  saveAll(recommendations);
 
   let routedRecommendations = recommendations;
   if (routeApprovals && recommendations.length) {
