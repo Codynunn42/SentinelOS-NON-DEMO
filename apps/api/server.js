@@ -64,6 +64,10 @@ const {
   listAnchors,
   updateExternalAnchor
 } = require('../sentinel/src/verification/stateAnchors');
+const { analyzeDrift } = require('../sentinel/src/drift/driftAnalyzer');
+const { enforceSovereignBoot } = require('../sentinel/src/sovereign/sovereignBoot');
+const { resolveTier, classifyOperation } = require('../sentinel/src/tiers/tierResolver');
+const { TIERS } = require('../sentinel/src/tiers/tierRegistry');
 
 const PORT = process.env.PORT || 3000;
 const LANDING_PAGE_PATH = path.join(__dirname, 'public', 'index.html');
@@ -89,6 +93,24 @@ function sendJson(res, statusCode, payload) {
 function requireAuthoritySecret() {
   if (!process.env.SENTINEL_HMAC_SECRET) {
     console.error('FATAL: SENTINEL_HMAC_SECRET missing');
+    process.exit(1);
+  }
+}
+
+function enforceProductionBoundary() {
+  const nodeEnv = process.env.NODE_ENV || 'development';
+  const authMode = process.env.SENTINEL_AUTH_MODE || '';
+  const smokeAuth = process.env.SENTINEL_SMOKE_AUTH || '';
+  const isProduction = nodeEnv === 'production';
+
+  if (isProduction && (authMode === 'smoke' || smokeAuth === '1' || smokeAuth === 'true')) {
+    emitSecurityEvent('startup.boundary.violation', {
+      reason: 'smoke_auth_in_production',
+      NODE_ENV: nodeEnv,
+      SENTINEL_AUTH_MODE: authMode,
+      SENTINEL_SMOKE_AUTH: smokeAuth
+    });
+    console.error('FATAL: Smoke auth mode is not permitted in production');
     process.exit(1);
   }
 }
@@ -1445,10 +1467,14 @@ const server = http.createServer(async (req, res) => {
   }
 
   if (pathname === '/health' && req.method === 'GET') {
+    const deploymentTier = resolveTier({});
     return sendJson(res, 200, {
       status: 'ok',
       service: 'sentinel-api',
       mode: 'non-demo',
+      tier: deploymentTier.tier,
+      tierLabel: deploymentTier.definition.label,
+      sovereign: deploymentTier.tier === TIERS.SOVEREIGN,
       database: getDatabaseStatus(),
       timestamp: new Date().toISOString()
     });
@@ -1505,10 +1531,15 @@ const server = http.createServer(async (req, res) => {
   }
 
   if (pathname === '/system/status' && req.method === 'GET') {
+    const deploymentTier = resolveTier({});
     return sendJson(res, 200, {
       status: 'ok',
       service: 'sentinel-api',
       mode: 'non-demo',
+      tier: deploymentTier.tier,
+      tierLabel: deploymentTier.definition.label,
+      sovereign: deploymentTier.tier === TIERS.SOVEREIGN,
+      platformConnected: deploymentTier.definition.platformConnected,
       database: getDatabaseStatus(),
       surfaces: getSurfaceSummary(),
       routes: {
@@ -3216,6 +3247,49 @@ const server = http.createServer(async (req, res) => {
     });
   }
 
+  if (pathname === '/drift/analyze' && req.method === 'GET') {
+    const tenant = requestUrl.searchParams.get('tenant');
+    const access = authorizeRoute(req, res, '/drift/analyze', {
+      tenant: tenant || undefined,
+      command: 'learning.read',
+      requiredScope: 'learning:read'
+    });
+
+    if (!access) {
+      return;
+    }
+
+    const shouldRoute = requestUrl.searchParams.get('routeApprovals') !== 'false';
+
+    return analyzeDrift(auditLogger.getAll(), {
+      tenant,
+      emitSecurityEvent,
+      createApprovalRequest: shouldRoute ? createApprovalRequest : null,
+      routeApprovals: shouldRoute
+    })
+      .then((result) => {
+        auditLogger.log({
+          tenant: tenant || null,
+          command: 'drift.analyzed',
+          payload: { tenant, routeApprovals: shouldRoute },
+          result: {
+            success: true,
+            status: result.status,
+            signalCount: result.summary ? result.summary.signalCount : 0,
+            recommendationCount: result.summary ? result.summary.recommendationCount : 0
+          },
+          actor: access.principal.actor,
+          timestamp: new Date().toISOString()
+        }).catch(() => {});
+
+        return sendJson(res, 200, result);
+      })
+      .catch((error) => sendJson(res, 500, {
+        status: 'error',
+        error: error instanceof Error ? error.message : 'Drift analysis failed'
+      }));
+  }
+
   if (pathname === '/learning/events' && req.method === 'POST') {
     const access = authorizeRoute(req, res, '/learning/events', {
       command: 'learning.write',
@@ -3289,6 +3363,8 @@ const server = http.createServer(async (req, res) => {
 
 if (require.main === module) {
   requireAuthoritySecret();
+  enforceProductionBoundary();
+  enforceSovereignBoot();
 
   ensureSchema()
     .then(() => {
