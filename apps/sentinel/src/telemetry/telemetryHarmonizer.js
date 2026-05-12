@@ -1,46 +1,7 @@
 const crypto = require('crypto');
 const { buildPolicyContext, evaluatePolicy } = require('../governance/policyEngine');
 const { TELEMETRY_STATUSES, createTelemetryResponse } = require('./telemetrySchema');
-
-const TELEMETRY_ACTION_MAP = {
-  'workflow.metrics': {
-    command: 'telemetry.metric.write',
-    riskLevel: 'low',
-    reason: 'Operational metrics can be sent when tenant and scope policy allow.'
-  },
-  'audit.summary': {
-    command: 'telemetry.audit.summary',
-    riskLevel: 'low',
-    reason: 'Audit summaries are safe when scoped and non-sensitive.'
-  },
-  'deal.execution': {
-    command: 'deal.execute',
-    riskLevel: 'medium',
-    approvalRequired: true,
-    reason: 'Financial execution visibility requires human approval.'
-  },
-  'approval.state': {
-    command: 'approval.read',
-    riskLevel: 'medium',
-    reason: 'Approval state visibility is read-scoped and tenant-bound.'
-  },
-  'external.export': {
-    command: 'telemetry.export.external',
-    riskLevel: 'high',
-    forceBlock: true,
-    reason: 'External export is blocked when telemetry is off or limited.'
-  },
-  'sensitive.payload': {
-    command: 'telemetry.payload.sensitive',
-    riskLevel: 'high',
-    forceBlock: true,
-    reason: 'Sensitive payload telemetry cannot be sent without explicit external export approval.'
-  }
-};
-
-function hasText(value) {
-  return typeof value === 'string' && value.trim() !== '';
-}
+const { hasText } = require('../shared/validation');
 
 function stableStringify(value) {
   if (Array.isArray(value)) {
@@ -60,6 +21,8 @@ function stableStringify(value) {
 function hashObject(value) {
   return crypto.createHash('sha256').update(stableStringify(value)).digest('hex');
 }
+
+const TELEMETRY_ACTION_MAP = {};
 
 function normalizeActivity(item = {}, index = 0) {
   const type = hasText(item.type)

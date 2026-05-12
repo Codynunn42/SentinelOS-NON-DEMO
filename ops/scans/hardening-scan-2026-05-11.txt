@@ -1,0 +1,39 @@
+=== CORRELATION IDS ===
+apps/sentinel/src/drift/driftRecommendations.js:24:    correlationId: signal.signalId
+apps/sentinel/src/drift/driftRecommendations.js:43:    correlationId: signal.signalId
+apps/sentinel/src/drift/driftRecommendations.js:62:    correlationId: signal.signalId
+apps/sentinel/src/drift/driftRecommendations.js:81:    correlationId: signal.signalId
+apps/sentinel/src/drift/driftRecommendations.js:100:    correlationId: signal.signalId
+apps/sentinel/src/drift/driftSchemas.js:27:function createDriftSignal({ type, severity, tenant, source, pattern, evidence = [], correlationId = null }) {
+apps/sentinel/src/drift/driftSchemas.js:36:    correlationId,
+apps/sentinel/src/drift/driftSchemas.js:51:  correlationId = null
+apps/sentinel/src/drift/driftSchemas.js:68:    correlationId,
+apps/sentinel/src/audit/auditLogger.js:102:      correlationId: entry.correlationId || null,
+apps/sentinel/src/commands/dispatch.js:40:    correlationId: envelope.correlationId || null,
+apps/sentinel/src/commands/dispatch.js:57:    correlationId: envelope.correlationId || null,
+apps/sentinel/src/commands/dispatch.js:79:  const correlationId = (context && context.correlationId) || generateCorrelationId();
+apps/sentinel/src/commands/dispatch.js:81:  envelope.correlationId = correlationId;
+apps/sentinel/src/commands/dispatch.js:117:        details: { reason: 'tampered_or_unsigned_decision', correlationId }
+apps/sentinel/src/commands/dispatch.js:121:        correlationId,
+apps/sentinel/src/commands/dispatch.js:229:      correlationId: envelope.correlationId || null,
+apps/sentinel/src/commands/dispatch.js:258:      correlationId: envelope.correlationId || null,
+
+=== EXECUTION PATHS ===
+apps/sentinel/src/planes/customerops.ts:119:        status: approvalRequired ? 'approval_required' : 'created',
+apps/sentinel/src/learning/engine.js:292:        'approval_required',
+apps/sentinel/src/surface/nunncloud.js:31:      executionMode: requiresApproval(cdnluxEvent) ? 'approval_required' : 'read_only'
+apps/sentinel/src/drift/driftApprovalRouter.js:15:      executionMode: 'approval_required',
+apps/sentinel/src/drift/driftPolicies.js:16:  'apps/sentinel/src/commands/dispatch.js',
+apps/sentinel/src/drift/driftSignals.js:89:  const blockedPaths = entries.filter((e) => e.command === 'blocked-path' || (e.result && e.result.governance === 'preflight' && e.result.success === false));
+apps/sentinel/src/drift/driftRecommendations.js:58:      targetFiles: ['apps/sentinel/src/commands/dispatch.js'],
+apps/sentinel/src/drift/driftRecommendations.js:59:      rationale: 'Reduce repeated blocked execution by improving pre-dispatch validation.'
+apps/sentinel/src/drift/driftRecommendations.js:70:    recommendedAction: 'Investigate blocked-path spike. Review telemetry severity classification and alert thresholds.',
+apps/sentinel/src/integrations/docking/protocol.js:126:    executionMode: approvalRequired ? 'approval_required' : 'read_only',
+apps/sentinel/src/orchestration/taskTemplates.js:309:      executionMode: 'approval_required'
+apps/sentinel/src/orchestration/taskTemplates.js:346:        executionMode: candidate.xeRequired ? 'operator_assisted' : 'approval_required',
+apps/sentinel/src/governance/governanceSignals.js:121:      'approval_required',
+apps/sentinel/src/commands/dispatch.js:22:    eventType: 'blocked-path',
+apps/sentinel/src/commands/dispatch.js:77:async function dispatchCommand(body, context) {
+apps/sentinel/src/commands/dispatch.js:272:  dispatchCommand
+apps/sentinel/src/commands/dealFlow/runDemo.js:41:          reason: 'approval_required'
+apps/sentinel/src/commands/customeropsHandlers.js:92:    status: approvalRequired ? 'approval_required' : 'created',
