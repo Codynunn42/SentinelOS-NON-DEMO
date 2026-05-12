@@ -1,72 +1,6 @@
 const crypto = require('crypto');
+const { hasText } = require('../shared/validation');
 const { runTelemetryHarmonizer } = require('../telemetry/telemetryHarmonizer');
-
-const APPROVAL_BADGES = {
-  approved: '[APPROVED:TASK]',
-  conditional: '[APPROVE:CONDITIONAL]',
-  hold: '[HOLD:REVIEW]',
-  xeAssist: '[XE:ASSISTANCE]',
-  mapped: '[APPROVED:MAPPING]'
-};
-
-const DEFAULT_TEMPLATES = [
-  {
-    id: 'tpl_mapping_alignment',
-    category: 'mapping_alignment',
-    title: 'Map governance/compliance artifacts to source evidence',
-    badge: APPROVAL_BADGES.mapped,
-    riskLevel: 'medium',
-    approvalPolicy: 'human_review_required',
-    xeEligible: false,
-    reason: 'Canonical mappings must exist before streamlining or external publication.'
-  },
-  {
-    id: 'tpl_conditional_approval',
-    category: 'conditional_approval',
-    title: 'Advance conditional approval toward final approval',
-    badge: APPROVAL_BADGES.conditional,
-    riskLevel: 'medium',
-    approvalPolicy: 'human_review_required',
-    xeEligible: true,
-    reason: 'Conditional items need evidence, verification, and a final human decision.'
-  },
-  {
-    id: 'tpl_hold_review',
-    category: 'held_review',
-    title: 'Hold draft material until review is complete',
-    badge: APPROVAL_BADGES.hold,
-    riskLevel: 'high',
-    approvalPolicy: 'human_review_required',
-    xeEligible: false,
-    reason: 'Held material cannot become canonical or external without explicit approval.'
-  },
-  {
-    id: 'tpl_xe_assistance',
-    category: 'xe_assistance',
-    title: 'Queue execution assistance for Sentinel XE',
-    badge: APPROVAL_BADGES.xeAssist,
-    riskLevel: 'medium',
-    approvalPolicy: 'approval_before_execution',
-    xeEligible: true,
-    reason: 'XE actions can assist only after required approvals are recorded.'
-  },
-  {
-    id: 'tpl_billing_checkout',
-    category: 'billing_checkout',
-    title: 'Govern Stripe checkout creation',
-    badge: '[APPROVE:BILLING]',
-    riskLevel: 'high',
-    approvalPolicy: 'approval_before_execution',
-    xeEligible: true,
-    reason: 'Revenue actions require approved configuration, pricing, and audit boundaries before execution.'
-  }
-];
-
-const runs = new Map();
-
-function hasText(value) {
-  return typeof value === 'string' && value.trim() !== '';
-}
 
 function stableStringify(value) {
   if (Array.isArray(value)) {
@@ -86,6 +20,74 @@ function stableStringify(value) {
 function hashObject(value) {
   return crypto.createHash('sha256').update(stableStringify(value)).digest('hex');
 }
+
+const APPROVAL_BADGES = Object.freeze({
+  mapping_alignment: '[MAP]',
+  conditional_approval: '[APPROVE]',
+  held_review: '[HOLD]',
+  xe_assistance: '[XE]',
+  billing_checkout: '[BILLING]'
+});
+
+const DEFAULT_TEMPLATES = Object.freeze([
+  {
+    id: 'template_mapping_alignment',
+    category: 'mapping_alignment',
+    title: 'Mapping Alignment',
+    badge: '[MAP]',
+    riskLevel: 'low',
+    approvalPolicy: 'allowed_with_audit',
+    xeEligible: true,
+    reason: 'Mapping alignment task. Proceed under existing mapped approval.',
+    nextStep: 'Proceed under existing mapped approval.'
+  },
+  {
+    id: 'template_conditional_approval',
+    category: 'conditional_approval',
+    title: 'Conditional Approval',
+    badge: '[APPROVE]',
+    riskLevel: 'medium',
+    approvalPolicy: 'approval_before_execution',
+    xeEligible: true,
+    reason: 'Conditional approval required before execution.',
+    nextStep: 'Prepare evidence and route for human approval.'
+  },
+  {
+    id: 'template_held_review',
+    category: 'held_review',
+    title: 'Held For Review',
+    badge: '[HOLD]',
+    riskLevel: 'high',
+    approvalPolicy: 'human_review_required',
+    xeEligible: false,
+    reason: 'Task is held pending human review.',
+    nextStep: 'Route for human review before proceeding.'
+  },
+  {
+    id: 'template_xe_assistance',
+    category: 'xe_assistance',
+    title: 'XE Assistance',
+    badge: '[XE]',
+    riskLevel: 'low',
+    approvalPolicy: 'allowed_with_audit',
+    xeEligible: true,
+    reason: 'XE-assisted execution. Audit logging required.',
+    nextStep: 'Run through XE with audit logging enabled.'
+  },
+  {
+    id: 'template_billing_checkout',
+    category: 'billing_checkout',
+    title: 'Billing Checkout',
+    badge: '[BILLING]',
+    riskLevel: 'high',
+    approvalPolicy: 'approval_before_execution',
+    xeEligible: false,
+    reason: 'Billing checkout requires configuration approval before payment execution.',
+    nextStep: 'Approve Stripe checkout configuration before enabling revenue execution.'
+  }
+]);
+
+const runs = new Map();
 
 function normalizeCategory(value) {
   const category = hasText(value) ? value.trim().toLowerCase() : '';
