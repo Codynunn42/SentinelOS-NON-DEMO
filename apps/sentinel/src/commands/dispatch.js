@@ -5,6 +5,14 @@ const { auditLogger } = require('../audit/auditLogger');
 const { enforceSentinelExecution } = require('../governance/executionGuard');
 const { governanceCheck } = require('../governance/preflight');
 const { buildCommandTrustInput, buildTrustScoreResult } = require('../trustScore');
+const { verifyDecision } = require('../security/signing');
+const crypto = require('crypto');
+
+const SIGNING_KEY = process.env.SENTINEL_SIGNING_KEY || '';
+
+function generateCorrelationId() {
+  return `corr_${crypto.randomUUID()}`;
+}
 
 function emitBlockedPathEvent(envelope, reason, details = {}) {
   // Emit distinct Log Analytics telemetry marker for governance denials
@@ -29,6 +37,7 @@ function emitBlockedPathEvent(envelope, reason, details = {}) {
 
 async function auditGovernanceBlock(envelope, result, trust = null) {
   await auditLogger.log({
+    correlationId: envelope.correlationId || null,
     tenant: envelope.tenant || null,
     command: envelope.command || envelope.legacyCommand || 'unknown',
     payload: envelope.payload,
@@ -45,6 +54,7 @@ async function auditGovernanceBlock(envelope, result, trust = null) {
 
 async function auditPolicyAllow(envelope, policy, policyContext) {
   await auditLogger.log({
+    correlationId: envelope.correlationId || null,
     tenant: envelope.tenant || null,
     command: 'policy.preflight',
     payload: {
@@ -66,7 +76,9 @@ async function auditPolicyAllow(envelope, policy, policyContext) {
 
 async function dispatchCommand(body, context) {
   const startTime = Date.now();
+  const correlationId = (context && context.correlationId) || generateCorrelationId();
   const envelope = normalizeCommandEnvelope(body);
+  envelope.correlationId = correlationId;
   const executionGuard = enforceSentinelExecution(envelope, context);
 
   if (!executionGuard.allowed) {
@@ -94,6 +106,25 @@ async function dispatchCommand(body, context) {
   }
 
   const governance = governanceCheck(envelope, context && context.signals ? context.signals : {}, context ? context.principal : null);
+
+  // ENV-003: verify decision signature if present
+  if (governance.decision && governance.decision.signature !== undefined) {
+    if (SIGNING_KEY && !verifyDecision(governance.decision, SIGNING_KEY)) {
+      const sigFailure = {
+        success: false,
+        statusCode: 403,
+        error: 'SIGNATURE_VERIFICATION_FAILED',
+        details: { reason: 'tampered_or_unsigned_decision', correlationId }
+      };
+      emitBlockedPathEvent(envelope, 'signature_verification_failed', {
+        trustScore: 0,
+        correlationId,
+        severity: 'critical'
+      });
+      await auditGovernanceBlock(envelope, sigFailure, { trustScore: 0, reasons: ['signature_verification_failed'] });
+      return sigFailure;
+    }
+  }
   if (!governance.allowed) {
     const blockedPolicy = governance.policy || (governance.details && governance.details.policy) || {};
     const blockedPolicyContext = governance.policyContext || (governance.details && governance.details.policyContext) || {};
@@ -195,6 +226,7 @@ async function executeHandler({ envelope, context, governance, startTime, handle
     };
 
     await auditLogger.log({
+      correlationId: envelope.correlationId || null,
       tenant: envelope.tenant,
       command: envelope.command,
       payload: envelope.payload,
@@ -223,6 +255,7 @@ async function executeHandler({ envelope, context, governance, startTime, handle
     };
 
     await auditLogger.log({
+      correlationId: envelope.correlationId || null,
       tenant: envelope.tenant,
       command: envelope.command,
       payload: envelope.payload,

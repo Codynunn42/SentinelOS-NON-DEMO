@@ -39,6 +39,8 @@
     "check:task-templates": "node scripts/check-task-templates.js",
     "check:telemetry-harmonizer": "node scripts/check-telemetry-harmonizer.js",
     "check:trust-score": "node scripts/check-trust-score.js",
+    "check:tiers": "node scripts/check-tier-registry.js",
+    "generate:sovereign-license": "node scripts/generate-sovereign-license.js",
     "check:ready": "node scripts/check-ready-endpoint.js",
     "check:vendor-ledger": "node scripts/check-vendor-onboarding-ledger.js",
     "check:vendor-onboarding": "node scripts/check-vendor-onboarding-rules.js",

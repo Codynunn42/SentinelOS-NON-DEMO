@@ -21,6 +21,10 @@ function stableStringify(value) {
   return JSON.stringify(value);
 }
 
+function hashPayload(payload) {
+  return crypto.createHash('sha256').update(stableStringify(payload || {})).digest('hex');
+}
+
 function hashAuditEntry(entry, prevHash) {
   return crypto
     .createHash('sha256')
@@ -95,6 +99,9 @@ const auditLogger = {
     const timestampedEntry = {
       ...entry,
       eventId: entry.eventId || crypto.randomUUID(),
+      correlationId: entry.correlationId || null,
+      inputPayloadHash: hashPayload(entry.payload),
+      signatureVersion: (entry.result && entry.result.signatureVersion) || 'unsigned',
       timestamp: entry.timestamp || new Date().toISOString()
     };
     const governanceSignals = evaluateGovernanceSignals(timestampedEntry);

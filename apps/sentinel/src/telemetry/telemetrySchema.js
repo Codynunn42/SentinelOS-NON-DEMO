@@ -4,6 +4,27 @@ const TELEMETRY_STATUSES = Object.freeze({
   blocked: 'BLOCKED'
 });
 
+const TELEMETRY_SEVERITIES = Object.freeze({
+  info: 'info',
+  warning: 'warning',
+  elevated: 'elevated',
+  critical: 'critical'
+});
+
+const SEVERITY_MAP = Object.freeze({
+  low: 'info',
+  medium: 'warning',
+  high: 'elevated',
+  critical: 'critical'
+});
+
+function normalizeSeverity(value) {
+  if (typeof value === 'string' && TELEMETRY_SEVERITIES[value.toLowerCase()]) {
+    return value.toLowerCase();
+  }
+  return SEVERITY_MAP[typeof value === 'string' ? value.toLowerCase() : ''] || 'info';
+}
+
 function createTelemetryResponse({
   status = 'HARMONIZED',
   mode = 'GUARDED_VISIBILITY',
@@ -31,6 +52,8 @@ function createTelemetryResponse({
 }
 
 module.exports = {
+  TELEMETRY_SEVERITIES,
   TELEMETRY_STATUSES,
-  createTelemetryResponse
+  createTelemetryResponse,
+  normalizeSeverity
 };
