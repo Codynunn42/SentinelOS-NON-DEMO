@@ -2,6 +2,14 @@
 
 **COMM:** Sentinel AI by Cody Nunn | Nunn Cloud
 
+## Artifact Decision
+
+```txt
+[ARCHIVE:HISTORICAL-LINEAGE]
+```
+
+Next step: preserve in place as strategic lineage. Current execution truth lives in `docs/EXECUTIVE_SNAPSHOT_2026-05-12.md`.
+
 ## Executive Position
 
 SentinelOS is a governed control plane for business execution.

@@ -2,6 +2,14 @@
 
 **COMM:** Sentinel AI by Cody Nunn | Nunn Cloud
 
+## Artifact Decision
+
+```txt
+[KEEP:IMMUTABLE-RELEASE-LINEAGE]
+```
+
+Next step: preserve unchanged except for explicit release-lineage annotations.
+
 ## Status
 
 ```txt

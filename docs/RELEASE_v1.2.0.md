@@ -1,5 +1,13 @@
 # SentinelOS v1.2.0 - Governed Execution Proof
 
+## Artifact Decision
+
+```txt
+[KEEP:IMMUTABLE-RELEASE-LINEAGE]
+```
+
+Next step: preserve unchanged except for explicit release-lineage annotations.
+
 ## Overview
 
 This release marks a major step forward in SentinelOS maturity.

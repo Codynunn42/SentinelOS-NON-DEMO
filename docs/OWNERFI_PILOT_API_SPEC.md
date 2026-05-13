@@ -6,6 +6,14 @@
 
 Status: Pilot validation spec
 
+## Artifact Decision
+
+```txt
+[KEEP:CONTROLLED-PILOT-REFERENCE]
+```
+
+Next step: keep paired PDF `docs/OWNERFI_PILOT_API_SPEC.pdf` available as pilot reference. Refresh before any new external technical send.
+
 Audience: OwnerFi technical validation
 
 ## Overview

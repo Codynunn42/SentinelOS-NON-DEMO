@@ -4,9 +4,13 @@
 
 **DISCLAIMER:** This document outlines strategic positioning for future government alignment. Current SentinelOS deployment is limited to enterprise pilots. No government deployment claims should be made.
 
-Approval badge: `[HOLD:REVIEW]`
+Approval badge: `[DEFER:PUBLIC-SECTOR-DRAFT]`
 
 Document status: Discussion draft. Not approved for external publication.
+
+Artifact decision: `[DEFER:PUBLIC-SECTOR-DRAFT]`
+
+Next step: keep paired PDF `docs/ARIZONA_SPO_MODERNIZATION_BRIEF_LAYOUT.pdf` draft-only. Before any external use, approve this source document and regenerate or explicitly label the PDF as draft.
 
 Owner: Cody Nunn / Nunn Cloud
 
@@ -33,7 +37,7 @@ It is not:
 - an official government submission
 - an approval to publish the paired PDF
 
-The paired PDF, `docs/ARIZONA_SPO_MODERNIZATION_BRIEF_LAYOUT.pdf`, remains `[HOLD:REVIEW]` until this source document receives final owner approval and the PDF is regenerated or explicitly labeled draft.
+The paired PDF, `docs/ARIZONA_SPO_MODERNIZATION_BRIEF_LAYOUT.pdf`, remains `[DEFER:PUBLIC-SECTOR-DRAFT]` until this source document receives final owner approval and the PDF is regenerated or explicitly labeled draft.
 
 ## Design Guidance
 
