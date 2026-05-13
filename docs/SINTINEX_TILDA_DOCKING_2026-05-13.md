@@ -1,4 +1,4 @@
-# SINTINEX TILDA Docking - 2026-05-13
+# SINTENIX TILDA Docking - 2026-05-13
 
 **COMM:** Sentinel AI by Cody Nunn | Nunn Cloud
 
@@ -8,17 +8,18 @@
 [APPROVED:DOCKED-OBSERVE-ROUTE-ONLY]
 ```
 
-SINTINEX is docked to SentinelOS as a TILDA-managed intake and archive-connection lane.
+SINTENIX is docked to SentinelOS as a TILDA-managed intake and archive-connection lane.
 
 Accepted aliases:
 
+- `SINTENIX`
 - `SINTINEX`
 - `SENTINEX`
 - `SINTENX`
 
 ## Purpose
 
-SINTINEX receives incoming information that should not automatically alter the active SentinelOS lane.
+SINTENIX receives incoming information that should not automatically alter the active SentinelOS lane.
 
 It is meant to hold:
 
@@ -53,11 +54,12 @@ incoming information
 
 ## Archive Connection
 
-SINTINEX connects incoming information to the current artifact decision layer:
+SINTENIX connects incoming information to the current artifact decision layer:
 
 - current truth: `docs/EXECUTIVE_SNAPSHOT_2026-05-12.md`
 - current approval: `docs/PHASE1_APPROVAL_BOARD_2026-05-12.md`
 - decision register: `docs/SENTINEL_ARTIFACT_DECISION_REGISTER_2026-05-13.md`
+- ingestion ledger: `docs/SINTENIX_INGESTION_LEDGER_2026-05-13.md`
 - historical lineage: daily briefs, prior snapshots, prior repo scans
 - deferred draft lane: Arizona SPO modernization brief
 
@@ -65,7 +67,7 @@ Archive means preserved in place as institutional memory. It does not mean moved
 
 ## TILDA Boundary
 
-SINTINEX is managed through TILDA:
+SINTENIX is managed through TILDA:
 
 ```txt
 apps/sentinel/src/learning/tilda.js
@@ -80,6 +82,7 @@ TILDA may explain and route. It may not override SentinelOS policy.
 - `apps/sentinel/src/sintinex/intake.js`
 - `apps/sentinel/src/learning/tilda.js`
 - `scripts/check-sintinex-tilda-docking.js`
+- `docs/SINTENIX_INGESTION_LEDGER_2026-05-13.md`
 
 ## Validation
 
@@ -90,6 +93,7 @@ npm run check:sintinex
 Expected behavior:
 
 - Managed Results routes to `sintinex_idea_ledger`.
+- SentinelOS/SINTENIX boundary notes route to `sintenix_archival_cognition`.
 - Historical daily brief references route to `archive_reference`.
 - Phase 1.1 references route to `active_context`.
 - Arizona SPO/public-sector draft references route to `deferred_review`.
@@ -97,6 +101,6 @@ Expected behavior:
 
 ## Current Decision
 
-SINTINEX is clicked into place as an intake and memory-routing layer only.
+SINTENIX is clicked into place as an intake and memory-routing layer only.
 
 Do not expand it into execution, automation, publication, or active product scope until the owner explicitly approves that next boundary.

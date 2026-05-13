@@ -9,7 +9,8 @@ const futureTheory = routeSintinexIntake({
   tags: ['Managed Results', 'SINTINEX']
 });
 
-assert.strictEqual(futureTheory.system, 'SINTINEX');
+assert.strictEqual(futureTheory.system, 'SINTENIX');
+assert(futureTheory.aliases.includes('SINTINEX'));
 assert.strictEqual(futureTheory.managedBy, 'TILDA');
 assert.strictEqual(futureTheory.lane, 'sintinex_idea_ledger');
 assert.strictEqual(futureTheory.activeExecutionAllowed, false);
@@ -52,5 +53,24 @@ assert.strictEqual(deferredDraft.lane, 'deferred_review');
 assert(deferredDraft.archiveConnections.some((connection) => connection.decision === 'DEFER'));
 assert.strictEqual(deferredDraft.tilda.requiresApproval, true);
 assert.strictEqual(deferredDraft.tilda.riskLevel, 'high');
+
+const archivalCognition = routeSintinexIntake({
+  id: 'incoming_sintenix_boundary_20260513',
+  title: 'SINTENIX archival cognition boundary',
+  body: [
+    'SentinelOS is governed execution and operational control.',
+    'SINTENIX is archival cognition, lineage interpretation, and historical synthesis.',
+    'SINTENIX informs SentinelOS but does not control SentinelOS.',
+    'One governs. One understands.'
+  ].join(' '),
+  source: 'operator',
+  tags: ['SINTENIX', 'archive interpretation', 'historical intelligence']
+});
+
+assert.strictEqual(archivalCognition.system, 'SINTENIX');
+assert.strictEqual(archivalCognition.lane, 'sintenix_archival_cognition');
+assert.strictEqual(archivalCognition.activeExecutionAllowed, false);
+assert(archivalCognition.archiveConnections.some((connection) => connection.role === 'sintenix_boundary'));
+assert(archivalCognition.tilda.requiresApproval);
 
 console.log('SINTINEX TILDA docking check passed');

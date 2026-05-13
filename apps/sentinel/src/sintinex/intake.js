@@ -1,6 +1,7 @@
 const { evaluateForethought } = require('../forethought/tilda');
 
-const SINTINEX_ALIASES = ['SINTINEX', 'SENTINEX', 'SINTENX'];
+const SINTINEX_CANONICAL_NAME = 'SINTENIX';
+const SINTINEX_ALIASES = ['SINTENIX', 'SINTINEX', 'SENTINEX', 'SINTENX'];
 
 const ARCHIVE_CONNECTIONS = [
   {
@@ -32,6 +33,12 @@ const ARCHIVE_CONNECTIONS = [
     decision: 'KEEP',
     role: 'decision_register',
     keywords: ['artifact decision', '18 artifact', 'categorization', 'archive', 'keep', 'defer']
+  },
+  {
+    path: 'docs/SINTINEX_TILDA_DOCKING_2026-05-13.md',
+    decision: 'KEEP',
+    role: 'sintenix_boundary',
+    keywords: ['sintenix', 'sintinex', 'archival cognition', 'lineage interpretation', 'historical synthesis']
   },
   {
     path: 'docs/ARIZONA_SPO_MODERNIZATION_BRIEF_LAYOUT.md',
@@ -96,12 +103,33 @@ function classifySintinexLane(record, archiveConnections) {
 
   if (
     includesAny(haystack, [
+      'archival cognition',
+      'lineage interpretation',
+      'historical synthesis',
+      'historical intelligence',
+      'one governs',
+      'one understands',
+      'informs sentinelos',
+      'archive interpretation',
+      'pattern synthesis',
+      'memory/context evolution'
+    ])
+  ) {
+    return {
+      lane: 'sintenix_archival_cognition',
+      reason: 'Incoming information defines SINTENIX as archival cognition that informs but does not control SentinelOS.'
+    };
+  }
+
+  if (
+    includesAny(haystack, [
       'managed results',
       'future theory',
       'future-facing',
       'idea',
       'concept',
       'maybe later',
+      'sintenix',
       'sintinex',
       'sentinex',
       'sintenx'
@@ -169,7 +197,7 @@ function routeSintinexIntake(input = {}, options = {}) {
   );
 
   return {
-    system: 'SINTINEX',
+    system: SINTINEX_CANONICAL_NAME,
     aliases: SINTINEX_ALIASES,
     status: 'docked',
     executionMode: 'observe_route_only',
@@ -192,6 +220,7 @@ function routeSintinexIntake(input = {}, options = {}) {
 module.exports = {
   ARCHIVE_CONNECTIONS,
   SINTINEX_ALIASES,
+  SINTINEX_CANONICAL_NAME,
   normalizeIncomingInformation,
   resolveArchiveConnections,
   classifySintinexLane,
