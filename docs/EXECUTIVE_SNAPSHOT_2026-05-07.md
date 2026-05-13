@@ -2,6 +2,14 @@
 
 **COMM:** Sentinel AI by Cody Nunn | Nunn Cloud
 
+## Artifact Decision
+
+```txt
+[ARCHIVE:HISTORICAL-PHASE-1]
+```
+
+Next step: preserve in place as Phase 1 lock lineage. Current Phase 1.1 truth lives in `docs/EXECUTIVE_SNAPSHOT_2026-05-12.md`.
+
 ## Purpose
 
 Compile the daily and executive records from the beginning into one current decision surface.

@@ -1,5 +1,13 @@
 # SentinelOS v1.3.0 - Governance Signals
 
+## Artifact Decision
+
+```txt
+[KEEP:IMMUTABLE-RELEASE-LINEAGE]
+```
+
+Next step: preserve unchanged except for explicit release-lineage annotations.
+
 ## Overview
 
 This release turns SentinelOS audit visibility into a reactive control loop.

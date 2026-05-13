@@ -6,6 +6,14 @@
 
 **COMM:** Sentinel AI by Cody Nunn | Nunn Cloud
 
+## Artifact Decision
+
+```txt
+[KEEP:CONTROLLED-COMMERCIAL-COLLATERAL]
+```
+
+Next step: keep paired PDF `docs/COMMERCIAL_ASSETS_2026-04-29.pdf` available as controlled commercial collateral. Check claims against current Phase 1.1 evidence before any send.
+
 ## Purpose
 
 Package the current governed-execution proof into three reusable assets:

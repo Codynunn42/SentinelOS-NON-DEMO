@@ -2,6 +2,14 @@
 
 **COMM:** Sentinel AI by Cody Nunn | Nunn Cloud
 
+## Artifact Decision
+
+```txt
+[KEEP:CURRENT-PHASE-1.1]
+```
+
+Next step: treat as the current executive snapshot until a newer approved snapshot supersedes it.
+
 ## Purpose
 
 Compile the daily and executive records from the beginning into one current decision surface.

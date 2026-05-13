@@ -55,6 +55,20 @@ Phase 1.1 builds on the Phase 1 live proof path with analytics, telemetry persis
 | Craftsmanship pass | approved | applied and documented |
 | 18-artifact decision register | approved | 8 keep, 9 archive, 0 remove, 0 merge, 1 defer |
 
+## Artifact Decisions Applied
+
+```txt
+[APPROVED:APPLIED-IN-PLACE]
+```
+
+The 18 approved artifact decisions have been applied without deletion, movement, merge consolidation, or broad cleanup.
+
+- `KEEP` artifacts remain in place with controlled-use or release-lineage direction.
+- `ARCHIVE` artifacts remain in place as institutional memory, not current operating truth.
+- `DEFER` artifact remains held and draft-only.
+- `REMOVE` and `MERGE` have no approved artifacts.
+- Current Phase 1.1 operating truth remains this approval board plus `docs/EXECUTIVE_SNAPSHOT_2026-05-12.md`.
+
 ## Live Verification Captured
 
 Deployment target:

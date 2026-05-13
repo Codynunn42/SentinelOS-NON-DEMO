@@ -2,6 +2,14 @@
 
 **COMM:** Sentinel AI by Cody Nunn | Nunn Cloud
 
+## Artifact Decision
+
+```txt
+[ARCHIVE:HISTORICAL-LINEAGE]
+```
+
+Next step: preserve in place as institutional memory for the initial OwnerFi proof path. Do not use as current operating truth.
+
 ## Focus
 
 Move SentinelOS NON-DEMO from protected API work into a proof-backed platform shape.

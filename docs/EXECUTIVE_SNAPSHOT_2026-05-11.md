@@ -4,6 +4,14 @@
 
 **Date:** May 11, 2026 | **Status:** OPERATIONAL | **Phase:** Production Readiness
 
+## Artifact Decision
+
+```txt
+[ARCHIVE:HISTORICAL-READINESS]
+```
+
+Next step: preserve in place as Customer Operations and readiness lineage. Current Phase 1.1 truth lives in `docs/EXECUTIVE_SNAPSHOT_2026-05-12.md`.
+
 ---
 
 ## Summary

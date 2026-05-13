@@ -2,6 +2,14 @@
 
 **COMM:** Sentinel AI by Cody Nunn | Nunn Cloud
 
+## Artifact Decision
+
+```txt
+[ARCHIVE:HISTORICAL-PHASE-1]
+```
+
+Next step: preserve in place as Phase 1 approval lineage. Current Phase 1.1 approval truth lives in `docs/PHASE1_APPROVAL_BOARD_2026-05-12.md`.
+
 ## Status
 
 ```txt

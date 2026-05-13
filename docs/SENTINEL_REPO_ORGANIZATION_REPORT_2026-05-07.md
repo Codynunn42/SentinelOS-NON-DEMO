@@ -1,5 +1,13 @@
 # Sentinel Repository Organization Report - 2026-05-07
 
+## Artifact Decision
+
+```txt
+[ARCHIVE:HISTORICAL-REPO-SCAN]
+```
+
+Next step: preserve in place for drift lineage and comparison only. Do not use as active cleanup input.
+
 ## Operator Summary
 
 Sentinel scanned the repository for changed files, untracked files, exact duplicates, similar names, and overlapping document content. No files were deleted or moved. This report is an approval gate for optimization and streamlining.

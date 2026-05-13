@@ -2,6 +2,14 @@
 
 **COMM:** Sentinel AI by Cody Nunn | Nunn Cloud
 
+## Artifact Decision
+
+```txt
+[ARCHIVE:HISTORICAL-LINEAGE]
+```
+
+Next step: preserve in place as deployment and proof history. Do not use as current operating truth.
+
 ## Focus
 Make SentinelOS feel like a product and platform, not only an OwnerFi demo.
 
