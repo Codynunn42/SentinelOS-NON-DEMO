@@ -35,6 +35,7 @@
     "check:product-commands": "node scripts/check-product-command-routing.js",
     "check:receipts": "node scripts/check-receipt-lookup.js",
     "check:state-anchors": "node scripts/check-state-anchors.js",
+    "check:sintinex": "node scripts/check-sintinex-tilda-docking.js",
     "check:stripe-checkout": "node scripts/check-stripe-checkout-ingestion.js",
     "check:task-templates": "node scripts/check-task-templates.js",
     "check:telemetry-harmonizer": "node scripts/check-telemetry-harmonizer.js",
