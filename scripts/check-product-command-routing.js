@@ -5,6 +5,11 @@ const { server } = require('../apps/api/server');
 
 const TEST_KEY = 'product-command-test-secret';
 const PRODUCT_DOC = 'docs/DEAL_EXECUTION_ENGINE_POSITIONING.md';
+const STATEFUL_FILES = [
+  'config/product.json',
+  'config/uiLabels.json',
+  PRODUCT_DOC
+];
 
 process.env.SENTINEL_API_KEY = TEST_KEY;
 process.env.SENTINEL_HMAC_SECRET = process.env.SENTINEL_HMAC_SECRET || 'product-command-passport-secret';
@@ -36,7 +41,36 @@ async function postCommand(base, command, payload = {}) {
   return { response, body };
 }
 
+function snapshotFiles(files) {
+  return Object.fromEntries(files.map((file) => {
+    const fullPath = path.join(process.cwd(), file);
+    return [
+      file,
+      fs.existsSync(fullPath)
+        ? { existed: true, content: fs.readFileSync(fullPath, 'utf8') }
+        : { existed: false, content: null }
+    ];
+  }));
+}
+
+function restoreFiles(snapshot) {
+  for (const [file, state] of Object.entries(snapshot)) {
+    const fullPath = path.join(process.cwd(), file);
+
+    if (!state.existed) {
+      if (fs.existsSync(fullPath)) {
+        fs.unlinkSync(fullPath);
+      }
+      continue;
+    }
+
+    fs.mkdirSync(path.dirname(fullPath), { recursive: true });
+    fs.writeFileSync(fullPath, state.content, 'utf8');
+  }
+}
+
 async function main() {
+  const fileSnapshot = snapshotFiles(STATEFUL_FILES);
   const port = await listen();
   const base = `http://127.0.0.1:${port}`;
 
@@ -125,6 +159,7 @@ async function main() {
     console.log('Product command routing check passed');
   } finally {
     server.close();
+    restoreFiles(fileSnapshot);
   }
 }
 

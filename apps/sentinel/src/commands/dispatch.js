@@ -223,7 +223,9 @@ async function dispatchCommand(body, context) {
             approvalId: approval.id,
             unlockOnApproval: true,
             executionStatus: 'awaiting_approval',
-            approvalStatus: approval.status
+            approvalStatus: approval.status,
+            trustScore: 0,
+            reasons: ['approval_required']
           }
         };
 

@@ -85,10 +85,12 @@ async function main() {
   });
 
   assert.strictEqual(blockedResult.success, false);
-  assert.strictEqual(blockedResult.data.trustScore, 35);
-  assert(blockedResult.data.reasons.includes('role_mismatch'));
-  assert(blockedResult.data.reasons.includes('policy_blocked'));
-  assert(blockedResult.data.reasons.includes('medium_risk'));
+  assert.strictEqual(blockedResult.error, 'APPROVAL_REQUIRED');
+  assert.strictEqual(blockedResult.data.trustScore, 0);
+  assert(blockedResult.data.reasons.includes('approval_required'));
+  assert.strictEqual(blockedResult.data.approvalRequired, true);
+  assert.strictEqual(blockedResult.data.executionStatus, 'awaiting_approval');
+  assert.strictEqual(blockedResult.data.approvalStatus, 'pending');
 
   console.log('Trust score check passed');
 }
