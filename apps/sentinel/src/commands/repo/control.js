@@ -1,6 +1,4 @@
-function asArray(value) {
-  return Array.isArray(value) ? value : [];
-}
+const { asArray } = require('../../shared/validation');
 
 function classifyWorkflowFailure(payload = {}) {
   const conclusion = payload.conclusion || payload.status || 'unknown';

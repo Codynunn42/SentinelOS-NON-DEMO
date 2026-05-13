@@ -1,4 +1,5 @@
 const { RULE_SET_VERSION } = require('./nvopConfig');
+const { hasText, asNumber, asArray, isValidEmail, isValidPhone } = require('../../shared/validation');
 
 const CATEGORIES = {
   STRUCTURAL: 'Structural Integrity',
@@ -12,19 +13,7 @@ const SEVERITY_WEIGHT = {
   High: 3
 };
 
-function hasText(value) {
-  return typeof value === 'string' && value.trim() !== '';
-}
-
-function asNumber(value) {
-  const numeric = Number(value);
-  return Number.isFinite(numeric) ? numeric : null;
-}
-
-function asArray(value) {
-  return Array.isArray(value) ? value : [];
-}
-
+// Local helpers specific to vendor onboarding
 function normalizeText(value) {
   return hasText(value) ? value.trim().toLowerCase() : '';
 }
@@ -42,15 +31,6 @@ function fileExtension(file) {
 function hasDocument(documents, key) {
   const doc = documentFor(documents, key);
   return Boolean(doc && (hasText(doc.name) || hasText(doc.url) || hasText(doc.id) || hasText(doc)));
-}
-
-function isValidEmail(value) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value || '');
-}
-
-function isValidPhone(value) {
-  const digits = String(value || '').replace(/\D/g, '');
-  return digits.length >= 10 && digits.length <= 15;
 }
 
 function withinWindow(timestamp, intakeWindow = {}) {

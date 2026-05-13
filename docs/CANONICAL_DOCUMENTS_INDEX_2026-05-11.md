@@ -182,6 +182,7 @@ This index compiles all repository documents into canonical categories based on 
 ## SIMILARITY GROUPS (From Repo Scan)
 
 ### README Files (similar_name_1)
+
 - `README.md` (root)
 - `apps/README.md`
 - `docs/README.md` (canonical internal index)
@@ -191,24 +192,28 @@ This index compiles all repository documents into canonical categories based on 
 **Canonical:** `docs/README.md` for documentation index
 
 ### Registry Files (similar_name_2)
+
 - `apps/sentinel/src/commands/registry.js`
 - `apps/sentinel/src/surface/registry.js`
 
 **Canonical:** Both active - command vs surface registries
 
 ### Tilda Files (similar_name_3)
+
 - `apps/sentinel/src/forethought/tilda.js`
 - `apps/sentinel/src/learning/tilda.js`
 
 **Canonical:** Both active - different domains
 
 ### Drift Config Files (similar_name_4)
+
 - `apps/sentinel/src/governance/core/driftConfig.js`
 - `apps/sentinel/src/governance/vendorOnboarding/driftConfig.js`
 
 **Canonical:** Both active - core vs vendor onboarding
 
 ### Drift Monitor Files (similar_name_5)
+
 - `apps/sentinel/src/governance/core/driftMonitor.js`
 - `apps/sentinel/src/governance/vendorOnboarding/driftMonitor.js`
 

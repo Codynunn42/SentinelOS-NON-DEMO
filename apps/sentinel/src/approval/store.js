@@ -14,6 +14,7 @@ function fromRow(row) {
     status: row.status,
     decision: row.decision,
     context: row.context,
+    events: Array.isArray(row.events) ? row.events : [],
     resolution: row.resolution || undefined,
     createdAt: row.created_at instanceof Date ? row.created_at.toISOString() : row.created_at,
     updatedAt: row.updated_at instanceof Date ? row.updated_at.toISOString() : row.updated_at,
@@ -26,13 +27,14 @@ function fromRow(row) {
 
 async function saveApproval(request) {
   const result = await query(
-    `INSERT INTO approvals (id, tenant_id, status, decision, context, resolution, created_at, updated_at, resolved_at)
-     VALUES ($1, $2, $3, $4::jsonb, $5::jsonb, $6::jsonb, $7, $8, $9)
+    `INSERT INTO approvals (id, tenant_id, status, decision, context, events, resolution, created_at, updated_at, resolved_at)
+     VALUES ($1, $2, $3, $4::jsonb, $5::jsonb, $6::jsonb, $7::jsonb, $8, $9, $10)
      ON CONFLICT (id) DO UPDATE SET
        tenant_id = EXCLUDED.tenant_id,
        status = EXCLUDED.status,
        decision = EXCLUDED.decision,
        context = EXCLUDED.context,
+       events = EXCLUDED.events,
        resolution = EXCLUDED.resolution,
        updated_at = EXCLUDED.updated_at,
        resolved_at = EXCLUDED.resolved_at
@@ -43,6 +45,7 @@ async function saveApproval(request) {
       request.status,
       JSON.stringify(request.decision || {}),
       JSON.stringify(request.context || {}),
+      JSON.stringify(Array.isArray(request.events) ? request.events : []),
       request.resolution ? JSON.stringify(request.resolution) : null,
       toDbTimestamp(request.createdAt),
       toDbTimestamp(request.updatedAt),
@@ -82,32 +85,69 @@ async function listApprovals(status, tenantId = null) {
 
 async function updateApproval(id, status, metadata = {}, tenantId = null) {
   const resolvedAt = new Date().toISOString();
+  const eventType = status === 'approved' ? 'approved' : status === 'rejected' ? 'rejected' : status;
+  const event = {
+    type: eventType,
+    actor: metadata && metadata.actor ? metadata.actor : 'system',
+    timestamp: resolvedAt
+  };
   const result = tenantId
     ? await query(
         `UPDATE approvals
          SET status = $2,
              resolution = $3::jsonb,
-             updated_at = $4,
-             resolved_at = $4
-         WHERE id = $1 AND tenant_id = $5
+             events = COALESCE(events, '[]'::jsonb) || $4::jsonb,
+             updated_at = $5,
+             resolved_at = $5
+         WHERE id = $1 AND tenant_id = $6
          RETURNING *`,
-        [id, status, JSON.stringify(metadata || {}), resolvedAt, tenantId]
+        [id, status, JSON.stringify(metadata || {}), JSON.stringify([event]), resolvedAt, tenantId]
       )
     : await query(
         `UPDATE approvals
          SET status = $2,
              resolution = $3::jsonb,
-             updated_at = $4,
-             resolved_at = $4
+             events = COALESCE(events, '[]'::jsonb) || $4::jsonb,
+             updated_at = $5,
+             resolved_at = $5
          WHERE id = $1
          RETURNING *`,
-        [id, status, JSON.stringify(metadata || {}), resolvedAt]
+        [id, status, JSON.stringify(metadata || {}), JSON.stringify([event]), resolvedAt]
+      );
+
+  return result && result.rows && result.rows[0] ? fromRow(result.rows[0]) : null;
+}
+
+async function appendApprovalEvent(id, event, tenantId = null) {
+  const now = event.timestamp || new Date().toISOString();
+  const normalizedEvent = {
+    type: event.type,
+    actor: event.actor || 'system',
+    timestamp: now
+  };
+  const result = tenantId
+    ? await query(
+        `UPDATE approvals
+         SET events = COALESCE(events, '[]'::jsonb) || $2::jsonb,
+             updated_at = $3
+         WHERE id = $1 AND tenant_id = $4
+         RETURNING *`,
+        [id, JSON.stringify([normalizedEvent]), now, tenantId]
+      )
+    : await query(
+        `UPDATE approvals
+         SET events = COALESCE(events, '[]'::jsonb) || $2::jsonb,
+             updated_at = $3
+         WHERE id = $1
+         RETURNING *`,
+        [id, JSON.stringify([normalizedEvent]), now]
       );
 
   return result && result.rows && result.rows[0] ? fromRow(result.rows[0]) : null;
 }
 
 module.exports = {
+  appendApprovalEvent,
   getApproval,
   listApprovals,
   saveApproval,

@@ -1,10 +1,4 @@
-function hasText(value) {
-  return typeof value === 'string' && value.trim() !== '';
-}
-
-function isRecord(value) {
-  return Boolean(value) && typeof value === 'object' && !Array.isArray(value);
-}
+const { hasText, isRecord } = require('../shared/validation');
 
 function validateControlInput(input = {}) {
   if (!hasText(input.intent)) throw new Error('Missing intent');

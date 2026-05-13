@@ -1,10 +1,6 @@
-const crypto = require('crypto');
+const { generateId } = require('../shared/idGenerator');
 const { ownerfiStore } = require('../store/ownerfiStore');
 const { handleTelemetryCommand } = require('../telemetry/telemetryController');
-
-function generateId(prefix) {
-  return `${prefix}_${crypto.randomUUID()}`;
-}
 
 function buildMissingFieldResult(required) {
   return {

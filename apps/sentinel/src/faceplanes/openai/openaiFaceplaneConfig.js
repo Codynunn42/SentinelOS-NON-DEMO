@@ -1,3 +1,4 @@
+const { hasText } = require('../../shared/validation');
 const INTERNAL_TENANT_ID = 'nunn-internal';
 const FACEPLANE_NAME = 'openai';
 const FACEPLANE_VERSION = 'Faceplane_OpenAI_v1';
@@ -19,10 +20,6 @@ const OPENAI_FACEPLANE_CONFIGS = Object.freeze({
     thresholdExperimentationAllowed: true
   })
 });
-
-function hasText(value) {
-  return typeof value === 'string' && value.trim() !== '';
-}
 
 function listOpenAIFaceplaneConfigs() {
   return Object.values(OPENAI_FACEPLANE_CONFIGS);

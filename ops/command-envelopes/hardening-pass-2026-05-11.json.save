@@ -1,0 +1,224 @@
+{
+  "envelopeId": "ENV-001-TELEMETRY-SYNTAX",
+  "operation": "repair.syntax.telemetry",
+  "priority": "critical",
+  "target": "apps/sentinel/src/telemetry/telemetryHarmonizer.js",
+  "objective": "Resolve JavaScript parser failure preventing telemetry validation scripts from executing.",
+  "detectedIssue": {
+    "type": "syntax_regression",
+    "description": "TELEMETRY_ACTION_MAP object declaration improperly contains helper function declarations.",
+    "error": "Unexpected identifier 'stableStringify'"
+  },
+  "requiredActions": [
+    {
+      "action": "replace",
+      "find": "const TELEMETRY_ACTION_MAP = {",
+      "replace": "const TELEMETRY_ACTION_MAP = {};"
+    },
+    {
+      "action": "ensure",
+      "requirement": "stableStringify declared outside object scope"
+    },
+    {
+      "action": "validate",
+      "command": "node --check apps/sentinel/src/telemetry/telemetryHarmonizer.js"
+    }
+  ],
+  "successCriteria": [
+    "node --check exits cleanly",
+    "no parser errors",
+    "telemetry module loads successfully"
+  ],
+  "postValidation": [
+    "npm run check:customerops",
+    "npm run check:policy",
+    "npm run check:governance-status",
+    "npm run check:governance-drift"
+  ]
+}
+
+{
+  "envelopeId": "ENV-002-CORRELATION-CHAIN",
+  "operation": "hardening.correlation.chain",
+  "priority": "high",
+  "objective": "Establish deterministic execution lineage across governance infrastructure.",
+  "requiredFields": [
+    "correlationId",
+    "requestId",
+    "commandId",
+    "tenantId",
+    "executionPath",
+    "decisionId"
+  ],
+  "searchCommands": [
+    "grep -R \"correlationId\\|requestId\\|traceId\" apps/sentinel/src -n",
+    "grep -R \"dispatch\\|executeCommand\\|approval_required\" apps/sentinel/src -n"
+  ],
+  "requiredPropagation": [
+    "command intake",
+    "governance preflight",
+    "policy evaluation",
+    "telemetry events",
+    "audit logging",
+    "approval routing",
+    "execution dispatch",
+    "blocked-path telemetry"
+  ],
+  "successCriteria": [
+    "every execution path contains correlation identifiers",
+    "telemetry lineage reconstructable",
+    "audit chain deterministic"
+  ]
+}
+
+{
+  "envelopeId": "ENV-003-SIGNATURE-ENFORCEMENT",
+  "operation": "security.signature.enforcement",
+  "priority": "critical",
+  "objective": "Require signed governance decisions before execution dispatch.",
+  "requiredChecks": [
+    "decision.signed === true",
+    "signatureVersion exists",
+    "signature verification passes",
+    "decision hash integrity valid"
+  ],
+  "failureBehavior": [
+    "block execution",
+    "emit blocked-path telemetry",
+    "write audit denial event",
+    "return controlled failure response"
+  ],
+  "requiredTelemetry": {
+    "eventType": "signature_verification_failed",
+    "severity": "critical"
+  },
+  "successCriteria": [
+    "unsigned decisions cannot execute",
+    "tampered decisions rejected",
+    "verification telemetry emitted"
+  ]
+}
+
+{
+  "envelopeId": "ENV-004-TELEMETRY-SEVERITY",
+  "operation": "telemetry.normalize.severity",
+  "priority": "high",
+  "objective": "Normalize telemetry event severity classification.",
+  "requiredSchema": {
+    "severity": [
+      "info",
+      "warning",
+      "elevated",
+      "critical"
+    ],
+    "requiredFields": [
+      "eventType",
+      "correlationId",
+      "tenantId",
+      "executionPath",
+      "decisionScore",
+      "policy",
+      "timestamp"
+    ]
+  },
+  "targetAreas": [
+    "blocked-path events",
+    "command.executed events",
+    "approval-required events",
+    "governance denials",
+    "execution guard blocks"
+  ],
+  "successCriteria": [
+    "severity consistent across telemetry system",
+    "Log Analytics queries standardized",
+    "operational dashboards supportable"
+  ]
+}
+
+{
+  "envelopeId": "ENV-005-PROOF-PROD-BOUNDARY",
+  "operation": "hardening.execution.boundary",
+  "priority": "critical",
+  "objective": "Prevent proof/demo bypass logic from executing in production-like environments.",
+  "requiredGuards": [
+    "disable smoke auth in production",
+    "disable demo bypass execution",
+    "require tenant context",
+    "require real auth",
+    "require signature verification"
+  ],
+  "environmentChecks": [
+    "NODE_ENV",
+    "SENTINEL_AUTH_MODE",
+    "SENTINEL_SMOKE_AUTH"
+  ],
+  "failureBehavior": [
+    "startup rejection",
+    "execution denial",
+    "critical telemetry emission"
+  ],
+  "successCriteria": [
+    "production execution boundary enforced",
+    "demo-safe logic isolated",
+    "proof mode non-executable in production"
+  ]
+}
+
+{
+  "envelopeId": "ENV-006-GOVERNANCE-REPLAY",
+  "operation": "governance.replay.foundation",
+  "priority": "high",
+  "objective": "Enable deterministic replay of governance decisions.",
+  "requiredArtifacts": [
+    "correlationId",
+    "commandId",
+    "tenantId",
+    "operatorId",
+    "inputPayloadHash",
+    "policySnapshot",
+    "decisionScore",
+    "decisionResult",
+    "signatureVersion",
+    "signatureValid",
+    "telemetryEvents",
+    "auditEvents",
+    "timestamp"
+  ],
+  "requiredCapabilities": [
+    "decision reconstruction",
+    "policy replay",
+    "audit replay",
+    "telemetry lineage reconstruction"
+  ],
+  "successCriteria": [
+    "historical decisions reconstructable",
+    "governance reasoning traceable",
+    "audit replay deterministic"
+  ]
+}
+
+{
+  "envelopeId": "ENV-007-VALIDATION-SEQUENCE",
+  "operation": "validation.execution.sequence",
+  "priority": "mandatory",
+  "objective": "Validate system integrity after each hardening stage.",
+  "validationCommands": [
+    "node --check apps/sentinel/src/telemetry/telemetryHarmonizer.js",
+    "npm run check:customerops",
+    "npm run check:policy",
+    "npm run check:governance-status",
+    "npm run check:governance-drift"
+  ],
+  "gitSafety": [
+    "git status",
+    "git add .",
+    "git commit -m \"checkpoint: hardening validation pass\""
+  ],
+  "successCriteria": [
+    "all validation scripts pass",
+    "no parser/runtime failures",
+    "governance telemetry operational"
+  ]
+}
+
+

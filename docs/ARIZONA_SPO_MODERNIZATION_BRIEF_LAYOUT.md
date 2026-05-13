@@ -290,7 +290,7 @@ SentinelOS is proposed as governed workflow containment infrastructure for admin
 
 ## Source Notes
 
-- Arizona State Procurement Office, Arizona Procurement Portal: https://spo.az.gov/arizona-procurement-portal
-- Arizona State Procurement Office, Suppliers page: https://spo.az.gov/suppliers
-- Arizona Department of Administration, Register To Be A State Vendor: https://doa.az.gov/about/services/register-be-state-vendor
-- Arizona Procurement Portal login page: https://app.az.gov/
+- Arizona State Procurement Office, Arizona Procurement Portal: <https://spo.az.gov/arizona-procurement-portal>
+- Arizona State Procurement Office, Suppliers page: <https://spo.az.gov/suppliers>
+- Arizona Department of Administration, Register To Be A State Vendor: <https://doa.az.gov/about/services/register-be-state-vendor>
+- Arizona Procurement Portal login page: <https://app.az.gov/>

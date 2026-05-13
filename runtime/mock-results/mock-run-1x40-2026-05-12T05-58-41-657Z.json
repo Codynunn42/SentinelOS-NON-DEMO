@@ -1,0 +1,43 @@
+{
+  "timestamp": "2026-05-12T05:58:41.657Z",
+  "iterations": 1,
+  "config": {
+    "commandsPerRun": 40,
+    "approvalRate": 0.35,
+    "blockRate": 0.15,
+    "telemetryState": "LIMITED",
+    "telemetryActivityCount": 12
+  },
+  "results": [
+    {
+      "iteration": 1,
+      "durationMs": 9.6,
+      "success": true,
+      "statusCode": 200,
+      "blocked": false,
+      "summary": {
+        "faceplanes": [
+          "ownerfi",
+          "hotelops",
+          "itad"
+        ],
+        "runId": "mock_run_all_1778565521655",
+        "commandCount": 120,
+        "approvalCount": 39,
+        "blockedCount": 17
+      },
+      "iterationSummary": {
+        "commandCount": 120,
+        "approvalCount": 39,
+        "blockedCount": 17,
+        "approvalRatio": 0.325,
+        "blockRatio": 0.142,
+        "driftRecommendationsGenerated": 0,
+        "traceCompleteness": 1,
+        "timestamp": "2026-05-12T05:58:41.656Z",
+        "correlationId": "a822d577-ac3e-4cb4-b9ac-18bc12cb3261"
+      },
+      "error": null
+    }
+  ]
+}

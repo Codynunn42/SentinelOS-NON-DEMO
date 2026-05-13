@@ -3,6 +3,7 @@
 **COMM:** Sentinel AI by Cody Nunn | Nunn Cloud
 
 ## Current Verdict
+
 Billing and funnel execution are not active capabilities in this SentinelOS NON-DEMO proof surface.
 
 They are documented as future proof-case checkpoints, not ready-to-go production flows.

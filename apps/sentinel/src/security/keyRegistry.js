@@ -1,3 +1,5 @@
+const { hasText } = require('../shared/validation');
+
 const DEFAULT_OWNERFI_SCOPES = [
   'application:submit',
   'application:evaluate',
@@ -32,10 +34,6 @@ const PLATFORM_SCOPES = [
   'security:write',
   'policy:evaluate'
 ];
-
-function hasText(value) {
-  return typeof value === 'string' && value.trim() !== '';
-}
 
 function parseKeyRegistry() {
   if (!hasText(process.env.SENTINEL_API_KEYS)) {

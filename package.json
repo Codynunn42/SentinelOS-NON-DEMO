@@ -50,6 +50,8 @@
     "release:anchor": "node scripts/generate-system-release-anchor.js",
     "posture:containment": "node scripts/check-containment-posture.js",
     "simulate:vendor-onboarding": "node scripts/simulate-vendor-onboarding.js",
+    "simulate:mock-faceplanes": "node scripts/run-mock-faceplanes.js",
+    "simulate:stress-mock-faceplanes": "node scripts/stress-mock-faceplanes.js",
     "db:apply-schema": "node scripts/db-apply-schema.js",
     "db:smoke": "node scripts/db-smoke.js"
   },

@@ -1,0 +1,54 @@
+{
+  "runId": "mockrun_1x40_2026-05-12T06-17-19-540Z",
+  "timestamp": "2026-05-12T06:17:19.555Z",
+  "iterations": 1,
+  "config": {
+    "commandsPerRun": 40,
+    "approvalRate": 0.35,
+    "blockRate": 0.15,
+    "telemetryState": "LIMITED",
+    "telemetryActivityCount": 12
+  },
+  "aggregateSummary": {
+    "totalCommands": 120,
+    "totalApprovals": 40,
+    "totalBlocks": 14,
+    "avgApprovalRatio": 0.333,
+    "avgBlockRatio": 0.117,
+    "avgTraceCompleteness": 1,
+    "totalDriftRecommendations": 0,
+    "durationMs": 4.78
+  },
+  "results": [
+    {
+      "iteration": 1,
+      "durationMs": 4.78,
+      "success": true,
+      "statusCode": 200,
+      "blocked": false,
+      "summary": {
+        "faceplanes": [
+          "ownerfi",
+          "hotelops",
+          "itad"
+        ],
+        "runId": "mock_run_all_1778566639553",
+        "commandCount": 120,
+        "approvalCount": 40,
+        "blockedCount": 14
+      },
+      "iterationSummary": {
+        "commandCount": 120,
+        "approvalCount": 40,
+        "blockedCount": 14,
+        "approvalRatio": 0.333,
+        "blockRatio": 0.117,
+        "driftRecommendationsGenerated": 0,
+        "traceCompleteness": 1,
+        "timestamp": "2026-05-12T06:17:19.555Z",
+        "correlationId": "9391ced9-6f6d-48e1-ac05-5887de890287"
+      },
+      "error": null
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "tenant": "ownerfi-mock",
+  "commandsPerRun": 5,
+  "approvalRate": 0.3,
+  "blockRate": 0.1,
+  "driftInjection": true,
+  "telemetryState": "LIMITED",
+  "telemetryActivityCount": 4,
+  "traceEnabled": true,
+  "notes": "Low-frequency governance-heavy simulation. Observe drift recommendations and trace completeness."
+}

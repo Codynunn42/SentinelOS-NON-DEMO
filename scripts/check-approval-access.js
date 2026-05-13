@@ -6,8 +6,10 @@ const OPERATOR_KEY = 'approval-operator-secret';
 const APPROVER_KEY = 'approval-approver-secret';
 const previousKeys = process.env.SENTINEL_API_KEYS;
 const previousKey = process.env.SENTINEL_API_KEY;
+const previousHmacSecret = process.env.SENTINEL_HMAC_SECRET;
 
 process.env.SENTINEL_API_KEY = '';
+process.env.SENTINEL_HMAC_SECRET = 'approval-access-passport-secret';
 process.env.SENTINEL_API_KEYS = JSON.stringify([
   {
     keyId: 'key_ownerfi_operator_approval_read',
@@ -16,6 +18,16 @@ process.env.SENTINEL_API_KEYS = JSON.stringify([
     actor: 'operator@ownerfi.test',
     role: 'operator',
     scopes: ['approval:read', 'audit:read'],
+    status: 'active',
+    expiresAt: '2099-01-01T00:00:00.000Z'
+  },
+  {
+    keyId: 'key_ownerfi_agent_command_unlock',
+    secret: 'approval-command-unlock-secret',
+    tenant: 'ownerfi',
+    actor: 'agent@ownerfi.test',
+    role: 'agent',
+    scopes: ['application:submit', 'application:evaluate', 'deal:execute', 'audit:read'],
     status: 'active',
     expiresAt: '2099-01-01T00:00:00.000Z'
   },
@@ -93,6 +105,12 @@ function restoreEnv() {
   } else {
     process.env.SENTINEL_API_KEY = previousKey;
   }
+
+  if (previousHmacSecret === undefined) {
+    delete process.env.SENTINEL_HMAC_SECRET;
+  } else {
+    process.env.SENTINEL_HMAC_SECRET = previousHmacSecret;
+  }
 }
 
 (async () => {
@@ -117,6 +135,7 @@ function restoreEnv() {
   const readOne = await request('GET', `/approvals/${approval.id}`, OPERATOR_KEY);
   assert.strictEqual(readOne.statusCode, 200);
   assert.strictEqual(readOne.body.approval.id, approval.id);
+  assert.ok(readOne.body.approval.events.some((event) => event.type === 'viewed'));
 
   const blockedReview = await request('POST', `/approvals/${approval.id}/approve`, OPERATOR_KEY, {
     reason: 'operator should not resolve approvals'
@@ -140,6 +159,57 @@ function restoreEnv() {
   });
   assert.strictEqual(approved.statusCode, 200);
   assert.strictEqual(approved.body.approval.status, 'approved');
+  assert.ok(approved.body.approval.events.some((event) => event.type === 'approved'));
+
+  const submitted = await request('POST', '/v1/command', 'approval-command-unlock-secret', {
+    commandId: 'approval_unlock_submit',
+    command: 'application.submit',
+    payload: {
+      name: 'Approval Unlock Test',
+      vehicle: '2026 Fleet Unit',
+      amount: 15000,
+      creditScore: 720
+    }
+  });
+  assert.strictEqual(submitted.statusCode, 200);
+  const applicationId = submitted.body.applicationId;
+
+  const evaluated = await request('POST', '/v1/command', 'approval-command-unlock-secret', {
+    commandId: 'approval_unlock_evaluate',
+    command: 'application.evaluate',
+    payload: { applicationId }
+  });
+  assert.strictEqual(evaluated.statusCode, 200);
+  assert.strictEqual(evaluated.body.applicationStatus, 'approved');
+
+  const blockedExecute = await request('POST', '/v1/command', 'approval-command-unlock-secret', {
+    commandId: 'approval_unlock_execute_blocked',
+    command: 'deal.execute',
+    payload: { applicationId }
+  });
+  assert.strictEqual(blockedExecute.statusCode, 423);
+  assert.strictEqual(blockedExecute.body.error, 'APPROVAL_REQUIRED');
+  assert.strictEqual(blockedExecute.body.approvalRequired, true);
+  assert.strictEqual(blockedExecute.body.unlockOnApproval, true);
+  assert.ok(blockedExecute.body.approvalId);
+
+  const commandApproval = await request('POST', `/approvals/${blockedExecute.body.approvalId}/approve`, APPROVER_KEY, {
+    reason: 'approve command unlock smoke'
+  });
+  assert.strictEqual(commandApproval.statusCode, 200);
+  assert.strictEqual(commandApproval.body.approval.status, 'approved');
+
+  const executed = await request('POST', '/v1/command', 'approval-command-unlock-secret', {
+    commandId: 'approval_unlock_execute_allowed',
+    command: 'deal.execute',
+    payload: {
+      applicationId,
+      approvalId: blockedExecute.body.approvalId
+    }
+  });
+  assert.strictEqual(executed.statusCode, 200);
+  assert.strictEqual(executed.body.status, 'executed');
+  assert.strictEqual(executed.body.dealStatus, 'active');
 
   const viewed = auditLogger.getAll().filter((entry) => entry.command === 'approval.viewed');
   assert.ok(viewed.length >= 2);

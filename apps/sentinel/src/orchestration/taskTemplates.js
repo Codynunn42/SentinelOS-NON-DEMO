@@ -143,7 +143,7 @@ function normalizeTask(item = {}, index = 0, templates = DEFAULT_TEMPLATES) {
     item.approvalRequired === false
       ? false
       : template.approvalPolicy === 'human_review_required' ||
-        template.approvalPolicy === 'approval_before_execution';
+      template.approvalPolicy === 'approval_before_execution';
 
   const xeRequired = item.xeRequired === true || item.xeEligible === true || template.xeEligible === true;
 
@@ -382,13 +382,13 @@ async function orchestrateTaskTemplates(input = {}, options = {}) {
   const runId = hasText(input.runId) ? input.runId.trim() : `task_run_${crypto.randomUUID()}`;
   const approvalRecords = input.createApprovals
     ? await createTaskApprovals(
-        approvalCandidates,
-        {
-          tenant: input.tenant || options.tenant || null,
-          route: options.route || '/task-templates/ingest'
-        },
-        options.createApprovalRequest
-      )
+      approvalCandidates,
+      {
+        tenant: input.tenant || options.tenant || null,
+        route: options.route || '/task-templates/ingest'
+      },
+      options.createApprovalRequest
+    )
     : [];
 
   const run = Object.freeze({

@@ -1,13 +1,6 @@
+const { asText, asPositiveAmount } = require('../shared/validation');
+
 const SUPPORT_CHANNELS = new Set(['web', 'email', 'phone', 'chat', 'sms', 'internal']);
-
-function asText(value) {
-  return typeof value === 'string' ? value.trim() : '';
-}
-
-function asPositiveAmount(value) {
-  const amount = Number(value);
-  return Number.isFinite(amount) && amount > 0 ? amount : null;
-}
 
 function validateTicketCreate(payload = {}) {
   const customerId = asText(payload.customerId);

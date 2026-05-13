@@ -1,13 +1,6 @@
+import { asText, asPositiveAmount } from '../shared/validation.js';
+
 const SUPPORT_CHANNELS = new Set(['web', 'email', 'phone', 'chat', 'sms', 'internal']);
-
-function asText(value: any): string {
-    return typeof value === 'string' ? value.trim() : '';
-}
-
-function asPositiveAmount(value: any): number | null {
-    const amount = Number(value);
-    return Number.isFinite(amount) && amount > 0 ? amount : null;
-}
 
 export function validateTicketCreate(payload: any = {}) {
     const customerId = asText(payload.customerId);
