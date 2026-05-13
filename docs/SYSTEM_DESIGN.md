@@ -175,15 +175,16 @@ Tilda output should include:
 
 Tilda is allowed to explain and recommend. It is not allowed to override policy.
 
-### SINTINEX Intake Docking
+### SINTENIX Intake Docking
 
-SINTINEX is the future-intelligence and archive-connection lane managed by TILDA. It receives incoming information, connects it to current/archive/deferred evidence, and returns a lane decision.
+SINTENIX is the archival cognition and archive-connection lane managed by TILDA. It receives incoming information, connects it to current/archive/deferred evidence, and returns a lane decision.
 
 It lives at `apps/sentinel/src/sintinex/intake.js` and is exported through `apps/sentinel/src/learning/tilda.js`.
 
-SINTINEX lane decisions:
+SINTENIX lane decisions:
 
 ```txt
+sintenix_archival_cognition -> boundary notes, lineage interpretation, historical synthesis
 sintinex_idea_ledger -> future-facing idea or productive drift
 archive_reference -> historical evidence reference
 active_context -> current Phase 1.1 truth reference
@@ -191,7 +192,7 @@ deferred_review -> held/deferred material
 sintinex_review -> unclassified information
 ```
 
-SINTINEX does not execute. It routes memory, ideas, archive references, and deferred information so active SentinelOS execution remains governed by policy and approvals.
+SINTENIX does not execute. It routes memory, ideas, archive references, lineage interpretation, and deferred information so active SentinelOS execution remains governed by policy and approvals.
 
 ### Decision Layer
 
