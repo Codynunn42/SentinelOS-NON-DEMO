@@ -1,9 +1,10 @@
-const { evaluateForethought } = require('../forethought/tilda');
+const { evaluateForethought } = require('../forethought/interpretation');
 
-const SINTINEX_CANONICAL_NAME = 'SINTENIX';
-const SINTINEX_ALIASES = ['SINTENIX', 'SINTINEX', 'SENTINEX', 'SINTENX'];
+const COMPONENT_NAME = 'archive_intelligence';
+const INTERPRETATION_LAYER = 'forethought_interpretation';
+const OPERATOR_LOGIC_LABELS = ['SINTENIX', 'SINTINEX', 'SENTINEX', 'SINTENX'];
 
-const ARCHIVE_CONNECTIONS = [
+const EVIDENCE_CONNECTIONS = [
   {
     path: 'docs/DAILY_BRIEF_2026-04-23.md',
     decision: 'ARCHIVE',
@@ -35,9 +36,9 @@ const ARCHIVE_CONNECTIONS = [
     keywords: ['artifact decision', '18 artifact', 'categorization', 'archive', 'keep', 'defer']
   },
   {
-    path: 'docs/SINTINEX_TILDA_DOCKING_2026-05-13.md',
+    path: 'docs/ARCHIVE_INTELLIGENCE_INGESTION_LEDGER_2026-05-13.md',
     decision: 'KEEP',
-    role: 'sintenix_boundary',
+    role: 'archive_intelligence_boundary',
     keywords: ['sintenix', 'sintinex', 'archival cognition', 'lineage interpretation', 'historical synthesis']
   },
   {
@@ -49,11 +50,7 @@ const ARCHIVE_CONNECTIONS = [
 ];
 
 function normalizeText(value) {
-  if (typeof value !== 'string') {
-    return '';
-  }
-
-  return value.trim();
+  return typeof value === 'string' ? value.trim() : '';
 }
 
 function normalizeIncomingInformation(input = {}) {
@@ -65,7 +62,7 @@ function normalizeIncomingInformation(input = {}) {
     : [];
 
   return {
-    id: normalizeText(input.id) || `sintinex_${Date.now()}`,
+    id: normalizeText(input.id) || `archive_intelligence_${Date.now()}`,
     title,
     body,
     source,
@@ -79,10 +76,10 @@ function includesAny(text, keywords) {
   return keywords.some((keyword) => text.includes(keyword));
 }
 
-function resolveArchiveConnections(record) {
+function resolveEvidenceConnections(record) {
   const haystack = [record.title, record.body, ...record.tags].join(' ').toLowerCase();
 
-  return ARCHIVE_CONNECTIONS.filter((connection) => {
+  return EVIDENCE_CONNECTIONS.filter((connection) => {
     return connection.keywords.some((keyword) => haystack.includes(keyword));
   }).map((connection) => ({
     path: connection.path,
@@ -91,10 +88,10 @@ function resolveArchiveConnections(record) {
   }));
 }
 
-function classifySintinexLane(record, archiveConnections) {
+function classifyArchiveIntelligenceLane(record, evidenceConnections) {
   const haystack = [record.title, record.body, ...record.tags].join(' ').toLowerCase();
 
-  if (archiveConnections.some((connection) => connection.decision === 'DEFER')) {
+  if (evidenceConnections.some((connection) => connection.decision === 'DEFER')) {
     return {
       lane: 'deferred_review',
       reason: 'Incoming information touches a deferred artifact and must stay held.'
@@ -116,8 +113,8 @@ function classifySintinexLane(record, archiveConnections) {
     ])
   ) {
     return {
-      lane: 'sintenix_archival_cognition',
-      reason: 'Incoming information defines SINTENIX as archival cognition that informs but does not control SentinelOS.'
+      lane: 'archive_cognition',
+      reason: 'Incoming information defines archival cognition that informs but does not control SentinelOS.'
     };
   }
 
@@ -136,19 +133,19 @@ function classifySintinexLane(record, archiveConnections) {
     ])
   ) {
     return {
-      lane: 'sintinex_idea_ledger',
+      lane: 'idea_ledger',
       reason: 'Incoming information is future-facing and belongs outside the active execution lane.'
     };
   }
 
-  if (archiveConnections.some((connection) => connection.decision === 'ARCHIVE')) {
+  if (evidenceConnections.some((connection) => connection.decision === 'ARCHIVE')) {
     return {
       lane: 'archive_reference',
       reason: 'Incoming information references historical lineage and should be linked, not promoted.'
     };
   }
 
-  if (archiveConnections.some((connection) => connection.role === 'current_truth' || connection.role === 'current_approval')) {
+  if (evidenceConnections.some((connection) => connection.role === 'current_truth' || connection.role === 'current_approval')) {
     return {
       lane: 'active_context',
       reason: 'Incoming information references current Phase 1.1 truth.'
@@ -156,73 +153,74 @@ function classifySintinexLane(record, archiveConnections) {
   }
 
   return {
-    lane: 'sintinex_review',
+    lane: 'intake_review',
     reason: 'Incoming information needs classification before it can influence active work.'
   };
 }
 
-function buildTildaState(record, laneDecision, archiveConnections) {
+function buildInterpretationState(record, laneDecision, evidenceConnections) {
   const isActive = laneDecision.lane === 'active_context';
   const isDeferred = laneDecision.lane === 'deferred_review';
 
   return {
     state: isActive ? 'stable' : 'drift',
-    confidence: archiveConnections.length ? 0.86 : 0.64,
+    confidence: evidenceConnections.length ? 0.86 : 0.64,
     actionGate: isActive ? 'observe_only' : 'human_review_required',
     riskLevel: isDeferred ? 'high' : isActive ? 'low' : 'medium',
     requiresApproval: !isActive,
     reason: laneDecision.reason,
-    evidence: archiveConnections.map((connection) => connection.path),
+    evidence: evidenceConnections.map((connection) => connection.path),
     intakeId: record.id
   };
 }
 
-function routeSintinexIntake(input = {}, options = {}) {
+function routeArchiveIntelligenceIntake(input = {}, options = {}) {
   const record = normalizeIncomingInformation(input);
-  const archiveConnections = resolveArchiveConnections(record);
-  const laneDecision = classifySintinexLane(record, archiveConnections);
-  const tilda = evaluateForethought(
+  const evidenceConnections = resolveEvidenceConnections(record);
+  const laneDecision = classifyArchiveIntelligenceLane(record, evidenceConnections);
+  const interpretation = evaluateForethought(
     {
-      learningState: buildTildaState(record, laneDecision, archiveConnections),
-      confidence: archiveConnections.length ? 0.86 : 0.64,
+      learningState: buildInterpretationState(record, laneDecision, evidenceConnections),
+      confidence: evidenceConnections.length ? 0.86 : 0.64,
       suggestions: [
         laneDecision.reason,
-        'Do not execute from SINTINEX intake.',
+        'Do not execute from archive intelligence intake.',
         'Preserve archive lineage and route active changes through SentinelOS approvals.'
       ]
     },
     {
-      systemGoal: options.systemGoal || 'separate future intelligence from active governed execution'
+      systemGoal: options.systemGoal || 'separate archival intelligence from active governed execution'
     }
   );
 
   return {
-    system: SINTINEX_CANONICAL_NAME,
-    aliases: SINTINEX_ALIASES,
+    component: COMPONENT_NAME,
+    operatorLogicLabels: OPERATOR_LOGIC_LABELS,
     status: 'docked',
     executionMode: 'observe_route_only',
-    managedBy: 'TILDA',
+    managedBy: INTERPRETATION_LAYER,
     activeExecutionAllowed: false,
     record,
     lane: laneDecision.lane,
     reason: laneDecision.reason,
-    archiveConnections,
-    tilda,
+    evidenceConnections,
+    interpretation,
     constraints: [
-      'SINTINEX receives and classifies incoming information',
-      'SINTINEX may connect information to archive/current/deferred evidence',
-      'SINTINEX may not execute commands or promote archived material',
+      'Archive intelligence receives and classifies incoming information',
+      'Archive intelligence may connect information to archive/current/deferred evidence',
+      'Archive intelligence may not execute commands or promote archived material',
       'Active execution remains governed by SentinelOS policy and approvals'
     ]
   };
 }
 
 module.exports = {
-  ARCHIVE_CONNECTIONS,
-  SINTINEX_ALIASES,
-  SINTINEX_CANONICAL_NAME,
+  COMPONENT_NAME,
+  EVIDENCE_CONNECTIONS,
+  INTERPRETATION_LAYER,
+  OPERATOR_LOGIC_LABELS,
+  classifyArchiveIntelligenceLane,
   normalizeIncomingInformation,
-  resolveArchiveConnections,
-  classifySintinexLane,
-  routeSintinexIntake
+  resolveEvidenceConnections,
+  routeArchiveIntelligenceIntake
 };

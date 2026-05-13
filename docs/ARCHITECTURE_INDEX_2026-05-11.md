@@ -159,12 +159,12 @@ Comprehensive index of all architectural documentation based on repo scan. Organ
 
 **Purpose:** Configuration separation for different drift monitoring domains
 
-### Tilda Components
+### Forethought Interpretation Components
 
-- `apps/sentinel/src/forethought/tilda.js` - Forethought domain
-- `apps/sentinel/src/learning/tilda.js` - Learning domain
+- `apps/sentinel/src/forethought/interpretation.js` - Forethought Interpretation module
+- `apps/sentinel/src/learning/interpretation.js` - Learning interpretation module
 
-**Purpose:** Domain-specific AI/ML components
+**Purpose:** Domain-specific interpretation components. `TILDA` is an operator logic label, not the system component name.
 
 ## ARCHITECTURAL PRINCIPLES
 

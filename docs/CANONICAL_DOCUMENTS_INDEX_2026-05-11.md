@@ -198,12 +198,12 @@ This index compiles all repository documents into canonical categories based on 
 
 **Canonical:** Both active - command vs surface registries
 
-### Tilda Files (similar_name_3)
+### Forethought Interpretation Files (similar_name_3)
 
-- `apps/sentinel/src/forethought/tilda.js`
-- `apps/sentinel/src/learning/tilda.js`
+- `apps/sentinel/src/forethought/interpretation.js`
+- `apps/sentinel/src/learning/interpretation.js`
 
-**Canonical:** Both active - different domains
+**Canonical:** Both active modules - different domains. `TILDA` is an operator logic label, not the system component name.
 
 ### Drift Config Files (similar_name_4)
 
