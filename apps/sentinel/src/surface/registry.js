@@ -2,6 +2,7 @@ const { ownerfiHandlers } = require('../commands/ownerfiHandlers');
 const { customerOpsHandlers } = require('./customerops');
 const { hotelHandlers } = require('./hotelops');
 const { nunncloudHandlers } = require('./nunncloud');
+const { mockHandlers } = require('../commands/mockHandlers');
 
 const surfaceRegistry = {
   ownerfi: {
@@ -19,6 +20,10 @@ const surfaceRegistry = {
   nunncloud: {
     name: 'Nunn Cloud',
     handlers: nunncloudHandlers
+  },
+  mock: {
+    name: 'Mock Faceplane',
+    handlers: mockHandlers
   }
 };
 

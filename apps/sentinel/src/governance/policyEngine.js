@@ -1,4 +1,5 @@
 const { principalHasScope } = require('../security/keyRegistry');
+const { hasText } = require('../shared/validation');
 
 const commandScopes = {
   'application.submit': 'application:submit',
@@ -39,6 +40,7 @@ const commandScopes = {
   'repo.control.workflow.retry': 'platform:admin',
   'system.validate.integrity': 'platform:admin',
   'dealFlow.run.demo': 'platform:admin',
+  'faceplane.mock.run': 'platform:admin',
   'ui.sync.labels': 'platform:admin',
   'security.write': 'security:write',
   'policy.evaluate': 'policy:evaluate',
@@ -46,10 +48,6 @@ const commandScopes = {
   'cdnlux.contract.evaluate': 'platform:admin',
   'docking.evaluate': 'platform:admin'
 };
-
-function hasText(value) {
-  return typeof value === 'string' && value.trim() !== '';
-}
 
 function blocked(state, riskLevel, reason, details = {}) {
   return {
@@ -115,9 +113,9 @@ function buildPolicyContext(envelope = {}, principal = null, options = {}) {
 function evaluatePolicy(input = {}, signals = {}) {
   const ctx = input.command || input.actor || input.role || input.scopes
     ? {
-        ...input,
-        signals: input.signals || signals
-      }
+      ...input,
+      signals: input.signals || signals
+    }
     : buildPolicyContext(input, null, { signals });
   ctx.requiredScope = ctx.requiredScope || getRequiredScope(ctx.command);
   const missing = [];

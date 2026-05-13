@@ -1,11 +1,14 @@
 const { getSurfaceRegistry } = require('./registry');
 const { handleCustomerOps } = require('./customeropsHandlers');
+const { mockHandlers } = require('./mockHandlers');
 const { normalizeCommandEnvelope } = require('../types/command');
 const { auditLogger } = require('../audit/auditLogger');
 const { enforceSentinelExecution } = require('../governance/executionGuard');
 const { governanceCheck } = require('../governance/preflight');
 const { buildCommandTrustInput, buildTrustScoreResult } = require('../trustScore');
 const { verifyDecision } = require('../security/signing');
+const { buildBlockedPathEvent } = require('../shared/telemetryEventBuilder');
+const { createApprovalRequest, getApproval } = require('../approval/approval');
 const crypto = require('crypto');
 
 const SIGNING_KEY = process.env.SENTINEL_SIGNING_KEY || '';
@@ -15,21 +18,7 @@ function generateCorrelationId() {
 }
 
 function emitBlockedPathEvent(envelope, reason, details = {}) {
-  // Emit distinct Log Analytics telemetry marker for governance denials
-  const blockedPathEvent = {
-    source: 'sentinel-api',
-    category: 'governance',
-    eventType: 'blocked-path',
-    timestamp: new Date().toISOString(),
-    command: envelope.command || envelope.legacyCommand || 'unknown',
-    tenant: envelope.tenant || null,
-    actor: (envelope.metadata && envelope.metadata.actor) || null,
-    reason,
-    trustScore: details.trustScore || 0,
-    blockingPolicy: details.blockingPolicy || null,
-    executionPath: details.executionPath || null,
-    ...details
-  };
+  const blockedPathEvent = buildBlockedPathEvent(envelope, reason, details);
 
   // Log to console for Container App capture and Log Analytics ingestion
   console.log(JSON.stringify(blockedPathEvent));
@@ -72,6 +61,77 @@ async function auditPolicyAllow(envelope, policy, policyContext) {
     actor: policyContext && policyContext.actor ? policyContext.actor : undefined,
     timestamp: new Date().toISOString()
   });
+}
+
+function getEnvelopeApprovalId(envelope = {}) {
+  if (envelope.metadata && typeof envelope.metadata.approvalId === 'string') {
+    return envelope.metadata.approvalId.trim();
+  }
+
+  if (envelope.payload && typeof envelope.payload.approvalId === 'string') {
+    return envelope.payload.approvalId.trim();
+  }
+
+  return '';
+}
+
+async function checkApprovalUnlock(envelope, policy, policyContext) {
+  const approvalId = getEnvelopeApprovalId(envelope);
+
+  if (!approvalId) {
+    return {
+      unlocked: false,
+      approval: null,
+      approvalId: null
+    };
+  }
+
+  const tenant = policyContext && policyContext.tenant ? policyContext.tenant : envelope.tenant || null;
+  const approval = await getApproval(approvalId, tenant);
+
+  return {
+    unlocked: Boolean(approval && approval.status === 'approved'),
+    approval,
+    approvalId
+  };
+}
+
+async function createCommandApproval(envelope, policy, policyContext) {
+  const approval = await createApprovalRequest(
+    {
+      state: policy.state,
+      riskLevel: policy.riskLevel,
+      decision: policy.decision,
+      reason: policy.reason,
+      approvalRequired: true,
+      unlockOnApproval: true,
+      status: 'awaiting_approval',
+      executionStatus: 'awaiting_approval'
+    },
+    {
+      tenant: policyContext && policyContext.tenant ? policyContext.tenant : envelope.tenant || null,
+      actor: policyContext && policyContext.actor ? policyContext.actor : undefined,
+      command: envelope.command || envelope.legacyCommand || 'unknown',
+      approvalType: 'command_execution_unlock',
+      originalCommand: {
+        tenant: envelope.tenant || null,
+        command: envelope.command || envelope.legacyCommand || null,
+        payload: envelope.payload || {},
+        metadata: {
+          actor: envelope.metadata && envelope.metadata.actor ? envelope.metadata.actor : null,
+          role: envelope.metadata && envelope.metadata.role ? envelope.metadata.role : null,
+          keyId: envelope.metadata && envelope.metadata.keyId ? envelope.metadata.keyId : null
+        }
+      }
+    }
+  );
+
+  approval.decision = {
+    ...(approval.decision || {}),
+    approvalId: approval.id
+  };
+
+  return approval;
 }
 
 async function dispatchCommand(body, context) {
@@ -128,6 +188,63 @@ async function dispatchCommand(body, context) {
   if (!governance.allowed) {
     const blockedPolicy = governance.policy || (governance.details && governance.details.policy) || {};
     const blockedPolicyContext = governance.policyContext || (governance.details && governance.details.policyContext) || {};
+
+    if (blockedPolicy.approvalRequired) {
+      const approvalUnlock = await checkApprovalUnlock(envelope, blockedPolicy, blockedPolicyContext);
+
+      if (approvalUnlock.unlocked) {
+        governance.allowed = true;
+        governance.policy = {
+          ...blockedPolicy,
+          allowed: true,
+          decision: 'allow',
+          approvalRequired: false,
+          approvalId: approvalUnlock.approvalId,
+          unlockOnApproval: true,
+          executionStatus: 'allowed'
+        };
+        governance.policyContext = blockedPolicyContext;
+      } else {
+        const approval = approvalUnlock.approval || await createCommandApproval(envelope, blockedPolicy, blockedPolicyContext);
+        const failure = {
+          success: false,
+          statusCode: 423,
+          error: 'APPROVAL_REQUIRED',
+          details: {
+            ...(governance.details || {}),
+            approvalRequired: true,
+            approvalId: approval.id,
+            unlockOnApproval: true,
+            executionStatus: 'awaiting_approval',
+            approvalStatus: approval.status
+          },
+          data: {
+            approvalRequired: true,
+            approvalId: approval.id,
+            unlockOnApproval: true,
+            executionStatus: 'awaiting_approval',
+            approvalStatus: approval.status
+          }
+        };
+
+        emitBlockedPathEvent(envelope, blockedPolicy.reason || 'approval_required', {
+          approvalId: approval.id,
+          approvalStatus: approval.status,
+          blockingPolicy: blockedPolicy
+        });
+
+        await auditGovernanceBlock(envelope, failure, {
+          trustScore: 0,
+          reasons: ['approval_required']
+        });
+        return failure;
+      }
+    }
+  }
+
+  if (!governance.allowed) {
+    const blockedPolicy = governance.policy || (governance.details && governance.details.policy) || {};
+    const blockedPolicyContext = governance.policyContext || (governance.details && governance.details.policyContext) || {};
     const trust = buildTrustScoreResult(buildCommandTrustInput({
       envelope,
       policy: blockedPolicy,
@@ -165,6 +282,29 @@ async function dispatchCommand(body, context) {
       governance,
       startTime,
       handler: () => handleCustomerOps(envelope, {
+        ...context,
+        tenant: envelope.tenant
+      })
+    });
+  }
+
+  if (envelope.command && envelope.command.startsWith('faceplane.mock.')) {
+    const mockHandler = mockHandlers[envelope.command];
+
+    if (!mockHandler) {
+      return {
+        success: false,
+        statusCode: 400,
+        error: `Unknown command: ${envelope.command}`
+      };
+    }
+
+    return executeHandler({
+      envelope,
+      context,
+      governance,
+      startTime,
+      handler: () => mockHandler(envelope.payload, {
         ...context,
         tenant: envelope.tenant
       })

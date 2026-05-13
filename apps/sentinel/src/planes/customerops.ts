@@ -1,4 +1,5 @@
 import { validateRefundRequest, validateTicketCreate } from '../schemas/customerops';
+import { generateId } from '../shared/idGenerator.js';
 
 interface TicketCreatePayload {
     customerId: string;

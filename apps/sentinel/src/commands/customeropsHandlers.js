@@ -1,12 +1,8 @@
-const crypto = require('crypto');
+const { generateId } = require('../shared/idGenerator');
 const {
   validateRefundRequest,
   validateTicketCreate
 } = require('../schemas/customerops');
-
-function generateId(prefix) {
-  return `${prefix}_${crypto.randomUUID()}`;
-}
 
 function validationFailure(result) {
   return {

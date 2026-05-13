@@ -1,6 +1,7 @@
 const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
+const { hasText } = require('../../shared/validation');
 
 const DEFAULT_DRIFT_POLICY_LEDGER_PATH = '/private/tmp/sentinel_drift_policy_ledger.jsonl';
 
@@ -52,10 +53,6 @@ function appendEntry(entry, ledgerPath = DEFAULT_DRIFT_POLICY_LEDGER_PATH) {
 
   fs.appendFileSync(ledgerPath, `${JSON.stringify(finalEntry)}\n`, 'utf8');
   return finalEntry;
-}
-
-function hasText(value) {
-  return typeof value === 'string' && value.trim() !== '';
 }
 
 function countThresholdChanges(entries, timestamp, days) {

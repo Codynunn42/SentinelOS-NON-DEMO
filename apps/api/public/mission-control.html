@@ -276,6 +276,42 @@
       line-height: 1.35;
     }
 
+    .approval-timeline {
+      margin-top: 14px;
+      border-top: 1px solid var(--line);
+      padding-top: 14px;
+    }
+
+    .approval-timeline h3 {
+      margin: 0 0 10px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 750;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .timeline-list {
+      display: grid;
+      gap: 8px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .timeline-list li {
+      display: grid;
+      grid-template-columns: 110px minmax(140px, 1fr) minmax(120px, auto);
+      gap: 10px;
+      align-items: center;
+      border: 1px solid var(--line);
+      background: var(--surface-2);
+      border-radius: 6px;
+      padding: 9px 10px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
     .row-actions {
       display: flex;
       gap: 8px;
@@ -849,6 +885,12 @@
         <div id="approvalQueue" class="queue">
           <p class="empty">No approvals loaded.</p>
         </div>
+        <div class="approval-timeline">
+          <h3>Approval Timeline</h3>
+          <ul id="approvalTimeline" class="timeline-list">
+            <li><span>Pending</span><span>Approval queue not loaded</span><span>-</span></li>
+          </ul>
+        </div>
       </article>
 
       <article class="panel span-4">
@@ -1159,6 +1201,7 @@
       latestSecurityEvent: document.getElementById('latestSecurityEvent'),
       approvalQueue: document.getElementById('approvalQueue'),
       approvalCount: document.getElementById('approvalCount'),
+      approvalTimeline: document.getElementById('approvalTimeline'),
       activityFeed: document.getElementById('activityFeed'),
       metricsChip: document.getElementById('metricsChip'),
       metricTotalEvents: document.getElementById('metricTotalEvents'),
@@ -1186,9 +1229,9 @@
     el.tenantInput.value = state.tenant;
 
     function classify(value) {
-      if (['stable', 'allow', 'auto', 'low', 'ok', 'connected'].includes(value)) return 'good';
+      if (['stable', 'allow', 'auto', 'low', 'ok', 'connected', 'approved', 'executed'].includes(value)) return 'good';
       if (['unknown', 'restrict', 'restricted', 'medium', 'pending'].includes(value)) return 'warn';
-      if (['drift', 'block', 'blocked', 'high', 'error', 'disconnected'].includes(value)) return 'bad';
+      if (['drift', 'block', 'blocked', 'high', 'error', 'disconnected', 'rejected'].includes(value)) return 'bad';
       return '';
     }
 
@@ -1800,6 +1843,7 @@
       const approvals = Array.isArray(payload.approvals) ? payload.approvals : [];
       setChip(el.approvalCount, `${approvals.length} pending`, approvals.length ? 'warn' : 'good');
       el.approvalQueue.innerHTML = '';
+      renderApprovalTimeline(approvals);
 
       if (!approvals.length) {
         const empty = document.createElement('p');
@@ -1823,13 +1867,43 @@
             ${approvalContext ? `<small>Requested Action: ${approvalContext}</small>` : ''}
             <small>Created ${formatTime(approval.createdAt)}</small>
           </div>
-          <span class="chip ${classify(risk)}">${risk}</span>
+          <span class="chip ${classify(approval.status || risk)}">${approval.status || risk}</span>
           <div class="row-actions">
             <button type="button" title="Approve" data-action="approve" data-id="${approval.id}">&#10003;</button>
             <button class="danger" type="button" title="Reject" data-action="reject" data-id="${approval.id}">&#215;</button>
           </div>
         `;
         el.approvalQueue.appendChild(row);
+      });
+    }
+
+    function renderApprovalTimeline(approvals) {
+      const entries = approvals
+        .flatMap((approval) => (Array.isArray(approval.events) ? approval.events : []).map((event) => ({
+          ...event,
+          approvalId: approval.id,
+          status: approval.status
+        })))
+        .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+      el.approvalTimeline.innerHTML = '';
+
+      if (!entries.length) {
+        const li = document.createElement('li');
+        li.innerHTML = '<span class="chip warn">pending</span><span>No approval timeline loaded</span><span>-</span>';
+        el.approvalTimeline.appendChild(li);
+        return;
+      }
+
+      entries.slice(0, 8).forEach((entry) => {
+        const li = document.createElement('li');
+        const type = entry.type || 'pending';
+        li.innerHTML = `
+          <span class="chip ${classify(type)}">${escapeHtml(type)}</span>
+          <span>${escapeHtml(entry.actor || 'system')} · ${escapeHtml(entry.approvalId || '')}</span>
+          <span>${escapeHtml(formatTime(entry.timestamp))}</span>
+        `;
+        el.approvalTimeline.appendChild(li);
       });
     }
 

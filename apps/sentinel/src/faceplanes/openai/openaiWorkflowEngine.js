@@ -7,6 +7,8 @@ const {
 const { appendOpenAIAuditEntry } = require('./openaiAuditAdapter');
 const { routeOpenAIEscalation } = require('./openaiEscalationAdapter');
 
+const { asNumber } = require('../../shared/validation');
+
 function sha256(value) {
   return crypto.createHash('sha256').update(value).digest('hex');
 }
@@ -18,11 +20,6 @@ function clamp(value, min, max) {
 function round(value, places = 4) {
   const factor = 10 ** places;
   return Math.round(value * factor) / factor;
-}
-
-function asNumber(value, fallback) {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed : fallback;
 }
 
 function mapRiskState(riskIndex) {

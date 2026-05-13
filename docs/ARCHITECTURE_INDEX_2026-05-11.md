@@ -139,24 +139,28 @@ Comprehensive index of all architectural documentation based on repo scan. Organ
 ## SIMILARITY GROUPS (From Repo Scan)
 
 ### Registry Components
+
 - `apps/sentinel/src/commands/registry.js` - Command registry
 - `apps/sentinel/src/surface/registry.js` - Surface registry
 
 **Purpose:** Separate registries for command routing vs surface mappings
 
 ### Drift Monitoring
+
 - `apps/sentinel/src/governance/core/driftMonitor.js` - Core governance drift
 - `apps/sentinel/src/governance/vendorOnboarding/driftMonitor.js` - Vendor onboarding drift
 
 **Purpose:** Domain-specific drift monitoring for different governance contexts
 
 ### Drift Configuration
+
 - `apps/sentinel/src/governance/core/driftConfig.js` - Core drift config
 - `apps/sentinel/src/governance/vendorOnboarding/driftConfig.js` - Vendor drift config
 
 **Purpose:** Configuration separation for different drift monitoring domains
 
 ### Tilda Components
+
 - `apps/sentinel/src/forethought/tilda.js` - Forethought domain
 - `apps/sentinel/src/learning/tilda.js` - Learning domain
 

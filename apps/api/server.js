@@ -14,6 +14,7 @@ const { analyzeExecutionHistory } = require('../sentinel/src/learning/engine');
 const { evaluateAnalysis } = require('../sentinel/src/analysis/analysis');
 const { evaluateDecision } = require('../sentinel/src/decision/decision');
 const {
+  addApprovalTimelineEvent,
   approveRequest,
   createApprovalRequest,
   getApproval,
@@ -2058,6 +2059,96 @@ const server = http.createServer(async (req, res) => {
     });
   }
 
+  if (pathname === '/v1/faceplane/mock' && req.method === 'POST') {
+    const access = authorizeRoute(req, res, '/v1/faceplane/mock', {
+      command: 'faceplane.mock.run',
+      requiredScope: 'platform:admin'
+    });
+
+    if (!access) {
+      return;
+    }
+
+    if (!enforceRateLimit(req, '/v1/faceplane/mock', res, access.principal)) {
+      return;
+    }
+
+    return readJsonBody(req, async (error, body) => {
+      if (error) {
+        emitSecurityEvent('faceplane.mock.invalid_json', {
+          route: '/v1/faceplane/mock',
+          method: req.method
+        });
+
+        return sendJson(res, 400, {
+          status: 'error',
+          error: 'Invalid JSON body'
+        });
+      }
+
+      const payload = {
+        faceplane: typeof body.faceplane === 'string' ? body.faceplane.trim() : undefined,
+        faceplanes: Array.isArray(body.faceplanes) ? body.faceplanes : typeof body.faceplanes === 'string' ? body.faceplanes.split(',').map((item) => item.trim()).filter(Boolean) : undefined,
+        commandsPerRun: body.commandsPerRun,
+        approvalRate: body.approvalRate,
+        blockRate: body.blockRate,
+        telemetryState: body.telemetryState,
+        telemetryActivityCount: body.telemetryActivityCount,
+        scenario: body.scenario || body.driftScenario
+      };
+
+      let requestBody = {
+        tenant: access.principal.tenant === 'platform' ? 'mock' : access.principal.tenant,
+        command: 'faceplane.mock.run',
+        payload,
+        metadata: {
+          ...(body.metadata && typeof body.metadata === 'object' ? body.metadata : {}),
+          source: 'sentinel',
+          actor: access.principal.actor,
+          role: access.principal.role,
+          keyId: access.principal.keyId,
+          scopes: access.principal.scopes
+        }
+      };
+
+      try {
+        requestBody = signExecutionPassport(requestBody);
+      } catch (passportError) {
+        emitSecurityEvent('faceplane.mock.passport.signing_failed', {
+          route: '/v1/faceplane/mock',
+          method: req.method,
+          reason: passportError.message
+        });
+
+        return sendJson(res, 500, {
+          status: 'blocked',
+          error: 'PASSPORT_SIGNING_FAILED',
+          reason: passportError.message
+        });
+      }
+
+      const result = await dispatchCommand(requestBody, {
+        principal: access.principal,
+        source: 'sentinel',
+        route: '/v1/faceplane/mock'
+      });
+
+      if (!result.success) {
+        return sendJson(res, result.statusCode || 400, {
+          status: 'blocked',
+          error: result.error,
+          ...(result.details || {}),
+          ...(result.data || {})
+        });
+      }
+
+      return sendJson(res, 200, {
+        status: 'executed',
+        ...(result.data || {})
+      });
+    });
+  }
+
   if (pathname === '/command' && req.method === 'POST') {
     const access = authorizeRoute(req, res, '/command', {
       command: 'platform.admin',
@@ -2169,9 +2260,9 @@ const server = http.createServer(async (req, res) => {
         ...(decision.allowed
           ? {}
           : {
-              error: decision.error,
-              details: decision.details
-            })
+            error: decision.error,
+            details: decision.details
+          })
       };
 
       await auditLogger.log({
@@ -2897,12 +2988,12 @@ const server = http.createServer(async (req, res) => {
       .then(async () => {
         const approval = decision.approvalRequired && shouldCreateApproval
           ? await createApprovalRequest(decision, {
-              tenant,
-              route: '/learning/suggestions',
-              learningState: learning.summary.learningState,
-              analysis,
-              suggestions: learning.suggestions
-            })
+            tenant,
+            route: '/learning/suggestions',
+            learningState: learning.summary.learningState,
+            analysis,
+            suggestions: learning.suggestions
+          })
           : null;
 
         if (approval) {
@@ -2979,6 +3070,15 @@ const server = http.createServer(async (req, res) => {
 
     return getPendingApprovals(tenant)
       .then(async (approvals) => {
+        await Promise.all(approvals.map((approval) => addApprovalTimelineEvent(
+          approval.id,
+          'viewed',
+          access.principal.actor,
+          tenant
+        )));
+
+        const refreshedApprovals = await getPendingApprovals(tenant);
+
         await auditLogger.log({
           tenant,
           command: 'approval.viewed',
@@ -2989,7 +3089,7 @@ const server = http.createServer(async (req, res) => {
           result: {
             success: true,
             event: 'policy.decision',
-            count: approvals.length
+            count: refreshedApprovals.length
           },
           actor: access.principal.actor,
           timestamp: new Date().toISOString()
@@ -2997,8 +3097,8 @@ const server = http.createServer(async (req, res) => {
 
         return sendJson(res, 200, {
           status: 'ok',
-          count: approvals.length,
-          approvals
+          count: refreshedApprovals.length,
+          approvals: refreshedApprovals
         });
       })
       .catch((error) => sendJson(res, 500, {
@@ -3029,7 +3129,10 @@ const server = http.createServer(async (req, res) => {
 
     const tenant = getApprovalTenant(access.principal, requestUrl);
 
-    return getApproval(id, tenant)
+    return getApproval(id, tenant, {
+      recordViewed: true,
+      actor: access.principal.actor
+    })
       .then(async (approval) => {
         if (!approval) {
           return sendJson(res, 404, {
@@ -3219,13 +3322,13 @@ const server = http.createServer(async (req, res) => {
       });
       const approval = decision.approvalRequired
         ? await createApprovalRequest(decision, {
-            tenant,
-            route: '/events/security',
-            approvalType: eventType === 'app_consent_event' ? 'integration_approval' : 'security_approval',
-            securityEvent: payload,
-            learningState: learning.summary.learningState,
-            analysis
-          })
+          tenant,
+          route: '/events/security',
+          approvalType: eventType === 'app_consent_event' ? 'integration_approval' : 'security_approval',
+          securityEvent: payload,
+          learningState: learning.summary.learningState,
+          analysis
+        })
         : null;
 
       emitSecurityEvent('security.event.recorded', {
@@ -3282,7 +3385,7 @@ const server = http.createServer(async (req, res) => {
           },
           actor: access.principal.actor,
           timestamp: new Date().toISOString()
-        }).catch(() => {});
+        }).catch(() => { });
 
         return sendJson(res, 200, result);
       })
