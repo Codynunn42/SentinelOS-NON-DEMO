@@ -30,6 +30,7 @@ This index is the current docs control map. It shows which document is canonical
 | State anchoring | `docs/STATE_ANCHORING_RUNBOOK.md`, `docs/anchors/system-release-current.json` | `[APPROVED:VERIFY]` | verifiable records of key system states, linked to Sentinel audit after external proof is recorded | `npm run check:state-anchors` | Internal/operator reference |
 | Approval evidence | `docs/SENTINEL_APPROVAL_NOTICE_2026-05-04.md` | `[APPROVED:EVIDENCE]` | approval boundary for mapping alignment and no-cleanup rule | approval notice and reports | Internal approval record |
 | Repo organization scan | `docs/SENTINEL_REPO_ORGANIZATION_REPORT_2026-05-04.md` | `[APPROVED:EVIDENCE]` | scan evidence and classification input | `docs/sentinel-repo-organization-log-2026-05-04.jsonl` | Internal approval record |
+| Phase 1.1 artifact decisions | `docs/SENTINEL_ARTIFACT_DECISION_REGISTER_2026-05-13.md` | `[APPROVED:18-ARTIFACT-DECISIONS]` | item-level governance decisions for the 2026-05-13 repo organization scan | `docs/SENTINEL_REPO_ORGANIZATION_REPORT_2026-05-13.md` | Internal approval record |
 
 ## Approval Boundary
 

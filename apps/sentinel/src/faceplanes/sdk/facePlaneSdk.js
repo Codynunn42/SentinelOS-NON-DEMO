@@ -6,6 +6,43 @@ const {
 } = require('../../integrations/docking/protocol');
 
 const FACEPLANE_SDK_VERSION = '0.1.0';
+const MANIFEST_VERSION = 'faceplane.manifest.v1';
+
+const REQUIRED_FIELDS = [
+  'facePlaneId',
+  'tenantId',
+  'name',
+  'purpose',
+  'owner',
+  'gaasPolicyPack',
+  'requestedCapabilities',
+  'approvalModel',
+  'telemetryMode',
+  'dataClasses',
+  'evidence'
+];
+
+const ALLOWED_CAPABILITIES = new Set([
+  'FACEPLANE_READ',
+  'FACEPLANE_WRITE',
+  'FACEPLANE_EXECUTE',
+  'FACEPLANE_EXPORT',
+  'GAAS_POLICY_APPLY',
+  'DOCKING_MANIFEST_REGISTER',
+  'READ_STATUS',
+  'READ_TELEMETRY'
+]);
+
+const TRUST_BY_CAPABILITY = {
+  FACEPLANE_READ: 'TIER_0',
+  READ_STATUS: 'TIER_0',
+  READ_TELEMETRY: 'TIER_0',
+  DOCKING_MANIFEST_REGISTER: 'TIER_0',
+  FACEPLANE_WRITE: 'TIER_1',
+  GAAS_POLICY_APPLY: 'TIER_1',
+  FACEPLANE_EXECUTE: 'TIER_2',
+  FACEPLANE_EXPORT: 'TIER_2'
+};
 
 function normalizeId(value) {
   return String(value || '')

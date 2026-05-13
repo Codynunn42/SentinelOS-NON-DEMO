@@ -21,6 +21,14 @@ Phase 1.1 builds on the Phase 1 live proof path with analytics, telemetry persis
 - Approval continuity added for protected command execution: blocked -> approval -> approved -> rerun with approved `approvalId` -> executed.
 - Approval timeline events added for requested, viewed, approved, and rejected lifecycle steps.
 - Phase 1.1 image deployed to `ca-nc-dev-sentinel` and live verified.
+- Phase 1.1 release committed, tagged, and pushed:
+  - commit: `1cb7b3a`
+  - tag: `v1.1.1-phase1-approval-live`
+- Sentinel craftsmanship pass added:
+  - `docs/SENTINEL_CRAFTSMANSHIP_PASS_2026-05-13.md`
+  - `docs/SENTINEL_REPO_ORGANIZATION_REPORT_2026-05-13.md`
+- 18-artifact governance decision register added:
+  - `docs/SENTINEL_ARTIFACT_DECISION_REGISTER_2026-05-13.md`
 
 ## Live Verification Checklist
 
@@ -39,11 +47,13 @@ Phase 1.1 builds on the Phase 1 live proof path with analytics, telemetry persis
 | --- | --- | --- |
 | Phase 1.1 release package | approved | approved |
 | Live deployment refresh | approved | verified and approved |
-| Git commit for Phase 1.1 analytics | waiting | approve commit |
+| Git commit for Phase 1.1 analytics | approved | committed, tagged, and pushed |
 | Release checklist validation | live pass | approved after live proof |
 | `scripts/mockGovernanceAnalytics.js` report | approved | approved report |
 | Blocked-path telemetry evidence | live pass | approved |
 | Approval continuity model | live pass | approved |
+| Craftsmanship pass | approved | applied and documented |
+| 18-artifact decision register | approved | 8 keep, 9 archive, 0 remove, 0 merge, 1 defer |
 
 ## Live Verification Captured
 
@@ -132,10 +142,6 @@ Verified behavior:
 
 ## Next Working Order
 
-1. Owner reviews `/`, `/proof`, and `/v1/faceplane/mock`.
-2. Owner approves or changes Phase 1.1 package.
-3. Redeploy latest image and verify live route evidence.
-4. Re-run analytics report against the live deployment artifact set.
-5. Confirm blocked-path and approval-continuity telemetry in Log Analytics.
-6. Tag the deployed release if all live verification passes.
-7. Return to remaining Phase 2 items after Phase 1.1 is approved.
+1. Keep current live Phase 1.1 deployment stable while outreach/demo evidence is captured.
+2. Treat `docs/SENTINEL_ARTIFACT_DECISION_REGISTER_2026-05-13.md` as the approved decision surface for the 18 repo organization artifacts.
+3. Return to remaining Phase 2 items only after the owner approves the next narrow scope.
