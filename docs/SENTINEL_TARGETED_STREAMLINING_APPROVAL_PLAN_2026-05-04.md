@@ -110,7 +110,7 @@ These are not cleanup approvals. They are review prompts.
 | --- | --- | --- | --- | --- |
 | `[REVIEW:SIMILARITY]` | README group | `README.md`, `apps/README.md`, `docs/README.md`, `infrastructure/README.md`, `services/README.md` | Medium | Keep all for now; make `docs/README.md` the docs index and leave area READMEs scoped to their folders. |
 | `[REVIEW:SIMILARITY]` | Registry group | `apps/sentinel/src/commands/registry.js`, `apps/sentinel/src/surface/registry.js` | Medium | Keep both until architecture clarifies command registry vs surface registry responsibilities. |
-| `[REVIEW:SIMILARITY]` | Tilda group | `apps/sentinel/src/forethought/tilda.js`, `apps/sentinel/src/learning/tilda.js` | Medium | Keep both; document responsibility split before consolidation. |
+| `[REVIEW:SIMILARITY]` | Forethought Interpretation group | `apps/sentinel/src/forethought/interpretation.js`, `apps/sentinel/src/learning/interpretation.js` | Medium | Keep both modules; document responsibility split before consolidation. |
 | `[REVIEW:SIMILARITY]` | Drift config group | core and vendor onboarding drift configs | Medium | Keep both; core drift and vendor-specific drift are separate planes. |
 | `[REVIEW:SIMILARITY]` | Drift monitor group | core and vendor onboarding drift monitors | Medium | Keep both; do not merge without shared interface design. |
 | `[REVIEW:SIMILARITY]` | Engine group | vendor onboarding engine and learning engine | Low/Medium | Keep both; same name does not mean same role. |

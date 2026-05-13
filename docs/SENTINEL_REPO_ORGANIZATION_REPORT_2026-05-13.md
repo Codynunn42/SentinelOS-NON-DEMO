@@ -1,5 +1,16 @@
 # Sentinel Repository Organization Report - 2026-05-13
 
+## Supersession Note
+
+After this scan, the interpretation and archive-intelligence component names were normalized:
+
+- `apps/sentinel/src/forethought/tilda.js` -> `apps/sentinel/src/forethought/interpretation.js`
+- `apps/sentinel/src/learning/tilda.js` -> `apps/sentinel/src/learning/interpretation.js`
+- SINTENIX/SINTINEX/SENTINEX/SINTENX are operator logic labels only.
+- TILDA is an operator logic label only.
+
+Current system component names are Forethought Interpretation and Archive Intelligence.
+
 ## Operator Summary
 
 Sentinel scanned the repository for changed files, untracked files, exact duplicates, similar names, and overlapping document content. No files were deleted or moved. This report is an approval gate for optimization and streamlining.

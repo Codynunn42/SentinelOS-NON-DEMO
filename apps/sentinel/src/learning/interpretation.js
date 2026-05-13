@@ -1,6 +1,6 @@
-const { evaluateForethought } = require('../forethought/tilda');
+const { evaluateForethought } = require('../forethought/interpretation');
 const { evaluateAnalysis } = require('../analysis/analysis');
-const { routeSintinexIntake } = require('../sintinex/intake');
+const { routeArchiveIntelligenceIntake } = require('../archiveIntelligence/intakeRouter');
 
 function shapeForethought(analysis, options = {}) {
   return evaluateAnalysis(analysis, options);
@@ -9,6 +9,6 @@ function shapeForethought(analysis, options = {}) {
 module.exports = {
   evaluateAnalysis,
   evaluateForethought,
-  routeSintinexIntake,
+  routeArchiveIntelligenceIntake,
   shapeForethought
 };

@@ -48,7 +48,7 @@ GET  /v1/audit
 GET  /audit/events
 ```
 
-`/v1/command` is the primary execution route. `/command` remains a legacy compatibility route. `/policy/evaluate` is a dry-run governance decision route. `/agent/run` is reserved and blocked until the agent controller has an approval policy, tool registry, execution sandbox, and audit sink. `/learning/suggestions` reads execution history and returns `{ state, decision }`, where `state.learning` is Sentinel's classification and `state.forethought` is Tilda's aligned interpretation. `/learning/events` records external execution outcomes, such as deployments or smoke-test results, into the audit-backed learning stream.
+`/v1/command` is the primary execution route. `/command` remains a legacy compatibility route. `/policy/evaluate` is a dry-run governance decision route. `/agent/run` is reserved and blocked until the agent controller has an approval policy, tool registry, execution sandbox, and audit sink. `/learning/suggestions` reads execution history and returns `{ state, decision }`, where `state.learning` is Sentinel's classification and `state.forethought` is the Forethought Interpretation layer. `/learning/events` records external execution outcomes, such as deployments or smoke-test results, into the audit-backed learning stream.
 
 ## Command Envelope
 
@@ -112,7 +112,7 @@ Outputs:
 - runbook candidates
 - warnings before retrying unsafe actions
 - integration recommendations
-- Tilda forethought for operator-ready interpretation
+- Forethought Interpretation for operator-ready interpretation
 
 Current learning routes:
 
@@ -136,16 +136,18 @@ execution event
 
 The non-negotiable rule is: learning suggests, policy authorizes, orchestration executes.
 
-### Tilda Forethought
+### Forethought Interpretation
 
-Tilda is the interpretation layer on top of the Learning Plane. It lives at `apps/sentinel/src/forethought/tilda.js`. It does not execute. It turns state into operator-ready reasoning.
+Forethought Interpretation is the interpretation layer on top of the Learning Plane. It lives at `apps/sentinel/src/forethought/interpretation.js`. It does not execute. It turns state into operator-ready reasoning.
+
+Operator logic label: `TILDA`.
 
 Flow:
 
 ```txt
 Learning Engine
 -> state, risk, confidence, evidence
--> Tilda Forethought
+-> Forethought Interpretation
 -> meaning, directive, response shape
 -> Decision Layer
 -> allow, restrict, or block
@@ -153,11 +155,11 @@ Learning Engine
 -> optional execution
 ```
 
-Tilda output should include:
+Forethought Interpretation output should include:
 
 ```json
 {
-  "name": "Tilda",
+  "name": "Sentinel Analysis",
   "systemGoal": "stability-first governed execution",
   "alignmentScore": 0.2,
   "framedSuggestion": "System drift detected. Automation is paused and human review is required.",
@@ -173,30 +175,32 @@ Tilda output should include:
 }
 ```
 
-Tilda is allowed to explain and recommend. It is not allowed to override policy.
+Forethought Interpretation is allowed to explain and recommend. It is not allowed to override policy.
 
-### SINTENIX Intake Docking
+### Archive Intelligence Intake Docking
 
-SINTENIX is the archival cognition and archive-connection lane managed by TILDA. It receives incoming information, connects it to current/archive/deferred evidence, and returns a lane decision.
+Archive Intelligence is the archival cognition and archive-connection lane managed by Forethought Interpretation. It receives incoming information, connects it to current/archive/deferred evidence, and returns a lane decision.
 
-It lives at `apps/sentinel/src/sintinex/intake.js` and is exported through `apps/sentinel/src/learning/tilda.js`.
+It lives at `apps/sentinel/src/archiveIntelligence/intakeRouter.js` and is exported through `apps/sentinel/src/learning/interpretation.js`.
 
-SINTENIX lane decisions:
+Operator logic label: `SINTENIX`.
+
+Archive Intelligence lane decisions:
 
 ```txt
-sintenix_archival_cognition -> boundary notes, lineage interpretation, historical synthesis
-sintinex_idea_ledger -> future-facing idea or productive drift
+archive_cognition -> boundary notes, lineage interpretation, historical synthesis
+idea_ledger -> future-facing idea or productive drift
 archive_reference -> historical evidence reference
 active_context -> current Phase 1.1 truth reference
 deferred_review -> held/deferred material
-sintinex_review -> unclassified information
+intake_review -> unclassified information
 ```
 
-SINTENIX does not execute. It routes memory, ideas, archive references, lineage interpretation, and deferred information so active SentinelOS execution remains governed by policy and approvals.
+Archive Intelligence does not execute. It routes memory, ideas, archive references, lineage interpretation, and deferred information so active SentinelOS execution remains governed by policy and approvals.
 
 ### Decision Layer
 
-The Decision Layer turns Learning plus Tilda into the current action state. It lives at `apps/sentinel/src/decision/decision.js`.
+The Decision Layer turns Learning plus Forethought Interpretation into the current action state. It lives at `apps/sentinel/src/decision/decision.js`.
 
 It answers one question:
 
@@ -406,8 +410,8 @@ Near-term telemetry work:
 5. Feed deployment and health-check outcomes into `/learning/events`.
 6. Persist approval checkpoints and feed approval outcomes back into learning.
 7. Wire Decision output into Policy enforcement.
-8. Add Azure OpenAI behind Tilda response shaping and policy-aware prompt templates.
-9. Build Mission Control on top of command, audit, learning, Tilda, decision, approvals, and status routes.
+8. Add Azure OpenAI behind Forethought Interpretation response shaping and policy-aware prompt templates.
+9. Build Mission Control on top of command, audit, learning, Forethought Interpretation, decision, approvals, and status routes.
 
 ## Product Position
 
