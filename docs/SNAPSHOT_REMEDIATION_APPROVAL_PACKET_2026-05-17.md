@@ -75,13 +75,13 @@ SentinelOS NON-DEMO contains many active hardening, documentation, runtime, and 
 Solution options:
 
 1. `A1.1` - Create a named checkpoint commit containing only the current governance/documentation package.
-2. `A1.2` - Stage and commit in batches: governance standards, operational packets, public-surface remediation, then runtime/code changes.
+2. `A1.2` - Stage and commit in batches: governance standards, operational packets, public-surface remediation, then runtime/code changes. Status: `completed`.
 3. `A1.3` - Create a non-pushed local safety branch before any further broad edits.
 
 Recommended approval:
 
 ```txt
-Approve A1.2: staged checkpoint by artifact class.
+A1.2 completed: staged checkpoint by artifact class.
 ```
 
 Reason:
@@ -97,6 +97,10 @@ git log -1 --oneline
 ```
 
 No execution authorized from this packet.
+
+A1.2 output:
+
+- `docs/WORKTREE_CHECKPOINT_COMPLETION_2026-05-17.md`
 
 ### A2 - Secret Configuration Risk
 

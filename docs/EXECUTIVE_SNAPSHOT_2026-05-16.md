@@ -81,7 +81,7 @@ checked: 2026-05-16T21:18:40Z
 | Priority | Area | Status | Required Action |
 | --- | --- | --- | --- |
 | P0 | Secret configuration risk | A2 completed / secondary review open | `SENTINEL_HMAC_SECRET` now uses managed secret reference and A2.3 control rule is documented; review secondary direct env classifications |
-| P0 | Active worktree continuity | open | checkpoint or intentionally commit/stage the large May 15/16 hardening worktree before further broad changes |
+| P0 | Active worktree continuity | completed | A1.2 staged checkpoint completed by artifact class; push remains unapproved |
 | P1 | `nunncorp-global-mono` repo degradation | open | create a fresh comparison clone, compare `.git` internals, then approve cleanup boundaries |
 | P1 | Public surface alignment | remediation applied | preserve claim-boundary review and continue deeper label checks before broader buyer-facing use |
 | P1 | Deploy-authoritative IaC | open | reconcile `azure/container-app.yaml` with live Container App truth or mark it permanently scaffold-only |
@@ -672,7 +672,7 @@ do not redeploy from scaffold YAML until reconciled
 | --- | --- | --- | --- |
 | Public Surface Alignment report | documentation / review | no | completed |
 | Public copy edits | repo edit | yes | first pass applied; operator review before external use |
-| Worktree checkpoint | git operation | yes | yes before commit/push |
+| Worktree checkpoint | git operation | yes | A1.2 completed locally; push remains unapproved |
 | Secret rotation | runtime/security | yes | A2.2 completed; future rotation requires approval |
 | Fresh comparison clone | local filesystem/network | yes | yes if network clone needed |
 | Git duplicate cleanup | destructive repo cleanup | yes | explicit approval required |
