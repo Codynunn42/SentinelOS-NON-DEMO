@@ -46,7 +46,10 @@ const commandScopes = {
   'policy.evaluate': 'policy:evaluate',
   'cdnlux.token.evaluate': 'platform:admin',
   'cdnlux.contract.evaluate': 'platform:admin',
-  'docking.evaluate': 'platform:admin'
+  'docking.evaluate': 'platform:admin',
+  'drift.recommendation.instruct': 'platform:admin',
+  'drift.issues.classify': 'platform:admin',
+  'approval.bottleneck.analyze': 'platform:admin'
 };
 
 function blocked(state, riskLevel, reason, details = {}) {

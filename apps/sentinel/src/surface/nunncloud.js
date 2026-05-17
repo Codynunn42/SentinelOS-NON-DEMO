@@ -16,6 +16,9 @@ const { handleRepoUpdate } = require('../commands/repo/updateStructure');
 const { handleProductReframe } = require('../commands/system/productReframe');
 const { handleSystemValidate } = require('../commands/system/validateIntegrity');
 const { handleUiSync } = require('../commands/ui/syncLabels');
+const { handleDriftRecommendationInstruction } = require('../commands/drift/humanSteering');
+const { handleDriftIssuesClassify } = require('../commands/drift/issueClassification');
+const { handleApprovalBottleneckAnalyze } = require('../commands/approval/bottleneck');
 
 async function evaluateCdnluxToken(payload = {}) {
   const cdnluxEvent = buildCdnluxEvent(payload);
@@ -41,6 +44,9 @@ const nunncloudHandlers = {
   'system.validate.integrity': handleSystemValidate,
   'dealFlow.run.demo': handleDealFlowDemo,
   'ui.sync.labels': handleUiSync,
+  'drift.recommendation.instruct': handleDriftRecommendationInstruction,
+  'drift.issues.classify': handleDriftIssuesClassify,
+  'approval.bottleneck.analyze': handleApprovalBottleneckAnalyze,
 
   'cdnlux.token.evaluate': evaluateCdnluxToken,
   'cdnlux.contract.evaluate': evaluateCdnluxToken,

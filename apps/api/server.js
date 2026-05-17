@@ -1400,6 +1400,68 @@ const server = http.createServer(async (req, res) => {
     return sendHtmlFile(res, OPERATOR_ESCALATIONS_PATH);
   }
 
+  if (pathname === '/lead' && req.method === 'POST') {
+    return readJsonBody(req, (error, body) => {
+      if (error) {
+        return sendJson(res, 400, {
+          status: 'error',
+          error: 'invalid_json',
+          message: 'Unable to parse lead submission payload.'
+        });
+      }
+
+      const name = body && typeof body.name === 'string' ? body.name.trim() : '';
+      const email = body && typeof body.email === 'string' ? body.email.trim() : '';
+      const message = body && typeof body.message === 'string' ? body.message.trim() : '';
+
+      if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+        return sendJson(res, 400, {
+          status: 'error',
+          error: 'invalid_email',
+          message: 'A valid email address is required.'
+        });
+      }
+
+      const leadPayload = {
+        name: name || 'anonymous',
+        email,
+        message: message || 'No message provided',
+        route: pathname,
+        source: 'public_landing'
+      };
+
+      emitSecurityEvent('lead.submitted', {
+        route: pathname,
+        source: 'public_landing',
+        emailHash: crypto.createHash('sha256').update(email.toLowerCase()).digest('hex').slice(0, 16),
+        messageLength: message.length
+      });
+
+      auditLogger.log({
+        tenant: getSurfaceTenant(requestUrl, 'ownerfi'),
+        command: 'lead.submitted',
+        payload: leadPayload,
+        result: {
+          success: true,
+          received: true
+        },
+        actor: email,
+        timestamp: new Date().toISOString()
+      }).catch((logError) => {
+        emitSecurityEvent('lead.audit_failed', {
+          error: logError instanceof Error ? logError.message : 'Unknown lead audit failure',
+          route: pathname,
+          source: 'public_landing'
+        });
+      });
+
+      return sendJson(res, 200, {
+        status: 'ok',
+        message: 'Lead captured successfully.'
+      });
+    });
+  }
+
   if ((pathname === '/billing/checkout' || pathname === '/billing/checkout.html') && req.method === 'GET') {
     auditSurfaceView(req, requestUrl, pathname, 'billing-checkout');
     return sendHtmlFile(res, STRIPE_CHECKOUT_PAGE_PATH);

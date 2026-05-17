@@ -24,6 +24,15 @@ function getSigningKey(key) {
   return typeof key === 'string' && key.trim() ? key.trim() : null;
 }
 
+function getDecisionSigningKey(options = {}) {
+  return getSigningKey(
+    options.key ||
+      process.env.SENTINEL_SIGNING_KEY ||
+      process.env.BILLING_SIGN_KEY ||
+      process.env.SENTINEL_HMAC_SECRET
+  );
+}
+
 function signDecision(decision, key) {
   const signingKey = getSigningKey(key);
   if (!signingKey) {
@@ -61,11 +70,18 @@ function verifyDecision(decision, key) {
     .createHmac('sha256', signingKey)
     .update(payload)
     .digest('hex');
+  const expectedBuffer = Buffer.from(expected);
+  const actualBuffer = Buffer.from(decision.signature);
 
-  return crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(decision.signature));
+  if (expectedBuffer.length !== actualBuffer.length) {
+    return false;
+  }
+
+  return crypto.timingSafeEqual(expectedBuffer, actualBuffer);
 }
 
 module.exports = {
+  getDecisionSigningKey,
   signDecision,
   stableStringify,
   stripSignatureFields,
