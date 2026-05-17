@@ -32,6 +32,12 @@ Add the following under Settings → Secrets → Actions:
 
 `AZURE_CREDENTIALS` must have permission to push to `acrncdevsentinel` and update `ca-nc-dev-sentinel`. The Container App pulls from ACR with the user-assigned managed identity `id-nc-dev-sentinel`, which should keep `AcrPull` on the registry.
 
+## Secret Configuration Control
+
+Secret-class runtime values must use managed secret references. Do not place direct secret-like values in runtime env values, runtime exports, deployment evidence, executive snapshots, approval packets, public reports, or buyer-facing materials.
+
+Verification reports should use name-only, redacted queries and should record `secretRef` posture without printing values. The active control rule is documented in `docs/SECRET_CONFIGURATION_CONTROL_RULE_2026-05-17.md`.
+
 ## Role-Scoped API Keys
 
 Preferred production configuration is `SENTINEL_API_KEYS`, a JSON array of key records:

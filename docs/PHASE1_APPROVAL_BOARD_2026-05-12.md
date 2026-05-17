@@ -112,18 +112,31 @@ Command:
 node scripts/mockGovernanceAnalytics.js --report
 ```
 
-Result:
+Result (Local Verification - 2026-05-15):
 
 ```txt
-Total Artifacts Analyzed: 2
-Latest Run: mockrun_1x40_2026-05-12T06-17-19-540Z
-Total Commands Processed: 240
-Total Approvals: 79
-Total Blocks: 31
-Overall Approval Rate: 32.9%
-Overall Block Rate: 12.9%
-Average Time Between Runs: 0.3 hours
+Total Artifacts Analyzed: 4
+Latest Run: mockrun_5x50_2026-05-15T00-06-54-683Z
+Total Commands Processed: 990
+Total Approvals: 347
+Total Blocks: 120
+Overall Approval Rate: 35.1%
+Overall Block Rate: 12.1%
+Average Time Between Runs: 22.0 hours
 ```
+
+Live Verification Evidence (2026-05-15):
+
+- ✅ 5-iteration stress test completed successfully
+- ✅ 750 total commands processed (150 per iteration × 5)
+- ✅ 268 approvals granted (avg 35.7% approval ratio)
+- ✅ 89 blocks issued (avg 11.9% block ratio)
+- ✅ All 5 iterations returned HTTP 200 status
+- ✅ Mock governance telemetry artifacts persisted to `runtime/mock-results/`
+- ✅ Run artifacts contain correlation IDs and per-iteration metrics
+- ✅ Stress test execution path: `/v1/faceplane/mock` → Sentinel dispatch → mock runners
+- ✅ Policy enforcement: `faceplane.mock.run` mapped to `platform:admin` scope
+- ✅ Execution context validation: all 5 iterations executed with `source: 'sentinel'`
 
 ### Approval Continuity Check
 
