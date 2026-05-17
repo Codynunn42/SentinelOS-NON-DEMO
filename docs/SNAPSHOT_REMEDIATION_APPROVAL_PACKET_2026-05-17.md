@@ -175,15 +175,15 @@ nunncorp-global-mono has duplicate Git internals and hung status/fsck diagnostic
 
 Solution options:
 
-1. `A3.1` - Create a fresh comparison clone in a separate directory.
-2. `A3.2` - Compare `.git` internals and refs between degraded repo and fresh clone.
-3. `A3.3` - Produce cleanup boundary report.
-4. `A3.4` - Only after approval, remove duplicate/stale Git internals if confirmed safe.
+1. `A3.1` - Create a fresh comparison clone in a separate directory. Status: `completed`.
+2. `A3.2` - Compare `.git` internals and refs between degraded repo and fresh clone. Status: `completed`.
+3. `A3.3` - Produce cleanup boundary report. Status: `completed`.
+4. `A3.4` - Only after approval, quarantine duplicate/stale Git internals if confirmed safe. Status: `completed_with_residual_nested_duplicate`.
 
 Recommended approval:
 
 ```txt
-Approve A3.1 and A3.2 only.
+A3.1, A3.2, A3.3, and A3.4 completed within approved candidate scope. Destructive deletion remains blocked. One residual nested duplicate remains outside approved scope.
 ```
 
 Reason:
@@ -200,6 +200,18 @@ find .git -maxdepth 2 -name '* 2' -o -name '* 3' -o -name '* 4'
 ```
 
 Destructive cleanup remains blocked.
+
+A3.1/A3.2 output:
+
+- `docs/NUNNCORP_GLOBAL_MONO_FRESH_CLONE_COMPARISON_2026-05-17.md`
+
+A3.3 output:
+
+- `docs/NUNNCORP_GLOBAL_MONO_CLEANUP_BOUNDARY_REPORT_2026-05-17.md`
+
+A3.4 output:
+
+- `docs/NUNNCORP_GLOBAL_MONO_QUARANTINE_COMPLETION_2026-05-17.md`
 
 ### A4 - Deploy-Authoritative IaC
 
@@ -419,8 +431,8 @@ A9.1/A9.2 - governance standards review checklist and invariant validation
 Hold for later approval:
 
 ```txt
-A2.2 - actual secret rotation
-A3.4 - destructive Git cleanup
+A2.2 - actual secret rotation completed
+A3.4 - quarantine-only cleanup completed within approved scope; destructive deletion remains blocked
 A4.2 - deploy-authoritative YAML reconciliation
 external publication of buyer-facing materials
 promotion of any held governance standard

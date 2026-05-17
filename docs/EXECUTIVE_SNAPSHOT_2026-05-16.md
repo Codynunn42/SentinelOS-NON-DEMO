@@ -82,7 +82,7 @@ checked: 2026-05-16T21:18:40Z
 | --- | --- | --- | --- |
 | P0 | Secret configuration risk | A2 completed / secondary review open | `SENTINEL_HMAC_SECRET` now uses managed secret reference and A2.3 control rule is documented; review secondary direct env classifications |
 | P0 | Active worktree continuity | completed | A1.2 staged checkpoint completed by artifact class; push remains unapproved |
-| P1 | `nunncorp-global-mono` repo degradation | open | create a fresh comparison clone, compare `.git` internals, then approve cleanup boundaries |
+| P1 | `nunncorp-global-mono` repo degradation | quarantine completed / residual nested duplicate open | review `docs/NUNNCORP_GLOBAL_MONO_QUARANTINE_COMPLETION_2026-05-17.md`; destructive deletion and residual nested duplicate cleanup remain unapproved |
 | P1 | Public surface alignment | remediation applied | preserve claim-boundary review and continue deeper label checks before broader buyer-facing use |
 | P1 | Deploy-authoritative IaC | open | reconcile `azure/container-app.yaml` with live Container App truth or mark it permanently scaffold-only |
 | P1 | Deployment docs revision/image drift | open | update `docs/DEPLOYMENT.md` or move revision/image truth into a generated runtime map |
@@ -661,7 +661,7 @@ do not redeploy from scaffold YAML until reconciled
 
 1. Worktree checkpoint / commit strategy
 2. Secret configuration secondary classification
-3. Fresh clone comparison for `nunncorp-global-mono`
+3. Quarantine-only cleanup approval for `nunncorp-global-mono`
 4. Pilot Onboarding Kit refinement
 5. Architecture Diagram Set packaging
 6. Governance Stack Consolidation, Governance Consistency, Approval Chain, Governance Visualization, and Runtime Readiness review, then invariant checklist, lifecycle register, inheritance map, audit register, controlled pilot boundary definition, and downstream standards review
@@ -674,8 +674,9 @@ do not redeploy from scaffold YAML until reconciled
 | Public copy edits | repo edit | yes | first pass applied; operator review before external use |
 | Worktree checkpoint | git operation | yes | A1.2 completed locally; push remains unapproved |
 | Secret rotation | runtime/security | yes | A2.2 completed; future rotation requires approval |
-| Fresh comparison clone | local filesystem/network | yes | yes if network clone needed |
-| Git duplicate cleanup | destructive repo cleanup | yes | explicit approval required |
+| Fresh comparison clone | local filesystem/network | yes | A3.1/A3.2 completed |
+| Cleanup boundary report | documentation / repo integrity | yes | A3.3 completed; A3.4 completed within approved scope |
+| Git duplicate cleanup | destructive repo cleanup | yes | A3.4 quarantine completed; deletion and residual nested duplicate cleanup not approved |
 | YAML reconciliation | repo IaC edit | yes | review required before deploy |
 | Buyer-facing pilot kit | documentation | yes | claim review required |
 
@@ -708,3 +709,4 @@ do not redeploy from scaffold YAML until reconciled
 - `docs/SECRET_CONFIGURATION_INVENTORY_2026-05-17.md`
 - `docs/SECRET_ROTATION_COMPLETION_2026-05-17.md`
 - `docs/SECRET_CONFIGURATION_CONTROL_RULE_2026-05-17.md`
+- `docs/NUNNCORP_GLOBAL_MONO_FRESH_CLONE_COMPARISON_2026-05-17.md`
