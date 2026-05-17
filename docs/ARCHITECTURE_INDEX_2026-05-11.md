@@ -14,7 +14,7 @@ Comprehensive index of all architectural documentation based on repo scan. Organ
 |---|---|---|---|
 | `docs/EXECUTION_ARCHITECTURE.md` | ✅ ACTIVE | Command execution flow | Envelope → Validation → Intent → Execution → Receipt |
 | `docs/diagrams/sentinelos_architecture_v2.mmd` | ✅ ACTIVE | System architecture diagram | Control Plane, Face Planes, GaaS, Docking |
-| `docs/PRODUCT.md` | ✅ ACTIVE | Product definition | Governed execution OS positioning |
+| `docs/PRODUCT.md` | ✅ ACTIVE | Product definition | Governed execution operating framework positioning |
 
 ### Control Plane
 
@@ -217,4 +217,4 @@ API Server (server.js)
 
 ---
 
-**Architecture Status:** Core execution OS with governance, face planes, and audit fully implemented. Customer operations plane added. Ready for controlled expansion into new domains.
+**Architecture Status:** Core governed execution framework with governance, face planes, and audit implemented. Customer operations plane added. Ready for controlled expansion into new domains.

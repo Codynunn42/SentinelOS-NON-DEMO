@@ -6,16 +6,16 @@ Status: sendable one-page proof sheet
 
 ```txt
 SentinelOS is a governed execution layer.
-We do not replace your system. We control what your system is allowed to do.
+We do not replace your system. We coordinate what your system is allowed to do through policy, approval, and audit.
 ```
 
 ## Operating Model
 
 ```txt
-SentinelOS = Execution OS
+SentinelOS = Governed Execution Operating Framework
 Face Planes = Interaction Layer
 GaaS = Policy Layer
-Docking = Enforcement Boundary
+Docking = Governance Boundary
 ```
 
 ## Proof Case
@@ -38,7 +38,7 @@ application.submit
 - Commands are routed through governance before execution.
 - Approval-sensitive actions can be blocked.
 - Blocked decisions are auditable.
-- Face planes can adapt the OS without changing the OS core.
+- Face planes can adapt the framework without changing the governed core.
 - Docking keeps surfaces inside API, RBAC, and policy boundaries.
 
 ## Live Proof Path
@@ -60,7 +60,7 @@ npm run check:docking
 
 ```txt
 Most systems log after execution.
-SentinelOS decides before execution.
+SentinelOS checks authorization before execution.
 ```
 
 ## Boundary

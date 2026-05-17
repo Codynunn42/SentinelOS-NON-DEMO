@@ -2,17 +2,17 @@
 
 **COMM:** Sentinel AI by Cody Nunn | Nunn Cloud
 
-**Client operating repository for the post-demo SentinelOS system.**
+**Client-readiness repository for the post-demo SentinelOS system.**
 
 ---
 
 ## Overview
-SentinelOS NON-DEMO is the client-facing operational repository for the system after demo validation. This repository is intended to mature into the governed, production-direction environment where clients, operators, and stakeholders access SentinelOS capabilities beyond the demo lane.
+SentinelOS NON-DEMO is the client-facing readiness repository for the system after demo validation. This repository is intended to mature along the governed production-readiness path where clients, operators, and stakeholders access SentinelOS capabilities beyond the demo lane.
 
-This repository is not intended to be a temporary proof shell. It is the starting point for the real operating surface that clients will use once the platform transitions from demonstration into structured deployment.
+This repository is not intended to be a temporary proof shell. It is the starting point for the operational proof surface that clients will use once the platform transitions from demonstration into controlled deployment.
 
 ## Mission
-SentinelOS is designed to support command-driven execution with governance, accountability, and verification. The NON-DEMO repository exists to carry that model into a client-ready environment.
+SentinelOS is designed to support command-driven, human-authorized execution with governance, accountability, and verification. The NON-DEMO repository exists to carry that model into a client-readiness environment.
 
 Core intent:
 - provide a trustworthy client entry point
@@ -25,7 +25,7 @@ Core intent:
 This is the repository that should back the next stage of system use after demo adoption.
 
 Target outcomes:
-- clients access the real operating surface
+- clients access the operational proof surface
 - workflows move from demo proof to controlled execution
 - documentation supports stakeholder trust
 - repo discipline reflects enterprise expectations
@@ -68,9 +68,9 @@ Reference:
 Phase 2 framing:
 
 ```text
-Type -> Execute
-Click -> Execute
-Scan -> Execute
+Type -> Intent -> Governance -> Execution
+Click -> Intent -> Approval -> Execution
+Scan -> Intake -> Review -> Governed Action
 ```
 
 HERGLASS must remain a Face Plane:
@@ -120,4 +120,4 @@ Before broad client onboarding, this repository should contain:
 - begin non-demo client path implementation
 
 ## Status
-SentinelOS NON-DEMO is now established as the **post-demo client repository baseline** and is ready for structured buildout.
+SentinelOS NON-DEMO is now established as the **post-demo client repository baseline** and is ready for controlled buildout.

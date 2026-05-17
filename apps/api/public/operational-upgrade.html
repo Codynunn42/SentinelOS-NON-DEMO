@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Operational Upgrade — SentinelOS</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1a1f3a 100%);
+            color: #e2e8f0;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(to right, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            color: #94a3b8;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 200px 1fr 250px;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        /* Avatar Panel */
+        .avatar-panel {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 12px;
+            padding: 1.5rem;
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+        }
+
+        .avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+            animation: avatarPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes avatarPulse {
+
+            0%,
+            100% {
+                box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+            }
+
+            50% {
+                box-shadow: 0 0 40px rgba(139, 92, 246, 0.5);
+            }
+        }
+
+        .avatar-message {
+            text-align: center;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            margin-bottom: 1rem;
+        }
+
+        .avatar-state {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            background: rgba(100, 116, 139, 0.2);
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            width: 100%;
+            text-align: center;
+        }
+
+        /* Main Content */
+        .content-panel {
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 12px;
+            padding: 2.5rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .phase-indicator {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            justify-content: space-between;
+        }
+
+        .phase-step {
+            flex: 1;
+            height: 4px;
+            background: rgba(148, 163, 184, 0.2);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .phase-step.active {
+            background: linear-gradient(to right, #3b82f6, #8b5cf6);
+        }
+
+        .phase-step.completed {
+            background: #10b981;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: #94a3b8;
+            margin-bottom: 2rem;
+            font-size: 0.95rem;
+        }
+
+        /* Discovery Phase */
+        .relationship-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .relationship-card {
+            background: rgba(51, 65, 85, 0.5);
+            border: 2px solid rgba(148, 163, 184, 0.2);
+            border-radius: 8px;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .relationship-card:hover {
+            border-color: #3b82f6;
+            background: rgba(51, 65, 85, 0.7);
+            transform: translateY(-2px);
+        }
+
+        .relationship-card.selected {
+            border-color: #10b981;
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .rel-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .rel-name {
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+        }
+
+        .rel-type {
+            font-size: 0.85rem;
+            color: #94a3b8;
+            margin-bottom: 0.5rem;
+        }
+
+        .rel-status {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            background: rgba(59, 130, 246, 0.2);
+            color: #60a5fa;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        /* Analysis Phase */
+        .drift-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .drift-item {
+            background: rgba(51, 65, 85, 0.5);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 8px;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .drift-item:hover {
+            border-color: #3b82f6;
+            background: rgba(51, 65, 85, 0.7);
+        }
+
+        .drift-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .drift-icon {
+            font-size: 1.5rem;
+        }
+
+        .drift-type {
+            font-weight: 600;
+            flex: 1;
+            text-transform: capitalize;
+        }
+
+        .drift-classification {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+        }
+
+        .drift-classification.critical {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+
+        .drift-details {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(148, 163, 184, 0.1);
+            display: none;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            color: #cbd5e1;
+        }
+
+        .drift-item.expanded .drift-details {
+            display: block;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(148, 163, 184, 0.2);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 1rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(to right, #10b981, #3b82f6);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        /* Recommendations Phase */
+        .opportunity-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .opportunity-card {
+            background: rgba(51, 65, 85, 0.5);
+            border: 2px solid rgba(148, 163, 184, 0.2);
+            border-radius: 8px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .opportunity-card:hover {
+            border-color: #3b82f6;
+            background: rgba(51, 65, 85, 0.7);
+        }
+
+        .opportunity-card.selected {
+            border-color: #10b981;
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .opp-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1rem;
+        }
+
+        .opp-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .opp-priority {
+            font-size: 0.75rem;
+            padding: 0.3rem 0.8rem;
+            background: rgba(59, 130, 246, 0.2);
+            color: #60a5fa;
+            border-radius: 20px;
+        }
+
+        .opp-metrics {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .metric {
+            text-align: center;
+        }
+
+        .metric-value {
+            font-weight: 600;
+            font-size: 1.2rem;
+            color: #60a5fa;
+        }
+
+        .metric-label {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            margin-top: 0.25rem;
+        }
+
+        /* Action Plan Phase */
+        .timeline {
+            position: relative;
+            padding: 2rem 0;
+        }
+
+        .timeline-item {
+            display: flex;
+            gap: 2rem;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .timeline-marker {
+            width: 40px;
+            height: 40px;
+            background: rgba(51, 65, 85, 0.5);
+            border: 2px solid rgba(148, 163, 184, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            flex-shrink: 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        .timeline-item.active .timeline-marker {
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            border-color: #8b5cf6;
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.5);
+        }
+
+        .timeline-item.completed .timeline-marker {
+            background: #10b981;
+            border-color: #10b981;
+        }
+
+        .timeline-line {
+            position: absolute;
+            left: 19px;
+            top: 40px;
+            width: 2px;
+            height: calc(100% + 2rem);
+            background: rgba(148, 163, 184, 0.2);
+        }
+
+        .timeline-item.active .timeline-line,
+        .timeline-item.completed .timeline-line {
+            background: #10b981;
+        }
+
+        .timeline-item:last-child .timeline-line {
+            display: none;
+        }
+
+        .timeline-content {
+            flex: 1;
+            background: rgba(51, 65, 85, 0.3);
+            border-left: 2px solid rgba(148, 163, 184, 0.2);
+            padding: 1rem;
+            border-radius: 4px;
+        }
+
+        .timeline-title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .timeline-meta {
+            font-size: 0.85rem;
+            color: #94a3b8;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 12px;
+            padding: 1.5rem;
+            backdrop-filter: blur(10px);
+            height: fit-content;
+        }
+
+        .sidebar-title {
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #60a5fa;
+        }
+
+        .info-card {
+            background: rgba(59, 130, 246, 0.1);
+            border-left: 3px solid #60a5fa;
+            border-radius: 4px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        .info-card strong {
+            color: #60a5fa;
+        }
+
+        .checklist {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .checklist-item {
+            display: flex;
+            gap: 0.75rem;
+            font-size: 0.9rem;
+            align-items: flex-start;
+        }
+
+        .checklist-icon {
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        /* Navigation */
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(148, 163, 184, 0.2);
+        }
+
+        .nav-info {
+            font-size: 0.9rem;
+            color: #94a3b8;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        button {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+        }
+
+        button.primary {
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+        }
+
+        button.primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(59, 130, 246, 0.4);
+        }
+
+        button.primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        button.secondary {
+            background: rgba(148, 163, 184, 0.1);
+            color: #60a5fa;
+            border: 1px solid rgba(148, 163, 184, 0.3);
+        }
+
+        button.secondary:hover {
+            background: rgba(148, 163, 184, 0.2);
+        }
+
+        .cta-badge {
+            background: linear-gradient(135deg, #10b981 0%, #06b6d4 100%);
+            color: white;
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+            margin-top: 2rem;
+        }
+
+        .cta-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .cta-description {
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            opacity: 0.95;
+        }
+
+        .cta-button {
+            width: 100%;
+            background: white;
+            color: #10b981;
+            font-weight: 600;
+        }
+
+        .cta-button:hover {
+            background: #f0fdf4;
+        }
+
+        /* Animations */
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .content-panel {
+            animation: slideIn 0.3s ease;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>Operational Upgrade Assessor</h1>
+            <p>Upgrade your operational execution through governance, continuity, and auditability</p>
+        </div>
+
+        <!-- Main Layout -->
+        <div class="main-grid">
+            <!-- Avatar Panel -->
+            <div class="avatar-panel">
+                <div class="avatar" id="avatar">📋</div>
+                <div class="avatar-message" id="message">
+                    Let's modernize your operational relationships.
+                </div>
+                <div class="avatar-state" id="state">Ready to assess</div>
+            </div>
+
+            <!-- Content Panel -->
+            <div class="content-panel">
+                <!-- Phase Indicator -->
+                <div class="phase-indicator" id="phases">
+                    <div class="phase-step"></div>
+                    <div class="phase-step"></div>
+                    <div class="phase-step"></div>
+                    <div class="phase-step"></div>
+                </div>
+
+                <!-- Discovery Phase -->
+                <div id="discover-phase">
+                    <h2>Select a Relationship to Modernize</h2>
+                    <p class="subtitle">We'll assess how SentinelOS can upgrade operational execution</p>
+
+                    <div class="relationship-grid" id="relationships">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <!-- Analysis Phase (hidden) -->
+                <div id="analyze-phase" style="display: none;">
+                    <h2>Operational Drift Analysis</h2>
+                    <p class="subtitle">Where did execution diverge from original expectations?</p>
+
+                    <div class="drift-list" id="drifts">
+                        <!-- Populated by JS -->
+                    </div>
+
+                    <div class="progress-bar" style="margin-top: 2rem;">
+                        <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <!-- Recommendations Phase (hidden) -->
+                <div id="recommend-phase" style="display: none;">
+                    <h2>Modernization Opportunities</h2>
+                    <p class="subtitle">Here's how SentinelOS upgrades your operational execution</p>
+
+                    <div class="opportunity-list" id="opportunities">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <!-- Action Plan Phase (hidden) -->
+                <div id="execute-phase" style="display: none;">
+                    <h2>Your Modernization Roadmap</h2>
+                    <p class="subtitle">Progressive steps to operational upgrade</p>
+
+                    <div class="timeline" id="timeline">
+                        <!-- Populated by JS -->
+                    </div>
+
+                    <div class="cta-badge" id="cta">
+                        <div class="cta-title">Next Controlled Action</div>
+                        <div class="cta-description">Create governance formalization artifact</div>
+                        <button class="cta-button" onclick="executeCTA()">Prepare Upgrade Plan</button>
+                    </div>
+                </div>
+
+                <!-- Navigation -->
+                <div class="navigation">
+                    <div class="nav-info" id="nav-info">Step 1 of 4</div>
+                    <div class="nav-buttons">
+                        <button class="secondary" id="prev-btn" onclick="previousPhase()" disabled>Previous</button>
+                        <button class="primary" id="next-btn" onclick="nextPhase()">Next</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <div class="sidebar-title" id="sidebar-title">Getting Started</div>
+
+                <div class="info-card" id="sidebar-info">
+                    <strong>What is an Operational Upgrade?</strong>
+                    <p style="margin-top: 0.5rem;">We don't replace your agreements. We upgrade how they execute in
+                        practice by adding governance, continuity, and auditability.</p>
+                </div>
+
+                <div class="checklist" id="sidebar-checklist">
+                    <div class="checklist-item">
+                        <div class="checklist-icon">✓</div>
+                        <div>Historical operational data available</div>
+                    </div>
+                    <div class="checklist-item">
+                        <div class="checklist-icon">✓</div>
+                        <div>Stakeholder alignment on modernization</div>
+                    </div>
+                    <div class="checklist-item">
+                        <div class="checklist-icon">✓</div>
+                        <div>Governance constraints understood</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const state = {
+            phase: 0,
+            selectedRelationship: null,
+            expandedDrift: null,
+            selectedOpportunity: null
+        };
+
+        // Mock data
+        const mockRelationships = [
+            { id: 'ownerfi', name: 'OwnerFi', type: 'Deal Execution', status: 'Active Pilot', icon: '🏦', lastActive: '2 hours ago' },
+            { id: 'hotelops', name: 'HotelOps', type: 'Operations Management', status: 'In Proposal', icon: '🏨', lastActive: '5 days ago' },
+            { id: 'cdnlux', name: 'CDNLUX Integration', type: 'Token & Wallet', status: 'Planning', icon: '💰', lastActive: '1 week ago' }
+        ];
+
+        const mockDrifts = [
+            {
+                id: 'drift_auth',
+                type: 'authority',
+                classification: 'RESOLVED',
+                severity: 'medium',
+                evidence: 'Policy engine now enforces role-based gates',
+                summary: 'Authority was implicit; now enforced by governance rules'
+            },
+            {
+                id: 'drift_exec',
+                type: 'execution',
+                classification: 'RESOLVED',
+                severity: 'medium',
+                evidence: 'Command envelope prevents unauthorized actions',
+                summary: 'Execution was ambiguous; now deterministic and auditable'
+            },
+            {
+                id: 'drift_cont',
+                type: 'continuity',
+                classification: 'CRITICAL',
+                severity: 'critical',
+                evidence: 'No explicit pause/resume or transition rules',
+                summary: 'No governance for operational phase transitions'
+            },
+            {
+                id: 'drift_gov',
+                type: 'governance',
+                classification: 'DETECTED',
+                severity: 'medium',
+                evidence: 'Rules embedded in code, not as governance artifact',
+                summary: 'Governance rules lack versioning and change history'
+            }
+        ];
+
+        const mockOpportunities = [
+            {
+                id: 'opp1',
+                title: 'Governance Formalization',
+                priority: 'high',
+                effort: 'Low',
+                timeline: '1 week',
+                impactScore: 0.9,
+                benefit: 'Governance becomes auditable and maintainable'
+            },
+            {
+                id: 'opp2',
+                title: 'Approval Continuity Rules',
+                priority: 'high',
+                effort: 'Medium',
+                timeline: '2 weeks',
+                impactScore: 0.85,
+                benefit: 'Approvals persist across pauses and transitions'
+            },
+            {
+                id: 'opp3',
+                title: 'Drift Detection & Prevention',
+                priority: 'high',
+                effort: 'Medium',
+                timeline: '3 weeks',
+                impactScore: 0.8,
+                benefit: 'Real-time drift signals and automated escalation'
+            }
+        ];
+
+        const mockTimeline = [
+            { name: 'Governance Formalization', duration: '1 week', effort: 'Low', actions: ['Extract rules', 'Document versions', 'Create audit trail'] },
+            { name: 'Continuity Protocol Design', duration: '2 weeks', effort: 'Medium', actions: ['Design state machine', 'Checkpoint rules', 'Implement verification'] },
+            { name: 'Drift Detection Setup', duration: '3 weeks', effort: 'Medium', actions: ['Real-time signals', 'Drift thresholds', 'Escalation rules'] },
+            { name: 'Production Transition', duration: 'Ongoing', effort: 'Low', actions: ['Apply protocol', 'Validate patterns', 'Prepare renewals'] }
+        ];
+
+        function renderDiscoveryPhase() {
+            const container = document.getElementById('relationships');
+            container.innerHTML = mockRelationships.map(rel => `
+        <div class="relationship-card ${state.selectedRelationship === rel.id ? 'selected' : ''}" onclick="selectRelationship('${rel.id}')">
+          <div class="rel-icon">${rel.icon}</div>
+          <div class="rel-name">${rel.name}</div>
+          <div class="rel-type">${rel.type}</div>
+          <div class="rel-status">${rel.status}</div>
+        </div>
+      `).join('');
+
+            document.getElementById('message').textContent = 'Which relationship would you like to modernize?';
+            document.getElementById('state').textContent = 'Listening...';
+            document.getElementById('avatar').textContent = '👂';
+        }
+
+        function renderAnalysisPhase() {
+            const container = document.getElementById('drifts');
+            container.innerHTML = mockDrifts.map(drift => `
+        <div class="drift-item ${state.expandedDrift === drift.id ? 'expanded' : ''}" onclick="toggleDrift('${drift.id}')">
+          <div class="drift-header">
+            <span class="drift-icon">🔄</span>
+            <span class="drift-type">${drift.type}</span>
+            <span class="drift-classification ${drift.severity === 'critical' ? 'critical' : ''}">${drift.classification}</span>
+          </div>
+          <div class="drift-details">
+            <strong>Summary:</strong> ${drift.summary}<br><br>
+            <strong>Evidence:</strong> ${drift.evidence}
+          </div>
+        </div>
+      `).join('');
+
+            const resolved = mockDrifts.filter(d => d.classification === 'RESOLVED').length;
+            const total = mockDrifts.length;
+            document.getElementById('progressFill').style.width = `${(resolved / total) * 100}%`;
+
+            document.getElementById('message').textContent = 'I\'ve analyzed the operational lineage. Here\'s where drift occurred...';
+            document.getElementById('state').textContent = 'Analyzing...';
+            document.getElementById('avatar').textContent = '🤔';
+        }
+
+        function renderRecommendationsPhase() {
+            const container = document.getElementById('opportunities');
+            container.innerHTML = mockOpportunities.map(opp => `
+        <div class="opportunity-card ${state.selectedOpportunity === opp.id ? 'selected' : ''}" onclick="selectOpportunity('${opp.id}')">
+          <div class="opp-header">
+            <div class="opp-title">${opp.title}</div>
+            <div class="opp-priority">${opp.priority}</div>
+          </div>
+          <div class="opp-metrics">
+            <div class="metric">
+              <div class="metric-value">${opp.effort}</div>
+              <div class="metric-label">Effort</div>
+            </div>
+            <div class="metric">
+              <div class="metric-value">${opp.timeline}</div>
+              <div class="metric-label">Timeline</div>
+            </div>
+            <div class="metric">
+              <div class="metric-value">${Math.round(opp.impactScore * 100)}%</div>
+              <div class="metric-label">Impact</div>
+            </div>
+          </div>
+          <div>${opp.benefit}</div>
+        </div>
+      `).join('');
+
+            document.getElementById('message').textContent = 'These are the best opportunities for operational upgrade.';
+            document.getElementById('state').textContent = 'Explaining...';
+            document.getElementById('avatar').textContent = '💡';
+        }
+
+        function renderActionPlanPhase() {
+            const container = document.getElementById('timeline');
+            container.innerHTML = mockTimeline.map((item, idx) => `
+        <div class="timeline-item ${idx === 0 ? 'active' : idx < 0 ? 'completed' : ''}">
+          <div class="timeline-marker">${idx + 1}</div>
+          <div class="timeline-line"></div>
+          <div class="timeline-content">
+            <div class="timeline-title">${item.name}</div>
+            <div class="timeline-meta">${item.duration} • ${item.effort}</div>
+            <div style="font-size: 0.85rem; color: #cbd5e1;">${item.actions.join(' → ')}</div>
+          </div>
+        </div>
+      `).join('');
+
+            document.getElementById('message').textContent = 'Your modernization roadmap is ready!';
+            document.getElementById('state').textContent = 'Ready to execute';
+            document.getElementById('avatar').textContent = '🚀';
+        }
+
+        function showPhase(phaseIdx) {
+            // Hide all phases
+            document.getElementById('discover-phase').style.display = 'none';
+            document.getElementById('analyze-phase').style.display = 'none';
+            document.getElementById('recommend-phase').style.display = 'none';
+            document.getElementById('execute-phase').style.display = 'none';
+
+            // Update phase indicators
+            const phases = document.querySelectorAll('.phase-step');
+            phases.forEach((p, idx) => {
+                if (idx < phaseIdx) p.classList.add('completed');
+                else if (idx === phaseIdx) p.classList.add('active');
+                else {
+                    p.classList.remove('active', 'completed');
+                }
+            });
+
+            // Show current phase
+            switch (phaseIdx) {
+                case 0:
+                    document.getElementById('discover-phase').style.display = 'block';
+                    renderDiscoveryPhase();
+                    document.getElementById('sidebar-title').textContent = 'Discovery';
+                    break;
+                case 1:
+                    document.getElementById('analyze-phase').style.display = 'block';
+                    renderAnalysisPhase();
+                    document.getElementById('sidebar-title').textContent = 'Analysis';
+                    break;
+                case 2:
+                    document.getElementById('recommend-phase').style.display = 'block';
+                    renderRecommendationsPhase();
+                    document.getElementById('sidebar-title').textContent = 'Opportunities';
+                    break;
+                case 3:
+                    document.getElementById('execute-phase').style.display = 'block';
+                    renderActionPlanPhase();
+                    document.getElementById('sidebar-title').textContent = 'Roadmap';
+                    break;
+            }
+
+            document.getElementById('nav-info').textContent = `Step ${phaseIdx + 1} of 4`;
+            document.getElementById('prev-btn').disabled = phaseIdx === 0;
+            document.getElementById('next-btn').disabled = phaseIdx === 3;
+        }
+
+        function selectRelationship(id) {
+            state.selectedRelationship = id;
+            renderDiscoveryPhase();
+        }
+
+        function toggleDrift(id) {
+            state.expandedDrift = state.expandedDrift === id ? null : id;
+            renderAnalysisPhase();
+        }
+
+        function selectOpportunity(id) {
+            state.selectedOpportunity = id;
+            renderRecommendationsPhase();
+        }
+
+        function nextPhase() {
+            if (state.phase < 3) {
+                state.phase++;
+                showPhase(state.phase);
+            }
+        }
+
+        function previousPhase() {
+            if (state.phase > 0) {
+                state.phase--;
+                showPhase(state.phase);
+            }
+        }
+
+        function executeCTA() {
+            alert('Controlled upgrade plan prepared.\n\nNext: Create docs/OWNERFI_GOVERNANCE_RULES.md\nSchedule alignment meeting with stakeholders');
+        }
+
+        // Initialize
+        showPhase(0);
+    </script>
+</body>
+
+</html>
