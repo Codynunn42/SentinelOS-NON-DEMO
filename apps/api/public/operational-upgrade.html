@@ -589,7 +589,7 @@
         <!-- Header -->
         <div class="header">
             <h1>Operational Upgrade Assessor</h1>
-            <p>Upgrade your operational execution through governance, continuity, and auditability</p>
+            <p>Upgrade operational continuity through governance, approval visibility, and auditability</p>
         </div>
 
         <!-- Main Layout -->
@@ -616,7 +616,7 @@
                 <!-- Discovery Phase -->
                 <div id="discover-phase">
                     <h2>Select a Relationship to Modernize</h2>
-                    <p class="subtitle">We'll assess how SentinelOS can upgrade operational execution</p>
+                    <p class="subtitle">We'll assess how SentinelOS can strengthen governed operating posture</p>
 
                     <div class="relationship-grid" id="relationships">
                         <!-- Populated by JS -->
@@ -626,7 +626,7 @@
                 <!-- Analysis Phase (hidden) -->
                 <div id="analyze-phase" style="display: none;">
                     <h2>Operational Drift Analysis</h2>
-                    <p class="subtitle">Where did execution diverge from original expectations?</p>
+                    <p class="subtitle">Where did operations diverge from original expectations?</p>
 
                     <div class="drift-list" id="drifts">
                         <!-- Populated by JS -->
@@ -640,7 +640,7 @@
                 <!-- Recommendations Phase (hidden) -->
                 <div id="recommend-phase" style="display: none;">
                     <h2>Modernization Opportunities</h2>
-                    <p class="subtitle">Here's how SentinelOS upgrades your operational execution</p>
+                    <p class="subtitle">Here's how SentinelOS strengthens governed operating posture</p>
 
                     <div class="opportunity-list" id="opportunities">
                         <!-- Populated by JS -->
@@ -679,7 +679,7 @@
 
                 <div class="info-card" id="sidebar-info">
                     <strong>What is an Operational Upgrade?</strong>
-                    <p style="margin-top: 0.5rem;">We don't replace your agreements. We upgrade how they execute in
+                    <p style="margin-top: 0.5rem;">We don't replace your agreements. We upgrade how they operate in
                         practice by adding governance, continuity, and auditability.</p>
                 </div>
 
@@ -722,16 +722,16 @@
                 type: 'authority',
                 classification: 'RESOLVED',
                 severity: 'medium',
-                evidence: 'Policy engine now enforces role-based gates',
-                summary: 'Authority was implicit; now enforced by governance rules'
+                evidence: 'Policy engine now applies role-based gates',
+                summary: 'Authority was implicit; now constrained by governance rules'
             },
             {
                 id: 'drift_exec',
                 type: 'execution',
                 classification: 'RESOLVED',
                 severity: 'medium',
-                evidence: 'Command envelope prevents unauthorized actions',
-                summary: 'Execution was ambiguous; now deterministic and auditable'
+                evidence: 'Command envelope blocks unauthorized action paths',
+                summary: 'Execution was ambiguous; now approval-bound and auditable'
             },
             {
                 id: 'drift_cont',
@@ -777,7 +777,7 @@
                 effort: 'Medium',
                 timeline: '3 weeks',
                 impactScore: 0.8,
-                benefit: 'Real-time drift signals and automated escalation'
+                benefit: 'Real-time drift signals and governed escalation'
             }
         ];
 
@@ -785,7 +785,7 @@
             { name: 'Governance Formalization', duration: '1 week', effort: 'Low', actions: ['Extract rules', 'Document versions', 'Create audit trail'] },
             { name: 'Continuity Protocol Design', duration: '2 weeks', effort: 'Medium', actions: ['Design state machine', 'Checkpoint rules', 'Implement verification'] },
             { name: 'Drift Detection Setup', duration: '3 weeks', effort: 'Medium', actions: ['Real-time signals', 'Drift thresholds', 'Escalation rules'] },
-            { name: 'Production Transition', duration: 'Ongoing', effort: 'Low', actions: ['Apply protocol', 'Validate patterns', 'Prepare renewals'] }
+            { name: 'Readiness Transition', duration: 'Ongoing', effort: 'Low', actions: ['Apply protocol', 'Validate patterns', 'Prepare renewals'] }
         ];
 
         function renderDiscoveryPhase() {
@@ -875,7 +875,7 @@
       `).join('');
 
             document.getElementById('message').textContent = 'Your modernization roadmap is ready!';
-            document.getElementById('state').textContent = 'Ready to execute';
+            document.getElementById('state').textContent = 'Ready for review';
             document.getElementById('avatar').textContent = '🚀';
         }
 

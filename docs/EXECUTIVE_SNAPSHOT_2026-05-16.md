@@ -82,14 +82,18 @@ checked: 2026-05-16T21:18:40Z
 | --- | --- | --- | --- |
 | P0 | Secret configuration risk | A2 completed / secondary review open | `SENTINEL_HMAC_SECRET` now uses managed secret reference and A2.3 control rule is documented; review secondary direct env classifications |
 | P0 | Active worktree continuity | completed | A1.2 staged checkpoint completed by artifact class; push remains unapproved |
-| P1 | `nunncorp-global-mono` repo degradation | quarantine completed / residual nested duplicate open | review `docs/NUNNCORP_GLOBAL_MONO_QUARANTINE_COMPLETION_2026-05-17.md`; destructive deletion and residual nested duplicate cleanup remain unapproved |
-| P1 | Public surface alignment | remediation applied | preserve claim-boundary review and continue deeper label checks before broader buyer-facing use |
-| P1 | Deploy-authoritative IaC | open | reconcile `azure/container-app.yaml` with live Container App truth or mark it permanently scaffold-only |
-| P1 | Deployment docs revision/image drift | open | update `docs/DEPLOYMENT.md` or move revision/image truth into a generated runtime map |
-| P2 | Buyer-facing pilot kit | open | trim internal risk language and generate buyer-safe onboarding package after public surface alignment |
-| P2 | Architecture diagram bundle | open | produce sanitized diagram set from existing Mermaid docs without expanding system scope |
+| P1 | `nunncorp-global-mono` repo degradation | suffix duplicate quarantine completed / responsiveness issue remains | review `docs/NUNNCORP_GLOBAL_MONO_RESIDUAL_DUPLICATE_DIAGNOSTIC_2026-05-17.md`; active suffix scan is clean, branch reports `main`, but `git status --short` still hangs and requires separate diagnosis |
+| P1 | Public surface alignment | A6.1/A6.2 completed | review `docs/PUBLIC_LABEL_REMEDIATION_A6_2026-05-17.md`; A6.3 vocabulary rerun remains optional before buyer-facing use |
+| P1 | Deploy-authoritative IaC | A4.1 completed / A4.3R approved pending access / A4.2 held | review `docs/A4_REMEDIATION_GOVERNANCE_PASS_2026-05-17.md`; fresh sanitized Azure export remains required before YAML reconciliation |
+| P1 | Deployment docs revision/image drift | A5.2/A5.3 completed | volatile revision/image truth moved to runtime-map evidence; keep runtime map refresh cadence explicit |
+| P2 | Buyer-facing pilot kit | A7.1/A7.2/A7.3 completed / held from publication | review `docs/PILOT_ONBOARDING_KIT_2026-05-17.md` and `docs/PILOT_ONBOARDING_EXTERNAL_REVIEW_DRAFT_2026-05-17.md`; pilot activation and external publication remain unapproved |
+| P2 | Architecture diagram bundle | A8.1/A8.2/A8.3/A8.4 completed / held from publication | review `docs/ARCHITECTURE_DIAGRAM_INDEX_2026-05-17.md`; rendered diagram packet and external publication remain unapproved |
 | P2 | Constitutional review | open | review `sentinelOS Constitution` before promoting beyond root-authority draft |
-| P2 | Vocabulary enforcement | open | apply `Approved Vocabulary Dictionary` to public surface, prompts, UI labels, and buyer materials |
+| P2 | Vocabulary enforcement | A6.3 completed / no publication | review `docs/PUBLIC_VOCABULARY_REVIEW_A6_3_2026-05-17.md`; technical API terms remain preserved |
+| P3 | Governance standards review | A9.1/A9.2/A9.3 completed / no promotion | review `docs/GOVERNANCE_STANDARDS_REVIEW_CHECKLIST_2026-05-17.md`; promotion remains unapproved |
+| P3 | Governance register templates | A10.1/A10.2/A10.3 completed / no activation | review lifecycle, inheritance, and audit event register templates; populated snapshots completed separately under A12.1 |
+| P3 | Pilot boundary definition | A11.1 completed / no activation | review `docs/governance/PILOT_BOUNDARY_DEFINITION_TEMPLATE.md`; pilot activation, tenant activation, endpoint publication, and external publication remain unapproved |
+| P3 | Governance register snapshots | A12.1 completed / no activation | review first lifecycle, inheritance, and audit event register snapshots; maturity scoring remains the next safe local candidate |
 | P3 | Next Layer 1 architecture doc | drafted / held | review `sentinelOS Architecture Specification` against Constitution and Vocabulary Dictionary before promotion |
 | P3 | Runtime boundary mechanics | drafted / held | review `Sentinel Runtime & Execution Boundary Specification` before agent or memory standards expand |
 | P3 | Multi-agent framework | drafted / held | review `Multi-Agent Framework Standard` before any agent activation, registry, or tool access expansion |
@@ -676,7 +680,7 @@ do not redeploy from scaffold YAML until reconciled
 | Secret rotation | runtime/security | yes | A2.2 completed; future rotation requires approval |
 | Fresh comparison clone | local filesystem/network | yes | A3.1/A3.2 completed |
 | Cleanup boundary report | documentation / repo integrity | yes | A3.3 completed; A3.4 completed within approved scope |
-| Git duplicate cleanup | destructive repo cleanup | yes | A3.4 quarantine completed; deletion and residual nested duplicate cleanup not approved |
+| Git duplicate cleanup | destructive repo cleanup | yes | A3.4 and A3.5/A3.4R quarantine-only cleanup completed; deletion remains blocked; status responsiveness still requires separate diagnosis |
 | YAML reconciliation | repo IaC edit | yes | review required before deploy |
 | Buyer-facing pilot kit | documentation | yes | claim review required |
 

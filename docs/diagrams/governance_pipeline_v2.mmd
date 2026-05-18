@@ -1,11 +1,12 @@
 flowchart TB
+  %% [HOLD:INTERNAL-DIAGRAM] Governance pipeline source. Not approved for external publication.
   command[Command Envelope]
   auth[Auth]
   policy[Policy]
   risk[Risk]
   gate{Decision Gate}
   blocked[BLOCK<br/>Human Approval Required]
-  execute[Execute]
+  execute[Approved Action]
   audit[Log]
   sign[Sign]
 

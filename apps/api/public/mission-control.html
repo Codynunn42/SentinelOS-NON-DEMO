@@ -703,7 +703,7 @@
       <div>
         <p class="eyebrow">SentinelOS</p>
         <h1>Mission Control</h1>
-        <p class="subtitle">Live operating surface for learning state, Sentinel Analysis, decisions, and human approval gates.</p>
+        <p class="subtitle">Operator surface for learning state, Sentinel Analysis, decisions, and human approval gates.</p>
       </div>
       <div class="status-strip">
         <span id="connectionChip" class="chip warn">Disconnected</span>
@@ -727,7 +727,7 @@
 
     <section id="pipelineSection" class="panel pipeline-section">
       <div class="panel-head pipeline-head">
-        <h2>Execution Pipeline</h2>
+        <h2>Governed Workflow Pipeline</h2>
         <span id="pipelineChip" class="chip">idle</span>
       </div>
       <p id="stageLabel" class="pipeline-stage-label">Current Stage: —</p>
@@ -754,7 +754,7 @@
           </label>
           <div class="row-actions" style="justify-content:flex-start">
             <button id="runWorkflowButton" type="button">Initialize Workflow</button>
-            <button id="executeWorkflowButton" class="secondary" type="button">Attempt Blocked Step</button>
+            <button id="executeWorkflowButton" class="secondary" type="button">Test Approval Gate</button>
           </div>
           <pre id="commandOutput" class="output-box">No command run yet.</pre>
         </div>
@@ -2019,7 +2019,7 @@
 
       const list = document.getElementById('traceList');
       if (!traceItems.length) {
-        list.innerHTML = '<p class="empty">No execution traces recorded yet.</p>';
+        list.innerHTML = '<p class="empty">No governed workflow traces recorded yet.</p>';
         return payload;
       }
 

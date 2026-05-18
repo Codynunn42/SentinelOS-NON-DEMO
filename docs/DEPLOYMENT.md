@@ -4,19 +4,53 @@
 This guide walks through completing Azure deployment for the Sentinel API.
 
 ## Current Live Deployment
-As of 2026-04-29:
 
 - Container App: `ca-nc-dev-sentinel`
-- active revision: `ca-nc-dev-sentinel--approval-access-682b4cb`
-- image: `acrncdevsentinel.azurecr.io/sentinelos:approval-access-682b4cb`
 - live URL: `https://ca-nc-dev-sentinel.calmhill-388e1d39.eastus2.azurecontainerapps.io/`
 - live proof URL: `https://ca-nc-dev-sentinel.calmhill-388e1d39.eastus2.azurecontainerapps.io/proof`
 - health URL: `https://ca-nc-dev-sentinel.calmhill-388e1d39.eastus2.azurecontainerapps.io/health`
 - ingress target port: `80`
 - container port: `80`
 - health probes: HTTP `/health` on port `80`
-- traffic: 100 percent to `ca-nc-dev-sentinel--approval-access-682b4cb`
 - Log Analytics workspace: `log-nc-dev-sentinel`
+
+Revision and image values are volatile runtime truth. Do not treat this static guide as the revision or image authority.
+
+Current runtime evidence lives in:
+
+- `docs/AZURE_CONTAINER_APP_SANITIZED_EXPORT_2026-05-18.md`
+- `docs/GENERATED_RUNTIME_MAP_2026-05-17.md`
+- `docs/INFRASTRUCTURE_TRUTH_RECONCILIATION_2026-05-15.md`
+
+Last full live export evidence:
+
+```txt
+document: docs/INFRASTRUCTURE_TRUTH_RECONCILIATION_2026-05-15.md
+revision: ca-nc-dev-sentinel--phase1-approve-0645
+image: acrncdevsentinel.azurecr.io/sentinel-api:phase1-approval-continuity-3e7308a-20260513-0645
+targetPort: 80
+health route: /health
+```
+
+Most recent bridge evidence:
+
+```txt
+document: docs/GENERATED_RUNTIME_MAP_2026-05-17.md
+bridge: https://nunncorporation.com/api/status
+status: connected
+backend.status: ok
+backend.mode: non-demo
+backend.database: enabled
+checkedAt: 2026-05-18T00:11:44.448Z
+```
+
+Fresh sanitized Azure export status:
+
+```txt
+A4.3R completed_with_fresh_sanitized_export.
+A4.2 completed_repo_local_yaml_reconciliation.
+Deployment of the reconciled YAML remains unapproved and requires separate value/binding review.
+```
 
 Do not use `ca-sentinelos-proof` as the current shareable proof target. It appears to be an older health-only host and is not the current release path.
 

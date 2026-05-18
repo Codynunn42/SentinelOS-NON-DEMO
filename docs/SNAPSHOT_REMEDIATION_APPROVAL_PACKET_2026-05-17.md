@@ -179,11 +179,12 @@ Solution options:
 2. `A3.2` - Compare `.git` internals and refs between degraded repo and fresh clone. Status: `completed`.
 3. `A3.3` - Produce cleanup boundary report. Status: `completed`.
 4. `A3.4` - Only after approval, quarantine duplicate/stale Git internals if confirmed safe. Status: `completed_with_residual_nested_duplicate`.
+5. `A3.5 / A3.4R` - Optional residual nested duplicate quarantine-only cleanup. Status: `completed_move_only`.
 
 Recommended approval:
 
 ```txt
-A3.1, A3.2, A3.3, and A3.4 completed within approved candidate scope. Destructive deletion remains blocked. One residual nested duplicate remains outside approved scope.
+A3.1, A3.2, A3.3, A3.4, and A3.5/A3.4R completed within approved candidate scope. Destructive deletion remains blocked. No non-quarantined suffix-numbered Git-internal artifacts are currently reported by the active suffix scan.
 ```
 
 Reason:
@@ -213,6 +214,16 @@ A3.4 output:
 
 - `docs/NUNNCORP_GLOBAL_MONO_QUARANTINE_COMPLETION_2026-05-17.md`
 
+A3.5/A3.4R residual diagnostic and completion evidence:
+
+- `docs/NUNNCORP_GLOBAL_MONO_RESIDUAL_DUPLICATE_DIAGNOSTIC_2026-05-17.md`
+
+Residual cleanup result:
+
+```txt
+Moved .git/logs/refs/remotes/origin/HEAD 2 into the existing cleanup quarantine. No deletion.
+```
+
 ### A4 - Deploy-Authoritative IaC
 
 | Field | Value |
@@ -231,9 +242,9 @@ azure/container-app.yaml still does not match live runtime posture.
 
 Solution options:
 
-1. `A4.1` - Mark `azure/container-app.yaml` explicitly scaffold-only and non-deployable.
-2. `A4.2` - Reconcile YAML to live runtime truth and make it the future deploy-authoritative manifest.
-3. `A4.3` - Create generated runtime map as authoritative evidence, leaving YAML scaffold-only until IaC strategy is chosen.
+1. `A4.1` - Mark `azure/container-app.yaml` explicitly scaffold-only and non-deployable. Status: `completed`.
+2. `A4.2` - Reconcile YAML to live runtime truth and make it the future deploy-authoritative manifest. Status: `completed_repo_local_reconciliation`.
+3. `A4.3` - Create generated runtime map as authoritative evidence, leaving YAML scaffold-only until IaC strategy is chosen. Status: `completed_with_evidence_gap`.
 
 Recommended approval:
 
@@ -252,6 +263,46 @@ az containerapp show --name ca-nc-dev-sentinel --resource-group rg-nc-dev-sentin
 ```
 
 No deployment authorized from this packet.
+
+A4.3 output:
+
+- `docs/GENERATED_RUNTIME_MAP_2026-05-17.md`
+
+Sentinel AI remediation suggestions captured:
+
+```txt
+R-A4-1 - A4.3R fresh sanitized Azure export completed on 2026-05-18; required before YAML reconciliation
+R-A4-2 - approve A4.1 to mark azure/container-app.yaml scaffold-only/non-deployable
+R-A4-3 - approve A5.2/A5.3 to move volatile revision/image truth out of static docs
+R-A4-4 - keep A4.2 held until fresh export evidence exists
+```
+
+A4.3R status:
+
+```txt
+completed_with_fresh_sanitized_export
+```
+
+Blocked evidence collection:
+
+```txt
+az containerapp show: permission hook denied escalated read-only Azure CLI command
+direct Container App health: permission hook denied escalated curl command
+public bridge refresh: sandbox DNS resolution failed when run non-escalated
+```
+
+A4 remediation governance pass:
+
+- `docs/A4_REMEDIATION_GOVERNANCE_PASS_2026-05-17.md`
+
+Approved sub-issue outcomes:
+
+```txt
+R-A4-1 / A4.3R - completed_with_fresh_sanitized_export; A4.2 completed repo-local reconciliation
+R-A4-2 / A4.1 - completed; YAML marked scaffold-only/non-deployable
+R-A4-3 / A5.2/A5.3 - completed; volatile revision/image truth moved to runtime-map evidence
+R-A4-4 / A4.2 - completed_repo_local_reconciliation
+```
 
 ### A5 - Deployment Docs Revision/Image Drift
 
@@ -272,8 +323,8 @@ docs/DEPLOYMENT.md has stale revision/image details relative to verified runtime
 Solution options:
 
 1. `A5.1` - Update `docs/DEPLOYMENT.md` with current runtime revision/image from verified export.
-2. `A5.2` - Remove volatile revision/image details from static docs and link to generated runtime map.
-3. `A5.3` - Add a "last verified" section with command and timestamp.
+2. `A5.2` - Remove volatile revision/image details from static docs and link to generated runtime map. Status: `completed`.
+3. `A5.3` - Add a "last verified" section with command and timestamp. Status: `completed`.
 
 Recommended approval:
 
@@ -303,9 +354,9 @@ first remediation pass is applied, but deeper public label checks remain.
 
 Solution options:
 
-1. `A6.1` - Inspect public HTML/route labels for unqualified execution, control, autonomy, production, and government claims.
-2. `A6.2` - Produce a label remediation diff for operator review.
-3. `A6.3` - Re-run buyer-facing copy against `APPROVED_VOCABULARY_DICTIONARY.md`.
+1. `A6.1` - Inspect public HTML/route labels for unqualified execution, control, autonomy, production, and government claims. Status: `completed`.
+2. `A6.2` - Produce a label remediation diff for operator review. Status: `completed`.
+3. `A6.3` - Re-run buyer-facing copy against `APPROVED_VOCABULARY_DICTIONARY.md`. Status: `completed`.
 
 Recommended approval:
 
@@ -316,6 +367,25 @@ Approve A6.1 and A6.2.
 Reason:
 
 This continues semantic containment without external publication.
+
+A6.1/A6.2 output:
+
+- `docs/PUBLIC_LABEL_REMEDIATION_A6_2026-05-17.md`
+
+A6.3 output:
+
+- `docs/PUBLIC_VOCABULARY_REVIEW_A6_3_2026-05-17.md`
+
+Sentinel AI sub-issues noted:
+
+```txt
+GI-A6-1 - internal implementation terms should not be renamed during public label remediation
+GI-A6-2 - STATUS_REPORT.md needs separate archival/current-truth review before external use
+GI-A6-3 - operational-upgrade.html should be demo/review-labeled before buyer use
+GI-A6.3-1 - visible buyer/public copy now avoids the targeted high-risk phrases
+GI-A6.3-2 - technical execution terms remain in implementation contracts and should not be casually renamed
+GI-A6.3-3 - Mission Control needs a separate UI semantics pass before buyer use
+```
 
 ### A7 - Buyer-Facing Pilot Kit
 
@@ -335,19 +405,37 @@ operational package is internal-ready but buyer-facing use requires trimming.
 
 Solution options:
 
-1. `A7.1` - Create internal draft `PILOT_ONBOARDING_KIT_2026-05-17.md`.
-2. `A7.2` - Remove internal risk language, secret-risk details, and repo-internal diagnostics.
-3. `A7.3` - Include only verified proof surfaces, controlled claims, and onboarding next steps.
+1. `A7.1` - Create internal draft `PILOT_ONBOARDING_KIT_2026-05-17.md`. Status: `completed`.
+2. `A7.2` - Remove internal risk language, secret-risk details, and repo-internal diagnostics. Status: `completed_as_external_review_draft`.
+3. `A7.3` - Include only verified proof surfaces, controlled claims, and onboarding next steps. Status: `completed_as_external_review_draft`.
 
-Recommended approval:
+Approved action:
 
 ```txt
-Approve A7.1 as internal draft only.
+A7.1 approved and completed as internal draft only.
 ```
 
 Reason:
 
 This prepares buyer material without external publication.
+
+A7.1 output:
+
+- `docs/PILOT_ONBOARDING_KIT_2026-05-17.md`
+
+A7.2/A7.3 output:
+
+- `docs/PILOT_ONBOARDING_EXTERNAL_REVIEW_DRAFT_2026-05-17.md`
+
+Sentinel AI sub-issues noted:
+
+```txt
+GI-A7-1 - keep base URL conditional until A4.3R succeeds or URL posture is explicitly accepted
+GI-A7-2 - OwnerFi API spec can keep technical execute terms, but external use must preserve approval-bound context
+GI-A7-3 - onboarding kit is not a pilot boundary definition; tenant activation needs separate approval
+GI-A7.2-1 - external-review draft removes repo diagnostics and secret/configuration details
+GI-A7.3-1 - external-review draft stays proof-surface only and does not activate pilot use
+```
 
 ### A8 - Architecture Diagram Bundle
 
@@ -367,19 +455,40 @@ diagram set should be produced from existing Mermaid/docs without expanding syst
 
 Solution options:
 
-1. `A8.1` - Inventory existing Mermaid diagrams.
-2. `A8.2` - Create sanitized architecture diagram index.
-3. `A8.3` - Label diagrams as internal, buyer-safe, or held.
+1. `A8.1` - Inventory existing Mermaid diagrams. Status: `completed`.
+2. `A8.2` - Create sanitized architecture diagram index. Status: `completed`.
+3. `A8.3` - Label diagrams as internal, buyer-safe, or held. Status: `completed`.
+4. `A8.4` - Remediate execution-oriented diagram labels. Status: `completed`.
 
-Recommended approval:
+Approved action:
 
 ```txt
-Approve A8.1 and A8.2.
+A8.1 and A8.2 approved and completed as internal packaging only.
 ```
 
 Reason:
 
 This improves packaging without creating new system claims.
+
+A8.1/A8.2 output:
+
+- `docs/ARCHITECTURE_DIAGRAM_INDEX_2026-05-17.md`
+
+A8.3/A8.4 output:
+
+- `docs/diagrams/sentinelos_architecture_v2.mmd`
+- `docs/diagrams/faceplane_docking_v2.mmd`
+- `docs/diagrams/governance_pipeline_v2.mmd`
+- `docs/ARCHITECTURE_DIAGRAM_INDEX_2026-05-17.md`
+
+Sentinel AI sub-issues noted:
+
+```txt
+GI-A8-1 - existing diagram sources are small and controllable; no broad diagram sprawl detected
+GI-A8-2 - two diagrams contained unqualified execution wording; labels remediated, external use still held
+GI-A8-3 - one diagram contained internal acronyms; labels expanded, external use still requires claim review
+GI-A8-4 - no public-approved diagram set exists yet
+```
 
 ### A9 - Held Governance Standards Review
 
@@ -399,41 +508,99 @@ governance standards are drafted/held and need review before promotion or operat
 
 Solution options:
 
-1. `A9.1` - Create a governance review checklist for all held standards.
-2. `A9.2` - Validate invariants across the stack.
-3. `A9.3` - Produce promotion blockers and required evidence.
+1. `A9.1` - Create a governance review checklist for all held standards. Status: `completed`.
+2. `A9.2` - Validate invariants across the stack. Status: `completed`.
+3. `A9.3` - Produce promotion blockers and required evidence. Status: `completed`.
 
-Recommended approval:
+Approved action:
 
 ```txt
-Approve A9.1 and A9.2 only.
+A9.1, A9.2, and A9.3 approved and completed as internal governance QA only.
 ```
 
 Reason:
 
 This preserves draft containment while moving toward formal review.
 
+A9.1/A9.2/A9.3 output:
+
+- `docs/GOVERNANCE_STANDARDS_REVIEW_CHECKLIST_2026-05-17.md`
+
+Cross-board execution pass:
+
+- `docs/SENTINEL_APPROVAL_BOARD_EXECUTION_PASS_2026-05-17.md`
+
+Template application pass:
+
+- `docs/SNAPSHOT_APPROVAL_TEMPLATE_APPLICATION_2026-05-17.md`
+
+Sentinel AI sub-issues noted:
+
+```txt
+GI-A9-1 - root authority review remains incomplete; held standards should not be promoted
+GI-A9-2 - lifecycle, inheritance, and audit registers are still missing
+GI-A9-3 - vocabulary pass remains required before external use of public/buyer materials
+GI-A9-4 - diagram labels require a separate remediation pass before buyer/public use
+GI-A9-5 - A4.3R runtime export evidence gap still blocks deploy-authoritative reconciliation
+```
+
 ## Approval Request Summary
 
 Recommended approvals now:
 
 ```txt
-A1.2 - staged worktree checkpoint by artifact class
-A2.1 - redacted secret inventory report
-A3.1/A3.2 - fresh clone comparison for nunncorp-global-mono
-A4.3 - generated runtime map as authoritative evidence
-A6.1/A6.2 - deeper public label check and remediation diff
-A7.1 - internal pilot onboarding kit draft
-A8.1/A8.2 - architecture diagram inventory and index
-A9.1/A9.2 - governance standards review checklist and invariant validation
+None. A4.2 is complete repo-locally; deployment remains unapproved.
 ```
+
+A10.1/A10.2/A10.3 completed:
+
+- `docs/governance/LIFECYCLE_REGISTER_TEMPLATE.md`
+- `docs/governance/POLICY_INHERITANCE_REGISTER_TEMPLATE.md`
+- `docs/governance/AUDIT_EVENT_REGISTER_TEMPLATE.md`
+
+A11.1 completed:
+
+- `docs/governance/PILOT_BOUNDARY_DEFINITION_TEMPLATE.md`
+
+A12.1 completed:
+
+- `docs/governance/LIFECYCLE_REGISTER_SNAPSHOT_2026-05-17.md`
+- `docs/governance/POLICY_INHERITANCE_REGISTER_SNAPSHOT_2026-05-17.md`
+- `docs/governance/AUDIT_EVENT_REGISTER_SNAPSHOT_2026-05-17.md`
+
+A13.1 completed:
+
+- `docs/governance/GOVERNANCE_MATURITY_MODEL_TEMPLATE.md`
+
+A4.3R completed:
+
+- `docs/AZURE_CONTAINER_APP_SANITIZED_EXPORT_2026-05-18.md`
+
+A4.2 completed:
+
+- `azure/container-app.yaml`
+- `docs/A4_2_YAML_RECONCILIATION_COMPLETION_2026-05-18.md`
 
 Hold for later approval:
 
 ```txt
 A2.2 - actual secret rotation completed
 A3.4 - quarantine-only cleanup completed within approved scope; destructive deletion remains blocked
-A4.2 - deploy-authoritative YAML reconciliation
+A4.3 - generated runtime map completed with evidence gap
+A4.1 - scaffold-only/non-deployable marker completed
+A5.2/A5.3 - volatile deployment truth moved out of static docs
+A6.1/A6.2 - public label remediation completed; no external publication
+A6.3 - second vocabulary pass completed; no external publication
+A7.1 - internal pilot onboarding kit draft completed; no external publication
+A7.2/A7.3 - external-review pilot draft completed; no external publication
+A8.1/A8.2 - architecture diagram inventory and sanitized index completed; no external publication
+A8.3/A8.4 - diagram source labels remediated; rendered/public packet not approved
+A9.1/A9.2/A9.3 - governance standards review checklist, invariant validation, promotion blockers, and evidence requirements completed; no promotion
+A10.1/A10.2/A10.3 - lifecycle, inheritance, and audit register templates completed; no activation
+A11.1 - pilot boundary definition template completed; no pilot activation
+A12.1 - first populated lifecycle/inheritance/audit register snapshots completed; no promotion or activation
+A13.1 - governance maturity model template completed; no certification, promotion, runtime activation, or publication
+A4.2 - deploy-authoritative YAML reconciliation completed repo-locally; deployment remains unapproved
 external publication of buyer-facing materials
 promotion of any held governance standard
 ```
@@ -442,12 +609,22 @@ promotion of any held governance standard
 
 The snapshot issues are ready for controlled approval sequencing.
 
-The safest next executable approval is:
+The required access-dependent approval is now complete:
 
 ```txt
-A1.2 - staged worktree checkpoint by artifact class
+A4.3R - fresh sanitized Azure Container App export, completed_with_fresh_sanitized_export
 ```
 
 Reason:
 
-The active worktree is the continuity boundary that protects every subsequent remediation.
+The generated runtime map found an evidence gap. A4.3R now supplies fresh sanitized runtime evidence without secret values.
+
+The next approval is not deployment by default. If continuing in this lane, the next approval should be:
+
+```txt
+deployment value/binding review for reconciled container-app.yaml
+```
+
+Reason:
+
+A4.2 is complete as repo-local YAML reconciliation. Applying the YAML would mutate runtime and still requires separate approval.

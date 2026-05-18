@@ -7,26 +7,26 @@
 ---
 
 ## Overview
-SentinelOS NON-DEMO is the client-facing readiness repository for the system after demo validation. This repository is intended to mature along the governed production-readiness path where clients, operators, and stakeholders access SentinelOS capabilities beyond the demo lane.
+SentinelOS NON-DEMO is the client-facing readiness repository for the system after demo validation. This repository is intended to mature along the governed readiness path where clients, operators, and stakeholders review SentinelOS capabilities beyond the demo lane.
 
-This repository is not intended to be a temporary proof shell. It is the starting point for the operational proof surface that clients will use once the platform transitions from demonstration into controlled deployment.
+This repository is not intended to be a temporary proof shell. It is the starting point for the operational proof surface that clients can review as the platform moves from demonstration toward controlled, approval-aware deployment.
 
 ## Mission
-SentinelOS is designed to support command-driven, human-authorized execution with governance, accountability, and verification. The NON-DEMO repository exists to carry that model into a client-readiness environment.
+SentinelOS is designed to support command-driven, human-authorized workflows with governance, accountability, and verification. The NON-DEMO repository exists to carry that model into a client-readiness environment.
 
 Core intent:
 - provide a trustworthy client entry point
 - support governed operational workflows
 - maintain clear deployment and security posture
 - document readiness, controls, and change direction
-- establish a stable foundation for production buildout
+- establish a stable foundation for readiness buildout
 
 ## Client Use Direction
 This is the repository that should back the next stage of system use after demo adoption.
 
 Target outcomes:
 - clients access the operational proof surface
-- workflows move from demo proof to controlled execution
+- workflows move from demo proof to human-authorized governed workflow review
 - documentation supports stakeholder trust
 - repo discipline reflects enterprise expectations
 - deployment, governance, and security posture remain visible
@@ -68,8 +68,8 @@ Reference:
 Phase 2 framing:
 
 ```text
-Type -> Intent -> Governance -> Execution
-Click -> Intent -> Approval -> Execution
+Type -> Intent -> Governance -> Approved Action
+Click -> Intent -> Approval -> Governed Result
 Scan -> Intake -> Review -> Governed Action
 ```
 
@@ -95,8 +95,8 @@ STATUS_REPORT.md
 ## Governance Direction
 This repository should remain aligned with Sentinel operating principles:
 - secure by default
-- auditable execution
-- production-first discipline
+- auditable workflow evidence
+- production-readiness discipline
 - role-aware access control
 - visible operational trust signals
 - controlled change management
