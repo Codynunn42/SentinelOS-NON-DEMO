@@ -75,6 +75,7 @@ const { TIERS } = require('../sentinel/src/tiers/tierRegistry');
 const PORT = process.env.PORT || 3000;
 const LANDING_PAGE_PATH = path.join(__dirname, 'public', 'index.html');
 const PROOF_PAGE_PATH = path.join(__dirname, 'public', 'proof.html');
+const CONTRACT_RECLAMATION_PAGE_PATH = path.join(__dirname, 'public', 'contract-reclamation.html');
 const MISSION_CONTROL_PATH = path.join(__dirname, 'public', 'mission-control.html');
 const OPERATOR_ESCALATIONS_PATH = path.join(__dirname, 'public', 'operator-escalations.html');
 const STRIPE_CHECKOUT_PAGE_PATH = path.join(__dirname, 'public', 'stripe-checkout.html');
@@ -1388,6 +1389,11 @@ const server = http.createServer(async (req, res) => {
   if (pathname === '/proof' && req.method === 'GET') {
     auditSurfaceView(req, requestUrl, pathname, 'proof');
     return sendHtmlFile(res, PROOF_PAGE_PATH);
+  }
+
+  if ((pathname === '/contract-reclamation' || pathname === '/contract-reclamation.html') && req.method === 'GET') {
+    auditSurfaceView(req, requestUrl, pathname, 'contract-reclamation');
+    return sendHtmlFile(res, CONTRACT_RECLAMATION_PAGE_PATH);
   }
 
   if (pathname === '/mission-control' && req.method === 'GET') {

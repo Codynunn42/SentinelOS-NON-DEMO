@@ -8,6 +8,43 @@ This document defines how SentinelOS moves from governed decisions into governed
 
 Mission Control and future clients do not decide or execute directly. They request action from Sentinel Core. Sentinel Core verifies the decision, approval state, policy posture, and audit context before execution.
 
+## Current Governance Status
+
+```txt
+[HOLD:AUTHORITY-AWARE-EXECUTION-ARCHITECTURE]
+```
+
+This document is operating doctrine and execution architecture guidance. It does not authorize implementation of `/execute`, runtime mutation, deployment, direct env value restoration, secret access, external publication, endpoint release, pilot activation, tenant activation, held-standard promotion, push, tool grants, certification claims, autonomous execution, or destructive cleanup.
+
+## Authority Doctrine Integration
+
+SentinelOS execution architecture now inherits the authority-engineering doctrine:
+
+```txt
+Operational readiness does not come from review completion.
+Authority is never inherited.
+Authority is continuously re-proven.
+Runtime returns to Zero-Baseline.
+Capability exposure is not execution authority.
+Governance progression is not runtime activation.
+Faceplates define context, not authority.
+GaaS validates policy. OS Core enforces containment.
+Every elevation decays automatically.
+```
+
+These invariants supersede any interpretation that a signed decision, approved review, visible interface, available tool, or prepared command envelope independently authorizes execution.
+
+## Readiness Separation
+
+| Domain | Meaning | Does Not Mean |
+| --- | --- | --- |
+| Governance Readiness | doctrine, documentation, review, lifecycle, and inheritance maturity | runtime authority |
+| Operational Readiness | runtime evidence, configuration evidence, rollback posture, and verification planning | execution authority |
+| Authority Readiness | validated progression through structural, compliance, and deterministic trust gates | automatic execution |
+| Execution Readiness | bounded action may proceed after explicit operational approval | broad or persistent authority |
+
+SentinelOS must not collapse these into a generic production-ready claim.
+
 ## Product Boundary
 
 Current SentinelOS already has:
@@ -20,13 +57,13 @@ Current SentinelOS already has:
 - persistent approvals
 - Mission Control visibility
 
-The next product boundary is:
+The proposed future product boundary is:
 
 ```txt
 POST /execute
 ```
 
-`/execute` is where Sentinel becomes a governed action system instead of only a governed decision system.
+`/execute` would be where Sentinel becomes a governed action system instead of only a governed decision system. This endpoint is not authorized by this document. It remains subject to the Runtime Boundary Specification, Disciplined Authority Progression Standard, Zero-Baseline Runtime Model, Ephemeral Authority Token Standard, GaaS Validation and Scoping Standard, Tool Access Governance Standard, Audit Traceability Standard, and explicit implementation approval.
 
 ## Canonical Runtime Flow
 
@@ -39,8 +76,14 @@ Client app
 -> verifyDecision()
 -> check approval state
 -> run policy enforcement
+-> validate structural gate
+-> validate compliance gate
+-> validate deterministic trust gate
+-> issue bounded ephemeral authority if explicitly approved
 -> execute only if allowed
 -> persist audit event
+-> decay authority
+-> return runtime to Zero-Baseline
 -> return receipt
 ```
 
@@ -50,7 +93,13 @@ Client app
 No valid signed decision -> no execution.
 ```
 
-This rule is not optional. It is the kernel boundary for SentinelOS.
+This rule is necessary but not sufficient. It is one kernel boundary for SentinelOS, but the current authority doctrine also requires explicit approval posture, policy enforcement, deterministic trust checks, audit linkage, bounded authority, and automatic decay.
+
+Expanded rule:
+
+```txt
+No current authority progression -> no execution.
+```
 
 ## `/execute` Contract
 
@@ -124,7 +173,7 @@ return 403
 
 ### 3. Decision Posture
 
-Execution is allowed only when:
+Older proposed execution posture:
 
 ```txt
 decision.decision = allow
@@ -132,13 +181,32 @@ executionMode = auto
 approvalRequired = false
 ```
 
-Or when an approval is required:
+Current interpretation:
+
+```txt
+This posture is not sufficient by itself.
+```
+
+Even when a decision says `allow`, execution still requires:
+
+- current approval state
+- policy enforcement
+- structural validation
+- compliance validation
+- deterministic trust validation
+- audit linkage
+- bounded authority
+- automatic decay
+
+When an approval is required:
 
 ```txt
 approvalRequired = true
 approvalId exists
 approval.status = approved
 ```
+
+Approval status is still not runtime authority by itself. It is one evidence input into the authority progression path.
 
 ### 4. Policy Enforcement
 
@@ -151,6 +219,12 @@ Policy can still block:
 - unsafe action
 - missing approval
 - stale decision
+- stale approval
+- missing rollback posture
+- missing verification plan
+- invalid authority token
+- degraded audit state
+- failed Zero-Baseline return posture
 
 ### 5. Audit
 
@@ -190,10 +264,34 @@ Future clients:
 All clients must use the same system boundary:
 
 ```txt
-request -> signed decision -> policy -> execution
+request -> signed decision -> policy -> authority progression -> bounded execution -> decay -> audit receipt
 ```
 
-## Implementation Plan
+## Zero-Baseline Runtime Posture
+
+SentinelOS runtime should rest at:
+
+```txt
+zero trust
+zero authority
+zero persistence
+```
+
+until a specific action passes authority progression.
+
+No client, faceplate, tool, memory state, registry entry, or prior approval may carry authority forward into the next operation.
+
+## Faceplate And GaaS Boundary
+
+Faceplates provide context. They do not grant authority.
+
+GaaS validates and scopes requested capability. It does not grant execution authority by itself.
+
+The OS Core remains neutral and enforces deterministic containment.
+
+## Future Held Implementation Outline
+
+This outline is not approved for implementation. It identifies future sequencing only after explicit implementation approval, runtime readiness evidence, command-envelope review, tool governance review, audit requirements, rollback posture, and zero-baseline authority handling are complete.
 
 ### Phase 1: Minimal `/execute`
 
@@ -226,6 +324,8 @@ request -> signed decision -> policy -> execution
 - Add write actions only after approval and policy enforcement are proven.
 
 ## Near-Term Demo
+
+This demo story is conceptual and bounded by the same held implementation posture.
 
 Demo story:
 

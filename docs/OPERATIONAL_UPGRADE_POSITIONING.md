@@ -129,3 +129,24 @@ The strongest positioning is:
 
 This is not contract recovery.
 It is operational evolution.
+
+## Domain Faceplane Boundary
+
+Contract-specific intelligence should live as a separate governed faceplane collection, not inside the SentinelOS core.
+
+Canonical architecture note:
+
+```txt
+docs/CONTRACT_RECLAMATION_FACEPLANE_ARCHITECTURE_2026-05-21.md
+```
+
+Boundary:
+
+```txt
+Faceplanes = domain intelligence
+SentinelOS = governance + execution control
+```
+
+The Contract Reclamation lane should be positioned as contract-state reconstruction, operational governance, evidence intelligence, and execution readiness.
+
+It must not be positioned as legal advice, legal certainty, autonomous legal interpretation, or contract recovery.
