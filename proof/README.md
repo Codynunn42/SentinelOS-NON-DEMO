@@ -14,10 +14,12 @@ Minimum threshold:
 health_200: required
 proof_200: required
 no_key_audit_401: required
-governance_preflight_verified: required
+clean_no_key_proof_rehearsal: required
 buyer_safe_language_confirmed: required
 publication_share_approval: required
 ```
+
+The proof threshold is intentionally narrow: `/health` 200, `/proof` 200, no-key `/v1/audit` 401, and a clean no-key proof rehearsal. Passing this threshold supports review confidence only and does not create runtime activation, merge, publication, or share authority.
 
 ## Freshness
 

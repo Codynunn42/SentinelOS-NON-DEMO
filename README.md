@@ -2,9 +2,11 @@
 
 **COMM:** Sentinel AI by Cody Nunn | Nunn Cloud
 
-SentinelOS is a governed operational runtime focused on directional integrity, bounded execution, legitimacy sequencing, constitutional operational cadence, trust-preserving governance, and proof-based operational continuity.
+SentinelOS is presented here as a governed operational runtime model focused on directional integrity, bounded execution, legitimacy sequencing, constitutional operational cadence, trust-preserving governance, and proof-based operational continuity.
 
 This repository is a public-facing proof and explanation surface. It is meant to show how SentinelOS is framed, governed, and verified without exposing sensitive runtime internals, privileged orchestration flows, sealed memory mechanics, tenant-private details, or internal authority packets.
+
+This public surface remains review-held. It does not imply runtime activation, broad public launch readiness, deployment authority, or expanded externalization authority.
 
 ## What SentinelOS Is
 
@@ -54,10 +56,12 @@ Required proof threshold before external use:
 health_200: required
 proof_200: required
 no_key_audit_401: required
-governance_preflight_verified: required
+clean_no_key_proof_rehearsal: required
 buyer_safe_language_confirmed: required
 publication_share_approval: required
 ```
+
+These checks confirm a bounded proof posture only. They do not create runtime activation, merge authority, publication authority, or broader external claims.
 
 ## What Is Not Being Claimed
 
