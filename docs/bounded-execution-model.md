@@ -1,50 +1,31 @@
 # Bounded Execution Model
 
-**COMM:** Sentinel AI by Cody Nunn | Nunn Cloud  
-**Mode:** bounded public proof surface scaffold  
-**Selected Action:** `review_public_surface_scaffold`  
-**Posture:** bounded execution scaffold prepared; execution authority remains held
+**COMM:** Sentinel AI by Cody Nunn | Nunn Cloud
 
-## Artifact Decision
+SentinelOS is built around bounded execution: execution-sensitive movement must be scoped, governed, and traceable before it can be treated as legitimate.
+
+## Execution Boundary
 
 ```txt
-[KEEP:BOUNDED-EXECUTION-MODEL-SCAFFOLD]
+review != approval
+approval != execution
+evidence != authority
+memory != current truth
 ```
 
-## Purpose
+## Model
 
-The bounded execution model explains that SentinelOS is represented publicly through governed review, evidence discipline, and hold states. It frames progression as bounded and review-led rather than as an activated runtime capability.
+SentinelOS separates operational movement into controlled layers:
 
-## Public Model
+- review-only analysis
+- planning packets
+- approval gates
+- governed command paths
+- audit and receipt visibility
+- post-action reconciliation
 
-- keep actions inside defined review boundaries
-- require observable evidence before deeper expansion
-- preserve blocked or held states when evidence is incomplete
-- avoid exporting claims that exceed the current reviewed surface
+This separation prevents analysis, evidence, or historical context from silently becoming execution authority.
 
-## Hold and Review Discipline
+## Public Claim Boundary
 
-The public surface preserves hold states for:
-
-- deployment
-- runtime mutation
-- broad announcement
-- pilot activation
-- billing and funnel activation
-- memory runtime activation
-- external distribution beyond reviewed proof scope
-
-## Current Surface Status
-
-```yaml
-bounded_execution_status:
-  scaffolded: true
-  review_lane: public_surface_pr_review_or_hold
-  proof_state: reviewed_refresh_pending
-  authority_created: false
-  execution_authority: false
-```
-
-## Non-Authorization
-
-This bounded execution model scaffold does not authorize runtime mutation, deployment, uncontrolled execution, merge, public distribution, or new external capability claims.
+The public claim is bounded: SentinelOS demonstrates governance and proof discipline around operational workflows. It does not claim unbounded autonomy, unrestricted memory runtime, or fully automated execution without governance.

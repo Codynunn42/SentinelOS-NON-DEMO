@@ -1,63 +1,32 @@
 # Public Governance Overview
 
-**COMM:** Sentinel AI by Cody Nunn | Nunn Cloud  
-**Mode:** bounded public proof surface scaffold  
-**Selected Action:** `review_public_surface_scaffold`  
-**Posture:** public governance scaffold prepared; merge, broad announcement, deployment, and runtime mutation remain held
+**COMM:** Sentinel AI by Cody Nunn | Nunn Cloud
 
-## Artifact Decision
+SentinelOS treats governance as a pre-execution control, not a post-execution explanation.
 
-```txt
-[KEEP:PUBLIC-GOVERNANCE-OVERVIEW-SCAFFOLD]
-```
+The goal is to make operational movement visible, bounded, and accountable before a workflow can imply authority. This keeps proof, claims, execution, and externalization aligned with the current verified state of the system.
 
-## Public Positioning
+## Governance Principles
 
-This file presents the public governance framing for SentinelOS as a bounded legitimacy surface. It describes directional integrity, bounded execution, proof discipline, and review-led operational cadence without claiming runtime activation, broad deployment authority, or unsupported production readiness.
+- Governance runs before sensitive action.
+- Audit and receipts are evidence, not approval.
+- Memory and context do not create authority.
+- External sharing is a governed action.
+- Claims must match verified runtime truth.
+- Held states are operationally meaningful, not indecision.
 
-## Public Governance Principles
+## Why This Matters
 
-- preserve operational trust through review-led language
-- preserve directional integrity in public explanation
-- maintain bounded externalization and buyer-safe posture
-- prevent authority compression by separating public framing from protected internal runtime material
-- protect internal constitutional runtime logic from public exposure
+Most operational systems separate technical behavior from commercial or executive claims. SentinelOS is designed to keep those surfaces reconciled.
 
-## Public Surface Intent
+The system asks:
 
-The surface is designed to help external reviewers understand:
+- What is currently verified?
+- What authority exists?
+- What authority is explicitly held?
+- What claims are safe?
+- What must be reconciled before movement?
 
-- what SentinelOS is presenting publicly
-- how proof and governance are framed
-- what remains held, protected, and not yet authorized
+## Public Boundary
 
-## External Boundary
-
-This scaffold supports review of governance posture, proof readiness, and public coherence. It does not authorize:
-
-- deployment
-- runtime mutation
-- broad announcement
-- repository visibility changes
-- GitHub settings changes
-- merge into default branch
-- billing activation
-- funnel activation
-- pilot activation
-- memory runtime activation
-
-## Current Public Surface Status
-
-```yaml
-public_surface_status:
-  scaffolded: true
-  review_lane: public_surface_pr_review_or_hold
-  proof_state: reviewed_refresh_pending
-  authority_created: false
-  merge_authority: false
-  external_distribution_authority: false
-```
-
-## Non-Authorization
-
-This governance overview scaffold does not authorize deployment, runtime mutation, broad announcement, merge, GitHub settings change, repository visibility change, billing activation, funnel activation, pilot activation, or internal runtime exposure.
+This overview explains the governance philosophy. It does not expose internal authority mappings, tenant-private controls, privileged orchestration paths, sealed memory mechanics, or sensitive runtime internals.

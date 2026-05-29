@@ -1,42 +1,30 @@
-# Proof Surface README
+# SentinelOS Proof Notes
 
-**COMM:** Sentinel AI by Cody Nunn | Nunn Cloud  
-**Mode:** controlled proof surface scaffold  
-**Selected Action:** `review_public_surface_scaffold`  
-**Posture:** proof folder scaffold prepared; proof remains review-held and non-authoritative
+**COMM:** Sentinel AI by Cody Nunn | Nunn Cloud
 
-## Artifact Decision
+The proof surface is used to verify that SentinelOS can present a bounded business-facing proof while preserving governance and audit boundaries.
 
-```txt
-[KEEP:PROOF-README-SCAFFOLD]
-```
+## Proof Discipline
 
-## Controlled Proof Surface
+Before external use, the proof path must be refreshed against the current runtime.
 
-This directory contains the controlled proof-facing surface for SentinelOS review.
-
-The proof surface is intentionally bounded. It supports evidence review, buyer-safe explanation, and controlled refresh without granting deployment, merge, broad publication, or runtime authority.
-
-## Current Proof Posture
+Minimum threshold:
 
 ```yaml
-proof_surface_status:
-  scaffolded: true
-  proof_state: reviewed_refresh_pending
-  review_lane: public_surface_pr_review_or_hold
-  authority_created: false
-  deployment_authority: false
-  merge_authority: false
+health_200: required
+proof_200: required
+no_key_audit_401: required
+clean_no_key_proof_rehearsal: required
+buyer_safe_language_confirmed: required
+publication_share_approval: required
 ```
 
-## Required Discipline
+The proof threshold is intentionally narrow: `/health` 200, `/proof` 200, no-key `/v1/audit` 401, and a clean no-key proof rehearsal. Passing this threshold supports review confidence only and does not create runtime activation, merge, publication, or share authority.
 
-- preserve buyer-safe wording
-- keep proof evidence current
-- maintain no-key and no-secret posture
-- avoid unsupported production claims
-- keep public-facing material separated from internal runtime scope
+## Freshness
 
-## Non-Authorization
+Proof evidence is time-sensitive. A prior passing result supports internal continuity, but it does not create indefinite external claim authority.
 
-This proof folder scaffold does not authorize deployment, runtime mutation, merge, broad announcement, GitHub settings change, or external publication beyond the reviewed proof surface.
+## Claim Boundary
+
+The proof surface supports bounded operational trust. It does not claim production scaling, billing activation, funnel activation, unrestricted memory runtime, autonomous execution, legal certainty, or broad public launch readiness.

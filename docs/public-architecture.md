@@ -1,57 +1,32 @@
 # Public Architecture
 
-**COMM:** Sentinel AI by Cody Nunn | Nunn Cloud  
-**Mode:** bounded public proof surface scaffold  
-**Selected Action:** `review_public_surface_scaffold`  
-**Posture:** public architecture scaffold prepared; current public surface remains review-held
+**COMM:** Sentinel AI by Cody Nunn | Nunn Cloud
 
-## Artifact Decision
+This is a high-level public architecture view. It intentionally omits sensitive topology, internal authority mappings, privileged orchestration flows, sealed memory mechanics, tenant-private details, and implementation-specific secrets.
+
+## Layers
+
+| Layer | Public Purpose |
+| --- | --- |
+| Proof surface | Shows bounded business-facing runtime behavior |
+| Governance preflight | Blocks invalid or unauthorized movement before handlers run |
+| Audit and receipts | Preserve evidence and traceability |
+| Role and scope model | Separates read, review, approval, and execution boundaries |
+| Directional integrity | Detects bend, fork, drift, or break from the north star |
+| Externalization governance | Treats sharing as a governed action |
+| Operator cadence | Preserves controlled movement, reconciliation, and hold states |
+
+## Public Flow
 
 ```txt
-[KEEP:PUBLIC-ARCHITECTURE-SCAFFOLD]
+current truth
+  -> bounded context
+    -> governance preflight
+      -> controlled outcome
+        -> audit or receipt evidence
+          -> reconciliation
 ```
 
-## High-Level Architecture
+## Internal Boundary
 
-The public architecture presents SentinelOS as a review-held surface with three visible layers:
-
-1. public proof surface
-2. governance and language-control layer
-3. held internal execution layer
-
-This presentation preserves buyer-safe language, controls external claims, and keeps protected runtime mechanics inside reviewed internal boundaries.
-
-## Public Surface Structure
-
-- proof refresh framing
-- public governance posture
-- directional integrity explanation
-- bounded execution model
-- constitutional operational cadence
-- controlled proof surface folder
-
-## Boundary Rules
-
-The public architecture avoids exposing:
-
-- internal raw authority maps
-- protected runtime details
-- sensitive environment or secret structure
-- deployment commands
-- production capacity claims
-- unsupported release claims
-
-## Current Surface Status
-
-```yaml
-public_architecture_status:
-  scaffolded: true
-  review_lane: public_surface_pr_review_or_hold
-  proof_state: reviewed_refresh_pending
-  authority_created: false
-  external_distribution_authority: false
-```
-
-## Non-Authorization
-
-This public architecture scaffold does not authorize broad rollout, deployment, runtime mutation, or unsupported external claims.
+The public architecture describes the operating model. It does not publish protected internals or imply production activation of held capabilities.

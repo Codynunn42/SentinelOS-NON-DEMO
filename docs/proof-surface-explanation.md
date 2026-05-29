@@ -1,53 +1,41 @@
 # Proof Surface Explanation
 
-**COMM:** Sentinel AI by Cody Nunn | Nunn Cloud  
-**Mode:** bounded public proof surface scaffold  
-**Selected Action:** `review_public_surface_scaffold`  
-**Posture:** proof surface explanation scaffold prepared; fresh proof preserved
+**COMM:** Sentinel AI by Cody Nunn | Nunn Cloud
 
-## Artifact Decision
+The SentinelOS proof surface exists to make operational legitimacy observable.
 
-```txt
-[KEEP:PROOF-SURFACE-EXPLANATION-SCAFFOLD]
-```
+The proof path is designed to show that a review-held governed runtime surface can present a business-facing workflow while preserving health checks, no-key boundaries, audit protection, and bounded rehearsal behavior.
 
-## Purpose
+## Proof Expectations
 
-The proof surface explanation records how SentinelOS communicates freshness, verification, and supported claims without converting review evidence into deployment authority.
+Before external use, proof must be refreshed against the current runtime.
 
-## Public Proof Framing
-
-The public surface should represent only the claims that are supported by the current review lane:
-
-- proof freshness remains a review requirement
-- health and audit posture are part of the refresh boundary
-- no-key and blocked-state handling must remain visible when represented
-- unsupported runtime claims remain excluded from the public surface
-
-## Freshness Discipline
-
-Fresh proof must be re-checked when:
-
-- the freshness window expires
-- external meeting or share material changes
-- public claims are updated
-- runtime or deployment posture changes
-
-## Public Boundary
-
-Only supported, reviewed claims are surfaced. Sensitive data, secrets, internal topology, and unsupported production or billing assertions are excluded.
-
-## Current Surface Status
+Required checks:
 
 ```yaml
-proof_explanation_status:
-  scaffolded: true
-  proof_state: reviewed_refresh_pending
-  review_lane: public_surface_pr_review_or_hold
-  authority_created: false
-  share_authority: false
+health_200: required
+proof_200: required
+no_key_audit_401: required
+clean_no_key_proof_rehearsal: required
+buyer_safe_language_confirmed: required
+publication_share_approval: required
 ```
+
+The current recorded proof pattern is `/health` 200, `/proof` 200, no-key `/v1/audit` 401, and a clean no-key proof rehearsal. That evidence supports bounded demonstrability only; it does not activate runtime authority or external sharing authority.
+
+## Freshness Rule
+
+Proof freshness does not last indefinitely.
+
+Rerun proof checks when:
+
+- runtime changes
+- deployment changes
+- governance changes
+- claims change
+- the external meeting occurs after the freshness window
+- audience pressure increases
 
 ## Non-Authorization
 
-This proof surface explanation scaffold does not authorize merge, broad announcement, deployment, runtime mutation, billing activation, pilot activation, or broader external claims without fresh review.
+Proof confirms runtime behavior for a bounded purpose. It does not authorize publication, deployment, billing, funnel activation, pilot activation, runtime mutation, or expanded claims.
