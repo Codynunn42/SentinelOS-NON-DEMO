@@ -2,6 +2,20 @@
 
 Documentation for SentinelOS NON-DEMO.
 
+## Public Surface Scaffold
+
+The current review-held public surface scaffold is available here:
+
+- `docs/public-governance-overview.md`
+- `docs/directional-integrity.md`
+- `docs/bounded-execution-model.md`
+- `docs/proof-surface-explanation.md`
+- `docs/constitutional-operational-cadence.md`
+- `docs/public-architecture.md`
+- `proof/README.md`
+
+This scaffold is intended to support coherent external reading, bounded public legitimacy, and proof-safe review. It preserves held-action posture and protects internal runtime material from public exposure. It does not authorize deployment, merge, runtime mutation, broad announcement, or broad externalization.
+
 ## Canonical Mapping Index
 
 This index is the current docs control map. It shows which document is canonical for each lane, the approval badge, the governance/compliance mapping, and what must happen next.
