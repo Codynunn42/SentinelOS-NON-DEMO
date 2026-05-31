@@ -53,6 +53,7 @@ This index compiles all repository documents into canonical categories based on 
 | `docs/ARIZONA_SPO_MODERNIZATION_BRIEF_LAYOUT.md` | 🚫 ROADMAP | Arizona SPO modernization brief | `[APPROVED:CONTROLLED-RELEASE]` - mark as roadmap, not active |
 | `docs/COMMERCIAL_ASSETS_2026-04-29.md` | 🚫 ROADMAP | Commercial asset positioning | `[APPROVED:CONTROLLED-RELEASE]` - mark as roadmap, not active |
 | `docs/HERGLASS_FACEPLANE_PLAN.md` | 🚫 ROADMAP | HerGlass face plane integration | Not verified in current checkout |
+| `docs/OPENAI_FACEPLANE_PLAN.md` | 🚫 ROADMAP | OpenAI face plane internal pilot plan | Internal governance lab validation |
 | `docs/OWNERFI_PILOT_API_SPEC.md` | 🚫 ROADMAP | OwnerFi pilot API specification | Pilot phase, not production |
 | `docs/PLATFORM_CONTRACT_OWNERSHIP.md` | 🚫 ROADMAP | Platform contract ownership model | Future governance expansion |
 | `docs/INVARIANTS.md` | 🚫 ROADMAP | System invariants and guarantees | Core principles, not all implemented |

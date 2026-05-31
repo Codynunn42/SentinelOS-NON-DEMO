@@ -35,6 +35,8 @@ Comprehensive index of all architectural documentation based on repo scan. Organ
 | `docs/FACEPLANE_SDK_SPEC.md` | ✅ ACTIVE | Face plane SDK specification | Contract for face plane development |
 | `apps/sentinel/src/faceplanes/sdk/facePlaneSdk.js` | ✅ ACTIVE | Face plane SDK implementation | SDK for building face planes |
 | `fixtures/faceplanes/governed-workflow-faceplane.json` | ✅ ACTIVE | Face plane fixture | Example face plane configuration |
+| `docs/HERGLASS_FACEPLANE_PLAN.md` | 🚫 ROADMAP | Phase 2 perception face plane plan | Internal R&D / deferred concept |
+| `docs/OPENAI_FACEPLANE_PLAN.md` | 🚫 ROADMAP | Internal pilot AI Services face plane plan | Internal governance lab validation |
 
 ### Docking Protocol
 
