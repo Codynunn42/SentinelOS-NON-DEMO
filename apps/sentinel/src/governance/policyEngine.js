@@ -48,7 +48,11 @@ const commandScopes = {
   'cdnlux.contract.evaluate': 'platform:admin',
   'docking.evaluate': 'platform:admin',
   'architecture.reconstruction.begin': 'platform:admin',
-  'governance.canonicalize.platform': 'platform:admin'
+  'governance.canonicalize.platform': 'platform:admin',
+  'operational.upgrade.assess': 'platform:admin',
+  'operational.upgrade.plan.prepare': 'platform:admin',
+  'contract.reclamation.assess': 'platform:admin',
+  'contract.reclamation.plan.prepare': 'platform:admin'
 };
 
 function blocked(state, riskLevel, reason, details = {}) {

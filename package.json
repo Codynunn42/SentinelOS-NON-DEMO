@@ -28,6 +28,7 @@
     "check:demo-assets-v2": "node scripts/check-demo-assets-v2.js",
     "check:faceplane-sdk": "node scripts/check-faceplane-sdk.js",
     "check:openai-faceplane": "node scripts/check-openai-faceplane.js",
+    "check:operational-upgrade": "node scripts/check-operational-upgrade-routing.js",
     "check:operator-escalation": "node scripts/check-operator-escalation.js",
     "check:ownerfi-pilot-api": "node scripts/check-ownerfi-pilot-api.js",
     "check:ownerfi-pilot-api:live": "node scripts/check-ownerfi-pilot-api-live.js",
