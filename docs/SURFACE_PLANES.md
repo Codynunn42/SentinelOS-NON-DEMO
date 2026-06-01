@@ -28,6 +28,7 @@ Each client is represented as a surface plane:
 ## Examples
 - `ownerfi` -> financing workflows
 - `hotelops` -> property workflows
+- `operational-upgrade` -> obligation and evidence alignment workflows, internal-only and runtime-held
 
 ## Current Implementation Direction
 The current repo now supports a compatibility bridge:
@@ -46,6 +47,18 @@ Both currently resolve into the same OwnerFi surface plane so existing proof flo
 Today the registry contains:
 - `ownerfi`
 - `hotelops`
+
+## Operational Upgrade Faceplane
+
+The Operational Upgrade Faceplane is defined as an internal SentinelOS faceplane pattern for preserving an existing operator motion while adding governance, evidence mapping, approval visibility, drift classification, and receipts.
+
+Current status:
+- canonical docs: `docs/OPERATIONAL_UPGRADE_POSITIONING.md`, `docs/OPERATIONAL_UPGRADE_FACEPLANE.md`
+- internal legacy alias: `contractreclamation`
+- public status: internal only
+- runtime status: not ready
+- implementation status: held
+- required next gate for code repair: `APPROVE_RUNTIME_REGISTRY_CONTRACT_REPAIR_PLAN`
 
 Future tenants should be added as new surface entries, not as separate apps or command forks.
 
