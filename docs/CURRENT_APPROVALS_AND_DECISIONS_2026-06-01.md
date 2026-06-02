@@ -75,8 +75,9 @@ active_decisions:
     later_possible_phrase: APPROVE_STAGE_AND_COMMIT_OBSERVABILITY_PACKET
     authority_created: false
   contract_reclamation_faceplane:
-    current_state: docs_only_alignment_recorded_runtime_repair_held
+    current_state: verified_local_runtime_repair_present_activation_held
     selected_action: APPROVE_CONTRACT_RECLAMATION_STANDALONE_INCUBATOR
+    runtime_reconciliation_artifact: docs/CONTRACT_RECLAMATION_ALIGNMENT_RUNTIME_DRIFT_RECONCILIATION_2026-06-01.md
     options:
       - APPROVE_RUNTIME_REGISTRY_CONTRACT_REPAIR_PLAN
       - APPROVE_FACEPLANE_SIMULATION_PLAN
@@ -151,7 +152,8 @@ active_decisions:
     reason: current_live_key_is_ownerfi_scoped_not_platform_or_sentinelos_scoped
     authority_created: false
   proof_freshness:
-    current_state: prior_fresh_proof_recorded_but_time_sensitive
+    current_state: fresh_proof_rerun_passed_2026_06_01_but_external_share_held
+    proof_artifact: docs/FRESH_PROOF_RERUN_RESULT_2026-06-01.md
     next_action_before_external_share: REQUEST_FRESH_PROOF_RERUN_BEFORE_SHARE
     authority_created: false
   managed_repository_organization:

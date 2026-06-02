@@ -42,15 +42,15 @@ processing_result:
 ```yaml
 ordered_processing_queue:
   1_microsoft_sentinel_record_acceptance:
-    status: pending_operator_decision
+    status: approved_2026_06_01
     options:
       - ACCEPT_RECORDED_DIAGNOSTIC_SETTINGS_EXECUTION_RESULT
       - HOLD_DIAGNOSTIC_SETTINGS_IMPLEMENTATION_AUTHORITY
       - REVISE_DIAGNOSTIC_SETTINGS_MANIFEST
-    why_first: determines_whether_read_only_KQL_verification_is_the_next_technical_gate
+    result: diagnostic_settings_record_accepted; read_only_KQL_verification_remains_exact_phrase_held
   2_read_only_log_analytics_verification:
-    status: held
-    required_gate: REQUEST_READ_ONLY_LOG_ANALYTICS_VERIFICATION_AUTHORITY
+    status: execution_manifest_ready_exact_phrase_held
+    required_gate: EXECUTE_READ_ONLY_LOG_ANALYTICS_VERIFICATION_QUERIES_2026-06-01
     prohibited_now:
       - running_KQL
       - creating_Sentinel_rules
@@ -72,10 +72,11 @@ ordered_processing_queue:
       - agreement_send
       - registry_actions
   5_proof_freshness:
-    status: held_until_share_or_meeting_need
+    status: fresh_rerun_passed_2026_06_01_external_share_still_held
     next_action: REQUEST_FRESH_PROOF_RERUN_BEFORE_SHARE
+    proof_artifact: docs/FRESH_PROOF_RERUN_RESULT_2026-06-01.md
   6_runtime_faceplane_repair:
-    status: repair_recorded_persistence_and_activation_held
+    status: verified_local_repair_present_persistence_and_activation_held
     required_gate: explicit_persistence_or_activation_authority
   7_black_phoenix_division:
     status: docs_only_approval_accepted_execution_held

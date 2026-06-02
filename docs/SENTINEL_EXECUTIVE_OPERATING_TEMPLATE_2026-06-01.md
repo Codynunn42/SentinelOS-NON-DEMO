@@ -28,7 +28,7 @@ executive_template:
   phase: RECOMMENDATIONS_APPROVED_EXECUTION_HELD
   selected_action: process_approved_recommendations_with_held_execution
   runtime_state: STABLE_HELD
-  proof_state: VERIFIED_2026_05_31_FRESHNESS_SENSITIVE
+  proof_state: VERIFIED_2026_06_01_FRESHNESS_SENSITIVE_EXTERNAL_SHARE_HELD
   governance_state: REVIEW_SCOPED
   authority_balance: HEALTHY_HELD
   public_brand: SentinelOS
@@ -115,11 +115,11 @@ current_board:
       exact_streamline_candidates: 0
   faceplane_queue:
     operational_upgrade_faceplane:
-      state: runtime_registry_contract_repair_plan_approved_2026_06_01
+      state: verified_local_runtime_repair_present_activation_held_2026_06_01
       next_action: REQUEST_FRESH_PROOF_RERUN_BEFORE_SHARE
       selected_action: HOLD_CONTRACT_RECLAMATION_FACEPLANE_IMPLEMENTATION
       attention: active
-      comment: current operational issues are held; DOE-T2-CDT-001 is now the next active faceplane review target
+      comment: local registry and routing repair are verified; activation, deployment, import, and external share remain held
     doe_t2_cdt_001:
       state: controlled_input_hold_pending_validation
       release_authorized: false
@@ -166,8 +166,9 @@ current_board:
     approval_artifact: docs/CONTRACT_RECLAMATION_STANDALONE_INCUBATOR_APPROVAL_2026-06-01.md
     authority_created: true
   proof_freshness:
-    state: freshness_sensitive
-    last_recorded_fresh_pass: 2026-05-31
+    state: freshness_sensitive_verified_2026_06_01_external_share_held
+    last_recorded_fresh_pass: 2026-06-01
+    proof_artifact: docs/FRESH_PROOF_RERUN_RESULT_2026-06-01.md
     required_before_external_share: REQUEST_FRESH_PROOF_RERUN_BEFORE_SHARE
   authority_created: false
 ```
@@ -184,7 +185,7 @@ current_board:
 | Older SentinelOS cleanup decision | held | awaits diff review findings |
 | Microsoft Sentinel diagnostic settings record | accepted_2026_06_01 | KQL execution held pending explicit approval phrase |
 | Log Analytics verification | execution_manifest_ready | held until exact phrase `EXECUTE_READ_ONLY_LOG_ANALYTICS_VERIFICATION_QUERIES_2026-06-01` |
-| Runtime/code mutation | contract_repair_approved_2026_06_01 | proceed_to_REQUEST_FRESH_PROOF_RERUN_BEFORE_SHARE |
+| Runtime/code mutation | verified_local_repair_present_activation_held_2026_06_01 | no further runtime mutation without separate approval |
 | Proof freshness | stale-sensitive | rerun before share/meeting/external claim |
 | Push | held | no push |
 | External sharing | held | no share |
