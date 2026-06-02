@@ -3,7 +3,7 @@
 **COMM:** Sentinel AI by Cody Nunn | Nunn Cloud
 **Mode:** executive template processing start
 **Source Template:** `docs/SENTINEL_EXECUTIVE_OPERATING_TEMPLATE_2026-06-01.md`
-**State:** Recommendations Approved, Execution Held
+**State:** Recommendations Approved, Recommendation Processing Refresh Required
 **Authority Created:** false
 
 ## Artifact Decision
@@ -34,6 +34,23 @@ processing_result:
   Azure_mutation_authorized: false
   KQL_authorized: false
   runtime_mutation_authorized: false
+  authority_created: false
+```
+
+## June 2 Reconciliation
+
+```yaml
+june_2_reconciliation:
+  reviewed_after_docs_only_commit_attempt: true
+  approved_phrase_used: APPROVE_STAGE_AND_COMMIT_RECOMMENDATION_PROCESSING_DOCS_ONLY
+  result: no_commit_created
+  cause: approved_docs_only_packet_had_no_delta_against_HEAD
+  corrective_state: recommendation_processing_packet_must_be_refreshed_before_any_docs_only_commit_retry
+  exact_refresh_scope:
+    - docs/CURRENT_APPROVALS_AND_DECISIONS_2026-06-01.md
+    - docs/SENTINEL_EXECUTIVE_OPERATING_TEMPLATE_2026-06-01.md
+    - docs/SENTINEL_EXECUTIVE_TEMPLATE_PROCESSING_2026-06-01.md
+    - docs/CODE_AND_DOCS_SPLIT_REVIEW_2026-06-02.md
   authority_created: false
 ```
 
@@ -131,6 +148,7 @@ completed:
 ```yaml
 next_required_operator_selection:
   recommended:
+    - REFRESH_RECOMMENDATION_PROCESSING_PACKET_DOCS_ONLY
     - APPROVE_STAGE_AND_COMMIT_RECOMMENDATION_PROCESSING_DOCS_ONLY
     - PREPARE_CSR_REQUEST_PACKET_DRAFT_REVIEW
     - REQUEST_OLDER_REPO_CLEANUP_OR_PERSISTENCE_PLAN_REVIEW

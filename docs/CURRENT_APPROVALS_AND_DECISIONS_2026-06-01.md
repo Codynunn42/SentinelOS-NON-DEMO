@@ -57,11 +57,13 @@ active_decisions:
       - Sentinel_analytics_rule_creation
     authority_created: false
   current_control_packet_persistence:
-    current_state: refreshed_manifest_ready_docs_only_scope_recommended
+    current_state: refreshed_manifest_ready_but_recommendation_processing_packet_refresh_required
     required_phrase: APPROVE_STAGE_AND_COMMIT_CURRENT_CONTROL_PACKET
     source: docs/EXACT_STAGING_MANIFEST_REVIEW_CURRENT_CONTROL_PACKET_2026-05-31.md
     refreshed_manifest: docs/REFRESHED_CURRENT_CONTROL_PACKET_STAGING_MANIFEST_2026-06-01.md
-    recommended_next: APPROVE_STAGE_AND_COMMIT_RECOMMENDATION_PROCESSING_DOCS_ONLY
+    prior_attempt_result: approved_docs_only_commit_lane_had_no_delta_against_HEAD
+    recommended_next: REFRESH_RECOMMENDATION_PROCESSING_PACKET_DOCS_ONLY
+    follow_on_after_refresh: APPROVE_STAGE_AND_COMMIT_RECOMMENDATION_PROCESSING_DOCS_ONLY
     excluded_from_recommended_scope:
       - runtime_or_code_changes
       - package_json_change
@@ -208,6 +210,11 @@ fast_approval_choices:
       - HOLD_OLDER_REPO_CLEANUP (remains_active_for_diff_review)
       - HOLD_REPOSITORY_MOVEMENT (remains_active)
       - HOLD_CONTRACT_RECLAMATION_IMPORT_DECISION (remains_active)
+
+  refresh_recommendation_processing_packet:
+    phrase: REFRESH_RECOMMENDATION_PROCESSING_PACKET_DOCS_ONLY
+    status: now_required
+    outcome: updates_the_docs_only_recommendation_processing_packet_to_match_current_reality_before_any_commit_retry
 
   verify_microsoft_sentinel_logs:
     phrase: REQUEST_READ_ONLY_LOG_ANALYTICS_VERIFICATION_AUTHORITY

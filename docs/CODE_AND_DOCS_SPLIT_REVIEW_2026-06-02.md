@@ -21,8 +21,10 @@ Separate the current mixed worktree into reviewable persistence lanes before any
 ```yaml
 split_review:
   docs_only_recommendation_processing:
-    status: approved_for_stage_and_commit_by_exact_phrase
+    status: approved_phrase_was_valid_but_packet_refresh_required_before_commit_retry
     phrase: APPROVE_STAGE_AND_COMMIT_RECOMMENDATION_PROCESSING_DOCS_ONLY
+    corrective_next_phrase: REFRESH_RECOMMENDATION_PROCESSING_PACKET_DOCS_ONLY
+    last_attempt_result: no_delta_in_selected_docs_only_packet_against_HEAD
     include:
       - docs/CURRENT_APPROVALS_AND_DECISIONS_2026-06-01.md
       - docs/SENTINEL_EXECUTIVE_OPERATING_TEMPLATE_2026-06-01.md

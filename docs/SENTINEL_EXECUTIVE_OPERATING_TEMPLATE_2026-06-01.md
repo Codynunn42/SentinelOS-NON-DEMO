@@ -87,14 +87,14 @@ source_of_truth:
 ```yaml
 current_board:
   active_repo_control_packet:
-    state: refreshed_manifest_ready_docs_only_scope_recommended
+    state: refreshed_manifest_ready_but_recommendation_processing_packet_refresh_required
     governance_analysis: docs/GOVERNANCE_DEPENDENCY_ANALYSIS_2026-06-01.md
     determination: isolated_from_older_repo_state
     approval_phrase: APPROVE_STAGE_AND_COMMIT_CURRENT_CONTROL_PACKET
     commit: f3e104d (already committed earlier)
     push_authorized: false
     refreshed_manifest: docs/REFRESHED_CURRENT_CONTROL_PACKET_STAGING_MANIFEST_2026-06-01.md
-    next_decision: approve_docs_only_recommendation_processing_packet_or_hold
+    next_decision: refresh_recommendation_processing_packet_then_reconsider_docs_only_commit
   microsoft_sentinel_observability:
     state: diagnostic_settings_accepted_kql_execution_manifest_ready
     diagnostic_setting_name: ds-sentinelos-containerapps-observability
@@ -177,7 +177,7 @@ current_board:
 
 | Gate | State | Next Action |
 | --- | --- | --- |
-| Active control packet persistence | refreshed manifest ready; docs-only scope recommended | APPROVE_STAGE_AND_COMMIT_RECOMMENDATION_PROCESSING_DOCS_ONLY |
+| Active control packet persistence | refreshed manifest exists; recommendation-processing packet refresh required before docs-only commit retry | REFRESH_RECOMMENDATION_PROCESSING_PACKET_DOCS_ONLY |
 | Managed repository classification | accepted | use placement rules, keep movement held |
 | Repository movement | held | no move/delete/archive/import |
 | Active faceplane queue | active faceplanes requiring current operational attention | review `faceplane_queue` and prioritize approvals/validation for operational_upgrade_faceplane and doe_t2_cdt_001 |
@@ -195,13 +195,14 @@ current_board:
 ```yaml
 bottlenecks:
   primary:
-    name: operator_decision_on_recommendation_processing_docs_only_packet
-    status: refreshed_manifest_ready
+    name: operator_decision_on_recommendation_processing_packet_refresh
+    status: refresh_required_before_docs_only_commit_retry
     approval_artifact: docs/SENTINEL_EXECUTIVE_TEMPLATE_RECOMMENDATIONS_APPROVAL_2026-06-01.md
     refreshed_manifest: docs/REFRESHED_CURRENT_CONTROL_PACKET_STAGING_MANIFEST_2026-06-01.md
-    critical_finding: current_turn_git_status_dirty_with_code_and_docs_mixed
-    description: recommended_staging_scope_is_docs_only_recommendation_processing_packet
+    critical_finding: prior_docs_only_commit_attempt_found_no_delta_in_the_selected_packet
+    description: recommendation_processing_docs_must_be_refreshed_to_create_a_truthful_commit_scope
     legal_next_actions:
+      - REFRESH_RECOMMENDATION_PROCESSING_PACKET_DOCS_ONLY
       - APPROVE_STAGE_AND_COMMIT_RECOMMENDATION_PROCESSING_DOCS_ONLY
       - HOLD_REPOSITORY_MOVEMENT
 
