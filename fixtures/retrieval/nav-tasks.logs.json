@@ -1,0 +1,14 @@
+[
+  { "id": "nav-task-log-001", "timestamp": "2026-06-17T08:00:00.000Z", "event": "fixture_task_created", "task": "Review controlled retrieval proof" },
+  { "id": "nav-task-log-002", "timestamp": "2026-06-17T08:05:00.000Z", "event": "fixture_scope_confirmed", "task": "Restrict proof to non-sensitive records" },
+  { "id": "nav-task-log-003", "timestamp": "2026-06-17T08:10:00.000Z", "event": "fixture_route_defined", "task": "Define Nexus fixture route" },
+  { "id": "nav-task-log-004", "timestamp": "2026-06-17T08:15:00.000Z", "event": "fixture_executor_defined", "task": "Define Bhindi fixture executor" },
+  { "id": "nav-task-log-005", "timestamp": "2026-06-17T08:20:00.000Z", "event": "fixture_adapter_defined", "task": "Define Vault fixture adapter" },
+  { "id": "nav-task-log-006", "timestamp": "2026-06-17T08:25:00.000Z", "event": "fixture_policy_defined", "task": "Fail closed outside exact scope" },
+  { "id": "nav-task-log-007", "timestamp": "2026-06-17T08:30:00.000Z", "event": "fixture_audit_planned", "task": "Verify audit evidence" },
+  { "id": "nav-task-log-008", "timestamp": "2026-06-17T08:35:00.000Z", "event": "fixture_trace_planned", "task": "Verify execution trace evidence" },
+  { "id": "nav-task-log-009", "timestamp": "2026-06-17T08:40:00.000Z", "event": "fixture_collision_planned", "task": "Verify duplicate handling" },
+  { "id": "nav-task-log-010", "timestamp": "2026-06-17T08:45:00.000Z", "event": "fixture_isolation_planned", "task": "Verify no external access" },
+  { "id": "nav-task-log-011", "timestamp": "2026-06-17T08:50:00.000Z", "event": "fixture_manifest_reviewed", "task": "Review exact implementation manifest" },
+  { "id": "nav-task-log-012", "timestamp": "2026-06-17T08:55:00.000Z", "event": "fixture_implementation_approved", "task": "Implement fixture-only proof path" }
+]

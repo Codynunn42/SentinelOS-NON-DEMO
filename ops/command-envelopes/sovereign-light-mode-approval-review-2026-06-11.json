@@ -1,0 +1,42 @@
+{
+  "comm": "Sentinel AI by Cody Nunn | Nunn Cloud",
+  "session": "sovereign-light-mode-approval-review-2026-06-11",
+  "lane": "approval_review",
+  "op": "sovereign",
+  "action": "review_light_mode_candidate",
+  "requestedDecision": "APPROVE_SOVEREIGN_LIGHT_MODE_REVIEW_CANDIDATE",
+  "processedDecision": "APPROVE_SOVEREIGN_LIGHT_MODE_REVIEW_CANDIDATE",
+  "requires": [
+    "operator_approval"
+  ],
+  "payload": {
+    "approvalPacket": "docs/SOVEREIGN_LIGHT_MODE_APPROVAL_PACKET_2026-06-11.md",
+    "securityOverview": "docs/SOVEREIGN_SECURITY_AND_GOVERNANCE_OVERVIEW_DRAFT_2026-06-11.md",
+    "readinessScorecard": "docs/SOVEREIGN_READINESS_SCORECARD_2026-06-11.md",
+    "codeReviewScope": [
+      "apps/sentinel/src/sovereign/sovereignLicense.js",
+      "apps/sentinel/src/sovereign/sovereignBoot.js",
+      "scripts/generate-sovereign-keypair.js",
+      "scripts/generate-sovereign-license.js",
+      "scripts/check-sovereign-license.js",
+      "package.json"
+    ]
+  },
+  "holds": [
+    "runtime_activation",
+    "production_key_generation",
+    "license_issuance",
+    "staging",
+    "commit",
+    "push",
+    "deployment",
+    "external_use",
+    "customer_contact",
+    "legal_acceptance",
+    "pricing_acceptance"
+  ],
+  "status": "approved_internal_review_only",
+  "approvalResult": "docs/SOVEREIGN_LIGHT_MODE_APPROVAL_PROCESSING_RESULT_2026-06-16.md",
+  "authorityCreated": true,
+  "authorityBoundary": "internal_review_and_non_mutating_verification_only"
+}

@@ -54,7 +54,7 @@ The buyer does **not** receive:
 
 ## The License File — Technical Structure
 
-Every sovereign deployment is issued a cryptographically signed license file. The signing uses HMAC-SHA256. The license file contains:
+Every sovereign deployment is issued a cryptographically signed license file. The proposed signing model uses Ed25519. The license file contains:
 
 ```json
 {
@@ -64,11 +64,12 @@ Every sovereign deployment is issued a cryptographically signed license file. Th
   "issuedAt": "2026-06-08T00:00:00.000Z",
   "version": "1.0",
   "capabilities": ["execute", "audit", "govern", "drift"],
-  "signature": "<hmac-sha256-hex>"
+  "signatureAlgorithm": "ed25519:v1",
+  "signature": "<base64-signature>"
 }
 ```
 
-The signature is generated using a private signing key that never leaves Nunn Cloud. The buyer receives only a verification key. A buyer cannot use their verification key to generate new licenses or forge a license for a different organization — the signing key and verification key are different values.
+The proposed signature model uses an Ed25519 private signing key that never leaves Nunn Cloud. The buyer receives only the corresponding public verification key. The public key can verify licenses but cannot generate valid signatures.
 
 Every license is traceable to a specific buyer via `issuedTo` and `licenseId`. This creates an audit trail of who holds what license.
 
@@ -115,7 +116,7 @@ What limitations of liability and warranty disclaimers are needed given that thi
 
 ### 7. Export Controls
 
-Given that sovereign buyers may include government agencies and defense contractors, are there any EAR (Export Administration Regulations) or ITAR considerations for distributing cryptographic software (the system uses HMAC-SHA256 signing) to certain buyers or jurisdictions?
+Given that sovereign buyers may include government agencies and defense contractors, are there any EAR (Export Administration Regulations) or ITAR considerations for distributing cryptographic software that uses Ed25519 signing to certain buyers or jurisdictions?
 
 ### 8. Trade Secret Protection
 
@@ -145,17 +146,17 @@ These are not final. Attorney input on structure is requested.
 
 ---
 
-## What Is Ready Now
+## Current Technical Candidate
 
-The technical implementation is complete:
+The current technical candidate includes:
 
-- License generation script is built and tested
+- Ed25519 license generation and verification candidate is built for review
 - License verification is built into the server startup sequence
 - The system will not start in sovereign mode without a valid verified license
 - Every license is cryptographically tied to the buyer organization name
 - Deployment tier classification is implemented (`PUBLIC`, `ENTERPRISE`, `GOVERNMENT`, `SOVEREIGN`)
 
-**Nothing has been sold yet.** No licenses have been issued. The system is ready to generate licenses the moment the legal framework is in place.
+**Nothing has been sold yet.** No licenses have been issued. License issuance remains held pending approval of the Ed25519 candidate, legal framework, and key-management procedures.
 
 ---
 

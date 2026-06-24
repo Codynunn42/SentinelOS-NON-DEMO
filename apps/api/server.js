@@ -72,10 +72,12 @@ const { enforceSovereignBoot } = require('../sentinel/src/sovereign/sovereignBoo
 const { resolveTier, classifyOperation } = require('../sentinel/src/tiers/tierResolver');
 const { TIERS } = require('../sentinel/src/tiers/tierRegistry');
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 80;
 const LANDING_PAGE_PATH = path.join(__dirname, 'public', 'index.html');
 const PROOF_PAGE_PATH = path.join(__dirname, 'public', 'proof.html');
 const MISSION_CONTROL_PATH = path.join(__dirname, 'public', 'mission-control.html');
+const GOVERNMENT_OUTCOMES_PATH = path.join(__dirname, 'public', 'government-outcomes.html');
+const ENTITY_INQUIRY_PORTAL_PATH = path.join(__dirname, 'public', 'entity-inquiry-portal.html');
 const OPERATOR_ESCALATIONS_PATH = path.join(__dirname, 'public', 'operator-escalations.html');
 const STRIPE_CHECKOUT_PAGE_PATH = path.join(__dirname, 'public', 'stripe-checkout.html');
 const STRIPE_COMPLETE_PAGE_PATH = path.join(__dirname, 'public', 'stripe-complete.html');
@@ -1393,6 +1395,16 @@ const server = http.createServer(async (req, res) => {
   if (pathname === '/mission-control' && req.method === 'GET') {
     auditSurfaceView(req, requestUrl, pathname, 'mission-control');
     return sendHtmlFile(res, MISSION_CONTROL_PATH);
+  }
+
+  if (pathname === '/government-outcomes' && req.method === 'GET') {
+    auditSurfaceView(req, requestUrl, pathname, 'government-outcomes');
+    return sendHtmlFile(res, GOVERNMENT_OUTCOMES_PATH);
+  }
+
+  if (pathname === '/portal' && req.method === 'GET') {
+    auditSurfaceView(req, requestUrl, pathname, 'entity-inquiry-portal');
+    return sendHtmlFile(res, ENTITY_INQUIRY_PORTAL_PATH);
   }
 
   if (pathname === '/operator-escalations' && req.method === 'GET') {

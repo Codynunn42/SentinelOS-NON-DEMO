@@ -16,6 +16,7 @@ const { handleRepoUpdate } = require('../commands/repo/updateStructure');
 const { handleProductReframe } = require('../commands/system/productReframe');
 const { handleSystemValidate } = require('../commands/system/validateIntegrity');
 const { handleUiSync } = require('../commands/ui/syncLabels');
+const { handleVaultRetrieveFixture } = require('../commands/retrieval/vaultRetrieveFixture');
 
 async function evaluateCdnluxToken(payload = {}) {
   const cdnluxEvent = buildCdnluxEvent(payload);
@@ -41,6 +42,7 @@ const nunncloudHandlers = {
   'system.validate.integrity': handleSystemValidate,
   'dealFlow.run.demo': handleDealFlowDemo,
   'ui.sync.labels': handleUiSync,
+  'vault.retrieve': handleVaultRetrieveFixture,
 
   'cdnlux.token.evaluate': evaluateCdnluxToken,
   'cdnlux.contract.evaluate': evaluateCdnluxToken,

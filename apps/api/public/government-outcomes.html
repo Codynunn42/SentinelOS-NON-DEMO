@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SentinelOS Government Outcomes</title>
+  <style>
+    :root{--ink:#17211c;--muted:#68766e;--line:#d9e0db;--paper:#f3f5f2;--card:#fff;--green:#145c42;--green2:#e1efe8;--gold:#b98a2e;--gold2:#f8f0dc;--navy:#10251d;--red:#a94a3b}
+    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:13px Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}button,textarea{font:inherit}
+    .shell{display:grid;grid-template-columns:238px 1fr;min-height:100vh}.side{position:fixed;inset:0 auto 0 0;width:238px;padding:24px 17px;display:flex;flex-direction:column;color:#d7e3dc;background:var(--navy)}
+    .brand{padding:0 8px 24px;border-bottom:1px solid #2d4239}.brand b,.brand span{display:block}.brand b{font-size:15px;letter-spacing:.12em}.brand span{margin-top:5px;color:#8fa298;font-size:8px;letter-spacing:.13em}
+    nav{display:grid;gap:5px;margin-top:22px}.nav{border:0;border-radius:6px;padding:11px;color:#9bafa5;background:transparent;text-align:left;cursor:pointer}.nav.active,.nav:hover{color:#fff;background:#263d33;box-shadow:inset 2px 0 #d2b25f}
+    .boundary{margin-top:auto;padding:12px;border:1px solid #3c5148;border-radius:7px;background:#172e25}.boundary b{display:block;color:#e8d18f;font-size:9px}.boundary p{margin:6px 0 0;color:#9fb0a8;font-size:8px;line-height:1.6}
+    main{grid-column:2;width:min(1500px,100%);margin:auto;padding:28px 34px 35px}.top{display:flex;align-items:center;justify-content:space-between;gap:20px;margin-bottom:20px}.eyebrow{margin:0 0 7px;color:var(--green);font-size:8px;font-weight:800;letter-spacing:.12em}.top h1{margin:0;font-size:25px;letter-spacing:-.04em}.top p{margin:6px 0 0;color:var(--muted);font-size:11px}.chips{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}.chip{padding:6px 9px;border:1px solid var(--line);border-radius:20px;color:var(--muted);background:#fff;font-size:8px}.chip.hold{color:var(--gold);border-color:#dbc99b;background:var(--gold2)}
+    .notice{display:flex;justify-content:space-between;gap:15px;margin-bottom:14px;padding:11px 14px;border:1px solid #dac894;border-radius:7px;color:#765918;background:#fff9e9;font-size:9px}.notice b{letter-spacing:.05em}.notice span{color:#92752f}
+    .metrics{display:grid;grid-template-columns:repeat(5,1fr);margin-bottom:14px;border:1px solid var(--line);border-radius:8px;background:#fff}.metric{padding:14px 16px;border-right:1px solid var(--line)}.metric:last-child{border:0}.metric span,.metric b,.metric small{display:block}.metric span{color:var(--muted);font-size:7px;letter-spacing:.08em}.metric b{margin:5px 0 3px;font-size:19px}.metric small{color:var(--green);font-size:7px}.metric small.warn{color:var(--gold)}
+    .grid{display:grid;gap:14px}.hero{grid-template-columns:1.35fr .65fr}.lower{grid-template-columns:1fr 1fr;margin-top:14px}.panel{min-width:0;padding:17px;border:1px solid var(--line);border-radius:8px;background:#fff}.heading{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:15px}.heading h2{margin:0;font-size:14px}.heading p{margin:5px 0 0;color:var(--muted);font-size:8px}.badge{padding:5px 7px;border-radius:4px;color:var(--green);background:var(--green2);font-size:7px;font-weight:800}
+    .outcome-head{display:flex;justify-content:space-between;gap:15px;padding:13px;border-radius:7px;color:#fff;background:var(--navy)}.outcome-head span,.outcome-head b,.outcome-head small{display:block}.outcome-head span{color:#b2c2ba;font-size:7px}.outcome-head b{margin:4px 0;font-size:15px}.outcome-head small{color:#d4dfd9;font-size:8px}.prob{text-align:right}.prob b{color:#e6cf83;font-size:22px}
+    .graph{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;position:relative;margin-top:10px}.node{padding:10px;border:1px solid var(--line);border-radius:6px;background:#fff}.node span,.node b,.node small{display:block}.node span{color:var(--muted);font-size:6px;letter-spacing:.08em}.node b{margin:5px 0;font-size:8px}.node small{color:var(--muted);font-size:6px;line-height:1.5}.node.risk{border-color:#decda0;background:#fffaf0}.node.good{border-color:#b8d3c4;background:#f5fbf8}
+    .layers{display:grid;gap:8px}.layer{display:grid;grid-template-columns:28px 1fr auto;gap:9px;align-items:center;padding:10px;border:1px solid var(--line);border-radius:6px}.layer i{display:grid;place-items:center;width:26px;height:26px;border-radius:5px;color:var(--green);background:var(--green2);font-style:normal;font-size:9px}.layer b,.layer small{display:block}.layer b{font-size:9px}.layer small{margin-top:3px;color:var(--muted);font-size:7px}.layer em{color:var(--green);font-size:7px;font-style:normal}
+    .queue{display:grid;gap:8px}.review{padding:11px;border:1px solid var(--line);border-radius:6px;cursor:pointer;transition:.2s;background:#fff}.review:hover{border-color:#a9bbb0;transform:translateY(-1px)}.review-top{display:flex;justify-content:space-between;gap:8px}.review b{font-size:9px}.review p{margin:5px 0;color:var(--muted);font-size:7px;line-height:1.5}.review span{color:var(--gold);font-size:6px;font-weight:800;letter-spacing:.08em}.review small{color:var(--muted);font-size:6px}
+    .framework{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}.question{padding:10px;border:1px solid var(--line);border-radius:6px}.question b{display:grid;place-items:center;width:19px;height:19px;margin-bottom:7px;border-radius:50%;color:#fff;background:var(--green);font-size:7px}.question strong,.question small{display:block}.question strong{font-size:7px}.question small{margin-top:4px;color:var(--muted);font-size:6px;line-height:1.5}
+    .drawer{position:fixed;z-index:3;top:0;right:-410px;width:390px;height:100vh;padding:30px 25px;color:#fff;background:var(--navy);box-shadow:-10px 0 35px #10251d30;transition:right .25s}.drawer.open{right:0}.close{float:right;border:0;color:#9bafa5;background:transparent;font-size:21px;cursor:pointer}.drawer h2{margin:26px 0 8px;font-size:22px}.drawer .summary{color:#c4d1ca;font-size:10px;line-height:1.7}.review-block{margin-top:16px;padding:13px;border:1px solid #3b5147;border-radius:7px;background:#193128}.review-block span{color:#e4ca7e;font-size:7px;font-weight:800;letter-spacing:.1em}.review-block p{margin:7px 0 0;color:#c6d3cc;font-size:9px;line-height:1.7}.drawer label{display:block;margin:18px 0 7px;color:#aabbb2;font-size:7px;letter-spacing:.08em}.drawer textarea{width:100%;min-height:105px;padding:10px;border:1px solid #3b5147;border-radius:6px;color:#fff;background:#0c2018;resize:vertical}.drawer button.prepare{width:100%;margin-top:10px;padding:10px;border:0;border-radius:6px;color:var(--navy);background:#e4ca7e;font-size:8px;font-weight:800;cursor:pointer}.drawer .fine{margin-top:9px;color:#91a49a;font-size:7px;line-height:1.5}
+    @media(max-width:1050px){.shell{grid-template-columns:70px 1fr}.side{width:70px}.brand span,.brand b,.nav{font-size:0}.brand b:before{content:"S";display:grid;place-items:center;width:28px;height:28px;color:var(--navy);background:#e4ca7e;font-size:13px}.nav:first-letter{font-size:13px}.boundary{display:none}.hero,.lower{grid-template-columns:1fr}}
+    @media(max-width:720px){.shell{display:block}.side{display:none}main{padding:18px 11px}.top{align-items:flex-start}.chips{display:none}.metrics{grid-template-columns:repeat(2,1fr)}.metric{border-bottom:1px solid var(--line)}.graph{grid-template-columns:repeat(2,1fr)}.framework{grid-template-columns:1fr}.drawer{width:100%;right:-100%}.notice{flex-direction:column}}
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside class="side">
+      <div class="brand"><b>SENTINELOS</b><span>GOVERNMENT OUTCOME OPERATING SYSTEM</span></div>
+      <nav>
+        <button class="nav active">◫ Outcome command</button><button class="nav">◎ Mission graph</button><button class="nav">◇ Programs</button><button class="nav">△ Risks</button><button class="nav">▤ Evidence</button><button class="nav">✦ Review queue</button>
+      </nav>
+      <div class="boundary"><b>REVIEW-HELD WORKSPACE</b><p>Summaries are prepared for Cody Nunn's personal review, additions, and support. No autonomous approval or execution authority.</p></div>
+    </aside>
+    <main>
+      <header class="top">
+        <div><p class="eyebrow">INTERNAL GOVERNMENT ALIGNMENT WORKSPACE</p><h1>Public outcome command</h1><p>Define, govern, measure, and improve outcomes across agencies and systems.</p></div>
+        <div class="chips"><span class="chip">Authority created: false</span><span class="chip hold">Government deployment: roadmap only</span></div>
+      </header>
+      <div class="notice"><b>OWNER DIRECTION RECORDED · ILLUSTRATIVE DISCUSSION SURFACE</b><span>Internal category: Outcome Operating System. AI remains an internal capability. Entity-specific values remain placeholders pending authoritative evidence.</span></div>
+      <section class="metrics">
+        <div class="metric"><span>ACTIVE OUTCOMES</span><b>—</b><small class="warn">Authoritative inventory needed</small></div><div class="metric"><span>ON TRACK</span><b>—</b><small class="warn">Measurement model needed</small></div><div class="metric"><span>AT RISK</span><b>—</b><small class="warn">Evidence review needed</small></div><div class="metric"><span>DECISIONS PENDING</span><b>—</b><small class="warn">Owner intake needed</small></div><div class="metric"><span>WHITE-GLOVE SUMMARIES</span><b>4</b><small class="warn">Prepared for your review</small></div>
+      </section>
+      <section class="grid hero">
+        <article class="panel">
+          <div class="heading"><div><p class="eyebrow">ILLUSTRATIVE GOVERNMENT OUTCOME GRAPH</p><h2>Example: reduce permit approval time</h2><p>Proposed relationship model pending authoritative entity data and owner direction.</p></div><span class="badge">OWNER REVIEW</span></div>
+          <div class="outcome-head"><div><span>PROPOSED PUBLIC OUTCOME</span><b>Permit decisions within an approved service level</b><small>Target and commitment language not yet supported</small></div><div class="prob"><span>OUTCOME PROBABILITY</span><b>—</b><small>Model and evidence needed</small></div></div>
+          <div class="graph">
+            <div class="node"><span>INITIATIVE</span><b>Permitting modernization</b><small>Owner: pending confirmation</small></div>
+            <div class="node"><span>PROGRAM</span><b>Digital intake</b><small>Performance evidence needed</small></div>
+            <div class="node"><span>FUNDING</span><b>Allocation unknown</b><small>Authoritative budget source needed</small></div>
+            <div class="node risk"><span>RISK</span><b>Interagency handoff</b><small>Hypothesis pending validation</small></div>
+            <div class="node"><span>AGENCY</span><b>Responsible agency</b><small>Accountable executive unconfirmed</small></div>
+            <div class="node"><span>CONTRACT</span><b>Supporting contract</b><small>Contract record not provided</small></div>
+            <div class="node"><span>KPI</span><b>Median cycle time</b><small>Baseline and target needed</small></div>
+            <div class="node risk"><span>DECISION</span><b>Potential intervention</b><small>Prepared for personal review only</small></div>
+          </div>
+        </article>
+        <article class="panel">
+          <div class="heading"><div><p class="eyebrow">OPERATING ARCHITECTURE</p><h2>Four government-native layers</h2></div></div>
+          <div class="layers">
+            <div class="layer"><i>01</i><div><b>Mission layer</b><small>Plans, goals, commitments, mandates</small></div><em>WHY</em></div>
+            <div class="layer"><i>02</i><div><b>Outcome layer</b><small>KPIs, milestones, programs, funding</small></div><em>WHAT</em></div>
+            <div class="layer"><i>03</i><div><b>Execution layer</b><small>ERP, HR, procurement, grants, cases</small></div><em>HOW</em></div>
+            <div class="layer"><i>04</i><div><b>Governance layer</b><small>Source, evidence, policy, approval path</small></div><em>TRUST</em></div>
+          </div>
+        </article>
+      </section>
+      <section class="grid lower">
+        <article class="panel">
+          <div class="heading"><div><p class="eyebrow">WHITE-GLOVE OUTCOME ENGINEERING</p><h2>Prepared summary queue</h2><p>Owner direction: every action remains a summary for your personal review, additions, and support.</p></div><span class="badge">4 REVIEW ITEMS</span></div>
+          <div class="queue" id="queue"></div>
+        </article>
+        <article class="panel">
+          <div class="heading"><div><p class="eyebrow">AUTHORITATIVE INTAKE</p><h2>Evidence readiness</h2><p>Worksheet prepared; no entity data collected or transmitted.</p></div><span class="badge">REVIEW HELD</span></div>
+          <div class="framework">
+            <div class="question"><b>1</b><strong>Entity & authority</strong><small>Identity, sponsor, handling restrictions</small></div>
+            <div class="question"><b>2</b><strong>Outcome & measures</strong><small>Supported outcome, baseline, target, timeframe</small></div>
+            <div class="question"><b>3</b><strong>Graph & systems</strong><small>Owners, programs, funding, systems, custodians</small></div>
+            <div class="question"><b>4</b><strong>Evidence & policy</strong><small>Sources, validation authority, approval path</small></div>
+            <div class="question"><b>5</b><strong>Owner review</strong><small>Personal additions before any summary advances</small></div>
+          </div>
+        </article>
+      </section>
+    </main>
+  </div>
+  <aside class="drawer" id="drawer"><button class="close" id="close">×</button><p class="eyebrow">WHITE-GLOVE REVIEW SUMMARY</p><div id="detail"></div></aside>
+  <script>
+    const summaries=[
+      {title:"Define outcome and success measure",scope:"Permit approval time reduction",summary:"No authoritative baseline or target has been provided. A possible measurement model could include median cycle time, 90th percentile, rework rate, and resident satisfaction after the entity confirms the intended outcome.",attention:"Your additions needed: preferred outcome language, baseline period, excluded permit classes, and supported public commitment."},
+      {title:"Map systems and accountable owners",scope:"Cross-agency execution graph",summary:"A proposed map may include intake, planning review, inspections, procurement, and finance dependencies. No entity-specific system inventory or accountable owner has been validated.",attention:"Your attention needed: identify the entity, systems, accountable executive, and escalation path."},
+      {title:"Review potential intervention",scope:"Interagency handoff hypothesis",summary:"A shared handoff service level with a named escalation owner is a possible intervention pattern. No evidence currently supports a specific threshold or establishes handoff delay as the largest controllable contributor.",attention:"Your review needed before this advances beyond an illustrative option."},
+      {title:"Reconcile evidence and policy basis",scope:"Outcome governance packet",summary:"No authoritative entity evidence set has been provided. The future packet should link supported cycle-time data, funding, contracts, mandates, policies, and approval paths without filling evidence gaps.",attention:"Your support needed: identify authoritative sources and add policy context."}
+    ];
+    const queue=document.querySelector("#queue"),drawer=document.querySelector("#drawer"),detail=document.querySelector("#detail");
+    queue.innerHTML=summaries.map((s,i)=>`<div class="review" data-i="${i}"><div class="review-top"><b>${s.title}</b><span>PERSONAL REVIEW</span></div><p>${s.scope}</p><small>Open prepared summary →</small></div>`).join("");
+    document.querySelectorAll("[data-i]").forEach(el=>el.addEventListener("click",()=>{const s=summaries[Number(el.dataset.i)];detail.innerHTML=`<h2>${s.title}</h2><p class="summary">${s.summary}</p><div class="review-block"><span>PERSONAL ATTENTION</span><p>${s.attention}</p></div><label>YOUR ADDITIONS AND SUPPORT NOTES</label><textarea placeholder="Add your direction, corrections, context, or support details here..."></textarea><button class="prepare" id="prepareSummary">Prepare updated summary for review</button><p class="fine" id="summaryState">This action updates no external system and creates no approval or execution authority.</p>`;drawer.classList.add("open");document.querySelector("#prepareSummary").addEventListener("click",event=>{event.currentTarget.disabled=true;event.currentTarget.textContent="Updated summary prepared for your review";document.querySelector("#summaryState").textContent="Review-ready state recorded in this local surface only. No approval, execution, external system, or government communication was created."})}));
+    document.querySelector("#close").addEventListener("click",()=>drawer.classList.remove("open"));
+  </script>
+</body>
+</html>

@@ -1,0 +1,88 @@
+version: '3.9'
+
+services:
+  sentinel-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sentinel-api
+    profiles:
+      - core
+      - full
+    ports:
+      - "80:80"
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: 80
+      SENTINEL_API_KEY: ${SENTINEL_API_KEY}
+      SENTINEL_HMAC_SECRET: ${SENTINEL_HMAC_SECRET}
+      DATABASE_URL: postgresql://sentinel:sentinel@postgres:5432/sentinelos
+      REDIS_URL: redis://redis:6379
+    env_file:
+      - .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "npm", "run", "healthcheck"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+    networks:
+      - sentinel
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: sentinel-postgres
+    profiles:
+      - core
+      - full
+    environment:
+      POSTGRES_USER: sentinel
+      POSTGRES_PASSWORD: sentinel
+      POSTGRES_DB: sentinelos
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sentinel"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - sentinel
+
+  redis:
+    image: redis:7-alpine
+    container_name: sentinel-redis
+    profiles:
+      - core
+      - full
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - sentinel
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  sentinel:
+    driver: bridge

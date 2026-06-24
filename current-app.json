@@ -1,0 +1,57 @@
+{
+  "extendedLocation": null,
+  "id": "/subscriptions/82bd72d4-00ef-400d-839b-e168e980c510/resourceGroups/rg-nc-dev-sentinel/providers/Microsoft.App/containerapps/ca-nc-dev-sentinel",
+  "identity": null,
+  "kind": null,
+  "location": "East US 2",
+  "managedBy": null,
+  "name": "ca-nc-dev-sentinel",
+  "plan": null,
+  "properties": {
+    "configuration": {
+      "activeRevisionsMode": null,
+      "dapr": null,
+      "ingress": null,
+      "maxInactiveRevisions": null,
+      "registries": null,
+      "secrets": null,
+      "service": null
+    },
+    "customDomainVerificationId": "DE1753F3A3BF30A5733CD68E5ABEC251ACF67E879A68A4350B12304077CCFB0B",
+    "environmentId": "/subscriptions/82bd72d4-00ef-400d-839b-e168e980c510/resourceGroups/rg-nc-dev-sentinel/providers/Microsoft.App/managedEnvironments/cae-nc-dev-sentinel",
+    "managedEnvironmentId": "/subscriptions/82bd72d4-00ef-400d-839b-e168e980c510/resourceGroups/rg-nc-dev-sentinel/providers/Microsoft.App/managedEnvironments/cae-nc-dev-sentinel",
+    "outboundIpAddresses": [
+      "48.204.225.250"
+    ],
+    "provisioningState": "Failed",
+    "template": {
+      "containers": null,
+      "initContainers": null,
+      "revisionSuffix": null,
+      "scale": null,
+      "serviceBinds": null,
+      "terminationGracePeriodSeconds": null,
+      "volumes": null
+    },
+    "workloadProfileName": null
+  },
+  "resourceGroup": "rg-nc-dev-sentinel",
+  "sku": null,
+  "systemData": {
+    "createdAt": "2026-04-01T09:19:54.2376797",
+    "createdBy": "codynunn.azure@gmail.com",
+    "createdByType": "User",
+    "lastModifiedAt": "2026-06-05T13:27:12.6671853",
+    "lastModifiedBy": "Codynunn.azure@gmail.com",
+    "lastModifiedByType": "User"
+  },
+  "tags": {
+    "azd-env-name": "dev",
+    "azd-service-name": "sentinel",
+    "nunncorp-phase": "sentinel-first",
+    "nunncorp-role": "control-plane",
+    "nunncorp-scope": "monorepo-foundation",
+    "nunncorp-workload": "sentinel-core"
+  },
+  "type": "Microsoft.App/containerApps"
+}

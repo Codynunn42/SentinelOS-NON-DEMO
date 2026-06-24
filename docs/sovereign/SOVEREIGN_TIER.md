@@ -39,12 +39,12 @@ The buyer runs SentinelOS entirely on their own infrastructure. Nothing leaves t
 
 ## How Licensing Works
 
-Every sovereign deployment is issued a signed license file. The license is verified locally at startup using HMAC-SHA256 against the buyer's license key.
+Every sovereign deployment is issued a signed license file. The license is verified locally at startup using Ed25519 against a buyer-distributable public key.
 
 ```txt
 Nunn Cloud (you)
-  → generates license with SENTINEL_LICENSE_SIGNING_KEY (private, never shipped)
-  → delivers sentinel.license.json + SENTINEL_LICENSE_KEY to buyer
+  → generates license with SENTINEL_LICENSE_SIGNING_KEY (Ed25519 private key, never shipped)
+  → delivers sentinel.license.json + SENTINEL_LICENSE_KEY public key to buyer
 
 Buyer
   → places sentinel.license.json in deployment root
@@ -53,7 +53,7 @@ Buyer
   → license verified locally, no network call
 ```
 
-The signing key stays with you. The verification key goes to the buyer. A compromised verification key cannot be used to generate new licenses.
+The private signing key stays with Nunn Cloud. The public verification key goes to the buyer. The public key verifies signatures but cannot generate valid licenses.
 
 ## Pricing Model
 
@@ -94,7 +94,7 @@ Every license is traceable to a specific buyer via the `issuedTo` and `licenseId
 Generate a sovereign license for a buyer:
 
 ```bash
-SENTINEL_LICENSE_SIGNING_KEY=<your-private-key> \
+SENTINEL_LICENSE_SIGNING_KEY="$(cat /approved/path/sovereign-private-key.pem)" \
 SOVEREIGN_LICENSE_ID=SOS-2026-0001 \
 SOVEREIGN_ISSUED_TO="Organization Name" \
 SOVEREIGN_CAPABILITIES=execute,audit,govern,drift \
@@ -104,14 +104,14 @@ node scripts/generate-sovereign-license.js
 Verify a license locally:
 
 ```bash
-SENTINEL_LICENSE_KEY=<buyer-verification-key> \
+SENTINEL_LICENSE_KEY="$(cat /approved/path/sovereign-public-key.pem)" \
 SENTINEL_LICENSE_FILE=./sentinel.license.json \
 node -e "const {verifySovereignLicense} = require('./apps/sentinel/src/sovereign/sovereignLicense'); console.log(verifySovereignLicense());"
 ```
 
 ## Status
 
-Scaffold complete. License generation and verification are implemented.
+Ed25519 license generation and verification candidate implemented locally. License issuance remains held pending approval, legal review, key-management procedures, and accepted verification evidence.
 
 Before selling sovereign licenses:
 
