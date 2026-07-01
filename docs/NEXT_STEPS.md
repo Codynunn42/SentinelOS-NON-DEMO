@@ -34,6 +34,73 @@ Live verification completed on 2026-04-28:
    - OwnerFi owns brand, workflows, and data.
    - SentinelOS is the system layer that lets the business scale without rebuilding.
 
+## Cadence Restart
+
+On 2026-06-30, execution restarts with a daily cadence, weekly closeout, and end-of-month closeout discipline. Use `docs/CADENCE_CLOSEOUT_PLAN_2026-06-30.md` as the operating plan for sequencing next steps and for adding deep dive decision analysis before each meaningful action.
+
+June 30 processing records:
+
+- `docs/CADENCE_INDEX_2026-06-30.md`
+- `docs/JUNE_30_CURRENT_TRUTH_REESTABLISHMENT_2026-06-30.md`
+- `docs/WEEKLY_AND_MONTH_END_CLOSEOUT_2026-06-30.md`
+- `docs/JULY_PRIORITY_QUEUE_DEEP_DIVE_DECISION_PACKETS_2026-06-30.md`
+- `docs/JULY_QUEUE_ORDER_AND_FIRST_ACTION_APPROVAL_RESULT_2026-06-30.md`
+- `docs/JUNE_30_DAILY_CLOSEOUT_AND_TOMORROW_START_2026-06-30.md`
+- `docs/EXECUTIVE_BOARD_JULY_STARTING_POINT_2026-06-30.md`
+- `docs/SENTINEL_EXECUTIVE_OPERATING_TEMPLATE_JULY_STARTING_POINT_2026-06-30.md`
+- `docs/JULY_PRIORITY_QUEUE_READINESS_PACKET_2026-06-30.md`
+- `docs/SENTINEL_AI_JUNE_CLOSEOUT_READY_ON_HOLD_WORKFLOW_2026-06-30.md`
+- `docs/SP1_LOW_LATENCY_PROOF_PIPELINE_MOCK_OPTIMIZATION_PACKET_2026-06-30.md`
+- `docs/H1_OWNERFI_PROOF_HEALTH_VALIDATION_RESULT_2026-06-30.md`
+- `docs/H1_GOVERNANCE_CLOSEOUT_AND_OWNER_DECISION_2026-06-30.md`
+- `docs/JULY_PRIORITY_QUEUE_READINESS_PROCESSING_RESULT_2026-06-30.md`
+
+The first July execution candidate is Hardening Focus item 1:
+`VERIFY_CURRENT_OWNERFI_PROOF_HEALTH_BEFORE_SHARE_OR_MEETING`. Treat the live
+proof claim as recorded state until that gate produces fresh evidence.
+
+After that verification gate passes, the recommended substantial feature is an
+Operator Decision Surface for Receipt and Audit Lookup. This candidate is based
+on existing local capability, not a new speculative lane: receipt lookup,
+control plane, control UI, proof UI flow, governance status, Mission Control,
+and operational upgrade checks passed during the June 30 verification pass.
+
+June 30 live proof-health verification was attempted but did not complete:
+`docs/LIVE_PROOF_HEALTH_VERIFICATION_RESULT_2026-06-30.md`. Treat the gate as
+blocked, not failed. Live-system claims, release packaging, and the receipt/audit
+decision surface remain held until a current live proof-health receipt exists.
+
+The latest requested retry is recorded in
+`docs/LIVE_PROOF_HEALTH_RETRY_RESULT_2026-06-30.md`; it also remains
+`blocked_not_failed`.
+
+The H1 one-by-one processing pass is recorded in
+`docs/H1_OWNERFI_PROOF_HEALTH_VALIDATION_RESULT_2026-06-30.md`; it also remains
+`blocked_not_failed`. Do not advance to H2, Engineering Next, release packaging,
+external sharing, or the receipt/audit decision surface until the current live
+proof-health receipt is produced.
+
+The H1 governance closeout is recorded in
+`docs/H1_GOVERNANCE_CLOSEOUT_AND_OWNER_DECISION_2026-06-30.md`. The owner
+rejected treating old proof records as current, rejected moving to H2 or
+Engineering Next, and approved keeping H1 open for a working-network rerun.
+
+The active July queue readiness processing result is recorded in
+`docs/JULY_PRIORITY_QUEUE_READINESS_PROCESSING_RESULT_2026-06-30.md`. The gate
+remains `blocked_not_failed`; keep all live claims and feature shipping held.
+
+The July queue order and first July validation action are owner-approved in
+`docs/JULY_QUEUE_ORDER_AND_FIRST_ACTION_APPROVAL_RESULT_2026-06-30.md`. The
+first action remains validation-only and blocked until the live proof-health
+receipt is produced from a working network path.
+
+Billing and funnel work remains discovery or integration requirements until it
+is shipped, verified, and supported by current evidence.
+
+Local Sentinel AI is only used when explicitly asked for a bounded governance,
+analysis, or validation task. It does not replace owner decisions, compliance
+gates, live proof-health verification, or runtime authority.
+
 ## Engineering Next
 
 1. Package the current hardening work into a clean release batch.
@@ -49,6 +116,7 @@ Live verification completed on 2026-04-28:
 3. Keep adding clients as surface planes, not forks.
 4. Use `hotelops` as the next placeholder expansion path only when the current proof lane is accepted.
 5. Treat billing and funnel work as discovery/integration requirements, not current shipped capabilities.
+6. Treat SP1 low-latency proof pipeline work as a Platform Next research candidate until a fixture-only proof-plane scope is approved.
 
 ## Do Not Lose
 
