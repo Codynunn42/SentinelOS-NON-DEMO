@@ -1,0 +1,56 @@
+openapi: 3.1.0
+info:
+  title: The Executive Desk SentinelOS Diagnostic API
+  version: 1.0.0
+  description: >
+    Phase 1 read-only diagnostic API for verifying the SentinelOS signing proxy
+    before enabling governed command execution.
+servers:
+  - url: https://beans-candles-tamil-dressed.trycloudflare.com
+paths:
+  /health:
+    get:
+      operationId: getProxyHealth
+      summary: Check SentinelOS signing proxy health
+      description: Returns the current health status of the signing proxy.
+      responses:
+        "200":
+          description: Proxy health status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  service:
+                    type: string
+                  sentinel_api:
+                    type: string
+                  timestamp:
+                    type: string
+  /proxy/status:
+    get:
+      operationId: getProxyStatus
+      summary: Check SentinelOS signing proxy configuration status
+      description: Returns proxy configuration and downstream readiness indicators.
+      responses:
+        "200":
+          description: Proxy status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  service:
+                    type: string
+                  status:
+                    type: string
+                  sentinel_api:
+                    type: string
+                  api_key_set:
+                    type: boolean
+                  hmac_secret_set:
+                    type: boolean
+                  timestamp:
+                    type: string
