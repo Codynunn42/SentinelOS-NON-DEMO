@@ -72,7 +72,7 @@ GPT has verified downstream SentinelOS command execution or live governed contro
 
 ## Recommended Next Gate
 
-Define and approve one safe downstream SentinelOS validation action before adding `/proxy/command` to the schema.
+Define and approve one safe downstream SentinelOS validation action before using `/proxy/command`.
 
 Required before the next gate:
 
@@ -81,3 +81,47 @@ Required before the next gate:
 3. Add only that controlled `/proxy/command` operation to the schema.
 4. Run the command from GPT Builder.
 5. Require a governed response, receipt, or audit evidence before upgrading downstream status.
+
+## 2026-07-01 Phase 2 Gate Preparation
+
+The selected safe first command is recorded in:
+
+- `phase-2-safe-read-only-command-gate-2026-07-01.md`
+
+The controlled operation added to the schema is:
+
+```yaml
+operationId: runRepoWorkflowDiagnosis
+tenant: nunncloud
+command: repo.control.workflow.diagnose
+```
+
+This operation is approved only for read-only repository workflow diagnosis. General SentinelOS control remains unverified.
+
+## 2026-07-01 Tunnel Refresh
+
+The stale quick tunnel was replaced with:
+
+```text
+https://spoken-labels-seventh-massage.trycloudflare.com
+```
+
+The refreshed tunnel verification is recorded in:
+
+- `tunnel-refresh-result-2026-07-01.md`
+
+Current classification after refresh:
+
+```yaml
+active_public_tunnel_url: https://spoken-labels-seventh-massage.trycloudflare.com
+cloudflare_public_tunnel_created: verified
+cloudflare_connectivity_prechecks: pass
+public_getProxyHealth_manual_curl: verified_http_200
+public_getProxyStatus_manual_curl: verified_http_200
+openapi_server_url_updated: verified
+gpt_builder_phase_1_retest_on_refreshed_tunnel: pending
+runRepoWorkflowDiagnosis_from_gpt_builder: pending
+downstream_sentinel_api_reachability: pending
+governed_command_execution: pending
+external_live_claim_allowed: false
+```

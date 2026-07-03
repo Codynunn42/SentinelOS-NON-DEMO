@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Executive Desk</title>
+    <link rel="stylesheet" href="/executive/styles.css">
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">SentinelOS</p>
+        <h1>Executive Desk</h1>
+      </div>
+      <div class="principal-strip">
+        <label for="principalId">Principal</label>
+        <input id="principalId" value="user@example.com" autocomplete="off">
+        <button id="refreshButton" type="button">Refresh</button>
+      </div>
+    </header>
+
+    <main class="desk-shell">
+      <section class="summary-band" aria-label="Operating summary">
+        <div class="metric">
+          <span class="metric-label">Risk</span>
+          <strong id="riskScore">-</strong>
+          <span id="riskDecision" class="status-chip neutral">pending</span>
+        </div>
+        <div class="metric">
+          <span class="metric-label">Receipts</span>
+          <strong id="receiptTotal">-</strong>
+          <span id="receiptWindow">24h</span>
+        </div>
+        <div class="metric">
+          <span class="metric-label">Delegations</span>
+          <strong id="delegationTotal">-</strong>
+          <span id="delegationState">active view</span>
+        </div>
+        <div class="metric">
+          <span class="metric-label">Auth Boundary</span>
+          <strong id="authBoundary">-</strong>
+          <span id="lastUpdated">not synced</span>
+        </div>
+      </section>
+
+      <section class="panel-grid">
+        <article class="panel" id="briefingPanel">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Briefing</p>
+              <h2>Daily Briefing</h2>
+            </div>
+            <button class="icon-button" id="pinBriefing" type="button" title="Pin briefing">Pin</button>
+          </div>
+          <div id="briefingList" class="briefing-list" aria-live="polite"></div>
+        </article>
+
+        <article class="panel" id="accessPanel">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Authority</p>
+              <h2>Controlled Access</h2>
+            </div>
+            <select id="delegationFilter" aria-label="Delegation filter">
+              <option value="active">Active</option>
+              <option value="all">All</option>
+            </select>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Principal</th>
+                  <th>Command</th>
+                  <th>Scope</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="delegationRows"></tbody>
+            </table>
+          </div>
+        </article>
+
+        <article class="panel" id="riskPanel">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Readiness</p>
+              <h2>Risk + Infrastructure</h2>
+            </div>
+            <span id="riskTimestamp" class="panel-note">-</span>
+          </div>
+          <div id="serviceList" class="service-list"></div>
+          <div class="factor-grid">
+            <div>
+              <span>Infra</span>
+              <meter id="factorInfra" min="0" max="1" value="0"></meter>
+            </div>
+            <div>
+              <span>Incidents</span>
+              <meter id="factorIncidents" min="0" max="1" value="0"></meter>
+            </div>
+            <div>
+              <span>Deployments</span>
+              <meter id="factorDeployments" min="0" max="1" value="0"></meter>
+            </div>
+            <div>
+              <span>Resources</span>
+              <meter id="factorResources" min="0" max="1" value="0"></meter>
+            </div>
+          </div>
+        </article>
+
+        <article class="panel" id="receiptPanel">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Ledger</p>
+              <h2>Receipt Ledger</h2>
+            </div>
+            <div class="panel-actions">
+              <select id="receiptStatus" aria-label="Receipt status">
+                <option value="">All</option>
+                <option value="executed">Executed</option>
+                <option value="blocked">Blocked</option>
+                <option value="issued">Issued</option>
+                <option value="rejected">Rejected</option>
+              </select>
+              <a id="exportCsv" class="link-button" href="/api/executive/receipts/export?format=csv">CSV</a>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Time</th>
+                  <th>Command</th>
+                  <th>Executor</th>
+                  <th>Status</th>
+                  <th>Risk</th>
+                </tr>
+              </thead>
+              <tbody id="receiptRows"></tbody>
+            </table>
+          </div>
+        </article>
+      </section>
+    </main>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    <script src="/executive/app.js" type="module"></script>
+  </body>
+</html>

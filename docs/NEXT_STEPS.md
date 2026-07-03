@@ -2,6 +2,113 @@
 
 **COMM:** Sentinel AI by Cody Nunn | Nunn Cloud
 
+## July 3 Operating Directive Locked
+
+The active operating directive is now locked as governance-first,
+validation-first, and freeze-preserving.
+
+Current priority:
+
+```yaml
+active_gate: RESTORE_OWNERFI_PROOF_HEALTH_ROUTE_SURFACE
+verification_gate: VERIFY_CURRENT_OWNERFI_PROOF_HEALTH_BEFORE_SHARE_OR_MEETING
+prep_packet: docs/OWNERFI_PROOF_HEALTH_NETWORK_VERIFICATION_PREP_2026-07-03.md
+verification_result: docs/OWNERFI_PROOF_HEALTH_VERIFICATION_RESULT_2026-07-03.md
+prepared_script: scripts/check-ownerfi-proof-health-receipt.js
+package_script: check:ownerfi-proof-health
+feature_expansion_allowed: false
+external_claims_allowed: false
+commercial_trigger_lane: SINTENEX_review_held
+authority_created: false
+```
+
+The Mission Control SINTENEX UI reclassification remains the next design/code
+scope after the OwnerFi proof-health route surface is restored or explicitly
+re-ordered.
+
+Latest working-network result:
+
+```yaml
+ownerfi_proof_health:
+  status: failed_not_share_ready
+  checked_at: 2026-07-03T04:36:34.524Z
+  route_results:
+    GET /health: 404
+    GET /proof: 404
+    GET /v1/audit?tenant=ownerfi without key: 404
+  azure_metadata:
+    container_app_running: true
+    fqdn_matches_recorded_target: true
+    latest_ready_revision: ca-nc-dev-sentinel--0000030
+    revision_list_result: empty
+  next_gate: RESTORE_OWNERFI_PROOF_HEALTH_ROUTE_SURFACE
+  authority_created: false
+```
+
+## Current Verification Boundary - 2026-07-01
+
+The active July 1 operating boundary is validation-first and governance-first:
+
+```yaml
+current_boundary:
+  stale_ownerfi_proof_records_as_current: rejected
+  ownerfi_live_proof_health: blocked_not_failed
+  external_live_claims_allowed: false
+  public_cloudflare_quick_tunnel: refreshed_and_public_proxy_verified
+  executive_desk_gpt_phase_2_read_only_command: prepared_not_verified
+  mutating_sentinelos_commands_allowed: false
+```
+
+The older live proof notes below remain historical repository context. They do
+not authorize current external claims, release packaging, meeting use, or
+feature shipping until a fresh live proof-health receipt is recorded.
+
+## July 3 SINTENEX Routing Correction
+
+Billing, checkout, funnel, commercial trigger, renewal-timer, and future
+project timed-event references are not active SentinelOS implementation claims.
+They are routed to SINTENEX/SINTINEX as a review-held timekeeper and commercial
+trigger design lane.
+
+Current review files:
+
+- `docs/JULY_03_CADENCE_INDEX_2026-07-03.md`
+- `docs/SINTENEX_TIMED_EVENT_AND_COMMERCIAL_ROUTING_BOUNDARY_2026-07-03.md`
+- `docs/SINTENEX_TIMED_EVENT_AND_COMMERCIAL_ROUTING_BOUNDARY_REVIEW_RESULT_2026-07-03.md`
+- `docs/JULY_03_DAILY_EXECUTIVE_CADENCE_2026-07-03.md`
+- `docs/SENTINEL_EXECUTIVE_OPERATING_TEMPLATE_2026-07-03.md`
+
+Next exact gates:
+
+1. `DEFINE_MISSION_CONTROL_SINTENEX_UI_RECLASSIFICATION_SCOPE`
+2. `RUN_PROTECTED_SENTINEL_CHECKS_WITH_LOCAL_API_KEY`
+3. `REFRESH_PUBLIC_TUNNEL_AND_RUN_REPO_WORKFLOW_DIAGNOSIS`
+
+Mission Control billing controls and checker expectations still need a separate
+approved UI/code reclassification pass before they should be treated as fixed.
+
+## July 1 Cadence and Template Alignment
+
+July 1 cadence processing opened the daily, weekly, and monthly operating
+surfaces from the same governance gate:
+
+- `governance/sentinel-platform/SENTINELOS_EXECUTIVE_CONSTITUTION.md`
+- `docs/JULY_01_CADENCE_INDEX_2026-07-01.md`
+- `docs/JULY_01_DAILY_EXECUTIVE_CADENCE_2026-07-01.md`
+- `docs/JULY_01_WEEKLY_EXECUTIVE_CADENCE_START_2026-07-01.md`
+- `docs/JULY_MONTHLY_OPERATING_CADENCE_START_2026-07-01.md`
+- `docs/SENTINEL_EXECUTIVE_OPERATING_TEMPLATE_2026-07-01.md`
+- `docs/EXECUTIVE_BOARD_2026-07-01.md`
+- `docs/EXECUTIVE_BOARD_ADDRESS_2026-07-01.md`
+- `docs/JULY_MONTHLY_OPERATING_BRIEF_2026-07-01.md`
+- `docs/executive-desk-gpt/tunnel-refresh-result-2026-07-01.md`
+
+The next controlled implementation gate is
+`RETEST_EXECUTIVE_DESK_ACTIONS_ON_REFRESHED_TUNNEL`. This gate is limited to
+the Phase 1 `getProxyHealth` and `getProxyStatus` checks, followed by the
+read-only `runRepoWorkflowDiagnosis` GPT Action if Phase 1 succeeds from GPT
+Builder.
+
 ## Current Truth
 
 SentinelOS NON-DEMO has a live, shareable OwnerFi proof surface deployed at:
@@ -29,7 +136,8 @@ Live verification completed on 2026-04-28:
 
 1. Keep the current OwnerFi proof path stable.
 2. Verify live health before any meeting or share.
-3. Keep billing and funnels out of the demo claim unless explicitly scoped.
+3. Keep commercial trigger and funnel concepts routed through SINTENEX unless
+   explicitly scoped and approved.
 4. Keep the ownership answer short:
    - OwnerFi owns brand, workflows, and data.
    - SentinelOS is the system layer that lets the business scale without rebuilding.
@@ -94,8 +202,9 @@ The July queue order and first July validation action are owner-approved in
 first action remains validation-only and blocked until the live proof-health
 receipt is produced from a working network path.
 
-Billing and funnel work remains discovery or integration requirements until it
-is shipped, verified, and supported by current evidence.
+Commercial trigger and funnel work remains SINTENEX-routed discovery or
+integration requirements until it is shipped, verified, and supported by current
+evidence.
 
 Local Sentinel AI is only used when explicitly asked for a bounded governance,
 analysis, or validation task. It does not replace owner decisions, compliance
@@ -115,7 +224,8 @@ gates, live proof-health verification, or runtime authority.
 2. Define role-based key or operator identity model.
 3. Keep adding clients as surface planes, not forks.
 4. Use `hotelops` as the next placeholder expansion path only when the current proof lane is accepted.
-5. Treat billing and funnel work as discovery/integration requirements, not current shipped capabilities.
+5. Treat commercial trigger and funnel work as SINTENEX-routed
+   discovery/integration requirements, not current shipped capabilities.
 6. Treat SP1 low-latency proof pipeline work as a Platform Next research candidate until a fixture-only proof-plane scope is approved.
 
 ## Do Not Lose
@@ -126,5 +236,6 @@ gates, live proof-health verification, or runtime authority.
 - Key rotation and basic command rate limiting are meeting-readiness hardening, not expansion.
 - Monitoring and ownership clarity are now proven enough for the meeting.
 - Governance is now pre-execution control, not just post-execution logging.
-- Billing and funnels are not ready-to-go in this repo; do not imply they are active.
+- Commercial trigger and funnel concepts are SINTENEX-routed and not
+  ready-to-go in this repo; do not imply they are active.
 - The next work should avoid expansion until after the room gives direction.

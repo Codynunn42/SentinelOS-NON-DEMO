@@ -8,6 +8,10 @@ The first canonical document in this library is:
 
 - `constitution/NUNN_CORPORATION_CONSTITUTION.md`
 
+The first SentinelOS platform doctrine draft is:
+
+- `sentinel-platform/SENTINELOS_EXECUTIVE_CONSTITUTION.md`
+
 This constitution is the highest governing document for Nunn Corporation. Subordinate governance documents should identify their authority, purpose, status, owner, and position within the hierarchy before being treated as canonical.
 
 ## Corporate Governance Hierarchy
@@ -35,6 +39,7 @@ governance/
 │   ├── BOARD_TEMPLATE.md
 │   └── MANAGEMENT_OPERATING_BOOK.md
 └── sentinel-platform/
+    ├── SENTINELOS_EXECUTIVE_CONSTITUTION.md
     ├── SENTINEL_PLATFORM_CONSTITUTION.md
     ├── SENTINEL_PLATFORM_CHARTER.md
     ├── GOVERNANCE.md

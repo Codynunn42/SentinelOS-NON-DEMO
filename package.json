@@ -5,6 +5,7 @@
   "description": "SentinelOS NON-DEMO client operating repository",
   "dependencies": {
     "dotenv": "^17.4.2",
+    "express": "^5.2.1",
     "pg": "^8.20.0"
   },
   "scripts": {
@@ -35,6 +36,10 @@
     "check:operator-escalation": "node scripts/check-operator-escalation.js",
     "check:ownerfi-pilot-api": "node scripts/check-ownerfi-pilot-api.js",
     "check:ownerfi-pilot-api:live": "node scripts/check-ownerfi-pilot-api-live.js",
+    "check:ownerfi-proof-health": "node scripts/check-ownerfi-proof-health-receipt.js",
+    "check:executive-desk:api": "mocha --require tsx apps/executive-desk/api/__tests__/routes.test.ts",
+    "check:executive-desk:proxy": "tsx apps/executive-desk/proxy/test-handler.ts",
+    "check:executive-desk:types": "tsc --noEmit --skipLibCheck --module esnext --target es2022 --moduleResolution bundler --esModuleInterop --types mocha,node apps/executive-desk/server.ts apps/executive-desk/api/express-adapter.ts apps/executive-desk/api/receipt-queries.ts apps/executive-desk/api/delegation-queries.ts apps/executive-desk/api/risk-api.ts apps/executive-desk/api/__tests__/routes.test.ts apps/executive-desk/proxy/command-handler.ts apps/executive-desk/proxy/test-handler.ts",
     "check:policy": "node scripts/check-policy-engine.js",
     "check:product-commands": "node scripts/check-product-command-routing.js",
     "check:receipts": "node scripts/check-receipt-lookup.js",
@@ -64,5 +69,16 @@
   },
   "engines": {
     "node": ">=20"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^26.1.0",
+    "@types/pg": "^8.20.0",
+    "@types/supertest": "^7.2.0",
+    "mocha": "^11.7.6",
+    "supertest": "^7.2.2",
+    "tsx": "^4.22.5",
+    "typescript": "^6.0.3"
   }
 }

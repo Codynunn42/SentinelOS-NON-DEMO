@@ -10,6 +10,7 @@ Important: if your GPT Builder does not show an `Actions` section, use the no-ac
 - `the-executive-desk-instructions.md` - paste into the GPT Instructions field only when Actions are available.
 - `the-executive-desk-openapi.yaml` - import or paste into the GPT Actions schema field only when the builder exposes Actions.
 - `integration-status-2026-06-30.md` - current evidence and blocker classification.
+- `tunnel-refresh-result-2026-07-01.md` - July 1 refreshed Cloudflare tunnel verification record.
 
 ## GPT Settings
 
@@ -43,6 +44,25 @@ Call getProxyHealth.
 Call getProxyStatus.
 ```
 
+## Phase 2 Read-Only Command Test
+
+Only after Phase 1 succeeds, the approved downstream test operation is:
+
+```text
+runRepoWorkflowDiagnosis
+```
+
+It sends only:
+
+```yaml
+tenant: nunncloud
+command: repo.control.workflow.diagnose
+```
+
+Use `phase-2-safe-read-only-command-gate-2026-07-01.md` as the gate record.
+
+Do not add mutating `/proxy/command` operations until inbound auth and a new approval gate are defined.
+
 ## Governance Boundary
 
 This Phase 1 schema verifies only:
@@ -72,7 +92,7 @@ In that mode, The Executive Desk can classify evidence and prepare decision surf
 The configured server URL is:
 
 ```text
-https://beans-candles-tamil-dressed.trycloudflare.com
+https://spoken-labels-seventh-massage.trycloudflare.com
 ```
 
 This URL works only while the local `cloudflared tunnel --url http://localhost:3001` process is running.
