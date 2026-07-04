@@ -50,6 +50,7 @@ const commandScopes = {
   'vault.retrieve': 'platform:admin',
   'architecture.reconstruction.begin': 'platform:admin',
   'governance.canonicalize.platform': 'platform:admin',
+  'governance.nextsteps.quantitative.light': 'platform:admin',
   'operational.upgrade.assess': 'platform:admin',
   'operational.upgrade.plan.prepare': 'platform:admin',
   'contract.reclamation.assess': 'platform:admin',

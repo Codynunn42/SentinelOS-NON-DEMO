@@ -18,8 +18,12 @@ freeze-preserving.
 
 2. Prioritize the immediate gate.
    - Focus the immediate technical effort on
-     `VERIFY_CURRENT_OWNERFI_PROOF_HEALTH_BEFORE_SHARE_OR_MEETING`.
-   - Resolve `blocked_not_failed` through a working-network verification rerun.
+     `RESOLVE_AZURE_SUBSCRIPTION_AND_CONTAINER_APP_SERVING_STATE_FOR_OWNERFI_PROOF`.
+   - The working-network verification rerun is no longer `blocked_not_failed`;
+     it produced failed current live route health and a later timeout before
+     route classification.
+   - Route restoration remains sequenced after subscription / Container App
+     serving state is recovered enough for read-only runtime checks.
 
 3. Maintain system boundaries.
    - Keep commercial, billing, funnel, renewal-timer, and future timed-event
@@ -30,10 +34,17 @@ freeze-preserving.
 ## Current Next Action
 
 ```yaml
-active_gate: VERIFY_CURRENT_OWNERFI_PROOF_HEALTH_BEFORE_SHARE_OR_MEETING
+active_gate: RESOLVE_AZURE_SUBSCRIPTION_AND_CONTAINER_APP_SERVING_STATE_FOR_OWNERFI_PROOF
+next_route_gate_after_azure_serving_state: RESTORE_OWNERFI_PROOF_HEALTH_ROUTE_SURFACE
+failed_verification_gate: VERIFY_CURRENT_OWNERFI_PROOF_HEALTH_BEFORE_SHARE_OR_MEETING
 prepared_packet: docs/OWNERFI_PROOF_HEALTH_NETWORK_VERIFICATION_PREP_2026-07-03.md
+verification_result: docs/OWNERFI_PROOF_HEALTH_VERIFICATION_RESULT_2026-07-03.md
+azure_great_hold_state: docs/AZURE_OWNERFI_PROOF_GREAT_HOLD_STATE_2026-07-03.md
 prepared_script: scripts/check-ownerfi-proof-health-receipt.js
 package_script: check:ownerfi-proof-health
+latest_rerun_at: 2026-07-03T20:03:06Z
+latest_rerun_result: network_timeout_before_route_classification
+latest_direct_route_probe_result: timeout_after_15s_http_000
 authority_created: false
 ```
 

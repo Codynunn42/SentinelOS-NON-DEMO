@@ -736,6 +736,65 @@ function getStripeReadiness() {
   };
 }
 
+function buildRevenueReadiness() {
+  const stripe = getStripeReadiness();
+  const requiredConfig = getStripeRequiredConfig();
+  const paymentReady = stripe.status === 'ready';
+
+  return {
+    status: paymentReady ? 'ready_held_for_owner_activation' : 'scaffolded_held',
+    mode: 'ready_to_turn_on_when_approved',
+    verifiedFacts: {
+      proofHealthRequired: true,
+      billingSurfacePresent: true,
+      checkoutConfigEndpoint: '/billing/checkout/config',
+      checkoutSessionEndpoint: '/billing/checkout/session',
+      sessionStatusEndpoint: '/billing/session-status'
+    },
+    ownerDecisions: {
+      limitedExternalProofShare: 'owner_decision_required',
+      revenueConversations: 'owner_decision_required',
+      liveCheckoutActivation: paymentReady ? 'configuration_ready_owner_decision_required' : 'held_pending_configuration',
+      productionCustomerExecution: 'held_pending_customer_scope_packet'
+    },
+    authorizations: {
+      limitedExternalProofShare: false,
+      revenueConversations: false,
+      livePaymentCollection: false,
+      productionCustomerDealExecution: false,
+      publicPricingPublication: false,
+      customerOnboarding: false
+    },
+    activationReadiness: {
+      liveCheckout: paymentReady,
+      requiredConfig,
+      missing: stripe.missing,
+      safeguards: stripe.safeguards,
+      nextGate: paymentReady
+        ? 'OWNER_APPROVE_STRIPE_CHECKOUT_ACTIVATION'
+        : 'PREPARE_STRIPE_CHECKOUT_CONFIGURATION_APPROVAL_PACKET'
+    },
+    recommendedNextGates: [
+      { gate: 'VERIFY_GPT_ACTION_END_TO_END', status: 'pending' },
+      { gate: 'COMPLETE_RECEIPT_AND_AUDIT_VERIFICATION', status: 'pending' },
+      { gate: 'CONFIGURE_AND_VERIFY_STRIPE_NON_PRODUCTION', status: paymentReady ? 'configuration_present_verify_non_production' : 'pending' },
+      { gate: 'CUSTOMER_IMPLEMENTATION_PACKET', status: 'pending' },
+      { gate: 'PRODUCTION_READINESS_REVIEW', status: 'pending' },
+      { gate: 'COMMERCIAL_LAUNCH_APPROVAL', status: 'pending' }
+    ],
+    nonAuthorization: [
+      'live_payment_collection',
+      'stripe_checkout_activation',
+      'production_customer_processing',
+      'customer_onboarding',
+      'regulated_or_compliance_claims',
+      'production_service_commitments',
+      'public_pricing_publication',
+      'infrastructure_mutation'
+    ]
+  };
+}
+
 function getStripeRequiredConfig(config = getStripeCheckoutConfig()) {
   const required = [];
 
@@ -1591,6 +1650,10 @@ const server = http.createServer(async (req, res) => {
 
   if (pathname === '/billing/checkout/readiness' && req.method === 'GET') {
     return sendJson(res, 200, getStripeReadiness());
+  }
+
+  if (pathname === '/billing/revenue-readiness' && req.method === 'GET') {
+    return sendJson(res, 200, buildRevenueReadiness());
   }
 
   if (pathname === '/billing/checkout/session' && req.method === 'POST') {

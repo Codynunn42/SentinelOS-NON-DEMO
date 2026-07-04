@@ -9,12 +9,54 @@ const path = require('path');
  */
 const COMMANDS = {
     ARCHITECTURE_RECONSTRUCTION: 'architecture.reconstruction.begin',
-    GOVERNANCE_CANONICALIZE: 'governance.canonicalize.platform'
+    GOVERNANCE_CANONICALIZE: 'governance.canonicalize.platform',
+    LIGHT_QUANTITATIVE_NEXT_STEPS: 'governance.nextsteps.quantitative.light'
 };
 
 const KNOWN_LEGACY_KEYWORDS = ['ownerfi', 'nunncloud', 'hotelops', 'contractreclamation', 'sentinelos'];
-const INTERNAL_PATH_KEYWORDS = ['proof', 'ops', 'archive', 'runtime', 'scripts', 'configs', 'fixtures', 'infrastructure', 'store'];
-const PUBLIC_PATH_KEYWORDS = ['docs', 'apps', 'services', 'azure', 'README.md', 'package.json', 'package-lock.json', 'pnpm-lock.yaml'];
+const INTERNAL_PATH_KEYWORDS = [
+    'proof',
+    'ops',
+    'archive',
+    'runtime',
+    'scripts',
+    'config',
+    'configs',
+    'fixtures',
+    'infrastructure',
+    'store',
+    'deploy',
+    'lambda',
+    'ops-closeout',
+    'contract_reclamation-incubator',
+    'node_modules',
+    'dist',
+    'build',
+    '.git',
+    '.github',
+    '.husky',
+    '.vscode',
+    '.turbo',
+    '.next',
+    'coverage',
+    '.env',
+    '.env.example',
+    '.gitignore',
+    'Dockerfile',
+    'Dockerfile.phase1-lock',
+    'DoctorModeRuntimeRestoreSupportPacket.json',
+    'RELEASE_AUTHORITY_LOCK.md',
+    'SECURITY.md',
+    'SENTINEL-RELEASE-v1.md',
+    'STATUS_REPORT.md',
+    'activity-full.json',
+    'activity.json',
+    'broken-app.yaml',
+    'compose-expanded.yml',
+    'current-app.json',
+    'docker-compose.yml'
+];
+const PUBLIC_PATH_KEYWORDS = ['docs', 'governance', 'apps', 'services', 'azure', 'README.md', 'package.json', 'package-lock.json', 'pnpm-lock.yaml'];
 
 function normalizeBoolean(value, defaultValue = false) {
     return typeof value === 'boolean' ? value : defaultValue;
@@ -32,14 +74,23 @@ function normalizeStringArray(value) {
     return value.map(normalizeString).filter(Boolean);
 }
 
+function pathMatchesKeyword(normalizedPath, keyword) {
+    const normalizedKeyword = keyword.toLowerCase();
+
+    return normalizedPath === normalizedKeyword ||
+        normalizedPath.startsWith(`${normalizedKeyword}/`) ||
+        normalizedPath.includes(`/${normalizedKeyword}/`) ||
+        normalizedPath.endsWith(`/${normalizedKeyword}`);
+}
+
 function inferAssetClassification(relativePath) {
     const normalized = relativePath.toLowerCase();
 
-    if (INTERNAL_PATH_KEYWORDS.some((keyword) => normalized.includes(`/${keyword}/`) || normalized.endsWith(`/${keyword}`))) {
+    if (INTERNAL_PATH_KEYWORDS.some((keyword) => pathMatchesKeyword(normalized, keyword))) {
         return 'internal';
     }
 
-    if (PUBLIC_PATH_KEYWORDS.some((keyword) => normalized.includes(`/${keyword}/`) || normalized.endsWith(`/${keyword}`))) {
+    if (PUBLIC_PATH_KEYWORDS.some((keyword) => pathMatchesKeyword(normalized, keyword))) {
         return 'public';
     }
 
@@ -141,7 +192,195 @@ function buildExecutionMap() {
                 tenant: 'sentinelos',
                 command: COMMANDS.GOVERNANCE_CANONICALIZE,
                 description: 'Canonicalize platform governance, module classification, and publication boundaries.'
+            },
+            {
+                tenant: 'sentinelos',
+                command: COMMANDS.LIGHT_QUANTITATIVE_NEXT_STEPS,
+                description: 'Score next-step deep-dive lanes in light mode and return bounded authorization recommendations.'
             }
+        ]
+    };
+}
+
+function scoreGate({ evidence = 0, risk = 0, reversibility = 0, authority = 0 }) {
+    return Math.max(0, Math.min(100, Math.round((evidence * 0.35) + (authority * 0.25) + (reversibility * 0.2) + ((100 - risk) * 0.2))));
+}
+
+function buildCustomerDiscoveryQuestionnaire() {
+    return {
+        customer_identity_fields: [
+            { field: 'customer_legal_name', status: 'required_before_production' },
+            { field: 'authorized_contact_name', status: 'required_before_production' },
+            { field: 'authorized_contact_role', status: 'required_before_production' },
+            { field: 'authority_source', status: 'required_before_production' }
+        ],
+        workflow_scope_fields: [
+            { field: 'implementation_objective', allowedValues: ['discovery', 'pilot', 'production'], status: 'required' },
+            { field: 'workflow_commands', status: 'required_before_production' },
+            { field: 'inputs_outputs', status: 'required_before_production' },
+            { field: 'approval_chain', status: 'required_before_production' }
+        ],
+        data_classification_fields: [
+            { field: 'data_categories', status: 'required_before_customer_data' },
+            { field: 'tenant_boundary', status: 'required_before_customer_data' },
+            { field: 'retention_expectation', status: 'required_before_customer_data' },
+            { field: 'restricted_or_regulated_data', status: 'required_before_claims' }
+        ],
+        approval_authority_fields: [
+            { field: 'customer_approver', status: 'required_before_production' },
+            { field: 'nunncorp_approver', status: 'required_before_production' },
+            { field: 'go_live_authority', status: 'required_before_production' }
+        ],
+        audit_receipt_fields: [
+            { field: 'required_receipt_events', status: 'required_before_production' },
+            { field: 'audit_retrieval_expectation', status: 'required_before_production' }
+        ],
+        support_boundary_fields: [
+            { field: 'support_hours', status: 'required_before_sla' },
+            { field: 'response_expectation', status: 'required_before_sla' },
+            { field: 'escalation_contact', status: 'required_before_sla' }
+        ],
+        prohibited_claims_section: [
+            'No regulated finance claim without separate evidence and approval.',
+            'No production readiness claim until customer scope, data boundary, approval chain, and receipt evidence clear.',
+            'No payment collection claim until Stripe live-payment approval clears.'
+        ]
+    };
+}
+
+function buildStripeEvidencePlan() {
+    return {
+        exact_environment_keys: [
+            'SENTINEL_STRIPE_CHECKOUT_ENABLED',
+            'STRIPE_PUBLISHABLE_KEY',
+            'STRIPE_PRICE_ID'
+        ],
+        non_production_price_id_source: 'Stripe test-mode price ID supplied through approved environment management.',
+        validation_commands: [
+            'npm run check:revenue-readiness',
+            'npm run check:stripe-checkout'
+        ],
+        expected_ready_response: {
+            route: 'GET /billing/revenue-readiness',
+            requiredStatusBeforeLiveApproval: 'ready_held_for_owner_activation'
+        },
+        expected_checkout_session_test_response: 'Test-mode session may succeed only after non-production Stripe configuration is supplied.',
+        audit_receipt_expectation: 'Checkout attempts must produce an approval or audit receipt before live payment approval.',
+        rollback_or_disable_plan: 'Set SENTINEL_STRIPE_CHECKOUT_ENABLED=false and preserve Mission Control as SINTENEX Commercial Trigger Review.'
+    };
+}
+
+function buildOwnerFiInventoryTemplate() {
+    return {
+        source_paths: [],
+        asset_type: 'to_be_classified',
+        ownerfi_target_modules: [
+            'treasury',
+            'budgeting',
+            'forecasting',
+            'accounting',
+            'executive_reporting',
+            'ai_agents',
+            'governance'
+        ],
+        preserve_or_supersede_recommendation: 'pending_read_only_inventory',
+        governance_sensitivity: 'financial_internal',
+        proposed_future_path: 'pending_exact_file_movement_manifest',
+        movement_authority_required: true
+    };
+}
+
+function buildPublicFrontDoorVerificationTemplate() {
+    return {
+        hosting_provider: 'pending_verification',
+        production_deployment_method: 'pending_verification',
+        contact_form_storage_or_notification_target: 'pending_verification',
+        approved_public_copy_boundary: [
+            'selected trusted proof review approved',
+            'revenue conversations approved',
+            'no live payment claim',
+            'no production customer execution claim'
+        ],
+        rollback_plan: 'pending_hosting_target_verification'
+    };
+}
+
+function buildLightQuantitativeNextStepsResult(payload = {}, context = {}) {
+    const customerScopeFieldsComplete = normalizeBoolean(payload.customerScopeFieldsComplete, false);
+    const ownerIntentAfterScope = normalizeBoolean(payload.ownerIntentAfterScope, true);
+    const mode = normalizeString(payload.mode, 'light');
+    const lanes = [
+        {
+            lane: 'stripe_non_production_configuration',
+            score: scoreGate({ evidence: 55, risk: 68, reversibility: 80, authority: 45 }),
+            decision: 'authorize_evidence_plan_only',
+            output: buildStripeEvidencePlan()
+        },
+        {
+            lane: 'customer_discovery_intake_and_risk',
+            score: scoreGate({ evidence: 72, risk: 42, reversibility: 86, authority: 82 }),
+            decision: 'authorize_questionnaire_preparation',
+            output: buildCustomerDiscoveryQuestionnaire()
+        },
+        {
+            lane: 'production_customer_deal_execution',
+            score: customerScopeFieldsComplete
+                ? scoreGate({ evidence: 88, risk: 55, reversibility: 45, authority: 90 })
+                : scoreGate({ evidence: 38, risk: 86, reversibility: 35, authority: 45 }),
+            decision: customerScopeFieldsComplete ? 'prepare_owner_authorization_packet' : 'hold_pending_completed_customer_scope',
+            ownerIntentAfterScope,
+            missingIfHeld: customerScopeFieldsComplete ? [] : [
+                'customer_identity',
+                'authorized_contact',
+                'workflow_scope',
+                'data_categories',
+                'tenant_boundary',
+                'approval_chain',
+                'audit_receipt_requirements',
+                'support_boundary',
+                'allowed_claims'
+            ]
+        },
+        {
+            lane: 'ownerfi_ai_financial_management_inventory',
+            score: scoreGate({ evidence: 78, risk: 30, reversibility: 92, authority: 85 }),
+            decision: 'authorize_read_only_inventory',
+            output: buildOwnerFiInventoryTemplate()
+        },
+        {
+            lane: 'nunncorporation_public_front_door_verification',
+            score: scoreGate({ evidence: 70, risk: 44, reversibility: 78, authority: 60 }),
+            decision: 'authorize_read_only_deployment_target_verification',
+            output: buildPublicFrontDoorVerificationTemplate()
+        }
+    ];
+
+    return {
+        command: COMMANDS.LIGHT_QUANTITATIVE_NEXT_STEPS,
+        mode,
+        model: 'sentinel_light_quantitative_reasoning_v1',
+        generatedAt: new Date().toISOString(),
+        source: normalizeString(payload.source, 'docs/NEXT_STEPS_DEEP_DIVE_SUMMARIES_2026-07-03.md'),
+        thresholdPolicy: {
+            authorizePreparation: 60,
+            prepareOwnerAuthorizationPacket: 75,
+            authorizeProductionExecution: 90,
+            criticalMissingFieldsAllowedForProduction: 0
+        },
+        lanes,
+        conclusion: {
+            discoveryAndQuestionnaire: 'authorized_to_prepare',
+            productionCustomerDealExecution: customerScopeFieldsComplete ? 'prepare_authorization_packet_for_owner_review' : 'not_authorized_yet',
+            livePaymentCollection: 'not_authorized',
+            fileMovement: 'not_authorized',
+            runtimeMutation: 'not_authorized'
+        },
+        recommendedNextActions: [
+            'Populate the customer discovery intake and risk questionnaire.',
+            'Use the populated questionnaire to produce a customer-specific authorization packet only after required fields are complete.',
+            'Prepare Stripe non-production configuration evidence before live payment approval.',
+            'Run OwnerFi AI Financial Management inventory as read-only.',
+            'Verify nunncorporation.com deployment target and contact form destination before production publish.'
         ]
     };
 }
@@ -294,12 +533,41 @@ async function handleGovernanceCanonicalize(payload = {}, context = {}, envelope
     };
 }
 
+async function handleLightQuantitativeNextSteps(payload = {}, context = {}, envelope = {}) {
+    const commandName = COMMANDS.LIGHT_QUANTITATIVE_NEXT_STEPS;
+    const result = buildLightQuantitativeNextStepsResult(payload, context);
+    const receipt = buildGovernanceReceipt(commandName, { ...payload, scope: 'nextsteps-deep-dive' }, context);
+
+    if (context.emitSecurityEvent) {
+        context.emitSecurityEvent(`${context.tenant || 'sentinelos'}.${commandName}.receipt_created`, {
+            route: '/v1/command',
+            command: `${context.tenant || 'sentinelos'}.${commandName}`,
+            tenant: context.tenant || 'sentinelos',
+            receiptId: receipt ? receipt.receiptId : null,
+            auditId: receipt ? receipt.auditId : null
+        });
+    }
+
+    return {
+        success: true,
+        statusCode: 200,
+        data: {
+            result,
+            command: commandName,
+            tenant: context.tenant || 'sentinelos',
+            receipt
+        }
+    };
+}
+
 const sentinelOsHandlers = {
     [COMMANDS.ARCHITECTURE_RECONSTRUCTION]: handleArchitectureReconstruction,
-    [COMMANDS.GOVERNANCE_CANONICALIZE]: handleGovernanceCanonicalize
+    [COMMANDS.GOVERNANCE_CANONICALIZE]: handleGovernanceCanonicalize,
+    [COMMANDS.LIGHT_QUANTITATIVE_NEXT_STEPS]: handleLightQuantitativeNextSteps
 };
 
 module.exports = {
     sentinelOsHandlers,
-    COMMANDS
+    COMMANDS,
+    buildLightQuantitativeNextStepsResult
 };

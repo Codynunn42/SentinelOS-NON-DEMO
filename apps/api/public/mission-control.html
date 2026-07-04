@@ -1004,22 +1004,22 @@
 
       <article class="panel span-4">
         <div class="panel-head">
-          <h2>Billing Controls</h2>
+          <h2>SINTENEX Commercial Trigger Review</h2>
           <span id="billingChip" class="chip">not checked</span>
         </div>
         <div class="metric-grid">
           <div class="metric">
-            <span>Checkout</span>
+            <span>Revenue Stage</span>
             <strong id="billingStatus">-</strong>
           </div>
           <div class="metric">
-            <span>Config Gate</span>
+            <span>Activation Gate</span>
             <strong id="billingGate">-</strong>
           </div>
         </div>
         <div class="actions" style="margin-top:12px">
-          <button id="loadBillingButton" class="secondary" type="button">Check Billing</button>
-          <button id="attemptBillingButton" class="secondary" type="button">Attempt Checkout</button>
+          <button id="loadBillingButton" class="secondary" type="button">Check Revenue Gate</button>
+          <button id="attemptBillingButton" class="secondary" type="button">Test Held Checkout</button>
         </div>
       </article>
 
@@ -1739,10 +1739,11 @@
     }
 
     async function loadBillingStatus() {
-      const payload = await fetch('/billing/checkout/config').then((response) => response.json());
+      const payload = await fetch('/billing/revenue-readiness').then((response) => response.json());
       el.billingStatus.textContent = payload.status || '-';
-      el.billingGate.textContent = payload.enabled ? 'enabled' : (payload.missing || []).join(', ') || 'not enabled';
-      setChip(el.billingChip, payload.status || 'unknown', payload.status === 'ready' ? 'good' : 'warn');
+      const activation = payload.activationReadiness || {};
+      el.billingGate.textContent = activation.liveCheckout ? 'owner approval required' : (activation.requiredConfig || []).join(', ') || 'held';
+      setChip(el.billingChip, payload.status || 'unknown', activation.liveCheckout ? 'warn' : 'warn');
       return payload;
     }
 

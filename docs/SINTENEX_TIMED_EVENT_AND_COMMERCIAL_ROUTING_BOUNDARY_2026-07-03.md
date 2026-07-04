@@ -11,7 +11,8 @@
 review_gate: REVIEW_SINTENEX_TIMED_EVENT_AND_COMMERCIAL_ROUTING_BOUNDARY
 review_result: accepted_as_review_held_boundary
 review_result_file: docs/SINTENEX_TIMED_EVENT_AND_COMMERCIAL_ROUTING_BOUNDARY_REVIEW_RESULT_2026-07-03.md
-next_gate: DEFINE_MISSION_CONTROL_SINTENEX_UI_RECLASSIFICATION_SCOPE
+active_packet_gate: OWNER_DECISION_ON_EXTERNAL_SHARE_AND_REVENUE_USE
+held_design_gate: COMMERCIAL_LAUNCH_APPROVAL
 authority_created: false
 ```
 
@@ -115,17 +116,24 @@ Do not publish or reuse language that states or implies:
 - support or continuity timers create SLA commitments;
 - SINTENEX creates customer, payment, or runtime authority.
 
-## Next Gate
+## Held Design Gate
 
 ```yaml
-next_gate: DEFINE_SINTENEX_TIMED_EVENT_ROUTING_CONTRACT
-status: review_required
+held_design_gate: COMMERCIAL_LAUNCH_APPROVAL
+status: revenue_ready_held_after_ownerfi_proof_health_restoration
 requires:
   - normalized naming decision for SINTENEX and SINTINEX
   - timed event schema
   - executive template report contract
   - commercial trigger classification policy
-  - Mission Control UI terminology decision
+  - Stripe configuration approval packet
+  - non-production checkout verification
+  - customer implementation packet
+  - production readiness review
   - proof that no billing activation claim is created
 authority_created: false
 ```
+
+Mission Control now uses `SINTENEX Commercial Trigger Review` and
+`GET /billing/revenue-readiness` to show the revenue lane as ready-held, not as
+active billing.

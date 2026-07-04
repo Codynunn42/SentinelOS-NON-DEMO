@@ -63,9 +63,9 @@ async function main() {
   assert(candidates.some((item) => item.taskId === 'task_arizona_hold'));
 
   const xeQueue = buildXeQueue(tasks);
-  assert.strictEqual(xeQueue.length, 1);
-  assert.strictEqual(xeQueue[0].taskId, 'task_vendor_final');
-  assert.strictEqual(xeQueue[0].status, 'waiting_for_approval');
+  assert.strictEqual(xeQueue.length, 2);
+  assert(xeQueue.some((item) => item.taskId === 'task_vendor_final' && item.status === 'waiting_for_approval'));
+  assert(xeQueue.some((item) => item.taskId === 'task_mapping_index' && item.status === 'ready_for_xe'));
 
   const run = await orchestrateTaskTemplates({
     tenant: 'ownerfi',
@@ -81,7 +81,7 @@ async function main() {
       {
         id: 'task_xe_assist',
         title: 'Prepare XE assistance for approval follow-through',
-        category: 'xe',
+        category: 'conditional',
         xeRequired: true,
         nextStep: 'Queue XE only after the human approval is recorded.'
       }
@@ -90,14 +90,14 @@ async function main() {
 
   assert.strictEqual(run.status, 'orchestrated');
   assert.strictEqual(run.summary.taskCount, 2);
-  assert.strictEqual(run.summary.approvalsNeeded, 2);
-  assert.strictEqual(run.summary.xeActionsNeeded, 1);
-  assert.strictEqual(run.summary.approvalsCreated, 2);
-  assert.strictEqual(run.approvalRecords.length, 2);
-  assert.strictEqual(run.boundary.requiresApproval.length, 2);
-  assert.strictEqual(run.boundary.blockedActions.length, 2);
-  assert.strictEqual(run.boundary.xeActions.length, 0);
-  assert.strictEqual(createdApprovals.length, 2);
+  assert.strictEqual(run.summary.approvalsNeeded, 1);
+  assert.strictEqual(run.summary.xeActionsNeeded, 2);
+  assert.strictEqual(run.summary.approvalsCreated, 1);
+  assert.strictEqual(run.approvalRecords.length, 1);
+  assert.strictEqual(run.boundary.requiresApproval.length, 1);
+  assert.strictEqual(run.boundary.blockedActions.length, 1);
+  assert.strictEqual(run.boundary.xeActions.length, 1);
+  assert.strictEqual(createdApprovals.length, 1);
   assert(run.auditHash && run.auditHash.length === 64);
   assert(createdApprovals.every((approval) => approval.context.approvalType === 'task_template_approval'));
 
@@ -106,7 +106,7 @@ async function main() {
     approvalRecords: run.approvalRecords.map((record) => ({ ...record, status: 'approved' }))
   });
   assert.strictEqual(boundary.requiresApproval.length, 0);
-  assert.strictEqual(boundary.xeActions.length, 1);
+  assert.strictEqual(boundary.xeActions.length, 2);
 
   const blockedExecution = executeTaskStep(run.tasks[1]);
   assert.strictEqual(blockedExecution.status, 'BLOCKED');

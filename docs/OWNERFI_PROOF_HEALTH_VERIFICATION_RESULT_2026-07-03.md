@@ -75,6 +75,13 @@ failures:
 
 ## Read-Only Azure Metadata
 
+Superseding update: the metadata below is historical from an earlier July 3
+check. It is no longer the current Azure serving-state truth. The current
+holding record is
+`docs/AZURE_OWNERFI_PROOF_GREAT_HOLD_STATE_2026-07-03.md`, which supersedes the
+earlier `Running` metadata with Container App `Failed`, null ingress/containers,
+and revision listing blocked by `ManagedClusterSuspended`.
+
 Read-only Container App metadata was checked after the route failure:
 
 ```yaml
@@ -125,22 +132,65 @@ ownerfi_proof_health:
   reason: required_live_routes_return_404
   network_path: reached
   app_metadata: running_but_routes_not_serving_required_surface
-  next_gate: RESTORE_OWNERFI_PROOF_HEALTH_ROUTE_SURFACE
+  historical_next_route_gate: RESTORE_OWNERFI_PROOF_HEALTH_ROUTE_SURFACE
+  superseded_by_current_gate: RESOLVE_AZURE_SUBSCRIPTION_AND_CONTAINER_APP_SERVING_STATE_FOR_OWNERFI_PROOF
+  authority_created: false
+```
+
+## Azure Hold-State Update
+
+The current July 3 Azure closeout places this lane at the subscription /
+Container App serving-state gate:
+
+```yaml
+superseding_hold_state:
+  source: docs/AZURE_OWNERFI_PROOF_GREAT_HOLD_STATE_2026-07-03.md
+  active_gate: RESOLVE_AZURE_SUBSCRIPTION_AND_CONTAINER_APP_SERVING_STATE_FOR_OWNERFI_PROOF
+  container_app_provisioning_state: Failed
+  container_app_ingress: null
+  container_app_containers: null
+  revision_list_error: ManagedClusterSuspended
+  direct_route_probes:
+    GET /health: timeout_after_15s_http_000
+    GET /proof: timeout_after_15s_http_000
+    GET /v1/audit?tenant=ownerfi without key: timeout_after_15s_http_000
+  prior_running_metadata_current: false
+  live_claims_allowed: false
+  authority_created: false
+```
+
+## Current Rerun Update
+
+A read-only rerun at `2026-07-03T20:03:06Z` did not reproduce the earlier 404
+route responses. It failed earlier at the network fetch layer:
+
+```yaml
+latest_rerun:
+  checked_at: 2026-07-03T20:03:06Z
+  npm_run_check_ownerfi_proof_health: fetch_failed
+  direct_curl:
+    GET /health: timeout_after_20s
+    GET /proof: timeout_after_20s
+    GET /v1/audit?tenant=ownerfi without key: timeout_after_20s
+  live_claims_allowed: false
+  external_share_allowed: false
+  next_gate: RESOLVE_AZURE_SUBSCRIPTION_AND_CONTAINER_APP_SERVING_STATE_FOR_OWNERFI_PROOF
+  next_route_gate_after_azure_serving_state: RESTORE_OWNERFI_PROOF_HEALTH_ROUTE_SURFACE
   authority_created: false
 ```
 
 ## Required Next Gate
 
-`RESTORE_OWNERFI_PROOF_HEALTH_ROUTE_SURFACE`
+`RESOLVE_AZURE_SUBSCRIPTION_AND_CONTAINER_APP_SERVING_STATE_FOR_OWNERFI_PROOF`
 
 Required scope:
 
-1. Identify why the running Container App is not serving `/health`, `/proof`, or
-   `/v1/audit?tenant=ownerfi`.
-2. Reconcile the empty revision-list result against the `latestReadyRevisionName`
-   shown by `az containerapp show`.
-3. Restore or redeploy only after explicit approval.
-4. Rerun `npm run check:ownerfi-proof-health`.
+1. Resolve the Azure subscription/payment/admin state outside this repo lane.
+2. Rerun read-only Container App and managed-environment checks.
+3. If Container App serving state is still failed after subscription recovery,
+   prepare an exact runtime restore authority packet before mutation.
+4. If serving state is restored, rerun `npm run check:ownerfi-proof-health` and
+   direct route probes.
 
 ## Non-Authorization
 

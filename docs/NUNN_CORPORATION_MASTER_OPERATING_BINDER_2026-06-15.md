@@ -113,6 +113,64 @@ current-direction use. The active steering correction is
 | Entity Inquiry Portal | local preparation surface exists | external activation held |
 | Government Outcomes Surface | local preparation surface exists | external activation held |
 
+## July 3 OwnerFi Financial Domain Addendum
+
+OwnerFi is the Nunn Corporation internal financial management domain.
+AI Financial Management is not a parallel product lane beside OwnerFi; it is a
+capability set inside OwnerFi.
+
+```yaml
+ownerfi_domain:
+  role: internal_financial_management_domain
+  governs:
+    - treasury
+    - budgeting
+    - forecasting
+    - revenue_intelligence
+    - accounts_payable
+    - accounts_receivable
+    - payroll_governance
+    - expense_governance
+    - financial_receipts
+    - executive_financial_dashboard
+    - financial_ai_agents
+  ai_financial_management:
+    classification: ownerfi_capability_set
+    migration_status: planned_review_held
+  source_decision: docs/OWNERFI_INTERNAL_FINANCIAL_DOMAIN_AND_MOB_ALIGNMENT_DECISION_2026-07-03.md
+  next_gate: PREPARE_OWNERFI_AI_FINANCIAL_MANAGEMENT_MIGRATION_MANIFEST
+  authority_created: documentation_classification_only
+```
+
+Relationship rule:
+
+| Surface | Binder Responsibility |
+| --- | --- |
+| Deal Execution Engine | Generates customer revenue and routes customer-facing deal work. |
+| SINTENEX / Sintinex | Governs commercial packaging, trigger review, timed-event posture, and launch routing. |
+| OwnerFi | Records, analyzes, forecasts, approves, and reports internal financial operations. |
+| SendCOMM | Candidate SentinelOS origin / communications lineage component; GitHub source access pending. |
+| SentinelOS | Orchestrates governance, authority, receipts, workflows, and audit controls. |
+| Sentinel AI | Provides intelligence across domains under authority and approval boundaries. |
+
+## July 3 Master Operating Blueprint Overlay
+
+The current operating-model overlay is
+`docs/JULY_03_MASTER_OPERATING_BLUEPRINT_OVERLAY_2026-07-03.md`.
+
+```yaml
+overlay_role: current_operating_model_layer
+mob_constant: true
+phase_1: Infra_and_Health_Gate
+phase_2: Bounded_Prep_Packets
+phase_3: Scope_Finalization
+ownerfi_module_manifest: docs/OWNERFI_AI_FINANCIAL_MANAGEMENT_MODULE_ARCHITECTURE_AND_MANIFEST_RESULT_2026-07-03.md
+sendcomm_migration_review: docs/SENDCOMM_SENTINELOS_MIGRATION_REVIEW_RESULT_2026-07-03.md
+july_03_sequence_completion: docs/JULY_03_OPERATING_SEQUENCE_COMPLETION_RESULT_2026-07-03.md
+stripe_sandbox_evidence_plan: docs/STRIPE_NON_PRODUCTION_CONFIGURATION_EVIDENCE_PLAN_2026-07-03.md
+authority_created: false
+```
+
 ## Trust And Security Framework
 
 | Trust Area | Binder Record | Evidence Boundary |
@@ -155,6 +213,13 @@ current-direction use. The active steering correction is
 | 10 | Run local runtime health with API started | healthcheck currently lacks running local server | exact local runtime verification |
 | 11 | Decide external activation for inquiry/government surfaces | local preparation does not authorize use | exact activation review |
 | 12 | Refresh release manifest after MOB/template additions | new docs change the exact staging universe | refreshed manifest review |
+| 13 | Prepare OwnerFi AI Financial Management migration manifest | OwnerFi is now the internal financial management domain and AI Financial Management must be reorganized as OwnerFi modules | `PREPARE_OWNERFI_AI_FINANCIAL_MANAGEMENT_MIGRATION_MANIFEST` |
+| 14 | Prepare Stripe checkout configuration approval packet | owner approved revenue conversations but live payment remains held | `PREPARE_STRIPE_CHECKOUT_CONFIGURATION_APPROVAL_PACKET` |
+| 15 | Prepare customer implementation scope and risk packet | owner did not approve production customer execution or customer onboarding | `PREPARE_CUSTOMER_IMPLEMENTATION_SCOPE_AND_RISK_PACKET` |
+| 16 | Maintain July 3 Master Operating Blueprint overlay | ecosystem now needs a single current operating-model layer over the MOB constant | `MAINTAIN_JULY_03_MASTER_OPERATING_BLUEPRINT_OVERLAY` |
+| 17 | Verify OwnerFi AI Financial Management checksum manifest before movement | 84 discovered assets must preserve integrity before any file movement | `CHECK_OWNERFI_AI_FINANCIAL_MANIFEST` |
+| 18 | Locate SendCOMM source and prepare read-only SentinelOS migration inventory | owner identified SendCOMM as the beginning of SentinelOS; source evidence must be located before migration | `LOCATE_SENDCOMM_SOURCE_AND_PREPARE_READ_ONLY_INVENTORY` |
+| 19 | Provide or authorize exact SendCOMM GitHub repo access | owner clarified SendCOMM is a GitHub repository; guessed public URLs were not accessible | `PROVIDE_OR_AUTHORIZE_EXACT_SENDCOMM_GITHUB_REPO_ACCESS_FOR_READ_ONLY_INVENTORY` |
 
 ## June 18 Cadence Addendum
 

@@ -47,21 +47,23 @@ approved. Until then, the lane is planning-only and review-held.
    - Accepted as review-held boundary in
      `docs/SINTENEX_TIMED_EVENT_AND_COMMERCIAL_ROUTING_BOUNDARY_REVIEW_RESULT_2026-07-03.md`.
 
-2. `DEFINE_MISSION_CONTROL_SINTENEX_UI_RECLASSIFICATION_SCOPE`
-   - Next. Decide whether the current Mission Control billing controls and default
-     billing workflow payload should be renamed, removed, or replaced with a
-     review-held SINTENEX timed-event intake surface.
-
-3. `RUN_PROTECTED_SENTINEL_CHECKS_WITH_LOCAL_API_KEY`
-   - If an API key is available, use it only from local environment input.
-     Do not paste the key into chat or docs.
-
-4. `RESTORE_OWNERFI_PROOF_HEALTH_ROUTE_SURFACE`
+2. `RESTORE_OWNERFI_PROOF_HEALTH_ROUTE_SURFACE`
    - Active. The working-network no-key proof-health receipt returned `404`
-     for `/health`, `/proof`, and `/v1/audit?tenant=ownerfi`.
+     for `/health`, `/proof`, and `/v1/audit?tenant=ownerfi`; the latest
+     read-only rerun timed out before route classification.
 
-5. `VERIFY_CURRENT_OWNERFI_PROOF_HEALTH_BEFORE_SHARE_OR_MEETING`
+3. `VERIFY_CURRENT_OWNERFI_PROOF_HEALTH_BEFORE_SHARE_OR_MEETING`
    - Failed current live route health. Rerun only after route restoration.
+
+4. `DEFINE_MISSION_CONTROL_SINTENEX_UI_RECLASSIFICATION_SCOPE`
+   - Held behind active proof-health restoration unless the owner explicitly
+     reorders the queue. Decide whether the current Mission Control billing
+     controls and default billing workflow payload should be renamed, removed,
+     or replaced with a review-held SINTENEX timed-event intake surface.
+
+5. `RUN_PROTECTED_SENTINEL_CHECKS_WITH_LOCAL_API_KEY`
+   - Optional follow-on. If an API key is available, use it only from local
+     environment input. Do not paste the key into chat or docs.
 
 ## Not Missing
 
@@ -77,6 +79,8 @@ What is still open:
 - Public tunnel/GPT Builder proof must be refreshed before reuse.
 - OwnerFi proof-health now requires route restoration before a passing current
   receipt can exist.
+- Mission Control/SINTENEX UI reclassification is the next design lane, but it
+  is not the active gate while proof-health restoration remains open.
 
 ## Non-Authorization
 

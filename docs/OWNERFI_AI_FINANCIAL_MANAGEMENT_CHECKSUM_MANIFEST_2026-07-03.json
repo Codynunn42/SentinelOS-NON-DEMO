@@ -1,0 +1,695 @@
+{
+  "comm": "Sentinel AI by Cody Nunn | Nunn Cloud",
+  "mode": "read_only_checksum_and_movement_manifest",
+  "sourceRoot": "/Users/codynunn/Downloads/AI Docs ",
+  "sourceRootNote": "Path is literal and includes the trailing space after AI Docs.",
+  "matchingPattern": "AI_Financial_Management*",
+  "fileCount": 84,
+  "canonicalBaseline": "v1.2.1",
+  "distributionArtifact": "v1.2.2",
+  "modules": [
+    "Treasury",
+    "Budgeting",
+    "Forecasting",
+    "Accounting",
+    "Executive Reporting",
+    "AI Agents",
+    "Governance"
+  ],
+  "authorityCreated": false,
+  "movementAuthorized": false,
+  "entries": [
+    {
+      "filename": "AI_Financial_Management_APAC_Oversight_Brief.pdf",
+      "sourcePath": "/Users/codynunn/Downloads/AI Docs /AI_Financial_Management_APAC_Oversight_Brief.pdf",
+      "sha256": "93552d00728c67f09e350afad546b6f5146b458f61f5b230211f8e26081c99e1",
+      "module": "Governance",
+      "proposedDestination": "ownerfi/governance/AI_Financial_Management_APAC_Oversight_Brief.pdf",
+      "movementStatus": "held"
+    },
+    {
+      "filename": "AI_Financial_Management_Baseline_Certificate.pdf",
+      "sourcePath": "/Users/codynunn/Downloads/AI Docs /AI_Financial_Management_Baseline_Certificate.pdf",
+      "sha256": "87a4a298f3231660cd2712073edcef32cb41ce20683a50d86104c907a445740a",
+      "module": "Governance",
+      "proposedDestination": "ownerfi/governance/AI_Financial_Management_Baseline_Certificate.pdf",
+      "movementStatus": "held"
+    },
+    {
+      "filename": "AI_Financial_Management_Board_Chair_Brief.pdf",
+      "sourcePath": "/Users/codynunn/Downloads/AI Docs /AI_Financial_Management_Board_Chair_Brief.pdf",
+      "sha256": "c391fd0a9701924ee8aecaeb306d800d7bdad4ee1d79f9be6bd5bad09fa866e8",
+      "module": "Executive Reporting",
+      "proposedDestination": "ownerfi/executive_reporting/AI_Financial_Management_Board_Chair_Brief.pdf",
+      "movementStatus": "held"
+    },
+    {
+      "filename": "AI_Financial_Management_CHANGELOG.md",
+      "sourcePath": "/Users/codynunn/Downloads/AI Docs /AI_Financial_Management_CHANGELOG.md",
+      "sha256": "38adbc8aca85ca5398fa5d1a7efed8bde010e3da935e929884a24f25ae8a16bb",
+      "module": "Governance",
+      "proposedDestination": "ownerfi/governance/AI_Financial_Management_CHANGELOG.md",
+      "movementStatus": "held"
+    },
+    {
+      "filename": "AI_Financial_Management_Customer_Brief.pdf",
+      "sourcePath": "/Users/codynunn/Downloads/AI Docs /AI_Financial_Management_Customer_Brief.pdf",
+      "sha256": "5bd4b828a025c643391e69fa6ed4d3cdd2682f2217a2262b4acdd2db5b8701fe",
+      "module": "Governance",
+      "proposedDestination": "ownerfi/governance/AI_Financial_Management_Customer_Brief.pdf",
+      "movementStatus": "held"
+    },
+    {
+      "filename": "AI_Financial_Management_Customer_Pitch_Deck.pdf",
+      "sourcePath": "/Users/codynunn/Downloads/AI Docs /AI_Financial_Management_Customer_Pitch_Deck.pdf",
+      "sha256": "2dd7fb4bb752d579f4a9c3931baa3ebea044ef3e93ba13730420087ac52f695b",
+      "module": "Governance",
+      "proposedDestination": "ownerfi/governance/AI_Financial_Management_Customer_Pitch_Deck.pdf",
+      "movementStatus": "held"
+    },
+    {
+      "filename": "AI_Financial_Management_Dual_Anchor_Governance_Memo.pdf",
+      "sourcePath": "/Users/codynunn/Downloads/AI Docs /AI_Financial_Management_Dual_Anchor_Governance_Memo.pdf",
+      "sha256": "43cbc249c6930ed42a1e236a848b33168467665408274b4b7c3b25a92ac59ab1",
+      "module": "Governance",
+      "proposedDestination": "ownerfi/governance/AI_Financial_Management_Dual_Anchor_Governance_Memo.pdf",
+      "movementStatus": "held"
+    },
+    {
+      "filename": "AI_Financial_Management_EU_Oversight_Brief.pdf",
+      "sourcePath": "/Users/codynunn/Downloads/AI Docs /AI_Financial_Management_EU_Oversight_Brief.pdf",
+      "sha256": "1245402df68ef6ae3848600ab2319d66f9d80e1edfc3f5a26be8cc202de82ee6",
+      "module": "Governance",
+      "proposedDestination": "ownerfi/governance/AI_Financial_Management_EU_Oversight_Brief.pdf",
+      "movementStatus": "held"
+    },
+    {
+      "filename": "AI_Financial_Management_Employee_Brief.pdf",
+      "sourcePath": "/Users/codynunn/Downloads/AI Docs /AI_Financial_Management_Employee_Brief.pdf",
+      "sha256": "386107574cd415a2fe7aa720cf7e6252f26e8f5b2418ccf55456db1beda36b02",
+      "module": "Executive Reporting",
+      "proposedDestination": "ownerfi/executive_reporting/AI_Financial_Management_Employee_Brief.pdf",
+      "movementStatus": "held"
+    },
+    {
+      "filename": "AI_Financial_Management_Employee_Pitch_Deck.pdf",
+      "sourcePath": "/Users/codynunn/Downloads/AI Docs /AI_Financial_Management_Employee_Pitch_Deck.pdf",
+      "sha256": "c39f6e4d4bd690b2206f38443b3bff24a73b98b0f342de27336f707cd2540b34",
+      "module": "Executive Reporting",
+      "proposedDestination": "ownerfi/executive_reporting/AI_Financial_Management_Employee_Pitch_Deck.pdf",
+      "movementStatus": "held"
+    },
+    {
+      "filename": "AI_Financial_Management_Founder_Certificate.pdf",
+      "sourcePath": "/Users/codynunn/Downloads/AI Docs /AI_Financial_Management_Founder_Certificate.pdf",
+      "sha256": "0bd7555f362321110abf4b3185476f243fa2d7916d646f64cd199d57a00a3bd3",
+      "module": "Governance",
+      "proposedDestination": "ownerfi/governance/AI_Financial_Management_Founder_Certificate.pdf",
+      "movementStatus": "held"
+    },
+    {
+      "filename": "AI_Financial_Management_Governance_Deck_v2.pptx",
+      "sourcePath": "/Users/codynunn/Downloads/AI Docs /AI_Financial_Management_Governance_Deck_v2.pptx",
+      "sha256": "929a3cefb06026b14b1479c6f3c8081a1eae2d24d6504202b55d44f5f70fb7fb",
+      "module": "Governance",
+      "proposedDestination": "ownerfi/governance/AI_Financial_Management_Governance_Deck_v2.pptx",
+      "movementStatus": "held"
+    },
+    {
+      "filename": "AI_Financial_Management_Hub_Compliance_Playbook_v1.3.35.pdf",
+      "sourcePath": "/Users/codynunn/Downloads/AI Docs /AI_Financial_Management_Hub_Compliance_Playbook_v1.3.35.pdf",
+      "sha256": "8a3d2562f7f21783116acdcc1607bc56410d24781b03efe1a359284dd853f4fc",
+      "module": "Governance",
+      "proposedDestination": "ownerfi/governance/AI_Financial_Management_Hub_Compliance_Playbook_v1.3.35.pdf",
+      "movementStatus": "held"
+    },
+    {
+      "filename": "AI_Financial_Management_ISO22301_Alignment_Brief.pdf",
+      "sourcePath": "/Users/codynunn/Downloads/AI Docs /AI_Financial_Management_ISO22301_Alignment_Brief.pdf",
+      "sha256": "f7561e24749aa67de4edcc00a8e4d7a21e9300962f0908a0af7b4fa909c8d0db",
+      "module": "Governance",
+      "proposedDestination": "ownerfi/governance/AI_Financial_Management_ISO22301_Alignment_Brief.pdf",
+      "movementStatus": "held"
+    },
+    {
+      "filename": "AI_Financial_Management_ISO27001_Alignment_Brief.pdf",
+      "sourcePath": "/Users/codynunn/Downloads/AI Docs /AI_Financial_Management_ISO27001_Alignment_Brief.pdf",
+      "sha256": "8d6231f832bdd1b6af4816187ce03120cf60ca2dac14b1cb698944bde155648c",
+      "module": "Governance",
+      "proposedDestination": "ownerfi/governance/AI_Financial_Management_ISO27001_Alignment_Brief.pdf",
+      "movementStatus": "held"
+    },
+    {
+      "filename": "AI_Financial_Management_ISO37301_Alignment_Brief.pdf",
+      "sourcePath": "/Users/codynunn/Downloads/AI Docs /AI_Financial_Management_ISO37301_Alignment_Brief.pdf",
+      "sha256": "0fb829b12129130ff334473416d610807ea4d8dab9c4143e62b624c80a045b66",
+      "module": "Governance",
+      "proposedDestination": "ownerfi/governance/AI_Financial_Management_ISO37301_Alignment_Brief.pdf",
+      "movementStatus": "held"
+    },
+    {
+      "filename": "AI_Financial_Management_Internal_Launch_Memo.pdf",
+      "sourcePath": "/Users/codynunn/Downloads/AI Docs /AI_Financial_Management_Internal_Launch_Memo.pdf",
+      "sha256": "5300084a94f7e8eb36abe84ffa2591b27335d337670ff649a863fc97a44892b2",
+      "module": "Executive Reporting",
+      "proposedDestination": "ownerfi/executive_reporting/AI_Financial_Management_Internal_Launch_Memo.pdf",
+      "movementStatus": "held"
+    },
+    {
+      "filename": "AI_Financial_Management_Investor_Brief.pdf",
+      "sourcePath": "/Users/codynunn/Downloads/AI Docs /AI_Financial_Management_Investor_Brief.pdf",
+      "sha256": "c24b971c1854298dc49e5730c642e22cfe32fa62cd2856a401e577dc67c53f9a",
+      "module": "Executive Reporting",
+      "proposedDestination": "ownerfi/executive_reporting/AI_Financial_Management_Investor_Brief.pdf",
+      "movementStatus": "held"
+    },
+    {
+      "filename": "AI_Financial_Management_Investor_Pitch_Deck.pdf",
+      "sourcePath": "/Users/codynunn/Downloads/AI Docs /AI_Financial_Management_Investor_Pitch_Deck.pdf",
+      "sha256": "c1b7e9a674653530336a2a7d2e42b0e11ae851c151cb6c4b14516fff2148dc7e",
+      "module": "Executive Reporting",
+      "proposedDestination": "ownerfi/executive_reporting/AI_Financial_Management_Investor_Pitch_Deck.pdf",
+      "movementStatus": "held"
+    },
+    {
+      "filename": "AI_Financial_Management_Lineage_Ledger.csv",
+      "sourcePath": "/Users/codynunn/Downloads/AI Docs /AI_Financial_Management_Lineage_Ledger.csv",
+      "sha256": "f4b50ab2fea9811062ce6a2973a2b5f09e5771f914336e81f80afe06a5ea6b9f",
+      "module": "Governance",
+      "proposedDestination": "ownerfi/governance/AI_Financial_Management_Lineage_Ledger.csv",
+      "movementStatus": "held"
+    },
+    {
+      "filename": "AI_Financial_Management_Master_Distribution_Index.pdf",
+      "sourcePath": "/Users/codynunn/Downloads/AI Docs /AI_Financial_Management_Master_Distribution_Index.pdf",
+      "sha256": "a75c5c2066b090c0b696d88c7c53241d2034a70c0992f52cd6ca6c70e4f5829c",
+      "module": "Governance",
+      "proposedDestination": "ownerfi/governance/AI_Financial_Management_Master_Distribution_Index.pdf",
+      "movementStatus": "held"
+    },
+    {
+      "filename": "AI_Financial_Management_Media_Kit.zip",
+      "sourcePath": "/Users/codynunn/Downloads/AI Docs /AI_Financial_Management_Media_Kit.zip",
+      "sha256": "674130ac2174ea90051932014f8784e8a5d56314a1d4240ee381c1919bd3b5a2",
+      "module": "Governance",
+      "proposedDestination": "ownerfi/governance/AI_Financial_Management_Media_Kit.zip",
+      "movementStatus": "held"
+    },
+    {
+      "filename": "AI_Financial_Management_Partner_Brief.pdf",
+      "sourcePath": "/Users/codynunn/Downloads/AI Docs /AI_Financial_Management_Partner_Brief.pdf",
+      "sha256": "1c6cf60098620c4471742959f4ee964a60b3eecc1aed8c282e22df933b32ad93",
+      "module": "Governance",
+      "proposedDestination": "ownerfi/governance/AI_Financial_Management_Partner_Brief.pdf",
+      "movementStatus": "held"
+    },
+    {
+      "filename": "AI_Financial_Management_Partner_Pitch_Deck.pdf",
+      "sourcePath": "/Users/codynunn/Downloads/AI Docs /AI_Financial_Management_Partner_Pitch_Deck.pdf",
+      "sha256": "ddbf5cf7723b8136fd3e8b7f8be027b37e9ca2e887e3d24112cfbc80ea834bc5",
+      "module": "Governance",
+      "proposedDestination": "ownerfi/governance/AI_Financial_Management_Partner_Pitch_Deck.pdf",
+      "movementStatus": "held"
+    },
+    {
+      "filename": "AI_Financial_Management_Playbook.pdf",
+      "sourcePath": "/Users/codynunn/Downloads/AI Docs /AI_Financial_Management_Playbook.pdf",
+      "sha256": "fd380d8b6d205797c4c3a0cf4de00428d9978b166031e7fdb14303ec316e49e4",
+      "module": "Governance",
+      "proposedDestination": "ownerfi/governance/AI_Financial_Management_Playbook.pdf",
+      "movementStatus": "held"
+    },
+    {
+      "filename": "AI_Financial_Management_Playbook_Executive_Cut.pptx",
+      "sourcePath": "/Users/codynunn/Downloads/AI Docs /AI_Financial_Management_Playbook_Executive_Cut.pptx",
+      "sha256": "78c8020303d21faaf6b4db4658a01d55656db216996b94d88519b93737cadff8",
+      "module": "Governance",
+      "proposedDestination": "ownerfi/governance/AI_Financial_Management_Playbook_Executive_Cut.pptx",
+      "movementStatus": "held"
+    },
+    {
+      "filename": "AI_Financial_Management_Playbook_OnePager.pdf",
+      "sourcePath": "/Users/codynunn/Downloads/AI Docs /AI_Financial_Management_Playbook_OnePager.pdf",
+      "sha256": "a31328483acd6b2b4a8ba08708f06aba5c09bfdd7969c76a9134765e01a7eeef",
+      "module": "Governance",
+      "proposedDestination": "ownerfi/governance/AI_Financial_Management_Playbook_OnePager.pdf",
+      "movementStatus": "held"
+    },
+    {
+      "filename": "AI_Financial_Management_Playbook_OnePager_Branded.pdf",
+      "sourcePath": "/Users/codynunn/Downloads/AI Docs /AI_Financial_Management_Playbook_OnePager_Branded.pdf",
+      "sha256": "a3c844638062e9d990fc57f6468154cae94f38d60df3d15b2ee9c9a6b22acd59",
+      "module": "Governance",
+      "proposedDestination": "ownerfi/governance/AI_Financial_Management_Playbook_OnePager_Branded.pdf",
+      "movementStatus": "held"
+    },
+    {
+      "filename": "AI_Financial_Management_Playbook_OnePager_VaultSealed.pdf",
+      "sourcePath": "/Users/codynunn/Downloads/AI Docs /AI_Financial_Management_Playbook_OnePager_VaultSealed.pdf",
+      "sha256": "bae4344e4c8d2a94ca39d895278c14f6a10e886228e6f8affdf4a458ae7dda4c",
+      "module": "Governance",
+      "proposedDestination": "ownerfi/governance/AI_Financial_Management_Playbook_OnePager_VaultSealed.pdf",
+      "movementStatus": "held"
+    },
+    {
+      "filename": "AI_Financial_Management_Playbook_Slides.pptx",
+      "sourcePath": "/Users/codynunn/Downloads/AI Docs /AI_Financial_Management_Playbook_Slides.pptx",
+      "sha256": "f6e579b0ca847a366a8876d55c88c1710cc85b1742ca803a0c12c4deb678a9d5",
+      "module": "Governance",
+      "proposedDestination": "ownerfi/governance/AI_Financial_Management_Playbook_Slides.pptx",
+      "movementStatus": "held"
+    },
+    {
+      "filename": "AI_Financial_Management_Playbook_with_Diagram.pdf",
+      "sourcePath": "/Users/codynunn/Downloads/AI Docs /AI_Financial_Management_Playbook_with_Diagram.pdf",
+      "sha256": "7e8ec3154705f88dbdab6b343de213b39004a5bd5105794ddb3fab6e2d916ec4",
+      "module": "Governance",
+      "proposedDestination": "ownerfi/governance/AI_Financial_Management_Playbook_with_Diagram.pdf",
+      "movementStatus": "held"
+    },
+    {
+      "filename": "AI_Financial_Management_Press_QA_Brief.pdf",
+      "sourcePath": "/Users/codynunn/Downloads/AI Docs /AI_Financial_Management_Press_QA_Brief.pdf",
+      "sha256": "7a8c98f3a2e0219c5b64c7ae5e3da0f8e00a792a6f68c6f091b5615265be58e3",
+      "module": "Governance",
+      "proposedDestination": "ownerfi/governance/AI_Financial_Management_Press_QA_Brief.pdf",
+      "movementStatus": "held"
+    },
+    {
+      "filename": "AI_Financial_Management_README.txt",
+      "sourcePath": "/Users/codynunn/Downloads/AI Docs /AI_Financial_Management_README.txt",
+      "sha256": "5f806f7d7a2b81510c41feee1e4f2e340b1739dbe9a11eef3717a97abee642ef",
+      "module": "Governance",
+      "proposedDestination": "ownerfi/governance/AI_Financial_Management_README.txt",
+      "movementStatus": "held"
+    },
+    {
+      "filename": "AI_Financial_Management_Regulator_Brief.pdf",
+      "sourcePath": "/Users/codynunn/Downloads/AI Docs /AI_Financial_Management_Regulator_Brief.pdf",
+      "sha256": "c816f96f84465ff5329829a18b6e7567e904a203b11f8531cd7a3673ee556f37",
+      "module": "Governance",
+      "proposedDestination": "ownerfi/governance/AI_Financial_Management_Regulator_Brief.pdf",
+      "movementStatus": "held"
+    },
+    {
+      "filename": "AI_Financial_Management_Regulator_Pitch_Deck.pdf",
+      "sourcePath": "/Users/codynunn/Downloads/AI Docs /AI_Financial_Management_Regulator_Pitch_Deck.pdf",
+      "sha256": "2077ebaaf53bbed68f438448fd7056196c2cb7580692f94144628184e4fa0001",
+      "module": "Governance",
+      "proposedDestination": "ownerfi/governance/AI_Financial_Management_Regulator_Pitch_Deck.pdf",
+      "movementStatus": "held"
+    },
+    {
+      "filename": "AI_Financial_Management_Regulatory_Submission_Cover_Letter.pdf",
+      "sourcePath": "/Users/codynunn/Downloads/AI Docs /AI_Financial_Management_Regulatory_Submission_Cover_Letter.pdf",
+      "sha256": "c7f7ec76da38daaeea02753bdeceb5b00f2dc5fc5e6f1ee7763806c91e83900a",
+      "module": "Governance",
+      "proposedDestination": "ownerfi/governance/AI_Financial_Management_Regulatory_Submission_Cover_Letter.pdf",
+      "movementStatus": "held"
+    },
+    {
+      "filename": "AI_Financial_Management_Stakeholder_Welcome_Letter 2.pdf",
+      "sourcePath": "/Users/codynunn/Downloads/AI Docs /AI_Financial_Management_Stakeholder_Welcome_Letter 2.pdf",
+      "sha256": "ff1b1d964710572941436770db20f70f467b8eb73c1796d5f91af5fde64ca13a",
+      "module": "Executive Reporting",
+      "proposedDestination": "ownerfi/executive_reporting/AI_Financial_Management_Stakeholder_Welcome_Letter 2.pdf",
+      "movementStatus": "held"
+    },
+    {
+      "filename": "AI_Financial_Management_Stakeholder_Welcome_Letter.pdf",
+      "sourcePath": "/Users/codynunn/Downloads/AI Docs /AI_Financial_Management_Stakeholder_Welcome_Letter.pdf",
+      "sha256": "ff1b1d964710572941436770db20f70f467b8eb73c1796d5f91af5fde64ca13a",
+      "module": "Executive Reporting",
+      "proposedDestination": "ownerfi/executive_reporting/AI_Financial_Management_Stakeholder_Welcome_Letter.pdf",
+      "movementStatus": "held"
+    },
+    {
+      "filename": "AI_Financial_Management_Teleprompter_Script.pdf",
+      "sourcePath": "/Users/codynunn/Downloads/AI Docs /AI_Financial_Management_Teleprompter_Script.pdf",
+      "sha256": "640b3f154b02597e2788ae52b7954aabe7af75cba251b61c563777ee558d4006",
+      "module": "Executive Reporting",
+      "proposedDestination": "ownerfi/executive_reporting/AI_Financial_Management_Teleprompter_Script.pdf",
+      "movementStatus": "held"
+    },
+    {
+      "filename": "AI_Financial_Management_US_Oversight_Brief.pdf",
+      "sourcePath": "/Users/codynunn/Downloads/AI Docs /AI_Financial_Management_US_Oversight_Brief.pdf",
+      "sha256": "b9e4a2666f26237374bca62a4c458e82e3b6279f5fd11d20e28ae75b37708686",
+      "module": "Governance",
+      "proposedDestination": "ownerfi/governance/AI_Financial_Management_US_Oversight_Brief.pdf",
+      "movementStatus": "held"
+    },
+    {
+      "filename": "AI_Financial_Management_Vault_Certificate.pdf",
+      "sourcePath": "/Users/codynunn/Downloads/AI Docs /AI_Financial_Management_Vault_Certificate.pdf",
+      "sha256": "4e2966081c880236f7aa5460c9f2a60fb8a2494fd93f1f81451c9cbf99b4034c",
+      "module": "Governance",
+      "proposedDestination": "ownerfi/governance/AI_Financial_Management_Vault_Certificate.pdf",
+      "movementStatus": "held"
+    },
+    {
+      "filename": "AI_Financial_Management_Vault_Index 2.json",
+      "sourcePath": "/Users/codynunn/Downloads/AI Docs /AI_Financial_Management_Vault_Index 2.json",
+      "sha256": "0ab1494eb4ab1d6fc9abcd3bbca4c9fdce92744e45468dcfe48cde075b89fe7e",
+      "module": "Governance",
+      "proposedDestination": "ownerfi/governance/AI_Financial_Management_Vault_Index 2.json",
+      "movementStatus": "held"
+    },
+    {
+      "filename": "AI_Financial_Management_Vault_Index.json",
+      "sourcePath": "/Users/codynunn/Downloads/AI Docs /AI_Financial_Management_Vault_Index.json",
+      "sha256": "0ab1494eb4ab1d6fc9abcd3bbca4c9fdce92744e45468dcfe48cde075b89fe7e",
+      "module": "Governance",
+      "proposedDestination": "ownerfi/governance/AI_Financial_Management_Vault_Index.json",
+      "movementStatus": "held"
+    },
+    {
+      "filename": "AI_Financial_Management_Vault_Index.yaml",
+      "sourcePath": "/Users/codynunn/Downloads/AI Docs /AI_Financial_Management_Vault_Index.yaml",
+      "sha256": "9246a981334b22da930e901de44e27bdca4e8d594d4383d7979052f42285430c",
+      "module": "Governance",
+      "proposedDestination": "ownerfi/governance/AI_Financial_Management_Vault_Index.yaml",
+      "movementStatus": "held"
+    },
+    {
+      "filename": "AI_Financial_Management_Vault_Index_v1.2.json",
+      "sourcePath": "/Users/codynunn/Downloads/AI Docs /AI_Financial_Management_Vault_Index_v1.2.json",
+      "sha256": "7b95b9125ed5cb3eea11434136339479e10f1615b17d912bd3cc7f14c8d84e95",
+      "module": "Governance",
+      "proposedDestination": "ownerfi/governance/AI_Financial_Management_Vault_Index_v1.2.json",
+      "movementStatus": "held"
+    },
+    {
+      "filename": "AI_Financial_Management_Vault_Index_v1.2.yaml",
+      "sourcePath": "/Users/codynunn/Downloads/AI Docs /AI_Financial_Management_Vault_Index_v1.2.yaml",
+      "sha256": "4573a5e825c0635b5ecc4b069e132b60deafc71b35d3a4b8b5c26338d89a021a",
+      "module": "Governance",
+      "proposedDestination": "ownerfi/governance/AI_Financial_Management_Vault_Index_v1.2.yaml",
+      "movementStatus": "held"
+    },
+    {
+      "filename": "AI_Financial_Management_Vault_Package.zip",
+      "sourcePath": "/Users/codynunn/Downloads/AI Docs /AI_Financial_Management_Vault_Package.zip",
+      "sha256": "27b5a36142d40da6a5e6b1654b4618adb1a226e725dae4d8abb0da8bda8e68c8",
+      "module": "Governance",
+      "proposedDestination": "ownerfi/governance/AI_Financial_Management_Vault_Package.zip",
+      "movementStatus": "held"
+    },
+    {
+      "filename": "AI_Financial_Management_Vault_Package_v1.2.1.zip",
+      "sourcePath": "/Users/codynunn/Downloads/AI Docs /AI_Financial_Management_Vault_Package_v1.2.1.zip",
+      "sha256": "4cedeb7db00c24dc4a1d694798970de898b4dd1ad5c46d0fb0865f1ea0b3b2b4",
+      "module": "Governance",
+      "proposedDestination": "ownerfi/governance/AI_Financial_Management_Vault_Package_v1.2.1.zip",
+      "movementStatus": "held"
+    },
+    {
+      "filename": "AI_Financial_Management_Vault_Package_v1.2.2.zip",
+      "sourcePath": "/Users/codynunn/Downloads/AI Docs /AI_Financial_Management_Vault_Package_v1.2.2.zip",
+      "sha256": "f13d38328033baf62fa0c13332739b57e28ce9889839238189c9747978e5e391",
+      "module": "Governance",
+      "proposedDestination": "ownerfi/governance/AI_Financial_Management_Vault_Package_v1.2.2.zip",
+      "movementStatus": "held"
+    },
+    {
+      "filename": "AI_Financial_Management_Vault_Package_v1.2.2_FINAL.zip",
+      "sourcePath": "/Users/codynunn/Downloads/AI Docs /AI_Financial_Management_Vault_Package_v1.2.2_FINAL.zip",
+      "sha256": "8e6a9ca3a6c68dc79a2e4e74532cc20ad6a66d9e4ac068f1d325adc041f62dcd",
+      "module": "Governance",
+      "proposedDestination": "ownerfi/governance/AI_Financial_Management_Vault_Package_v1.2.2_FINAL.zip",
+      "movementStatus": "held"
+    },
+    {
+      "filename": "AI_Financial_Management_Vault_Package_v1.3.1.zip",
+      "sourcePath": "/Users/codynunn/Downloads/AI Docs /AI_Financial_Management_Vault_Package_v1.3.1.zip",
+      "sha256": "545470370440669c48128df3acd496746d3b9d124853f413a0ec9b24bb84abfa",
+      "module": "Governance",
+      "proposedDestination": "ownerfi/governance/AI_Financial_Management_Vault_Package_v1.3.1.zip",
+      "movementStatus": "held"
+    },
+    {
+      "filename": "AI_Financial_Management_Vault_Package_v1.3.10.zip",
+      "sourcePath": "/Users/codynunn/Downloads/AI Docs /AI_Financial_Management_Vault_Package_v1.3.10.zip",
+      "sha256": "8d0b7c717350685c6de2f3dae01d0d88d9e32ff84744fe92ac3c84a45cd2beae",
+      "module": "Governance",
+      "proposedDestination": "ownerfi/governance/AI_Financial_Management_Vault_Package_v1.3.10.zip",
+      "movementStatus": "held"
+    },
+    {
+      "filename": "AI_Financial_Management_Vault_Package_v1.3.11.zip",
+      "sourcePath": "/Users/codynunn/Downloads/AI Docs /AI_Financial_Management_Vault_Package_v1.3.11.zip",
+      "sha256": "9f0dce904013cd874a105e98dccf1bf941a25b18b29d9f2dcfc42c619cf422f9",
+      "module": "Governance",
+      "proposedDestination": "ownerfi/governance/AI_Financial_Management_Vault_Package_v1.3.11.zip",
+      "movementStatus": "held"
+    },
+    {
+      "filename": "AI_Financial_Management_Vault_Package_v1.3.12.zip",
+      "sourcePath": "/Users/codynunn/Downloads/AI Docs /AI_Financial_Management_Vault_Package_v1.3.12.zip",
+      "sha256": "dcd7a9017ee4f7b38e9f75a1da4e6cc73b6c73a8f02e59a49d99c74e52a28377",
+      "module": "Governance",
+      "proposedDestination": "ownerfi/governance/AI_Financial_Management_Vault_Package_v1.3.12.zip",
+      "movementStatus": "held"
+    },
+    {
+      "filename": "AI_Financial_Management_Vault_Package_v1.3.14.zip",
+      "sourcePath": "/Users/codynunn/Downloads/AI Docs /AI_Financial_Management_Vault_Package_v1.3.14.zip",
+      "sha256": "00502bb29fe5cf8601e2d677866e06293fb2f680693407cdc88d3dbfccae2be6",
+      "module": "Governance",
+      "proposedDestination": "ownerfi/governance/AI_Financial_Management_Vault_Package_v1.3.14.zip",
+      "movementStatus": "held"
+    },
+    {
+      "filename": "AI_Financial_Management_Vault_Package_v1.3.16.zip",
+      "sourcePath": "/Users/codynunn/Downloads/AI Docs /AI_Financial_Management_Vault_Package_v1.3.16.zip",
+      "sha256": "78c21cc847f62a018c007cef74e20694a782f6139f550b53935d8aac4ab29a1f",
+      "module": "Governance",
+      "proposedDestination": "ownerfi/governance/AI_Financial_Management_Vault_Package_v1.3.16.zip",
+      "movementStatus": "held"
+    },
+    {
+      "filename": "AI_Financial_Management_Vault_Package_v1.3.18.zip",
+      "sourcePath": "/Users/codynunn/Downloads/AI Docs /AI_Financial_Management_Vault_Package_v1.3.18.zip",
+      "sha256": "8634f96a73aacd6c59a5ebcaa61f040b673aa0d9f60ee7503f4c7d86e9e75efb",
+      "module": "Governance",
+      "proposedDestination": "ownerfi/governance/AI_Financial_Management_Vault_Package_v1.3.18.zip",
+      "movementStatus": "held"
+    },
+    {
+      "filename": "AI_Financial_Management_Vault_Package_v1.3.2.zip",
+      "sourcePath": "/Users/codynunn/Downloads/AI Docs /AI_Financial_Management_Vault_Package_v1.3.2.zip",
+      "sha256": "93c7556a97a883c8fd0996fdd1a979f1d9a883542e2bb28a8fe3254166168f36",
+      "module": "Governance",
+      "proposedDestination": "ownerfi/governance/AI_Financial_Management_Vault_Package_v1.3.2.zip",
+      "movementStatus": "held"
+    },
+    {
+      "filename": "AI_Financial_Management_Vault_Package_v1.3.20.zip",
+      "sourcePath": "/Users/codynunn/Downloads/AI Docs /AI_Financial_Management_Vault_Package_v1.3.20.zip",
+      "sha256": "e330633a395a2d71233a3c96644d8a9d34ddaac516a39b08b36ad2237deb28c3",
+      "module": "Governance",
+      "proposedDestination": "ownerfi/governance/AI_Financial_Management_Vault_Package_v1.3.20.zip",
+      "movementStatus": "held"
+    },
+    {
+      "filename": "AI_Financial_Management_Vault_Package_v1.3.21.zip",
+      "sourcePath": "/Users/codynunn/Downloads/AI Docs /AI_Financial_Management_Vault_Package_v1.3.21.zip",
+      "sha256": "646e348f70ff10cde5b2f9504ea38cd2cdf38d97d7ab2db9ee12520ee944134c",
+      "module": "Governance",
+      "proposedDestination": "ownerfi/governance/AI_Financial_Management_Vault_Package_v1.3.21.zip",
+      "movementStatus": "held"
+    },
+    {
+      "filename": "AI_Financial_Management_Vault_Package_v1.3.23.zip",
+      "sourcePath": "/Users/codynunn/Downloads/AI Docs /AI_Financial_Management_Vault_Package_v1.3.23.zip",
+      "sha256": "9bd650ea2253c7a1540315d6bf539c431682ee37a0c3d7c61ad8a748c93220c3",
+      "module": "Governance",
+      "proposedDestination": "ownerfi/governance/AI_Financial_Management_Vault_Package_v1.3.23.zip",
+      "movementStatus": "held"
+    },
+    {
+      "filename": "AI_Financial_Management_Vault_Package_v1.3.24.zip",
+      "sourcePath": "/Users/codynunn/Downloads/AI Docs /AI_Financial_Management_Vault_Package_v1.3.24.zip",
+      "sha256": "f1ce76d950bfa0ab0d06dca1885f59d8bbe2701d3c800d92568c7175707a2c67",
+      "module": "Governance",
+      "proposedDestination": "ownerfi/governance/AI_Financial_Management_Vault_Package_v1.3.24.zip",
+      "movementStatus": "held"
+    },
+    {
+      "filename": "AI_Financial_Management_Vault_Package_v1.3.26.zip",
+      "sourcePath": "/Users/codynunn/Downloads/AI Docs /AI_Financial_Management_Vault_Package_v1.3.26.zip",
+      "sha256": "cda707ba36edd77a2bed51370ea15bbc7bf82eadf32946c1cb373f28532caa03",
+      "module": "Governance",
+      "proposedDestination": "ownerfi/governance/AI_Financial_Management_Vault_Package_v1.3.26.zip",
+      "movementStatus": "held"
+    },
+    {
+      "filename": "AI_Financial_Management_Vault_Package_v1.3.28.zip",
+      "sourcePath": "/Users/codynunn/Downloads/AI Docs /AI_Financial_Management_Vault_Package_v1.3.28.zip",
+      "sha256": "9f0d81cf1d7df16fd69b213568a1eae48d082d35904105936a915bef2befab4e",
+      "module": "Governance",
+      "proposedDestination": "ownerfi/governance/AI_Financial_Management_Vault_Package_v1.3.28.zip",
+      "movementStatus": "held"
+    },
+    {
+      "filename": "AI_Financial_Management_Vault_Package_v1.3.29.zip",
+      "sourcePath": "/Users/codynunn/Downloads/AI Docs /AI_Financial_Management_Vault_Package_v1.3.29.zip",
+      "sha256": "9ffc1957c6991f97020322ea2eb9dcb879889f9a865f87546597e634487be9a3",
+      "module": "Governance",
+      "proposedDestination": "ownerfi/governance/AI_Financial_Management_Vault_Package_v1.3.29.zip",
+      "movementStatus": "held"
+    },
+    {
+      "filename": "AI_Financial_Management_Vault_Package_v1.3.3.zip",
+      "sourcePath": "/Users/codynunn/Downloads/AI Docs /AI_Financial_Management_Vault_Package_v1.3.3.zip",
+      "sha256": "d8dfed6bc38729c123cf772deae0ab42935486aa2e84dceeda9cc4979e4634af",
+      "module": "Governance",
+      "proposedDestination": "ownerfi/governance/AI_Financial_Management_Vault_Package_v1.3.3.zip",
+      "movementStatus": "held"
+    },
+    {
+      "filename": "AI_Financial_Management_Vault_Package_v1.3.30.zip",
+      "sourcePath": "/Users/codynunn/Downloads/AI Docs /AI_Financial_Management_Vault_Package_v1.3.30.zip",
+      "sha256": "6d28781c8cd67055a25c7d0e51b39f3d5bcad86ac2de9ae4180b15ac49a24956",
+      "module": "Governance",
+      "proposedDestination": "ownerfi/governance/AI_Financial_Management_Vault_Package_v1.3.30.zip",
+      "movementStatus": "held"
+    },
+    {
+      "filename": "AI_Financial_Management_Vault_Package_v1.3.31.zip",
+      "sourcePath": "/Users/codynunn/Downloads/AI Docs /AI_Financial_Management_Vault_Package_v1.3.31.zip",
+      "sha256": "5f1cf542f56946e09689360daeebf81177fe89495dc891ca17a31e2917246663",
+      "module": "Governance",
+      "proposedDestination": "ownerfi/governance/AI_Financial_Management_Vault_Package_v1.3.31.zip",
+      "movementStatus": "held"
+    },
+    {
+      "filename": "AI_Financial_Management_Vault_Package_v1.3.32.zip",
+      "sourcePath": "/Users/codynunn/Downloads/AI Docs /AI_Financial_Management_Vault_Package_v1.3.32.zip",
+      "sha256": "55a50300762e7170e487f7fa57e11399b3dd868e885753b410e32e266967c05b",
+      "module": "Governance",
+      "proposedDestination": "ownerfi/governance/AI_Financial_Management_Vault_Package_v1.3.32.zip",
+      "movementStatus": "held"
+    },
+    {
+      "filename": "AI_Financial_Management_Vault_Package_v1.3.33.zip",
+      "sourcePath": "/Users/codynunn/Downloads/AI Docs /AI_Financial_Management_Vault_Package_v1.3.33.zip",
+      "sha256": "609612b0875b04f51a83d19fff18cb4d048cc80b764891bdaf3d488897f1573d",
+      "module": "Governance",
+      "proposedDestination": "ownerfi/governance/AI_Financial_Management_Vault_Package_v1.3.33.zip",
+      "movementStatus": "held"
+    },
+    {
+      "filename": "AI_Financial_Management_Vault_Package_v1.3.37.zip",
+      "sourcePath": "/Users/codynunn/Downloads/AI Docs /AI_Financial_Management_Vault_Package_v1.3.37.zip",
+      "sha256": "e1dbb074720c3198f76363e4a80b4c39ccdd4eacd8d89d7e2fcb7533452bfc8b",
+      "module": "Governance",
+      "proposedDestination": "ownerfi/governance/AI_Financial_Management_Vault_Package_v1.3.37.zip",
+      "movementStatus": "held"
+    },
+    {
+      "filename": "AI_Financial_Management_Vault_Package_v1.3.38.zip",
+      "sourcePath": "/Users/codynunn/Downloads/AI Docs /AI_Financial_Management_Vault_Package_v1.3.38.zip",
+      "sha256": "2406c76b087e00ad2639c0828bc0457e0340ac3c60de83135226f07c93c7b2a1",
+      "module": "Governance",
+      "proposedDestination": "ownerfi/governance/AI_Financial_Management_Vault_Package_v1.3.38.zip",
+      "movementStatus": "held"
+    },
+    {
+      "filename": "AI_Financial_Management_Vault_Package_v1.3.39_Unified_Bundle.zip",
+      "sourcePath": "/Users/codynunn/Downloads/AI Docs /AI_Financial_Management_Vault_Package_v1.3.39_Unified_Bundle.zip",
+      "sha256": "b30f2cc0d9e319807e8cb742d585a3218040228b3181312493c042e7eb94fefa",
+      "module": "Governance",
+      "proposedDestination": "ownerfi/governance/AI_Financial_Management_Vault_Package_v1.3.39_Unified_Bundle.zip",
+      "movementStatus": "held"
+    },
+    {
+      "filename": "AI_Financial_Management_Vault_Package_v1.3.5.zip",
+      "sourcePath": "/Users/codynunn/Downloads/AI Docs /AI_Financial_Management_Vault_Package_v1.3.5.zip",
+      "sha256": "33e17026ace6240bdb0c19b9b95b3285d8008a9a8d3de183a3784ea1695c12b6",
+      "module": "Governance",
+      "proposedDestination": "ownerfi/governance/AI_Financial_Management_Vault_Package_v1.3.5.zip",
+      "movementStatus": "held"
+    },
+    {
+      "filename": "AI_Financial_Management_Vault_Package_v1.3.6.zip",
+      "sourcePath": "/Users/codynunn/Downloads/AI Docs /AI_Financial_Management_Vault_Package_v1.3.6.zip",
+      "sha256": "5711d059e6d0bfa690b8ae6b3c968364975de457da14274c9111b631ef2dcd6d",
+      "module": "Governance",
+      "proposedDestination": "ownerfi/governance/AI_Financial_Management_Vault_Package_v1.3.6.zip",
+      "movementStatus": "held"
+    },
+    {
+      "filename": "AI_Financial_Management_Vault_Package_v1.3.8.zip",
+      "sourcePath": "/Users/codynunn/Downloads/AI Docs /AI_Financial_Management_Vault_Package_v1.3.8.zip",
+      "sha256": "6a45eedc474c9f91b7d0e65aa34a61094c8d4daa03c587b0ef38d3ae037b20a3",
+      "module": "Governance",
+      "proposedDestination": "ownerfi/governance/AI_Financial_Management_Vault_Package_v1.3.8.zip",
+      "movementStatus": "held"
+    },
+    {
+      "filename": "AI_Financial_Management_Vault_Package_v1.3.9.zip",
+      "sourcePath": "/Users/codynunn/Downloads/AI Docs /AI_Financial_Management_Vault_Package_v1.3.9.zip",
+      "sha256": "d6e6ed3536fff292d84a12bed8ff5e7002e46f3fb9b562889b5ab9f44a469d52",
+      "module": "Governance",
+      "proposedDestination": "ownerfi/governance/AI_Financial_Management_Vault_Package_v1.3.9.zip",
+      "movementStatus": "held"
+    },
+    {
+      "filename": "AI_Financial_Management_Vault_Package_v1.3.zip",
+      "sourcePath": "/Users/codynunn/Downloads/AI Docs /AI_Financial_Management_Vault_Package_v1.3.zip",
+      "sha256": "bcd481f125d0d1a86481489865589b1d7da5e3fc2702fde7e8caf2d259e238ac",
+      "module": "Governance",
+      "proposedDestination": "ownerfi/governance/AI_Financial_Management_Vault_Package_v1.3.zip",
+      "movementStatus": "held"
+    },
+    {
+      "filename": "AI_Financial_Management_Vault_QRCodes.pdf",
+      "sourcePath": "/Users/codynunn/Downloads/AI Docs /AI_Financial_Management_Vault_QRCodes.pdf",
+      "sha256": "17bdf890517e460bf2b4a24ebf694bd205151e123b60e834d93219c8922665e3",
+      "module": "Governance",
+      "proposedDestination": "ownerfi/governance/AI_Financial_Management_Vault_QRCodes.pdf",
+      "movementStatus": "held"
+    },
+    {
+      "filename": "AI_Financial_Management_Vault_Release_Timeline.pdf",
+      "sourcePath": "/Users/codynunn/Downloads/AI Docs /AI_Financial_Management_Vault_Release_Timeline.pdf",
+      "sha256": "1f28a71088e76f007fec9712efaea9b70c032d30218de25a1dd57cf10e1784cb",
+      "module": "Governance",
+      "proposedDestination": "ownerfi/governance/AI_Financial_Management_Vault_Release_Timeline.pdf",
+      "movementStatus": "held"
+    },
+    {
+      "filename": "AI_Financial_Management_Vault_SOP.pdf",
+      "sourcePath": "/Users/codynunn/Downloads/AI Docs /AI_Financial_Management_Vault_SOP.pdf",
+      "sha256": "a2b1c9c4b07d902280e1d3f47180b29dde671309e41d7f8b2fdfef753a0334d4",
+      "module": "Governance",
+      "proposedDestination": "ownerfi/governance/AI_Financial_Management_Vault_SOP.pdf",
+      "movementStatus": "held"
+    },
+    {
+      "filename": "AI_Financial_Management_Vault_Seal_Certificate.pdf",
+      "sourcePath": "/Users/codynunn/Downloads/AI Docs /AI_Financial_Management_Vault_Seal_Certificate.pdf",
+      "sha256": "7e571e3c9cef42152ad6d3adc71e1b88d621a8d655fe78fdf607a10748f46be5",
+      "module": "Governance",
+      "proposedDestination": "ownerfi/governance/AI_Financial_Management_Vault_Seal_Certificate.pdf",
+      "movementStatus": "held"
+    },
+    {
+      "filename": "AI_Financial_Management_Version_Hashes.json",
+      "sourcePath": "/Users/codynunn/Downloads/AI Docs /AI_Financial_Management_Version_Hashes.json",
+      "sha256": "a3cdedf1a5dcd134d841ed416b8577c4e18925b762cbe4119040bf3c6f23ef47",
+      "module": "Governance",
+      "proposedDestination": "ownerfi/governance/AI_Financial_Management_Version_Hashes.json",
+      "movementStatus": "held"
+    },
+    {
+      "filename": "AI_Financial_Management_v1.3_Release_Notes.pdf",
+      "sourcePath": "/Users/codynunn/Downloads/AI Docs /AI_Financial_Management_v1.3_Release_Notes.pdf",
+      "sha256": "d78e97ee6d2ce2df3f9ba4ff66cc257c5e70a9de410c260dbc0810ef68d45b7c",
+      "module": "Executive Reporting",
+      "proposedDestination": "ownerfi/executive_reporting/AI_Financial_Management_v1.3_Release_Notes.pdf",
+      "movementStatus": "held"
+    }
+  ]
+}

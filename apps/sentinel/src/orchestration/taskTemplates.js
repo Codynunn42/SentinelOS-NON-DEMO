@@ -23,10 +23,11 @@ function hashObject(value) {
 
 const APPROVAL_BADGES = Object.freeze({
   mapping_alignment: '[MAP]',
+  conditional: '[APPROVE]',
   conditional_approval: '[APPROVE]',
   held_review: '[HOLD]',
   xe_assistance: '[XE]',
-  billing_checkout: '[BILLING]'
+  billing_checkout: '[APPROVE:BILLING]'
 });
 
 const DEFAULT_TEMPLATES = Object.freeze([
@@ -78,7 +79,7 @@ const DEFAULT_TEMPLATES = Object.freeze([
     id: 'template_billing_checkout',
     category: 'billing_checkout',
     title: 'Billing Checkout',
-    badge: '[BILLING]',
+    badge: '[APPROVE:BILLING]',
     riskLevel: 'high',
     approvalPolicy: 'approval_before_execution',
     xeEligible: false,

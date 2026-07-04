@@ -18,7 +18,8 @@ review_result:
   customer_contact_authority: false
   timed_event_runtime_authority: false
   support_sla_authority: false
-  next_gate: DEFINE_MISSION_CONTROL_SINTENEX_UI_RECLASSIFICATION_SCOPE
+  active_packet_gate: RESTORE_OWNERFI_PROOF_HEALTH_ROUTE_SURFACE
+  held_design_gate: DEFINE_MISSION_CONTROL_SINTENEX_UI_RECLASSIFICATION_SCOPE
 ```
 
 The boundary is accepted as the governing review-held correction for current
@@ -55,12 +56,24 @@ This review preserves the holds on:
 - tunnel reuse;
 - protected API-key checks.
 
-## Required Next Action
+## Held Design Action
 
-Proceed to:
+Proof-health restoration has cleared. The design action has now advanced into a
+held-ready implementation result:
+
+`docs/REVENUE_READY_HELD_IMPLEMENTATION_RESULT_2026-07-03.md`
+
+The Mission Control surface is reclassified as `SINTENEX Commercial Trigger
+Review`, and the revenue-readiness endpoint reports decision and authorization
+boundaries without activating payment.
+
+Remaining production/commercial activation still requires:
 
 `DEFINE_MISSION_CONTROL_SINTENEX_UI_RECLASSIFICATION_SCOPE`
 
-That next gate should decide whether the current Mission Control billing controls
-and checker expectations are removed, renamed, or replaced with a review-held
-SINTENEX timed-event intake surface.
+- owner approval;
+- Stripe configuration verification;
+- non-production checkout verification;
+- customer implementation packet;
+- production readiness review;
+- commercial launch approval.
