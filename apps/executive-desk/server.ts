@@ -15,6 +15,8 @@ app.listen(PORT, HOST, () => {
     console.log('');
     console.log('Available endpoints:');
     console.log('  GET  /health                              — Health check (no auth)');
+    console.log('  GET  /executive                           — Read-only cockpit');
+    console.log('  POST /proxy/command                       — Governed read-only command proxy');
     console.log('  GET  /api/executive/receipts              — List receipts');
     console.log('  GET  /api/executive/receipts/:id          — Get receipt by ID');
     console.log('  GET  /api/executive/receipts/export       — Export receipts');
@@ -24,9 +26,11 @@ app.listen(PORT, HOST, () => {
     console.log('  GET  /api/executive/risk/status           — Current risk status');
     console.log('  GET  /api/executive/risk/factors          — Risk factors history');
     console.log('');
-    console.log('All endpoints except /health require X-Principal-Id header.');
+    console.log('/api/executive endpoints require X-Principal-Id header.');
+    console.log('/proxy/command requires payload.principalId and is read-only in v1.');
     console.log('');
     console.log('Example requests:');
+    console.log('  curl http://localhost:3000/executive');
     console.log('  curl -H "X-Principal-Id: user@example.com" http://localhost:3000/api/executive/receipts');
     console.log('  curl -H "X-Principal-Id: user@example.com" http://localhost:3000/api/executive/risk/status');
     console.log('  curl -H "X-Principal-Id: user@example.com" http://localhost:3000/api/executive/receipts/export?format=csv');

@@ -40,6 +40,7 @@
     "check:executive-desk:api": "mocha --require tsx apps/executive-desk/api/__tests__/routes.test.ts",
     "check:executive-desk:proxy": "tsx apps/executive-desk/proxy/test-handler.ts",
     "check:executive-desk:frontend": "node scripts/check-executive-desk-frontend.js",
+    "check:executive-desk:e2e": "node scripts/check-executive-desk-e2e-demo.js",
     "check:executive-desk:types": "tsc --noEmit --skipLibCheck --module esnext --target es2022 --moduleResolution bundler --esModuleInterop --types mocha,node apps/executive-desk/server.ts apps/executive-desk/api/express-adapter.ts apps/executive-desk/api/receipt-queries.ts apps/executive-desk/api/delegation-queries.ts apps/executive-desk/api/risk-api.ts apps/executive-desk/api/__tests__/routes.test.ts apps/executive-desk/proxy/command-handler.ts apps/executive-desk/proxy/test-handler.ts",
     "check:policy": "node scripts/check-policy-engine.js",
     "check:product-commands": "node scripts/check-product-command-routing.js",

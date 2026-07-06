@@ -2,7 +2,7 @@
 
 **Date:** 2026-07-03  
 **Product Vision:** Turn executive intelligence into governed action — with authority checks, risk review, and receipts
-**Current Verification Refresh:** 2026-07-05 local cadence pass
+**Current Verification Refresh:** 2026-07-05 Gate 8 local E2E pass
 
 ## Completed Gates
 
@@ -69,19 +69,20 @@
 
 ---
 
+### ✅ Gate 8: E2E Demo
+
+- Local GPT-style request posts to `/proxy/command`
+- `repo.control.workflow.diagnose` executes as read-only diagnosis
+- Authority Check validates the principal and command whitelist
+- Risk Gate evaluates and passes the read-only command at low risk
+- Receipt is recorded with signature and audit reference
+- Receipt is fetched back through `GET /api/executive/receipts/:id`
+- Unsupported mutating command is blocked and receives a rejected receipt
+- Verification recorded in `GATE_8_E2E_DEMO_VERIFICATION_RESULT_2026-07-05.md`
+
+---
+
 ## Pending Gates (Roadmap)
-
-### ⏳ Gate 8: E2E Demo
-
-- End-to-end workflow: GPT → Authority → Risk → Receipt
-- Demonstration script showing:
-  - User asks GPT for workflow diagnosis
-  - GPT calls `/api/executive/` endpoint
-  - Authority check validates delegation
-  - Risk gate evaluates infrastructure
-  - Receipt is recorded with all context
-  - User gets response with governance metadata
-- Video/recording of full flow
 
 ### ⏳ Gate 9: v2 Features (Out of Scope for v1)
 
@@ -145,16 +146,17 @@ Every receipt includes:
 
 ## Next Immediate Steps
 
-1. **Keep Gates 6-7 Verified** — Rerun the verified checks when API or frontend code changes
+1. **Keep Gates 6-8 Verified** — Rerun the verified checks when API, frontend, or proxy code changes
 
    ```bash
    pnpm run check:executive-desk:types
    pnpm run check:executive-desk:api
    pnpm run check:executive-desk:proxy
    pnpm run check:executive-desk:frontend
+   pnpm run check:executive-desk:e2e
    ```
 
-2. **Gate 8 (E2E Demo)** — Demonstrate full flow with GPT integration
+2. **Public GPT Builder Proof** — Refresh tunnel/schema and run the Action only under a separate proof gate
 
 ---
 
@@ -201,10 +203,10 @@ DELEGATION_RULES_BACKEND=postgres
 - [x] Full audit trail with principal context
 - [x] REST API for receipt queries (Gate 6)
 - [x] Frontend panels (Gate 7)
-- [ ] E2E demo with GPT (Gate 8)
-- [ ] Documentation complete
+- [x] Local E2E demo with GPT-style request (Gate 8)
+- [x] Documentation complete for v1 local gate sequence
 - [ ] Test coverage > 80%
 
 ---
 
-**Status:** 7/8 v1 gates complete. Core governance loop, API, and read-only frontend cockpit are verified. Ready for Gate 8 E2E demo.
+**Status:** 8/8 v1 gates complete for the local read-only Executive Desk loop. Public GPT Builder/tunnel execution remains a separate held proof lane.

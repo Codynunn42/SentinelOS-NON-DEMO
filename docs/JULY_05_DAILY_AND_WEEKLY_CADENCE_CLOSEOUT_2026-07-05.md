@@ -37,7 +37,7 @@ authority_created: false
 | 2 | Compare templates against MOB constant | Completed | Refresh needed by addendum, not replacement |
 | 3 | Solidify Gate 7 frontend verification | Completed | Repeatable frontend smoke command added and passed |
 | 4 | Reconcile roadmap status | Completed | Gate 7 changed from stale pending to verified complete |
-| 5 | Prepare next Executive Desk gate | Ready | Gate 8 E2E demo is next, still review-held |
+| 5 | Process next Executive Desk gate | Completed after closeout start | Gate 8 local E2E demo verified; public GPT proof still held |
 
 ## Gate 7 Verification Refresh
 
@@ -75,8 +75,8 @@ an approval event.
 | Lane | Closeout State | Next Review |
 | --- | --- | --- |
 | Executive Desk Gate 7 | Verified complete with repeatable frontend check | Keep in regression set |
-| Executive Desk Gate 8 | Next | E2E demo plan: GPT/read-only command/authority/risk/receipt/report |
-| Executive Template / MOB / Board | Aligned but Board requires July 5 addendum | Refresh Board surface before treating it current |
+| Executive Desk Gate 8 | Verified complete locally | Keep in regression set; public GPT Builder/tunnel proof remains separate |
+| Executive Template / MOB / Board | Drift items 1-5 remediated by July 5 addenda and overlays | Keep MOB constant; public GPT/tunnel proof remains held |
 | SINTENEX/SINTINEX | Review-held commercial/timed-event lane | No runtime scheduler or billing activation |
 | OwnerFi | Internal financial domain classification remains active | File movement and live financial operations held |
 | SendCOMM | Source access remains next evidence intake | Exact GitHub URL or authenticated access required |
@@ -91,8 +91,8 @@ That is now recorded.
 
 Still open after this closeout:
 
-- Board Template addendum for July 5 current posture;
-- Gate 8 E2E demo packet and verification;
+- public GPT Builder/tunnel proof if external Action execution is desired;
+- MOB drift items 6-7 if local/public proof distinction and Gate 9 v2 classification should be separately closed;
 - exact SendCOMM GitHub source access;
 - Stripe test-only values if sandbox validation should proceed;
 - customer discovery target if customer scope should be completed;

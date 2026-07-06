@@ -29,6 +29,10 @@ Implementation Status
   - Read-only cockpit served at `/executive`
   - Four panels connected to Gate 6 APIs
   - Frontend route/assets covered by API route tests
+- ✅ Gate 8: E2E demo (verified 2026-07-05)
+  - Local GPT-style request posts to `/proxy/command`
+  - Authority Check, Risk Gate, command execution, receipt creation, and receipt lookup verified
+  - Public GPT Builder/tunnel execution remains separate and held
 
 Quick Start
 
@@ -38,9 +42,12 @@ Quick Start
 4. **Run proxy harness:** `pnpm run check:executive-desk:proxy`
 5. **Run API route suite:** `pnpm run check:executive-desk:api`
 6. **Run TypeScript check:** `pnpm run check:executive-desk:types`
-7. **Start API server:** `API_HOST=127.0.0.1 API_PORT=3137 pnpm exec tsx apps/executive-desk/server.ts`
-8. **Open cockpit:** `http://127.0.0.1:3137/executive`
+7. **Run frontend smoke:** `pnpm run check:executive-desk:frontend`
+8. **Run E2E demo smoke:** `pnpm run check:executive-desk:e2e`
+9. **Start API server:** `API_HOST=127.0.0.1 API_PORT=3137 pnpm exec tsx apps/executive-desk/server.ts`
+10. **Open cockpit:** `http://127.0.0.1:3137/executive`
 
 Next Steps
 
-- Gate 8: End-to-end demo flow (GPT → Authority → Risk → Receipt)
+- Keep Gate 8 in regression proof while any public GPT Builder or tunnel proof remains separately held.
+- Gate 9: v2 features remain out of scope for v1.

@@ -48,6 +48,19 @@ authority_created: false
 3. The MOB remains the correct constant, but its completion queue now needs the
    Sunday cadence overlay rather than replacement.
 
+## Remediation Update
+
+The first five MOB drift items identified after this comparison are remediated
+by review-held addenda and overlays:
+
+| Drift | Remediation |
+| --- | --- |
+| Board Template stale | `docs/EXECUTIVE_BOARD_JULY_05_ADDENDUM_2026-07-05.md` |
+| Executive Template stale | `docs/SENTINEL_EXECUTIVE_OPERATING_TEMPLATE_JULY_05_ADDENDUM_2026-07-05.md` |
+| MOB completion queue stale | `docs/MOB_COMPLETION_QUEUE_REFRESH_OVERLAY_2026-07-05.md` |
+| MOB verification matrix stale | `docs/MOB_VERIFICATION_MATRIX_ADDENDUM_2026-07-05.md` |
+| Worktree/evidence baseline stale | `docs/CURRENT_WORKTREE_EVIDENCE_BASELINE_2026-07-05.md` |
+
 ## Sunday Refresh Direction
 
 ```yaml
