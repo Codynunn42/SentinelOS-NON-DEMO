@@ -36,13 +36,16 @@ checks:
   pnpm_run_check_executive_desk_types: passed
   pnpm_run_check_executive_desk_api: 29_passing
   pnpm_run_check_executive_desk_proxy: passed
+  pnpm_run_check_executive_desk_frontend: passed
   localhost_smoke:
     GET /executive: 200
     GET /executive/app.js: 200
     GET /executive/styles.css: 200
     GET /api/executive/risk/status with principal: 200
     GET /api/executive/receipts/stats with principal: 200
-browser_automation: not_available_locally
+frontend_regression_command: pnpm run check:executive-desk:frontend
+verification_refresh_date_local: 2026-07-05
+browser_automation: not_required_for_this_local_gate
 ```
 
 ## Non-Authorization

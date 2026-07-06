@@ -2,6 +2,7 @@
 
 **Date:** 2026-07-03  
 **Product Vision:** Turn executive intelligence into governed action — with authority checks, risk review, and receipts
+**Current Verification Refresh:** 2026-07-05 local cadence pass
 
 ## Completed Gates
 
@@ -63,6 +64,7 @@
 - Risk + Infrastructure panel connected to risk status API
 - Receipt Ledger panel connected to receipt list, stats, and CSV export APIs
 - Route tests cover cockpit HTML, JavaScript, and CSS assets
+- Frontend smoke command covers `/executive`, static assets, read APIs, and CSV export
 - Verification recorded in `GATE_7_FRONTEND_COMPONENTS_VERIFICATION_RESULT_2026-07-03.md`
 
 ---
@@ -143,12 +145,13 @@ Every receipt includes:
 
 ## Next Immediate Steps
 
-1. **Keep Gate 6 Verified** — Rerun the verified checks when API code changes
+1. **Keep Gates 6-7 Verified** — Rerun the verified checks when API or frontend code changes
 
    ```bash
    pnpm run check:executive-desk:types
    pnpm run check:executive-desk:api
    pnpm run check:executive-desk:proxy
+   pnpm run check:executive-desk:frontend
    ```
 
 2. **Gate 8 (E2E Demo)** — Demonstrate full flow with GPT integration
@@ -197,11 +200,11 @@ DELEGATION_RULES_BACKEND=postgres
 - [x] Risk assessment with infrastructure health factors
 - [x] Full audit trail with principal context
 - [x] REST API for receipt queries (Gate 6)
-- [ ] Frontend panels (Gate 7)
+- [x] Frontend panels (Gate 7)
 - [ ] E2E demo with GPT (Gate 8)
 - [ ] Documentation complete
 - [ ] Test coverage > 80%
 
 ---
 
-**Status:** 6/8 gates complete. Core governance loop + API fully functional. Ready for frontend layer (Gate 7). 🚀
+**Status:** 7/8 v1 gates complete. Core governance loop, API, and read-only frontend cockpit are verified. Ready for Gate 8 E2E demo.

@@ -15,6 +15,7 @@ import { fileURLToPath } from 'node:url';
 import { receiptQueriesService } from './receipt-queries';
 import { delegationQueriesService } from './delegation-queries';
 import { getRiskApiService } from './risk-api';
+import { handleCommand, ProxyCommandRequest } from '../proxy/command-handler';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -142,6 +143,19 @@ export function mountApiRoutes(app: Express): void {
         res.sendFile(path.join(publicDir, 'index.html'));
     });
     app.use('/executive', express.static(publicDir));
+
+    app.post('/proxy/command', rateLimitMiddleware, async (
+        req: Request,
+        res: Response,
+        next: NextFunction,
+    ) => {
+        try {
+            const response = await handleCommand(req.body as ProxyCommandRequest);
+            res.json(response);
+        } catch (err) {
+            next(err);
+        }
+    });
 
     // Protected routes
     const protectedRouter = Router();

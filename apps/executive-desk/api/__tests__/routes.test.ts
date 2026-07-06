@@ -78,6 +78,53 @@ describe('Executive Desk API Routes', () => {
         });
     });
 
+    describe('Proxy Command E2E Surface', () => {
+        it('should execute the governed read-only diagnosis path', async () => {
+            const res = await request(app)
+                .post('/proxy/command')
+                .send({
+                    tenant: 'nunncloud',
+                    command: 'repo.control.workflow.diagnose',
+                    payload: {
+                        principalId: 'user@example.com',
+                        repository: 'Codynunn42/SentinelOS-NON-DEMO',
+                        workflowName: 'Sentinel Actions Diagnostic',
+                        runId: 'gate-8-test',
+                    },
+                });
+
+            assert.strictEqual(res.status, 200);
+            assert.strictEqual(res.body.status, 'executed');
+            assert.strictEqual(res.body.command, 'repo.control.workflow.diagnose');
+            assert.strictEqual(res.body.executionMode, 'read_only_diagnosis');
+            assert.strictEqual(res.body.authorityCheckResult.allowed, true);
+            assert.strictEqual(res.body.riskGateOutcome.decision, 'pass');
+            assert.strictEqual(res.body.receipt.status, 'executed');
+            assert.strictEqual(res.body.auditReference, res.body.receipt.id);
+            assert.strictEqual(res.body.diagnosis.state, 'diagnosed');
+        });
+
+        it('should block unsupported commands before execution', async () => {
+            const res = await request(app)
+                .post('/proxy/command')
+                .send({
+                    tenant: 'nunncloud',
+                    command: 'exec.deploy.toggle',
+                    payload: {
+                        principalId: 'user@example.com',
+                        resource: 'prod/deployment/feature-x',
+                    },
+                });
+
+            assert.strictEqual(res.status, 200);
+            assert.strictEqual(res.body.status, 'blocked');
+            assert.strictEqual(res.body.bypassPrevented, true);
+            assert.strictEqual(res.body.authorityCheckResult.allowed, false);
+            assert.strictEqual(res.body.riskGateOutcome.decision, 'block');
+            assert.strictEqual(res.body.receipt.status, 'rejected');
+        });
+    });
+
     describe('Receipt Endpoints', () => {
         const principal = 'user@example.com';
 
