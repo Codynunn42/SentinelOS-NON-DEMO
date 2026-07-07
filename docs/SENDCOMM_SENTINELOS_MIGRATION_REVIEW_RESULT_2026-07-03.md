@@ -152,3 +152,22 @@ and inventoried.
 This review does not authorize file movement, deletion, archive extraction,
 runtime mutation, command execution, connector execution, deployment, Azure
 mutation, DNS changes, external publication, staging, commit, or push.
+
+## July 06 Source Access Addendum
+
+Exact SendCOMM GitHub source access is now situated by read-only GitHub checks.
+
+```yaml
+source_access_status: situated
+confirmed_repository: Codynunn42/SendCOMM-Nunn-Cloud
+confirmed_repository_url: https://github.com/Codynunn42/SendCOMM-Nunn-Cloud
+inventory_result: docs/SENDCOMM_GITHUB_SOURCE_INVENTORY_2026-07-06.md
+head_sha: 61cc8fdb9665e861f8c7c9ec38e5803baa1a0dd6
+next_gate: CLASSIFY_SENDCOMM_CONCEPTS_AGAINST_SENTINELOS_COMMAND_AND_COMMUNICATIONS_BOUNDARIES
+file_movement: held
+migration_authority: false
+authority_created: false
+```
+
+This addendum supersedes the prior blocker that exact GitHub access was missing,
+but it does not authorize migration or file movement.
