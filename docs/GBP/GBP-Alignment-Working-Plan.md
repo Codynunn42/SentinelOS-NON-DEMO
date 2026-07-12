@@ -23,6 +23,7 @@ Align the Government Deployment Blueprint to source materials before further spe
 - `docs/MOB_MOVEMENT_QUEUE_PROCESSING_RESULT_2026-07-05.md`
 - `docs/JUNE_CLOSEOUT_AND_RUNTIME_ALIGNMENT_SCAN_2026-07-06.md`
 - `apps/executive-desk/gates/GATE_8_E2E_DEMO.md`
+- `docs/GBP/Mission-Readiness-Index.md`
 
 ## Extraction Areas
 
