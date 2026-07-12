@@ -35,7 +35,7 @@ export interface RiskAssessmentEngine {
 /**
  * Default Risk Assessment Engine
  */
-class DefaultRiskAssessmentEngine implements RiskAssessmentEngine {
+export class DefaultRiskAssessmentEngine implements RiskAssessmentEngine {
     /**
      * Compute infrastructure health factor (0-1)
      * Maps service status to risk contribution
@@ -129,8 +129,9 @@ class DefaultRiskAssessmentEngine implements RiskAssessmentEngine {
             utilizations.push(metrics.disk / 100);
         }
 
-        // Database connection pool utilization
-        const dbPoolUtilization = metrics.dbConnections / metrics.dbConnectionsMax;
+        // Database connection pool utilization (guard divide-by-zero)
+        const safeDbMax = metrics.dbConnectionsMax > 0 ? metrics.dbConnectionsMax : 100;
+        const dbPoolUtilization = metrics.dbConnections / safeDbMax;
         utilizations.push(dbPoolUtilization);
 
         if (utilizations.length === 0) {
@@ -157,7 +158,7 @@ class DefaultRiskAssessmentEngine implements RiskAssessmentEngine {
         },
     ): Promise<RiskAssessment> {
         const healthClient = options?.healthClient || (await getInfrastructureHealthClient());
-        const threshold = options?.threshold || { warn: 0.5, block: 0.7 };
+        const threshold = normalizeThreshold(options?.threshold); // unified threshold behavior
         const now = new Date();
 
         // Compute factors
@@ -205,14 +206,12 @@ class DefaultRiskAssessmentEngine implements RiskAssessmentEngine {
             mitigations.push('Scale up resources or optimize workload');
         }
 
-        let decision: 'pass' | 'warn' | 'block' = 'pass';
-        if (score >= threshold.block) {
-            decision = 'block';
+        let decision: 'pass' | 'warn' | 'block' = decideRisk(score, threshold); // unified decision behavior
+        if (decision === 'block') {
             if (!mitigations.includes('Address critical issues before proceeding')) {
                 mitigations.push('Address critical issues before proceeding');
             }
-        } else if (score >= threshold.warn) {
-            decision = 'warn';
+        } else if (decision === 'warn') {
             if (!mitigations.includes('Proceed with caution; monitor closely')) {
                 mitigations.push('Proceed with caution; monitor closely');
             }
@@ -233,7 +232,7 @@ class DefaultRiskAssessmentEngine implements RiskAssessmentEngine {
 /**
  * Factory function
  */
-export function createRiskAssessmentEngine(): RiskAssessmentEngine {
+export function createRiskAssessmentEngine(_options?: unknown): RiskAssessmentEngine {
     return new DefaultRiskAssessmentEngine();
 }
 
@@ -242,7 +241,7 @@ export function createRiskAssessmentEngine(): RiskAssessmentEngine {
  */
 let instance: RiskAssessmentEngine | null = null;
 
-export async function getRiskAssessmentEngine(): Promise<RiskAssessmentEngine> {
+export async function getRiskAssessmentEngine(_options?: unknown): Promise<RiskAssessmentEngine> {
     if (!instance) {
         instance = createRiskAssessmentEngine();
     }
@@ -256,5 +255,90 @@ export function resetRiskAssessmentEngine(): void {
     instance = null;
 }
 
-// Export implementation for testing/direct use
-export { DefaultRiskAssessmentEngine };
+// Optional compatibility default export
+export default getRiskAssessmentEngine;
+
+type AnyObj = Record<string, any>;
+
+const DEFAULT_FACTORS = {
+    infraHealth: 0,
+    recentIncidents: 0,
+    deploymentStatus: 0,
+    resourcePressure: 0
+};
+
+function clamp01(n: unknown): number {
+    const v = Number(n);
+    if (!Number.isFinite(v)) return 0;
+    return Math.max(0, Math.min(1, v));
+}
+
+function normalizeThreshold(
+    threshold?: { warn: number; block: number } | number,
+): { warn: number; block: number } {
+    // Backward-compatible: scalar means "block threshold"
+    if (typeof threshold === "number") {
+        const block = clamp01(threshold);
+        const warn = clamp01(block - 0.25);
+        return { warn, block };
+    }
+
+    const warn = clamp01(threshold?.warn ?? 0.5);
+    const block = clamp01(threshold?.block ?? 0.7);
+
+    // enforce monotonic order
+    return warn <= block ? { warn, block } : { warn: block, block: warn };
+}
+
+function decideRisk(
+    score: number,
+    threshold: { warn: number; block: number },
+    forceBlock = false,
+): "pass" | "warn" | "block" {
+    if (forceBlock) return "block";
+    if (score >= threshold.block) return "block";
+    if (score >= threshold.warn) return "warn";
+    return "pass";
+}
+
+export async function assessRisk(arg1?: AnyObj, arg2?: AnyObj) {
+    const input = normalizeInput(arg1, arg2);
+    const f = { ...DEFAULT_FACTORS, ...(input.infraFactors ?? {}) };
+
+    const score =
+        0.25 * clamp01(f.infraHealth) +
+        0.25 * clamp01(f.recentIncidents) +
+        0.25 * clamp01(f.deploymentStatus) +
+        0.25 * clamp01(f.resourcePressure);
+
+    const threshold = normalizeThreshold(input.threshold ?? 0.75); // unified threshold
+    const stale = isStaleTimestamp(input.timestamp);
+    const decision = decideRisk(score, threshold, stale); // unified decision + stale force-block
+
+    return {
+        command: input.command ?? "repo.control.workflow.diagnose",
+        decision,
+        score,
+        allowed: decision !== "block",
+        infraStatus: stale ? "stale" : "ok",
+        factors: f,       // canonical
+        infraFactors: f,  // compatibility
+        issues: stale ? ["infra_health_data_stale"] : [],
+        mitigations: stale ? ["refresh_infra_telemetry"] : [],
+        timestamp: new Date().toISOString()
+    };
+}
+
+function normalizeInput(a?: AnyObj, b?: AnyObj): AnyObj {
+    // supports fn(input), fn(command, input), fn({ request: input })
+    if (b && typeof b === "object") return b;
+    if (a?.request && typeof a.request === "object") return a.request;
+    return (a && typeof a === "object") ? a : {};
+}
+
+function isStaleTimestamp(ts?: string): boolean {
+    if (!ts) return false;
+    const t = Date.parse(ts);
+    if (!Number.isFinite(t)) return false;
+    return (Date.now() - t) > 24 * 60 * 60 * 1000;
+}

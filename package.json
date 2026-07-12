@@ -42,6 +42,9 @@
     "check:executive-desk:frontend": "node scripts/check-executive-desk-frontend.js",
     "check:executive-desk:e2e": "node scripts/check-executive-desk-e2e-demo.js",
     "check:executive-desk:types": "tsc --noEmit --skipLibCheck --module esnext --target es2022 --moduleResolution bundler --esModuleInterop --types mocha,node apps/executive-desk/server.ts apps/executive-desk/api/express-adapter.ts apps/executive-desk/api/receipt-queries.ts apps/executive-desk/api/delegation-queries.ts apps/executive-desk/api/risk-api.ts apps/executive-desk/api/__tests__/routes.test.ts apps/executive-desk/proxy/command-handler.ts apps/executive-desk/proxy/test-handler.ts",
+    "test": "mocha --require tsx \"apps/executive-desk/**/__tests__/**/*.test.ts\" \"apps/executive-desk/**/*.test.ts\"",
+    "test:coverage": "c8 --all --src apps/executive-desk --exclude \"apps/executive-desk/public/**\" --exclude \"apps/executive-desk/**/__tests__/**\" --exclude \"apps/executive-desk/**/*.test.ts\" --exclude \"apps/executive-desk/**/*.md\" --reporter=text-summary --reporter=lcov pnpm run test",
+    "test:coverage:check": "c8 check-coverage --lines 80 --statements 80 --functions 80 --branches 75",
     "check:policy": "node scripts/check-policy-engine.js",
     "check:product-commands": "node scripts/check-product-command-routing.js",
     "check:receipts": "node scripts/check-receipt-lookup.js",
@@ -72,7 +75,10 @@
     "simulate:mock-faceplanes": "node scripts/run-mock-faceplanes.js",
     "simulate:stress-mock-faceplanes": "node scripts/stress-mock-faceplanes.js",
     "db:apply-schema": "node scripts/db-apply-schema.js",
-    "db:smoke": "node scripts/db-smoke.js"
+    "db:smoke": "node scripts/db-smoke.js",
+    "verify:executive-desk:fast": "node scripts/sentinel-ai-package.js --fast",
+    "verify:executive-desk:full": "node scripts/sentinel-ai-package.js",
+    "sentinel:package": "pnpm run verify:executive-desk:full"
   },
   "engines": {
     "node": ">=20"
@@ -83,6 +89,7 @@
     "@types/node": "^26.1.0",
     "@types/pg": "^8.20.0",
     "@types/supertest": "^7.2.0",
+    "c8": "^11.0.0",
     "mocha": "^11.7.6",
     "supertest": "^7.2.2",
     "tsx": "^4.22.5",

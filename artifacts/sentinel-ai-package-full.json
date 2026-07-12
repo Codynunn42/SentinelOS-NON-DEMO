@@ -1,0 +1,48 @@
+{
+  "mode": "full",
+  "startedAt": "2026-07-12T12:16:49.989Z",
+  "finishedAt": "2026-07-12T12:17:01.273Z",
+  "passed": false,
+  "results": [
+    {
+      "script": "check:executive-desk:types",
+      "ok": true,
+      "durationMs": 2156
+    },
+    {
+      "script": "check:executive-desk:api",
+      "ok": true,
+      "durationMs": 937
+    },
+    {
+      "script": "check:executive-desk:proxy",
+      "ok": true,
+      "durationMs": 705
+    },
+    {
+      "script": "check:executive-desk:frontend",
+      "ok": true,
+      "durationMs": 1286
+    },
+    {
+      "script": "check:executive-desk:e2e",
+      "ok": true,
+      "durationMs": 1331
+    },
+    {
+      "script": "test",
+      "ok": true,
+      "durationMs": 963
+    },
+    {
+      "script": "test:coverage",
+      "ok": true,
+      "durationMs": 2658
+    },
+    {
+      "script": "test:coverage:check",
+      "ok": false,
+      "durationMs": 1248
+    }
+  ]
+}
