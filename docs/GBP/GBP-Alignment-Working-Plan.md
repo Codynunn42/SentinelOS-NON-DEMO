@@ -197,7 +197,7 @@ Align the Government Deployment Blueprint to source materials before further spe
 
 ### 7. Mission Readiness Index (MRI)
 
-**Source:** `docs/releases/# GBP Phase 5 — Mission Readiness Index .md`
+**Source:** `docs/GBP/Mission-Readiness-Index.md`
 
 **Extracted doctrine**
 
