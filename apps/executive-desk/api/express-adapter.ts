@@ -15,6 +15,13 @@ import { fileURLToPath } from 'node:url';
 import { receiptQueriesService } from './receipt-queries';
 import { delegationQueriesService } from './delegation-queries';
 import { getRiskApiService } from './risk-api';
+import {
+    getCloseoutState,
+    getMobRuns,
+    recordMobRun,
+    saveCloseoutState,
+    validateCloseoutUpdate,
+} from './closeout-state';
 import { handleCommand, ProxyCommandRequest } from '../proxy/command-handler';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -35,6 +42,15 @@ declare global {
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
 const RATE_LIMIT_WINDOW_MS = 60 * 1000; // 1 minute
 const RATE_LIMIT_MAX_REQUESTS = 100;
+
+function authEnabled(): boolean {
+    return String(process.env.AUTH_ENABLED || 'false').toLowerCase() === 'true';
+}
+
+function getExpectedProxyToken(): string {
+    const token = process.env.AUTH_BEARER_TOKEN || process.env.JWT_SECRET;
+    return String(token || '').trim();
+}
 
 /**
  * Rate limiting middleware
@@ -97,6 +113,44 @@ function authMiddleware(req: Request, res: Response, next: NextFunction): void {
 }
 
 /**
+ * Proxy auth middleware
+ *
+ * If AUTH_ENABLED=true, requires Authorization: Bearer <token>
+ * where token matches AUTH_BEARER_TOKEN (or JWT_SECRET fallback).
+ */
+function proxyAuthMiddleware(req: Request, res: Response, next: NextFunction): void {
+    if (!authEnabled()) {
+        next();
+        return;
+    }
+
+    const expectedToken = getExpectedProxyToken();
+    if (!expectedToken) {
+        res.status(500).json({
+            error: 'Internal Server Error',
+            details: 'AUTH_ENABLED=true but no AUTH_BEARER_TOKEN/JWT_SECRET configured',
+            code: 'AUTH_MISCONFIGURED',
+        });
+        return;
+    }
+
+    const authHeader = String(req.headers.authorization || '');
+    const match = authHeader.match(/^Bearer\s+(.+)$/i);
+    const token = match?.[1]?.trim();
+
+    if (!token || token !== expectedToken) {
+        res.status(401).json({
+            error: 'Unauthorized',
+            details: 'Valid bearer token is required for /proxy/command',
+            code: 'MISSING_OR_INVALID_BEARER',
+        });
+        return;
+    }
+
+    next();
+}
+
+/**
  * Request ID middleware
  */
 function requestIdMiddleware(req: Request, res: Response, next: NextFunction): void {
@@ -144,7 +198,7 @@ export function mountApiRoutes(app: Express): void {
     });
     app.use('/executive', express.static(publicDir));
 
-    app.post('/proxy/command', rateLimitMiddleware, async (
+    app.post('/proxy/command', proxyAuthMiddleware, rateLimitMiddleware, async (
         req: Request,
         res: Response,
         next: NextFunction,
@@ -383,6 +437,303 @@ export function mountApiRoutes(app: Express): void {
 
                 const history = await service.getRiskFactorsHistory(window, granularity);
                 res.json(history);
+            } catch (err) {
+                next(err);
+            }
+        },
+    );
+
+    // Closeout state endpoints
+    protectedRouter.get(
+        '/closeout/state',
+        async (req: Request, res: Response, next: NextFunction) => {
+            try {
+                const principalId = String(req.principalId || '');
+                const data = await getCloseoutState(principalId);
+                res.json({ data });
+            } catch (err) {
+                next(err);
+            }
+        },
+    );
+
+    protectedRouter.put(
+        '/closeout/state',
+        async (req: Request, res: Response, next: NextFunction) => {
+            try {
+                const principalId = String(req.principalId || '');
+                const updates = validateCloseoutUpdate(req.body);
+                const data = await saveCloseoutState(principalId, updates, principalId);
+                res.json({ data });
+            } catch (err) {
+                if (err instanceof Error) {
+                    res.status(400).json({
+                        error: 'Bad Request',
+                        details: err.message,
+                        code: 'INVALID_CLOSEOUT_PAYLOAD',
+                    });
+                    return;
+                }
+                next(err);
+            }
+        },
+    );
+
+    protectedRouter.get(
+        '/closeout/mob-runs',
+        async (req: Request, res: Response, next: NextFunction) => {
+            try {
+                const principalId = String(req.principalId || '');
+                const limit = req.query.limit ? parseInt(String(req.query.limit), 10) : 10;
+                const status = req.query.status ? String(req.query.status).toLowerCase() : 'all';
+                const windowDays = req.query.windowDays
+                    ? parseInt(String(req.query.windowDays), 10)
+                    : 7;
+
+                const rows = await getMobRuns(principalId, limit);
+                const now = Date.now();
+                const windowMs = Math.max(1, Math.min(windowDays, 90)) * 24 * 60 * 60 * 1000;
+                const cutoff = now - windowMs;
+
+                const windowed = rows.filter(
+                    (row) => new Date(row.timestamp).getTime() >= cutoff,
+                );
+                const filtered =
+                    status === 'completed' || status === 'failed'
+                        ? windowed.filter((row) => row.status === status)
+                        : windowed;
+
+                const completed = filtered.filter((row) => row.status === 'completed').length;
+                const failed = filtered.filter((row) => row.status === 'failed').length;
+                const total = filtered.length;
+
+                const timeseriesMap = new Map<string, { completed: number; failed: number }>();
+                filtered.forEach((row) => {
+                    const day = new Date(row.timestamp).toISOString().slice(0, 10);
+                    if (!timeseriesMap.has(day)) {
+                        timeseriesMap.set(day, { completed: 0, failed: 0 });
+                    }
+                    const slot = timeseriesMap.get(day)!;
+                    if (row.status === 'completed') {
+                        slot.completed += 1;
+                    } else {
+                        slot.failed += 1;
+                    }
+                });
+
+                const timeseries = Array.from(timeseriesMap.entries())
+                    .sort(([a], [b]) => a.localeCompare(b))
+                    .map(([date, values]) => ({ date, ...values }));
+
+                res.json({
+                    data: filtered,
+                    total,
+                    limit,
+                    windowDays,
+                    summary: {
+                        total,
+                        completed,
+                        failed,
+                        successRate: total > 0 ? completed / total : 0,
+                        lastRunAt: filtered[0]?.timestamp || null,
+                    },
+                    timeseries,
+                });
+            } catch (err) {
+                next(err);
+            }
+        },
+    );
+
+    protectedRouter.post(
+        '/closeout/mob-runs',
+        async (req: Request, res: Response, next: NextFunction) => {
+            try {
+                const principalId = String(req.principalId || '');
+                const status = String(req.body?.status || '').toLowerCase();
+
+                if (!['completed', 'failed'].includes(status)) {
+                    res.status(400).json({
+                        error: 'Bad Request',
+                        details: 'status must be completed or failed',
+                        code: 'INVALID_MOB_RUN_STATUS',
+                    });
+                    return;
+                }
+
+                const notes =
+                    typeof req.body?.notes === 'string' ? req.body.notes.slice(0, 512) : undefined;
+                const data = await recordMobRun(
+                    principalId,
+                    principalId,
+                    status as 'completed' | 'failed',
+                    notes,
+                );
+                res.status(201).json({ data });
+            } catch (err) {
+                next(err);
+            }
+        },
+    );
+
+    protectedRouter.get(
+        '/closeout/mob-runs/export',
+        async (req: Request, res: Response, next: NextFunction) => {
+            try {
+                const principalId = String(req.principalId || '');
+                const limit = req.query.limit ? parseInt(String(req.query.limit), 10) : 100;
+                const status = req.query.status ? String(req.query.status).toLowerCase() : 'all';
+                const windowDays = req.query.windowDays
+                    ? parseInt(String(req.query.windowDays), 10)
+                    : 30;
+                const format = req.query.format ? String(req.query.format).toLowerCase() : 'csv';
+
+                if (!['csv', 'json', 'jsonl'].includes(format)) {
+                    res.status(400).json({
+                        error: 'Bad Request',
+                        details: 'format must be csv, json, or jsonl',
+                        code: 'INVALID_EXPORT_FORMAT',
+                    });
+                    return;
+                }
+
+                const rows = await getMobRuns(principalId, limit);
+                const now = Date.now();
+                const windowMs = Math.max(1, Math.min(windowDays, 90)) * 24 * 60 * 60 * 1000;
+                const cutoff = now - windowMs;
+
+                const windowed = rows.filter(
+                    (row) => new Date(row.timestamp).getTime() >= cutoff,
+                );
+                const filtered =
+                    status === 'completed' || status === 'failed'
+                        ? windowed.filter((row) => row.status === status)
+                        : windowed;
+
+                const filename =
+                    format === 'csv'
+                        ? 'mob-runs.csv'
+                        : format === 'jsonl'
+                            ? 'mob-runs.jsonl'
+                            : 'mob-runs.json';
+                const contentType =
+                    format === 'csv'
+                        ? 'text/csv'
+                        : format === 'jsonl'
+                            ? 'application/x-ndjson'
+                            : 'application/json';
+
+                res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+                res.setHeader('Content-Type', contentType);
+
+                if (format === 'json') {
+                    res.end(JSON.stringify(filtered, null, 2));
+                    return;
+                }
+
+                if (format === 'jsonl') {
+                    filtered.forEach((row) => res.write(JSON.stringify(row) + '\n'));
+                    res.end();
+                    return;
+                }
+
+                res.write('ID,PrincipalId,Executor,Status,Timestamp,Notes\n');
+                filtered.forEach((row) => {
+                    const notes = typeof row.notes === 'string' ? row.notes.replace(/"/g, '""') : '';
+                    res.write(
+                        [
+                            row.id,
+                            row.principalId,
+                            row.executor,
+                            row.status,
+                            row.timestamp,
+                            `"${notes}"`,
+                        ].join(',') + '\n',
+                    );
+                });
+                res.end();
+            } catch (err) {
+                next(err);
+            }
+        },
+    );
+
+    protectedRouter.get(
+        '/closeout/export-bundle',
+        async (req: Request, res: Response, next: NextFunction) => {
+            try {
+                const principalId = String(req.principalId || '');
+                const limit = req.query.limit ? parseInt(String(req.query.limit), 10) : 200;
+                const status = req.query.status ? String(req.query.status).toLowerCase() : 'all';
+                const windowDays = req.query.windowDays
+                    ? parseInt(String(req.query.windowDays), 10)
+                    : 30;
+
+                const closeoutState = await getCloseoutState(principalId);
+                const rows = await getMobRuns(principalId, limit);
+
+                const now = Date.now();
+                const windowMs = Math.max(1, Math.min(windowDays, 90)) * 24 * 60 * 60 * 1000;
+                const cutoff = now - windowMs;
+
+                const windowed = rows.filter(
+                    (row) => new Date(row.timestamp).getTime() >= cutoff,
+                );
+                const filtered =
+                    status === 'completed' || status === 'failed'
+                        ? windowed.filter((row) => row.status === status)
+                        : windowed;
+
+                const completed = filtered.filter((row) => row.status === 'completed').length;
+                const failed = filtered.filter((row) => row.status === 'failed').length;
+                const total = filtered.length;
+
+                const timeseriesMap = new Map<string, { completed: number; failed: number }>();
+                filtered.forEach((row) => {
+                    const day = new Date(row.timestamp).toISOString().slice(0, 10);
+                    if (!timeseriesMap.has(day)) {
+                        timeseriesMap.set(day, { completed: 0, failed: 0 });
+                    }
+                    const slot = timeseriesMap.get(day)!;
+                    if (row.status === 'completed') {
+                        slot.completed += 1;
+                    } else {
+                        slot.failed += 1;
+                    }
+                });
+
+                const timeseries = Array.from(timeseriesMap.entries())
+                    .sort(([a], [b]) => a.localeCompare(b))
+                    .map(([date, values]) => ({ date, ...values }));
+
+                const payload = {
+                    exportedAt: new Date().toISOString(),
+                    principalId,
+                    filters: {
+                        status,
+                        windowDays,
+                        limit,
+                    },
+                    closeoutState,
+                    mobRuns: {
+                        data: filtered,
+                        summary: {
+                            total,
+                            completed,
+                            failed,
+                            successRate: total > 0 ? completed / total : 0,
+                            lastRunAt: filtered[0]?.timestamp || null,
+                        },
+                        timeseries,
+                    },
+                };
+
+                res.setHeader(
+                    'Content-Disposition',
+                    'attachment; filename="executive-closeout-bundle.json"',
+                );
+                res.setHeader('Content-Type', 'application/json');
+                res.end(JSON.stringify(payload, null, 2));
             } catch (err) {
                 next(err);
             }

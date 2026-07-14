@@ -1,0 +1,93 @@
+{
+  "states": {
+    "user@example.com": {
+      "principalId": "user@example.com",
+      "cadence": {
+        "mode": "weekly",
+        "weeklyDay": "sunday",
+        "monthlyDay": "1"
+      },
+      "gbpAttached": true,
+      "gbpReference": "GBP-2026-07",
+      "mobTemplateRequired": true,
+      "mobLastRunStatus": "failed",
+      "updatedAt": "2026-07-14T05:12:25.418Z",
+      "updatedBy": "user@example.com",
+      "mobLastRunAt": "2026-07-14T05:12:25.418Z"
+    }
+  },
+  "mobRuns": {
+    "user@example.com": [
+      {
+        "id": "7979d5cd-e1ea-481a-b7f4-b8d2aef7602d",
+        "principalId": "user@example.com",
+        "status": "failed",
+        "timestamp": "2026-07-14T05:12:25.418Z",
+        "executor": "user@example.com"
+      },
+      {
+        "id": "f0e9b7a4-4b2a-472a-aa85-90cfe59d4ad4",
+        "principalId": "user@example.com",
+        "status": "completed",
+        "timestamp": "2026-07-14T05:12:25.414Z",
+        "executor": "user@example.com"
+      },
+      {
+        "id": "37cb99d6-a6b7-48d2-932b-c9a991a7898f",
+        "principalId": "user@example.com",
+        "status": "failed",
+        "timestamp": "2026-07-14T04:41:33.002Z",
+        "executor": "user@example.com"
+      },
+      {
+        "id": "46190466-d87b-4619-b8b4-e26ae4e6af48",
+        "principalId": "user@example.com",
+        "status": "completed",
+        "timestamp": "2026-07-14T04:41:32.998Z",
+        "executor": "user@example.com"
+      },
+      {
+        "id": "de5f01e4-5b4a-43c6-9d1f-dc93d84d00dc",
+        "principalId": "user@example.com",
+        "status": "failed",
+        "timestamp": "2026-07-14T04:33:42.669Z",
+        "executor": "user@example.com"
+      },
+      {
+        "id": "0a6f44d1-ca95-4f2b-a07b-9713d5e63a8a",
+        "principalId": "user@example.com",
+        "status": "completed",
+        "timestamp": "2026-07-14T04:33:42.666Z",
+        "executor": "user@example.com"
+      },
+      {
+        "id": "d37f24ca-d16e-44d1-a24c-43f170565901",
+        "principalId": "user@example.com",
+        "status": "failed",
+        "timestamp": "2026-07-14T04:29:54.564Z",
+        "executor": "user@example.com"
+      },
+      {
+        "id": "85f9112a-c3a4-40f1-bc80-1fe4e3248c0c",
+        "principalId": "user@example.com",
+        "status": "completed",
+        "timestamp": "2026-07-14T04:29:54.561Z",
+        "executor": "user@example.com"
+      },
+      {
+        "id": "eb2b8d8a-92e5-438d-aad1-709fb0dbe4b4",
+        "principalId": "user@example.com",
+        "status": "failed",
+        "timestamp": "2026-07-14T04:28:07.259Z",
+        "executor": "user@example.com"
+      },
+      {
+        "id": "51478f25-1d61-4926-a5f7-4bf00260811b",
+        "principalId": "user@example.com",
+        "status": "completed",
+        "timestamp": "2026-07-14T04:28:07.251Z",
+        "executor": "user@example.com"
+      }
+    ]
+  }
+}

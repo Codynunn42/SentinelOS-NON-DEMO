@@ -47,6 +47,13 @@ Quick Start
 9. **Start API server:** `API_HOST=127.0.0.1 API_PORT=3137 pnpm exec tsx apps/executive-desk/server.ts`
 10. **Open cockpit:** `http://127.0.0.1:3137/executive`
 
+Production proxy auth
+
+- Set `AUTH_ENABLED=true` to require bearer auth on `POST /proxy/command`.
+- Set `AUTH_BEARER_TOKEN=<strong-random-token>` (preferred).
+- If `AUTH_BEARER_TOKEN` is unset, `JWT_SECRET` is used as fallback.
+- Use this token in GPT Action auth or upstream API gateway auth policy.
+
 Next Steps
 
 - Keep Gate 8 in regression proof while any public GPT Builder or tunnel proof remains separately held.

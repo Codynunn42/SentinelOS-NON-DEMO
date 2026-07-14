@@ -1,125 +1,108 @@
-# Executive Desk v1 — Integration Checklist & Next Steps
+# Executive Desk v1 — Integration Checklist & Launch Readiness
 
-This checklist guides the full rollout from documentation through end-to-end demo.
+This checklist is the source of truth for current readiness and the public launch path.
 
-## Phase 1: Scaffold & Documentation (✓ Complete)
+## Current Verified Status (Local v1)
 
-- [x] Design doc: `docs/EXECUTIVE_DESK_V1.md`
-- [x] Panel specs: `apps/executive-desk/panels.md`
-- [x] GPT integration: `apps/executive-desk/gpt-integration.md`
-- [x] App README: `apps/executive-desk/README.md`
+### Gate Completion
 
-## Phase 2: Core API Services (Implement next)
+- [x] Gate 1 — Documentation scaffold
+- [x] Gate 2 — Proxy implementation
+- [x] Gate 3 — Receipt persistence
+- [x] Gate 4 — Authority integration
+- [x] Gate 5 — Risk gate integration
+- [x] Gate 6 — API routes
+- [x] Gate 7 — Frontend cockpit
+- [x] Gate 8 — Local E2E demo
 
-### Receipt Store Service (Append-only, Signed)
+### Latest Local Verification (2026-07-13 / 2026-07-14 run)
 
-- [ ] Create `services/receipt-store/` with:
-  - `store.ts`: append-only receipt ledger (file-based or database)
-  - `sign.ts`: HMAC/asymmetric signing for audit verification
-  - `verify.ts`: receipt verification and chain-of-custody checking
-  - `export.ts`: compliance export (CSV, JSON audit trail)
-- [ ] API routes:
-  - `POST /api/executive/receipts` → record a receipt
-  - `GET /api/executive/receipts?skip=0&limit=100` → paginated receipts
-  - `GET /api/executive/receipts/:id` → retrieve single receipt
-  - `POST /api/executive/receipts/:id/verify` → verify signature
+- [x] `pnpm run check:executive-desk:types`
+- [x] `pnpm run check:executive-desk:api` (41 passing)
+- [x] `pnpm run check:executive-desk:proxy`
+- [x] `pnpm run check:executive-desk:frontend`
+- [x] `pnpm run check:executive-desk:e2e`
 
-### Authority Check Service
+Operational meaning:
 
-- [ ] Create `services/authority-check/` with:
-  - `check.ts`: consult identity graph and delegation rules
-  - `rules.ts`: authority rules engine (who can do what on which resources)
-  - `escalate.ts`: logic for escalating to required approvers
-- [ ] API routes:
-  - `GET /api/executive/authority?scope=...` → list active authorities
-  - `POST /api/executive/authority/check` → immediate decision + approvers list
-  - `POST /api/executive/authority/delegate` → grant temporary authority
+- [x] Ready for local read-only SentinelOS operation now.
+- [ ] Not yet approved for full public production command execution without Stage 2/3 controls below.
 
-### Risk Gate Service
+## Commercial Chapter Rollout (Production/Public)
 
-- [ ] Create `services/risk-gate/` with:
-  - `evaluate.ts`: compute risk score and gating decision
-  - `probe.ts`: run health checks and readiness probes
-  - `mitigate.ts`: suggest mitigations for high-risk actions
-- [ ] API routes:
-  - `GET /api/executive/risk?scope=...` → current risk snapshot
-  - `POST /api/executive/risk/probe` → run fresh health checks
-  - `GET /api/executive/risk/history?hours=24` → risk trends
+### Stage 1 — Public Presence (Now)
 
-### Briefing Aggregator Service
+- [ ] Reposition `nunncorporation.com` to outcome-first messaging.
+- [ ] Publish Executive Assessment entry point.
+- [ ] Publish Executive Solutions and Executive Library pages.
+- [ ] Ensure no sensitive/governed internal data is exposed publicly.
+- [ ] Route all public engagement to assessment/scheduling workflow.
 
-- [ ] Create `services/briefing-aggregator/` with:
-  - `aggregate.ts`: combine telemetry, alerts, policy flags, calendar
-  - `rank.ts`: prioritize briefing items by severity and recency
-  - `recommend.ts`: suggest actions based on current state
-- [ ] API routes:
-  - `GET /api/executive/briefing` → prioritized daily briefing
-  - `POST /api/executive/briefing/:id/ack` → acknowledge item
-  - `GET /api/executive/briefing/recommendations` → action suggestions
+### Stage 2 — Public GPT Concierge (Front Door)
 
-## Phase 3: Proxy Endpoint & GPT Integration
+- [ ] Publish GPT as Executive Desk Concierge only (no privileged execution).
+- [ ] Limit GPT scope to: introduction, qualification, outcomes framing, assessment invitation.
+- [ ] Remove/disable mutating or sensitive command affordances in public action schema.
+- [ ] Add policy text in GPT instructions: no customer-specific or government-sensitive execution.
+- [ ] Add human handoff CTA to Executive Assessment flow.
 
-- [ ] Deploy proxy at `/proxy/command` (see `gpt-integration.md`)
-- [ ] Add authentication (Bearer token, OIDC, or mTLS)
-- [ ] Test with sample GPT action schema
-- [ ] Document proxy URL and auth setup for production deployment
+### Stage 3 — Governed Backend for Approved Workflows
 
-## Phase 4: Frontend Scaffold (React/Vue/Svelte)
+- [ ] Enable production auth for proxy and API (`AUTH_ENABLED=true`).
+- [ ] Move receipts to durable backend (`RECEIPT_LEDGER_BACKEND=postgres`).
+- [ ] Configure production CORS allowlist and HTTPS-only ingress.
+- [ ] Place `/proxy/command` behind API gateway/WAF/rate limiting.
+- [ ] Restrict production command set to approved non-sensitive workflows only.
+- [ ] Keep government/customer privileged workflows behind authenticated Executive Desk.
+- [ ] Add production monitoring/alerting for proxy, auth failures, and error spikes.
 
-- [ ] Create `apps/executive-desk/components/`:
-  - `BriefingPanel.tsx` (or `.vue`, `.svelte`)
-  - `AuthorityPanel.tsx`
-  - `RiskPanel.tsx`
-  - `ReceiptPanel.tsx`
-- [ ] Create `apps/executive-desk/layouts/`:
-  - `DashboardLayout.tsx` (2x2 grid, resizable panels)
-- [ ] Create `apps/executive-desk/hooks/`:
-  - `useBriefing()` → fetch & cache briefing items
-  - `useAuthority()` → fetch authority records
-  - `useRisk()` → fetch risk snapshot
-  - `useReceipts()` → fetch receipt ledger
+## Production Hardening Checklist
 
-## Phase 5: End-to-End Demo
+### Security and Access
 
-- [ ] Create demo scenario:
-  - User clicks "Approve" on briefing item → triggers decision
-  - System runs Authority Check → "Allowed for prod/deploy scope"
-  - Risk Gate evaluates → "Pass (infra healthy, no incidents)"
-  - Receipt issued and added to ledger
-  - UI shows receipt entry with signature and auditReference
-- [ ] Create demo flow document: `apps/executive-desk/demo-flow.md`
-- [ ] Record or script the demo for stakeholder review
+- [ ] Production secret management for JWT/API keys (no plaintext env in repo/runtime logs).
+- [ ] Principal authentication and authorization validated in production environment.
+- [ ] Audit logging retained and queryable for compliance.
+- [ ] Incident response runbook published for Executive Desk operations.
 
-## Deployment Checklist
+### Reliability
 
-- [ ] All API services have health check endpoints (`GET /health`)
-- [ ] Receipt store is backed by durable storage (not in-memory)
-- [ ] Proxy endpoint is behind API gateway with rate limiting
-- [ ] Authority check service can load identity graph from production source
-- [ ] Risk gate can query real infrastructure health (e.g., Datadog, Azure Monitor)
-- [ ] Audit logging is enabled for all command executions
-- [ ] Frontend is served over HTTPS with CORS configured
-- [ ] GPT integration docs are updated with production proxy URL
-- [ ] Team has access to:
-  - Runbook for proxy endpoint troubleshooting
-  - Audit log access for compliance review
-  - Receipt export capability for reporting
+- [ ] Health checks integrated with deployment platform probes.
+- [ ] Database backup/restore validated for receipt and closeout state.
+- [ ] Rate limit policy validated under expected traffic.
+- [ ] Rollback path documented for GPT/proxy deployment.
 
-## Success Criteria
+### Governance
 
-- [ ] Daily Briefing panel displays real alerts & recommendations
-- [ ] Authority Check correctly blocks unauthorized commands
-- [ ] Risk Gate prevents commands when infra is degraded
-- [ ] Receipt Ledger records all decisions with signatures
-- [ ] Custom GPT can execute a command end-to-end (Briefing → Decision → Authority → Risk → Receipt)
-- [ ] Audit trail is complete and verifiable
-- [ ] All panels respond in < 500ms
+- [ ] GBP mission package references linked in operating runbook.
+- [ ] Daily/weekly/monthly cadence finalized in live environment.
+- [ ] MOB updated with Commercial Chapter milestone and operating SOP.
+- [ ] Founder sign-off recorded for public launch scope.
 
-## Rollout Plan
+## Go/No-Go Decision Gates
 
-1. **Week 1–2**: Implement receipt store and authority check services
-2. **Week 3**: Risk gate and briefing aggregator
-3. **Week 4**: Proxy endpoint and GPT integration tests
-4. **Week 5–6**: Frontend components and layout
-5. **Week 7**: End-to-end demo and stakeholder review
-6. **Week 8**: Production deployment and monitoring
+### Go for Local Operation
+
+- [x] All Gate 6-8 checks passing locally.
+- [x] Executive Desk local cockpit and E2E command loop validated.
+
+### Go for Public Concierge Launch
+
+- [ ] Stage 1 complete.
+- [ ] Stage 2 controls complete.
+- [ ] Public copy/legal review complete.
+
+### Go for Governed Production Execution
+
+- [ ] Stage 3 controls complete.
+- [ ] Security hardening checklist complete.
+- [ ] Reliability checklist complete.
+- [ ] Governance checklist complete.
+- [ ] Final founder go/no-go approval captured.
+
+## Immediate Next Actions (Priority Order)
+
+1. [ ] Finish Stage 1 web repositioning and assessment funnel.
+2. [ ] Publish Stage 2 concierge GPT with strict non-sensitive scope.
+3. [ ] Stand up Stage 3 production environment with auth + postgres + gateway.
+4. [ ] Run final launch dry run with full checklist sign-off.

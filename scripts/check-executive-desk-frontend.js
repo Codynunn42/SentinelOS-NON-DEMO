@@ -13,6 +13,7 @@ const requiredHtmlMarkers = [
   'Controlled Access',
   'Risk + Infrastructure',
   'Receipt Ledger',
+  'Executive Template Runs',
   '/executive/app.js',
   '/executive/styles.css',
 ];

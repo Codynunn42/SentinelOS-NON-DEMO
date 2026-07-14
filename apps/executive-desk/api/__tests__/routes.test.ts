@@ -79,6 +79,63 @@ describe('Executive Desk API Routes', () => {
     });
 
     describe('Proxy Command E2E Surface', () => {
+        it('should require bearer token for proxy when auth is enabled', async () => {
+            const prevAuthEnabled = process.env.AUTH_ENABLED;
+            const prevToken = process.env.AUTH_BEARER_TOKEN;
+
+            process.env.AUTH_ENABLED = 'true';
+            process.env.AUTH_BEARER_TOKEN = 'proxy-test-token';
+
+            try {
+                const res = await request(app)
+                    .post('/proxy/command')
+                    .send({
+                        tenant: 'nunncloud',
+                        command: 'repo.control.workflow.diagnose',
+                        payload: {
+                            principalId: 'user@example.com',
+                            repository: 'Codynunn42/SentinelOS-NON-DEMO',
+                            workflowName: 'Sentinel Actions Diagnostic',
+                        },
+                    });
+
+                assert.strictEqual(res.status, 401);
+                assert.strictEqual(res.body.code, 'MISSING_OR_INVALID_BEARER');
+            } finally {
+                process.env.AUTH_ENABLED = prevAuthEnabled;
+                process.env.AUTH_BEARER_TOKEN = prevToken;
+            }
+        });
+
+        it('should accept proxy bearer token when auth is enabled', async () => {
+            const prevAuthEnabled = process.env.AUTH_ENABLED;
+            const prevToken = process.env.AUTH_BEARER_TOKEN;
+
+            process.env.AUTH_ENABLED = 'true';
+            process.env.AUTH_BEARER_TOKEN = 'proxy-test-token';
+
+            try {
+                const res = await request(app)
+                    .post('/proxy/command')
+                    .set('Authorization', 'Bearer proxy-test-token')
+                    .send({
+                        tenant: 'nunncloud',
+                        command: 'repo.control.workflow.diagnose',
+                        payload: {
+                            principalId: 'user@example.com',
+                            repository: 'Codynunn42/SentinelOS-NON-DEMO',
+                            workflowName: 'Sentinel Actions Diagnostic',
+                        },
+                    });
+
+                assert.strictEqual(res.status, 200);
+                assert.strictEqual(res.body.status, 'executed');
+            } finally {
+                process.env.AUTH_ENABLED = prevAuthEnabled;
+                process.env.AUTH_BEARER_TOKEN = prevToken;
+            }
+        });
+
         it('should execute the governed read-only diagnosis path', async () => {
             const res = await request(app)
                 .post('/proxy/command')
@@ -342,6 +399,141 @@ describe('Executive Desk API Routes', () => {
 
                 assert.strictEqual(res.status, 200);
             }
+        });
+    });
+
+    describe('Closeout State Endpoints', () => {
+        const principal = 'user@example.com';
+
+        it('should get default closeout state', async () => {
+            const res = await request(app)
+                .get('/api/executive/closeout/state')
+                .set('X-Principal-Id', principal);
+
+            assert.strictEqual(res.status, 200);
+            assert.strictEqual(res.body.data.principalId, principal);
+            assert.strictEqual(res.body.data.cadence.weeklyDay, 'sunday');
+            assert.strictEqual(typeof res.body.data.gbpAttached, 'boolean');
+        });
+
+        it('should update closeout state', async () => {
+            const res = await request(app)
+                .put('/api/executive/closeout/state')
+                .set('X-Principal-Id', principal)
+                .send({
+                    cadence: {
+                        mode: 'weekly',
+                        weeklyDay: 'sunday',
+                    },
+                    gbpAttached: true,
+                    gbpReference: 'GBP-2026-07',
+                    mobTemplateRequired: true,
+                });
+
+            assert.strictEqual(res.status, 200);
+            assert.strictEqual(res.body.data.cadence.mode, 'weekly');
+            assert.strictEqual(res.body.data.cadence.weeklyDay, 'sunday');
+            assert.strictEqual(res.body.data.gbpAttached, true);
+            assert.strictEqual(res.body.data.gbpReference, 'GBP-2026-07');
+        });
+
+        it('should reject invalid closeout update payload', async () => {
+            const res = await request(app)
+                .put('/api/executive/closeout/state')
+                .set('X-Principal-Id', principal)
+                .send({
+                    cadence: {
+                        mode: 'weekly',
+                        weeklyDay: 'funday',
+                    },
+                });
+
+            assert.strictEqual(res.status, 400);
+            assert.strictEqual(res.body.code, 'INVALID_CLOSEOUT_PAYLOAD');
+        });
+
+        it('should record MOB template run', async () => {
+            const res = await request(app)
+                .post('/api/executive/closeout/mob-runs')
+                .set('X-Principal-Id', principal)
+                .send({ status: 'completed' });
+
+            assert.strictEqual(res.status, 201);
+            assert.strictEqual(res.body.data.status, 'completed');
+            assert.strictEqual(res.body.data.principalId, principal);
+        });
+
+        it('should list MOB template runs', async () => {
+            const res = await request(app)
+                .get('/api/executive/closeout/mob-runs?limit=5')
+                .set('X-Principal-Id', principal);
+
+            assert.strictEqual(res.status, 200);
+            assert(Array.isArray(res.body.data));
+            assert.strictEqual(typeof res.body.total, 'number');
+            assert.strictEqual(typeof res.body.summary.total, 'number');
+            assert.strictEqual(typeof res.body.summary.successRate, 'number');
+            assert(Array.isArray(res.body.timeseries));
+        });
+
+        it('should filter MOB template runs by status', async () => {
+            await request(app)
+                .post('/api/executive/closeout/mob-runs')
+                .set('X-Principal-Id', principal)
+                .send({ status: 'failed' });
+
+            const res = await request(app)
+                .get('/api/executive/closeout/mob-runs?status=failed&windowDays=30')
+                .set('X-Principal-Id', principal);
+
+            assert.strictEqual(res.status, 200);
+            res.body.data.forEach((row: any) => {
+                assert.strictEqual(row.status, 'failed');
+            });
+        });
+
+        it('should export MOB runs as CSV', async () => {
+            const res = await request(app)
+                .get('/api/executive/closeout/mob-runs/export?format=csv&windowDays=30')
+                .set('X-Principal-Id', principal);
+
+            assert.strictEqual(res.status, 200);
+            assert.strictEqual(res.headers['content-type'].includes('text/csv'), true);
+            assert(res.text.includes('ID,PrincipalId,Executor,Status,Timestamp,Notes'));
+        });
+
+        it('should export MOB runs as JSON', async () => {
+            const res = await request(app)
+                .get('/api/executive/closeout/mob-runs/export?format=json')
+                .set('X-Principal-Id', principal);
+
+            assert.strictEqual(res.status, 200);
+            assert.strictEqual(res.headers['content-type'].includes('application/json'), true);
+            assert(Array.isArray(res.body));
+        });
+
+        it('should reject invalid MOB export format', async () => {
+            const res = await request(app)
+                .get('/api/executive/closeout/mob-runs/export?format=xml')
+                .set('X-Principal-Id', principal);
+
+            assert.strictEqual(res.status, 400);
+            assert.strictEqual(res.body.code, 'INVALID_EXPORT_FORMAT');
+        });
+
+        it('should export closeout bundle as JSON', async () => {
+            const res = await request(app)
+                .get('/api/executive/closeout/export-bundle?windowDays=30&status=all')
+                .set('X-Principal-Id', principal);
+
+            assert.strictEqual(res.status, 200);
+            assert.strictEqual(res.headers['content-type'].includes('application/json'), true);
+            assert.strictEqual(res.body.principalId, principal);
+            assert(res.body.exportedAt);
+            assert(res.body.closeoutState);
+            assert(Array.isArray(res.body.mobRuns.data));
+            assert(res.body.mobRuns.summary);
+            assert(Array.isArray(res.body.mobRuns.timeseries));
         });
     });
 

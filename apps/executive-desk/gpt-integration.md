@@ -1,298 +1,117 @@
-# Executive Desk — GPT Integration
+# Executive Desk GPT Integration (Production/Public)
 
-This document describes how to connect Custom GPT to Executive Desk v1 via a governed proxy endpoint, following the Sentinel command governance pattern.
+This guide defines how to configure the GPT safely for SentinelOS.
 
-## Architecture
+It follows the staged rollout:
 
-A Custom GPT can invoke a subset of Executive Desk commands by calling a proxy endpoint at `POST /proxy/command`. The proxy:
+1. Stage 1: public concierge (no backend actions)
+2. Stage 2: concierge with assessment funnel handoff
+3. Stage 3: governed backend actions for approved read-only workflows
 
-1. Validates the request schema (tenant, command, payload)
-2. Runs the command through the Authority Check → Risk Gate → Receipt flow
-3. Returns a governed response with receipt, auditReference, and trustScore
+## Current Implementation Reality
 
-The GPT can use Daily Briefing and Authority Status to inform its decision-making, then propose a command that the Executive Desk loop validates and executes.
+As of v1 now:
 
-## OpenAPI Schema
+- The only supported governed command is `repo.control.workflow.diagnose`.
+- It is executed via `POST /proxy/command`.
+- The proxy flow is: Authority Check -> Risk Gate -> Receipt.
+- The canonical action schema is in `apps/executive-desk/openapi.yaml`.
 
-```yaml
-openapi: 3.1.0
-info:
-  title: Sentinel Executive Desk v1
-  version: 1.0.0
-  description: >
-    Governed command interface for Executive Desk v1.
-    Commands flow through: Authority Check → Risk Gate → Receipt.
-    All responses include governance metadata (receipt, auditReference, trustScore).
+Do not use older mutating-command examples for production GPT configuration.
 
-servers:
-  - url: https://YOUR_PROXY_URL
+## Decision: Do You Need an API?
 
-paths:
-  /proxy/command:
-    post:
-      operationId: executeGovernedCommand
-      summary: Execute a governed command via Executive Desk
-      description: >
-        Accepts a command object and runs it through the Authority Check → Risk Gate
-        → Receipt flow. Returns a signed receipt and audit reference.
-        Supported commands:
-        - exec.deploy.toggle (toggle a deployment flag)
-        - exec.policy.apply (apply a governance policy)
-        - exec.escalate (escalate to approver queue)
+- For Stage 1 and Stage 2 concierge: no API required.
+- For Stage 3 governed execution: yes, you need a public HTTPS endpoint for `/proxy/command`.
 
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - tenant
-                - command
-                - payload
-              properties:
-                tenant:
-                  type: string
-                  enum:
-                    - nunncloud
-                  description: Tenant identifier
+## Stage 1 / Stage 2: Concierge GPT (No Actions)
 
-                command:
-                  type: string
-                  enum:
-                    - exec.deploy.toggle
-                    - exec.policy.apply
-                    - exec.escalate
-                  description: Governed command name
+Configure a GPT that only:
 
-                payload:
-                  type: object
-                  description: Command-specific payload
-                  required:
-                    - principalId
-                    - action
-                    - resource
-                  properties:
-                    principalId:
-                      type: string
-                      example: user@example.com
-                      description: Executing principal ID
+- explains Executive Desk capabilities at a high level,
+- helps visitors define desired outcomes,
+- routes them to Executive Assessment,
+- avoids customer-specific operational execution.
 
-                    action:
-                      type: string
-                      example: approve
-                      description: Action to perform
+### Recommended GPT Instruction Baseline
 
-                    resource:
-                      type: string
-                      example: prod/deployment/feature-x
-                      description: Target resource path
+Use language equivalent to:
 
-                    context:
-                      type: object
-                      description: Optional decision context (e.g., briefing item ID, risk notes)
-                      properties:
-                        briefingItemId:
-                          type: string
-                        riskNotes:
-                          type: string
+- role: Executive Desk Concierge for Nunn Corporation
+- objective: qualify outcome goals and invite Executive Assessment
+- constraints:
+  - do not claim privileged access to customer systems
+  - do not execute commands
+  - do not collect sensitive secrets
+  - do not provide legal/compliance guarantees
+- handoff:
+  - always propose an Executive Assessment next step
+  - provide concise problem -> outcome framing
 
-      responses:
-        "200":
-          description: Command executed and received
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-                    enum:
-                      - executed
-                      - blocked
-                      - pending_approval
-                    description: Execution status
+## Stage 3: Governed Action GPT (API Connected)
 
-                  command:
-                    type: string
-                    description: Echoed command name
+When you are ready for controlled execution, connect Actions to SentinelOS.
 
-                  executionMode:
-                    type: string
-                    enum:
-                      - governed_direct
-                      - governed_escalated
-                    description: How the command was processed
+### Required Components
 
-                  bypassPrevented:
-                    type: boolean
-                    description: Whether bypass was prevented by risk gate
+1. Public HTTPS domain exposing `POST /proxy/command`
+2. Action schema from `apps/executive-desk/openapi.yaml`
+3. Authentication on proxy endpoint (recommended mandatory in production)
+4. Monitoring/audit for proxy calls and receipt IDs
 
-                  authorityCheckResult:
-                    type: object
-                    properties:
-                      allowed:
-                        type: boolean
-                      requiredApprovers:
-                        type: array
-                        items:
-                          type: string
+### Builder Steps
 
-                  riskGateOutcome:
-                    type: object
-                    properties:
-                      decision:
-                        type: string
-                        enum:
-                          - pass
-                          - warn
-                          - block
-                      score:
-                        type: number
-                      mitigations:
-                        type: array
-                        items:
-                          type: string
+1. Open GPT Builder.
+2. Configure identity, description, and strict system instructions.
+3. In Actions, import schema from `apps/executive-desk/openapi.yaml`.
+4. Replace `servers.url` with your production proxy URL.
+5. Configure authentication in GPT Builder to match your gateway.
+6. Test with a safe payload for `repo.control.workflow.diagnose`.
+7. Verify response includes receipt and auditReference.
 
-                  trustScore:
-                    type: number
-                    minimum: 0
-                    maximum: 1
-                    description: Governance trust score for the decision
+## Production Security Requirements
 
-                  receipt:
-                    type: object
-                    properties:
-                      id:
-                        type: string
-                      command:
-                        type: string
-                      executor:
-                        type: string
-                      timestamp:
-                        type: string
-                        format: date-time
-                      signature:
-                        type: string
-                        description: HMAC or asymmetric signature for audit verification
+Before enabling public action use:
 
-                  auditReference:
-                    type: string
-                    description: Log entry ID for compliance and tracing
+- enforce auth at gateway and/or proxy,
+- keep command allowlist strict (read-only command only),
+- rate limit by principal and IP,
+- log every request with request ID and audit reference,
+- block sensitive payload fields from logging.
 
-                  reasons:
-                    type: array
-                    items:
-                      type: string
-                    description: Explanation of decision
+## Example Safe Test Payload
 
-        "400":
-          description: Invalid request schema
-
-        "403":
-          description: Authority check failed or risk gate blocked
-
-components: {}
+```json
+{
+  "tenant": "nunncloud",
+  "command": "repo.control.workflow.diagnose",
+  "payload": {
+    "principalId": "user@example.com",
+    "repository": "Codynunn42/SentinelOS-NON-DEMO",
+    "workflowName": "Sentinel Actions Diagnostic",
+    "runId": "12345"
+  }
+}
 ```
 
-## Setup
+## Expected Success Markers
 
-1. **Deploy proxy endpoint** at your Cloudflare URL (e.g., `https://frontdesk.nunncorporation.com/proxy/command`)
-2. **Add authentication** (Bearer token, API key, or OIDC) in `securitySchemes` section
-3. **Update server URL** to your production domain
-4. **Import schema** into Custom GPT → Actions → Create new action → Paste this schema
+- `status` is `executed` or `blocked` (never raw server errors in normal flow)
+- `executionMode` is `read_only_diagnosis`
+- `authorityCheckResult` is present
+- `riskGateOutcome` is present
+- `receipt.id` is present
+- `auditReference` is present
 
-## Minimal proxy implementation (Node.js reference)
+## Recommended Public Rollout Order
 
-```javascript
-app.post('/proxy/command', async (req, res) => {
-  const { tenant, command, payload } = req.body;
+1. launch Stage 1 concierge GPT without actions
+2. run website + assessment funnel with real traffic
+3. enable Stage 3 actions for read-only command only
+4. evaluate logs and receipts for 1-2 weeks
+5. decide if broader command scope is needed
 
-  // 1. Validate schema
-  if (!['nunncloud'].includes(tenant)) {
-    return res.status(400).json({ error: 'Invalid tenant' });
-  }
+## Operator Notes
 
-  // 2. Authority Check
-  const authCheck = await authorityService.check({
-    principalId: payload.principalId,
-    action: payload.action,
-    resource: payload.resource,
-  });
-
-  if (!authCheck.allowed) {
-    return res.status(403).json({
-      status: 'blocked',
-      command,
-      authorityCheckResult: authCheck,
-      receipt: { status: 'rejected', reason: 'authority_check_failed' },
-    });
-  }
-
-  // 3. Risk Gate
-  const riskOutcome = await riskGateService.evaluate({
-    command,
-    payload,
-    authorityCheckResult: authCheck,
-  });
-
-  if (riskOutcome.decision === 'block') {
-    return res.status(403).json({
-      status: 'blocked',
-      command,
-      riskGateOutcome: riskOutcome,
-      receipt: { status: 'rejected', reason: 'risk_gate_blocked' },
-    });
-  }
-
-  // 4. Issue Receipt & Execute
-  const receipt = {
-    id: uuid(),
-    command,
-    executor: payload.principalId,
-    timestamp: new Date().toISOString(),
-    authorityChecks: [authCheck],
-    riskOutcome,
-    signature: sign(JSON.stringify({ command, payload, timestamp: Date.now() })),
-  };
-
-  const auditReference = await auditLog.record(receipt);
-
-  // (In v1, actual command execution may be async/deferred)
-  const result = await executeCommand(command, payload);
-
-  return res.json({
-    status: 'executed',
-    command,
-    executionMode: authCheck.requiredApprovers.length > 0 ? 'governed_escalated' : 'governed_direct',
-    bypassPrevented: riskOutcome.decision !== 'pass',
-    authorityCheckResult: authCheck,
-    riskGateOutcome: riskOutcome,
-    trustScore: (authCheck.allowed && riskOutcome.decision === 'pass') ? 0.95 : 0.6,
-    receipt,
-    auditReference,
-    reasons: riskOutcome.mitigations || [],
-  });
-});
-```
-
-## Integration workflow (GPT perspective)
-
-1. **Briefing context**: GPT reads `/api/executive/briefing` to understand pending decisions
-2. **Authority check**: GPT queries `/api/executive/authority?scope=...` to see if action is allowed
-3. **Propose command**: GPT calls `POST /proxy/command` with the decision
-4. **Receipt & report**: GPT reads the response, including receipt and auditReference, and summarizes for the executive
-
-## Security & governance notes
-
-- All `/proxy/command` calls MUST include an attestation token (Bearer or OIDC)
-- Risk Gate must explicitly return `pass/warn/block`; commands with `warn` should prompt for approval
-- Receipts are signed and immutable; maintain an audit log for compliance export
-- Trust score reflects the governance posture: high (0.9+) for properly authorized, low-risk actions; lower for escalations or risk warnings
-
-## Next steps
-
-1. Implement the proxy endpoint with authority check and risk gate services
-2. Wire GPT action schema to your production domain
-3. Test end-to-end flow: GPT → Authority Check → Risk Gate → Receipt → Report
-4. Add Custom GPT instructions that reference the briefing and authority endpoints to inform decision-making
+- `apps/executive-desk/openapi.yaml` is the schema source of truth.
+- Keep this guide synchronized when endpoint capabilities change.

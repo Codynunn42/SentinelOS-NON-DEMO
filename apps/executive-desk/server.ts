@@ -25,6 +25,12 @@ app.listen(PORT, HOST, () => {
     console.log('  GET  /api/executive/delegations/:id       — Get delegation by ID');
     console.log('  GET  /api/executive/risk/status           — Current risk status');
     console.log('  GET  /api/executive/risk/factors          — Risk factors history');
+    console.log('  GET  /api/executive/closeout/state        — Get closeout cadence + GBP/MOB state');
+    console.log('  PUT  /api/executive/closeout/state        — Save closeout cadence + GBP/MOB state');
+    console.log('  GET  /api/executive/closeout/mob-runs     — List MOB template runs');
+    console.log('  POST /api/executive/closeout/mob-runs     — Record MOB template run');
+    console.log('  GET  /api/executive/closeout/mob-runs/export — Export MOB template runs');
+    console.log('  GET  /api/executive/closeout/export-bundle — Export closeout state + MOB bundle');
     console.log('');
     console.log('/api/executive endpoints require X-Principal-Id header.');
     console.log('/proxy/command requires payload.principalId and is read-only in v1.');
