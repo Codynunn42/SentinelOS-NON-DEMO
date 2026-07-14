@@ -2,6 +2,10 @@
 
 Documentation for SentinelOS NON-DEMO.
 
+## Quick Links
+
+- [Documentation Policy Guardrail](./DOCUMENTATION_POLICY_GUARDRAIL.md)
+
 ## Canonical Mapping Index
 
 This index is the current docs control map. It shows which document is canonical for each lane, the approval badge, the governance/compliance mapping, and what must happen next.
