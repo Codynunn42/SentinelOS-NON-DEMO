@@ -10,6 +10,20 @@ Documentation
 - `openapi.yaml`: OpenAPI 3.1 schema (import into Custom GPT Actions)
 - `INTEGRATION_CHECKLIST.md`: phased rollout plan (5 phases, from services to E2E demo)
 
+Government Readiness (Executive Artifacts)
+
+- `GOVERNMENT_READINESS_DAILY_CADENCE_2026-07-14.md`: daily mission cadence and end-of-day success criteria
+- `government-readiness/README.md`: Government Readiness Library overview and usage
+- `government-readiness/DOE/EXECUTIVE_INTRODUCTION_ONE_PAGER.md`: executive introduction for government outreach
+- `government-readiness/DOE/GOVERNMENT_EXECUTIVE_DESK_OVERVIEW.md`: executive desk overview for government audiences
+- `government-readiness/DOE/OUTCOME_FIRST_MESSAGING.md`: outcome-first positioning language and guardrails
+- `government-readiness/DOE/DISCOVERY_MEETING_FRAMEWORK.md`: discovery framework for executive outreach meetings
+- `government-readiness/DOE/GOVERNMENT_CONTACT_LIST.md`: relationship-first government contact tracker
+- `government-readiness/executive-intelligence/EXECUTIVE_INTELLIGENCE_BRIEF_DOCTRINE.md`: permanent doctrine for Executive Intelligence Briefs
+- `government-readiness/deployment-profiles/GOVERNMENT_DEPLOYMENT_BLUEPRINT_2026-07-14.md`: federal profile refinement and compatibility matrix
+- `government-readiness/governance/EXECUTIVE_REVIEW_CHECKLIST_GOVERNMENT_POSTURE.md`: executive review checklist for posture alignment
+- `government-readiness/mission-outcomes/GOVERNMENT_OUTCOME_REFERENCE_LIBRARY_OUTLINE.md`: stretch-goal outline organized by mission outcomes
+
 Implementation Status
 
 - ✅ Gate 1: Documentation-first scaffold (complete)
