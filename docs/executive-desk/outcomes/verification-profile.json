@@ -1,0 +1,33 @@
+{
+    "government_readiness": {
+        "verified": false,
+        "verificationEvidence": []
+    },
+    "sentinelos_completion": {
+        "verified": true,
+        "verificationEvidence": [
+            "apps/executive-desk/GATE_8_E2E_DEMO_VERIFICATION_RESULT_2026-07-05.md"
+        ]
+    },
+    "executive_desk_operational_cadence": {
+        "verified": true,
+        "verificationEvidence": [
+            "docs/executive-desk/receipts/2026-07-15-governed-build-completion-receipt.json"
+        ]
+    },
+    "ownerfi_internal_financial_management": {
+        "verified": false,
+        "verificationEvidence": []
+    },
+    "sintinex_commercial_readiness": {
+        "verified": false,
+        "verificationEvidence": []
+    },
+    "governed_deal_execution": {
+        "verified": true,
+        "verificationEvidence": [
+            "apps/executive-desk/GATE_6_API_ROUTES_VERIFICATION_RESULT_2026-07-03.md",
+            "docs/executive-desk/receipts/2026-07-15-governed-build-completion-receipt.json"
+        ]
+    }
+}

@@ -452,6 +452,95 @@ describe('Executive Desk API Routes', () => {
             assert.strictEqual(res.body.code, 'INVALID_CLOSEOUT_PAYLOAD');
         });
 
+
+        describe('Sentinel AI Remote Connector', () => {
+            const principal = 'user@example.com';
+
+            it('should report hosted Sentinel AI posture when no remote is configured', async () => {
+                const prevBaseUrl = process.env.SENTINEL_AI_BASE_URL;
+                const prevBearer = process.env.SENTINEL_AI_BEARER_TOKEN;
+
+                delete process.env.SENTINEL_AI_BASE_URL;
+                delete process.env.SENTINEL_AI_BEARER_TOKEN;
+
+                try {
+                    const res = await request(app)
+                        .get('/api/executive/sentinel-ai/status')
+                        .set('X-Principal-Id', principal);
+
+                    assert.strictEqual(res.status, 200);
+                    assert.strictEqual(res.body.data.remote.configured, false);
+                    assert(Array.isArray(res.body.data.hardeningPaths));
+                    assert(res.body.data.hardeningPaths.some((item: string) => item.includes('SENTINEL_AI_BASE_URL')));
+                    assert(res.body.data.efficiencyPlan);
+                    assert(Array.isArray(res.body.data.efficiencyPlan.costReduction));
+                    assert(Array.isArray(res.body.data.efficiencyPlan.latencyReduction));
+                    assert(Array.isArray(res.body.data.efficiencyPlan.computeOptimization));
+                    assert(Array.isArray(res.body.data.efficiencyPlan.greenMode));
+                    assert(Array.isArray(res.body.data.readyToGo));
+                    assert(Array.isArray(res.body.data.focusAreas));
+                    assert(Array.isArray(res.body.data.recommendedCourse));
+                    assert(res.body.data.recommendedCourse.length > 0);
+                } finally {
+                    if (prevBaseUrl !== undefined) {
+                        process.env.SENTINEL_AI_BASE_URL = prevBaseUrl;
+                    } else {
+                        delete process.env.SENTINEL_AI_BASE_URL;
+                    }
+
+                    if (prevBearer !== undefined) {
+                        process.env.SENTINEL_AI_BEARER_TOKEN = prevBearer;
+                    } else {
+                        delete process.env.SENTINEL_AI_BEARER_TOKEN;
+                    }
+                }
+            });
+
+            it('should produce a course-setting scan payload', async () => {
+                const res = await request(app)
+                    .post('/api/executive/sentinel-ai/scan')
+                    .set('X-Principal-Id', principal)
+                    .send({ focus: 'hardening' });
+
+                assert.strictEqual(res.status, 200);
+                assert.strictEqual(typeof res.body.data.generatedAt, 'string');
+                assert(Array.isArray(res.body.data.localSignals));
+                assert(res.body.data.efficiencyPlan);
+                assert(Array.isArray(res.body.data.readyToGo));
+                assert(Array.isArray(res.body.data.focusAreas));
+                assert(Array.isArray(res.body.data.recommendedCourse));
+                assert(
+                    res.body.data.recommendedCourse.some((item: string) =>
+                        item.includes('No remote Sentinel AI endpoint') || item.includes('hosted service through Executive Desk'),
+                    ),
+                );
+                assert(
+                    res.body.data.readyToGo.some((item: string) =>
+                        item.includes('Gate 6 to Gate 8') || item.includes('Government outreach binder'),
+                    ),
+                );
+                assert(
+                    res.body.data.focusAreas.some((item: string) =>
+                        item.includes('government relationship building') || item.includes('pilot material'),
+                    ),
+                );
+                assert(
+                    res.body.data.recommendedCourse.some((item: string) =>
+                        item.includes('operating cost') || item.includes('green energy module'),
+                    ),
+                );
+                assert(
+                    res.body.data.efficiencyPlan.costReduction.some((item: string) =>
+                        item.includes('operating spend') || item.includes('idle services'),
+                    ),
+                );
+                assert(
+                    res.body.data.efficiencyPlan.greenMode.some((item: string) =>
+                        item.includes('green energy module') || item.includes('carbon-aware'),
+                    ),
+                );
+            });
+        });
         it('should record MOB template run', async () => {
             const res = await request(app)
                 .post('/api/executive/closeout/mob-runs')

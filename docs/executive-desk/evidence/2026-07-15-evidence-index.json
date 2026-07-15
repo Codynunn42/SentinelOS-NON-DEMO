@@ -1,0 +1,1651 @@
+{
+  "generatedAt": "2026-07-15T07:16:18.989Z",
+  "readOnly": true,
+  "entries": [
+    {
+      "category": "sentinelos_completion",
+      "path": ".vscode/SentinelOS-NON-DEMO.code-workspace",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "authority",
+      "path": "RELEASE_AUTHORITY_LOCK.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "government_readiness",
+      "path": "apps/api/public/government-outcomes.html",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "apps/executive-desk/.env.example",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "apps/executive-desk/EXECUTIVE_DESK_V1_ROADMAP.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "gates",
+      "path": "apps/executive-desk/GATE_3_COMPLETE.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "gates",
+      "path": "apps/executive-desk/GATE_4_AUTHORITY_INTEGRATION_COMPLETE.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "gates",
+      "path": "apps/executive-desk/GATE_5_RISK_GATE_INTEGRATION_COMPLETE.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "gates",
+      "path": "apps/executive-desk/GATE_6_API_ROUTES_COMPLETE.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "gates",
+      "path": "apps/executive-desk/GATE_6_API_ROUTES_VERIFICATION_RESULT_2026-07-03.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "gates",
+      "path": "apps/executive-desk/GATE_6_COMPLETION_SUMMARY.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "gates",
+      "path": "apps/executive-desk/GATE_7_FRONTEND_COMPONENTS_VERIFICATION_RESULT_2026-07-03.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "gates",
+      "path": "apps/executive-desk/GATE_8_E2E_DEMO_VERIFICATION_RESULT_2026-07-05.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "government_readiness",
+      "path": "apps/executive-desk/GOVERNMENT_READINESS_DAILY_CADENCE_2026-07-14.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "apps/executive-desk/INTEGRATION_CHECKLIST.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "apps/executive-desk/PROXY_IMPLEMENTATION_COMPLETE.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "apps/executive-desk/README.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "receipts",
+      "path": "apps/executive-desk/RECEIPT_PERSISTENCE_IMPLEMENTATION.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "apps/executive-desk/SENTINEL_AI_WORK_PACKET_DOE_EXECUTIVE_ASSESSMENT.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "apps/executive-desk/api/__tests__/routes.test.ts",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "apps/executive-desk/api/closeout-state.ts",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "apps/executive-desk/api/delegation-queries.ts",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "apps/executive-desk/api/express-adapter.ts",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "receipts",
+      "path": "apps/executive-desk/api/receipt-queries.ts",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "risk",
+      "path": "apps/executive-desk/api/risk-api.ts",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "board",
+      "path": "apps/executive-desk/cadence/board.ts",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "apps/executive-desk/cadence/cadence-engine.ts",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "apps/executive-desk/cadence/daily.ts",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "apps/executive-desk/cadence/monthly.ts",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "apps/executive-desk/cadence/weekly.ts",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "apps/executive-desk/cli/command-router.ts",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "apps/executive-desk/cli/index.ts",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "apps/executive-desk/cli/types.ts",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "apps/executive-desk/config/executive-desk.config.ts",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "receipts",
+      "path": "apps/executive-desk/db/__tests__/receipt-ledger.test.ts",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "receipts",
+      "path": "apps/executive-desk/db/migrations/001-receipt-ledger.sql",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "apps/executive-desk/db/migrations/002-delegation-rules.sql",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "apps/executive-desk/db/setup.ts",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "apps/executive-desk/evidence/evidence-scanner.ts",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "gates",
+      "path": "apps/executive-desk/gates/GATE_4_AUTHORITY_INTEGRATION.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "gates",
+      "path": "apps/executive-desk/gates/GATE_5_RISK_GATE_INTEGRATION.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "gates",
+      "path": "apps/executive-desk/gates/GATE_6_API_ROUTES.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "gates",
+      "path": "apps/executive-desk/gates/GATE_7_FRONTEND_COMPONENTS.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "gates",
+      "path": "apps/executive-desk/gates/GATE_8_E2E_DEMO.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "gates",
+      "path": "apps/executive-desk/gates/GATE_PROXY_ACTION_IMPLEMENTATION.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "gates",
+      "path": "apps/executive-desk/gates/GATE_RECEIPT_PERSISTENCE.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "government_readiness",
+      "path": "apps/executive-desk/government-readiness/DOE/DISCOVERY_MEETING_FRAMEWORK.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "government_readiness",
+      "path": "apps/executive-desk/government-readiness/DOE/DOE_EXECUTIVE_INTRO_OUTBOUND_EMAIL_ONE_PAGER.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "government_readiness",
+      "path": "apps/executive-desk/government-readiness/DOE/EXECUTIVE_INTRODUCTION_ONE_PAGER.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "government_readiness",
+      "path": "apps/executive-desk/government-readiness/DOE/GOVERNMENT_CONTACT_LIST.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "government_readiness",
+      "path": "apps/executive-desk/government-readiness/DOE/GOVERNMENT_EXECUTIVE_DESK_OVERVIEW.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "government_readiness",
+      "path": "apps/executive-desk/government-readiness/DOE/OUTCOME_FIRST_MESSAGING.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "government_readiness",
+      "path": "apps/executive-desk/government-readiness/README.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "government_readiness",
+      "path": "apps/executive-desk/government-readiness/deployment-profiles/GOVERNMENT_DEPLOYMENT_BLUEPRINT_2026-07-14.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "government_readiness",
+      "path": "apps/executive-desk/government-readiness/evidence/README.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "government_readiness",
+      "path": "apps/executive-desk/government-readiness/executive-briefings/LINKEDIN_OUTREACH_PLAYBOOK_2026-07-14.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "government_readiness",
+      "path": "apps/executive-desk/government-readiness/executive-intelligence/EXECUTIVE_INTELLIGENCE_BRIEF_DOCTRINE.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "government_readiness",
+      "path": "apps/executive-desk/government-readiness/governance/EXECUTIVE_REVIEW_CHECKLIST_GOVERNMENT_POSTURE.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "government_readiness",
+      "path": "apps/executive-desk/government-readiness/governance/GBP_CHIEF_OF_STAFF_BRIEF.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "government_readiness",
+      "path": "apps/executive-desk/government-readiness/governance/GBP_OPERATING_RUNBOOK.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "government_readiness",
+      "path": "apps/executive-desk/government-readiness/mission-outcomes/GOVERNMENT_OUTCOME_REFERENCE_LIBRARY_OUTLINE.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "government_readiness",
+      "path": "apps/executive-desk/government-readiness/modernization/README.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "government_readiness",
+      "path": "apps/executive-desk/government-readiness/pilot-packages/README.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "apps/executive-desk/gpt-integration.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "mob",
+      "path": "apps/executive-desk/mob/mob-review.ts",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "apps/executive-desk/openapi.yaml",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "apps/executive-desk/outcomes/outcome-status.ts",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "apps/executive-desk/package.json",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "apps/executive-desk/panels.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "apps/executive-desk/proxy/README.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "apps/executive-desk/proxy/__tests__/command-handler.test.ts",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "apps/executive-desk/proxy/command-handler.ts",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "apps/executive-desk/proxy/test-handler.ts",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "apps/executive-desk/public/app.js",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "apps/executive-desk/public/index.html",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "apps/executive-desk/public/styles.css",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "government_readiness",
+      "path": "apps/executive-desk/readiness/government-readiness.ts",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "apps/executive-desk/reporting/markdown-reporter.ts",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "receipts",
+      "path": "apps/executive-desk/reporting/receipt-writer.ts",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "apps/executive-desk/server.ts",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "authority",
+      "path": "apps/executive-desk/services/__tests__/authority-check.test.ts",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "risk",
+      "path": "apps/executive-desk/services/__tests__/risk-assessment.test.ts",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "authority",
+      "path": "apps/executive-desk/services/authority-check.ts",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "apps/executive-desk/services/closeout-state.ts",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "apps/executive-desk/services/delegation-rules.ts",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "apps/executive-desk/services/identity-graph-client.ts",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "health",
+      "path": "apps/executive-desk/services/infrastructure-health-client.ts",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "receipts",
+      "path": "apps/executive-desk/services/receipt-ledger-file.ts",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "receipts",
+      "path": "apps/executive-desk/services/receipt-ledger-pg.ts",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "receipts",
+      "path": "apps/executive-desk/services/receipt-ledger.ts",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "risk",
+      "path": "apps/executive-desk/services/risk-assessment.ts",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "risk",
+      "path": "apps/executive-desk/services/risk-gate.ts",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "apps/executive-desk/tsconfig.cli.json",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "audit",
+      "path": "apps/sentinel/src/audit/auditLogger.js",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "audit",
+      "path": "apps/sentinel/src/audit/executionTrace.js",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "sentinelos_completion",
+      "path": "apps/sentinel/src/commands/sentinelOsHandlers.js",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "audit",
+      "path": "apps/sentinel/src/faceplanes/openai/openaiAuditAdapter.js",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "authority",
+      "path": "apps/sentinel/src/governance/authorityState.js",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "audit",
+      "path": "apps/sentinel/src/governance/vendorOnboarding/auditLedger.js",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "board",
+      "path": "apps/sentinel/src/governance/vendorOnboarding/driftConfig.js",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "board",
+      "path": "apps/sentinel/src/governance/vendorOnboarding/driftMonitor.js",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "board",
+      "path": "apps/sentinel/src/governance/vendorOnboarding/engine.js",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "board",
+      "path": "apps/sentinel/src/governance/vendorOnboarding/latencyGovernor.js",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "board",
+      "path": "apps/sentinel/src/governance/vendorOnboarding/nvopConfig.js",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "board",
+      "path": "apps/sentinel/src/governance/vendorOnboarding/operatorEscalation.js",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "board",
+      "path": "apps/sentinel/src/governance/vendorOnboarding/rules.js",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "apps/sentinel/src/orchestration/taskTemplates.js",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "verification",
+      "path": "apps/sentinel/src/verification/stateAnchors.js",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "health",
+      "path": "azure/container-app-healthfix.yaml",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "coverage/lcov-report/executive-desk/api/<define:import.meta>.html",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "coverage/lcov-report/executive-desk/api/__tests__/index.html",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "coverage/lcov-report/executive-desk/api/__tests__/routes.test.ts.html",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "coverage/lcov-report/executive-desk/api/delegation-queries.ts.html",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "coverage/lcov-report/executive-desk/api/express-adapter.ts.html",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "coverage/lcov-report/executive-desk/api/index.html",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "receipts",
+      "path": "coverage/lcov-report/executive-desk/api/receipt-queries.ts.html",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "risk",
+      "path": "coverage/lcov-report/executive-desk/api/risk-api.ts.html",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "coverage/lcov-report/executive-desk/db/__tests__/index.html",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "receipts",
+      "path": "coverage/lcov-report/executive-desk/db/__tests__/receipt-ledger.test.ts.html",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "coverage/lcov-report/executive-desk/db/index.html",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "coverage/lcov-report/executive-desk/db/setup.ts.html",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "coverage/lcov-report/executive-desk/index.html",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "coverage/lcov-report/executive-desk/proxy/__tests__/command-handler.test.ts.html",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "coverage/lcov-report/executive-desk/proxy/__tests__/index.html",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "coverage/lcov-report/executive-desk/proxy/command-handler.ts.html",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "coverage/lcov-report/executive-desk/proxy/index.html",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "coverage/lcov-report/executive-desk/proxy/test-handler.ts.html",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "coverage/lcov-report/executive-desk/public/app.js.html",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "coverage/lcov-report/executive-desk/public/index.html",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "coverage/lcov-report/executive-desk/server.ts.html",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "authority",
+      "path": "coverage/lcov-report/executive-desk/services/__tests__/authority-check.test.ts.html",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "coverage/lcov-report/executive-desk/services/__tests__/index.html",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "risk",
+      "path": "coverage/lcov-report/executive-desk/services/__tests__/risk-assessment.test.ts.html",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "authority",
+      "path": "coverage/lcov-report/executive-desk/services/authority-check.ts.html",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "coverage/lcov-report/executive-desk/services/delegation-rules.ts.html",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "coverage/lcov-report/executive-desk/services/identity-graph-client.ts.html",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "coverage/lcov-report/executive-desk/services/index.html",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "health",
+      "path": "coverage/lcov-report/executive-desk/services/infrastructure-health-client.ts.html",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "receipts",
+      "path": "coverage/lcov-report/executive-desk/services/receipt-ledger-file.ts.html",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "receipts",
+      "path": "coverage/lcov-report/executive-desk/services/receipt-ledger-pg.ts.html",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "receipts",
+      "path": "coverage/lcov-report/executive-desk/services/receipt-ledger.ts.html",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "risk",
+      "path": "coverage/lcov-report/executive-desk/services/risk-assessment.ts.html",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "risk",
+      "path": "coverage/lcov-report/executive-desk/services/risk-gate.ts.html",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "gates",
+      "path": "docs/ACTIVE_GATE_REVIEW_QUEUE_AND_SENDCOMM_ACCESS_RESULT_2026-07-06.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "government_readiness",
+      "path": "docs/AUTHORITATIVE_GOVERNMENT_OUTCOME_INTAKE_WORKSHEET_2026-06-12.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "government_readiness",
+      "path": "docs/AUTHORITATIVE_GOVERNMENT_OUTCOME_INTAKE_WORKSHEET_REVIEW_RESULT_2026-06-12.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "sentinelos_completion",
+      "path": "docs/CDNLUX_SENTINELOS_INTEGRATION.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "docs/CURRENT_SENTINEL_DEPLOYMENT_FOOTPRINT_EXECUTIVE_INTAKE_RECONCILIATION_2026-06-12.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "risk",
+      "path": "docs/CUSTOMER_DISCOVERY_INTAKE_AND_RISK_QUESTIONNAIRE_2026-07-03.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "risk",
+      "path": "docs/CUSTOMER_DISCOVERY_INTAKE_AND_RISK_QUESTIONNAIRE_POPULATED_RESULT_2026-07-03.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "risk",
+      "path": "docs/CUSTOMER_IMPLEMENTATION_SCOPE_AND_RISK_PACKET_2026-07-03.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "docs/DAILY_EXECUTIVE_CADENCE_PLAN_2026-06-16_AND_2026-06-17.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "authority",
+      "path": "docs/DIAGNOSTIC_SETTINGS_IMPLEMENTATION_AUTHORITY_REQUEST_2026-05-31.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "docs/EXACT_SENTINEL_EXECUTIVE_ENVELOPE_COMMAND_CHANGE_REVIEW_2026-06-12.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "board",
+      "path": "docs/EXECUTIVE_BOARD_2026-05-11.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "board",
+      "path": "docs/EXECUTIVE_BOARD_2026-06-11.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "board",
+      "path": "docs/EXECUTIVE_BOARD_2026-06-19.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "board",
+      "path": "docs/EXECUTIVE_BOARD_2026-07-01.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "board",
+      "path": "docs/EXECUTIVE_BOARD_ADDRESS_2026-07-01.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "board",
+      "path": "docs/EXECUTIVE_BOARD_JULY_05_ADDENDUM_2026-07-05.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "board",
+      "path": "docs/EXECUTIVE_BOARD_JULY_STARTING_POINT_2026-06-30.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "mob",
+      "path": "docs/EXECUTIVE_BOARD_MOB_REFRESHED_2026-06-15.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "board",
+      "path": "docs/EXECUTIVE_BOARD_REFRESHED_FOR_PROCESSING_2026-06-13.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "board",
+      "path": "docs/EXECUTIVE_BOARD_SUMMARY_UPDATE_2026-06-12.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "docs/EXECUTIVE_DESK_GPT_RUNTIME_UPGRADE_GUIDED_SUPPORT_SCRIPT_2026-07-06.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "docs/EXECUTIVE_DESK_GPT_RUNTIME_UPGRADE_HANDOFF_AND_PROMPT_PACK_2026-07-06.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "docs/EXECUTIVE_DESK_GPT_RUNTIME_UPGRADE_USER_FLOW_2026-07-06.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "docs/EXECUTIVE_DESK_RUNTIME_RESTORE_EXECUTION_APPROVAL_RESULT_2026-06-19.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "docs/EXECUTIVE_DESK_RUNTIME_RESTORE_EXECUTION_PREFLIGHT_RESULT_2026-06-20.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "docs/EXECUTIVE_DESK_V1.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "docs/EXECUTIVE_DRIFT_FOCUS_REPORT_2026-06-18.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "docs/EXECUTIVE_PRIORITY_EVIDENCE_AND_APPROVAL_MATRIX_2026-06-18.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "docs/EXECUTIVE_SNAPSHOT_2026-05-05.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "docs/EXECUTIVE_SNAPSHOT_2026-05-07.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "docs/EXECUTIVE_SNAPSHOT_2026-05-11.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "docs/EXECUTIVE_SNAPSHOT_2026-05-12.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "docs/EXECUTIVE_SNAPSHOT_2026-06-01.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "docs/EXECUTIVE_SNAPSHOT_2026-06-11.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "docs/EXECUTIVE_SNAPSHOT_2026-06-13.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "docs/EXECUTIVE_SNAPSHOT_2026-06-17.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "docs/EXECUTIVE_SNAPSHOT_CURRENT_2026-05-31.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "docs/EXECUTIVE_SNAPSHOT_REFRESH_AFTER_SCOPE_DECISION_2026-05-29.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "docs/EXECUTIVE_TASK_LINEUP_2026-05-07.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "docs/EXECUTIVE_TEMPLATE_APPROVAL_HOLD_2026-05-31.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "docs/EXECUTIVE_TEMPLATE_APPROVAL_PROCESS_RESULT_2026-05-31.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "docs/EXECUTIVE_TEMPLATE_SENTINEL_AI_APPROVAL_COMMAND_RESULT_2026-05-31.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "government_readiness",
+      "path": "docs/FIRST_GOVERNMENT_OUTCOME_INTAKE_INPUT_PROCESSING_RESULT_2026-06-12.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "government_readiness",
+      "path": "docs/FIRST_GOVERNMENT_OUTCOME_INTAKE_SCOPE_AUTHORIZATION_RESULT_2026-06-12.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "receipts",
+      "path": "docs/FIXTURE_ONLY_AUTHORITY_RECEIPT_PROOF_IMPLEMENTATION_MANIFEST_2026-06-19.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "receipts",
+      "path": "docs/FIXTURE_ONLY_AUTHORITY_RECEIPT_PROOF_IMPLEMENTATION_MANIFEST_REVIEW_RESULT_2026-06-19.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "docs/FRIDAY_DAILY_EXECUTIVE_CADENCE_2026-06-19.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "docs/FRIDAY_DAILY_EXECUTIVE_CADENCE_CLOSEOUT_2026-06-12.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "docs/FRIDAY_WEEKLY_EXECUTIVE_CADENCE_2026-06-19.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "docs/FRIDAY_WEEKLY_EXECUTIVE_CADENCE_CLOSEOUT_2026-06-12.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "docs/GBP/Deployment-Profile-Template.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "government_readiness",
+      "path": "docs/GBP/Government-Deployment-Blueprint.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "sentinelos_completion",
+      "path": "docs/GITHUB_ACTIONS_SENTINELOS_REPAIR_REPORT_2026-05-08.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "government_readiness",
+      "path": "docs/GOVERNMENT_OUTCOME_OPERATING_SYSTEM_REVIEW_PACKET_2026-06-12.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "government_readiness",
+      "path": "docs/GOVERNMENT_OUTCOME_OWNER_ADDITIONS_RESULT_2026-06-12.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "government_readiness",
+      "path": "docs/GOVERNMENT_POSITIONING.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "health",
+      "path": "docs/H1_OWNERFI_PROOF_HEALTH_VALIDATION_RESULT_2026-06-30.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "docs/JULY_01_DAILY_EXECUTIVE_CADENCE_2026-07-01.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "docs/JULY_01_WEEKLY_EXECUTIVE_CADENCE_START_2026-07-01.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "docs/JULY_03_DAILY_EXECUTIVE_CADENCE_2026-07-03.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "docs/JULY_03_EXECUTIVE_TEMPLATE_PACKET_PROCESSING_RESULT_2026-07-03.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "sentinelos_completion",
+      "path": "docs/JULY_03_OPERATING_SEQUENCE_COMPLETION_RESULT_2026-07-03.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "mob",
+      "path": "docs/JULY_05_EXECUTIVE_MOB_BOARD_COMPARISON_2026-07-05.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "mob",
+      "path": "docs/JULY_05_MOB_DRIFT_REPORT_2026-07-05.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "health",
+      "path": "docs/LIVE_PROOF_HEALTH_RETRY_RESULT_2026-06-30.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "verification",
+      "path": "docs/LIVE_PROOF_HEALTH_VERIFICATION_RESULT_2026-06-30.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "authority",
+      "path": "docs/MICROSOFT_SENTINEL_DIAGNOSTIC_SETTINGS_IMPLEMENTATION_AUTHORITY_PACKET_2026-06-01.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "authority",
+      "path": "docs/MICROSOFT_SENTINEL_IMPLEMENTATION_AUTHORITY_PACKET_2026-05-30.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "gates",
+      "path": "docs/MICROSOFT_SENTINEL_NEXT_DECISION_GATE_2026-05-30.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "government_readiness",
+      "path": "docs/MINIMUM_FIRST_GOVERNMENT_OUTCOME_IDENTITY_AND_OUTCOME_PROCESSING_RESULT_2026-06-18.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "gates",
+      "path": "docs/MISSION_CONTROL_SECURITY_AND_PLATFORM_REVIEW_GATE_2026-07-06.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "mob",
+      "path": "docs/MOB_COMPLETION_QUEUE_REFRESH_OVERLAY_2026-07-05.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "gates",
+      "path": "docs/MOB_FIRST_MOVEMENT_PACKET_GATE_8_REGRESSION_PROOF_2026-07-05.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "mob",
+      "path": "docs/MOB_MOVEMENT_MAP_2026-07-05.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "mob",
+      "path": "docs/MOB_MOVEMENT_QUEUE_PROCESSING_RESULT_2026-07-05.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "mob",
+      "path": "docs/MOB_NEXT_STEPS_TEMPLATE_2026-07-05.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "verification",
+      "path": "docs/MOB_VERIFICATION_MATRIX_ADDENDUM_2026-07-05.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "docs/MONDAY_DAILY_EXECUTIVE_CADENCE_2026-06-15.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "docs/MONDAY_EXECUTIVE_ROUTING_UPDATE_2026-06-15.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "docs/MONDAY_WEEKLY_EXECUTIVE_CADENCE_START_2026-06-15.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "sentinelos_completion",
+      "path": "docs/NOTION_BRIEF_JUNE_SENTINELOS_PROGRESS_UPDATE_2026-06-18.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "verification",
+      "path": "docs/NUNNCORPORATION_PUBLIC_FRONT_DOOR_VERIFICATION_RESULT_2026-07-03.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "sentinelos_completion",
+      "path": "docs/NUNNCORP_SENTINELOS_ISSUE_SUPPORT_TRACKER_2026-06-14.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "mob",
+      "path": "docs/OWNERFI_INTERNAL_FINANCIAL_DOMAIN_AND_MOB_ALIGNMENT_DECISION_2026-07-03.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "verification",
+      "path": "docs/OWNERFI_PROOF_HEALTH_NETWORK_VERIFICATION_PREP_2026-07-03.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "health",
+      "path": "docs/OWNERFI_PROOF_HEALTH_RESTORED_RESULT_2026-07-03.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "verification",
+      "path": "docs/OWNERFI_PROOF_HEALTH_VERIFICATION_RESULT_2026-07-03.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "board",
+      "path": "docs/PHASE1_APPROVAL_BOARD_2026-05-07.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "board",
+      "path": "docs/PHASE1_APPROVAL_BOARD_2026-05-12.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "verification",
+      "path": "docs/POSTGRESQL_MEMORY_LAYER_LIVE_VERIFICATION_RECONCILIATION_2026-06-12.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "verification",
+      "path": "docs/READ_ONLY_LOG_ANALYTICS_VERIFICATION_AUTHORITY_ACCEPTANCE_2026-06-01.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "verification",
+      "path": "docs/READ_ONLY_LOG_ANALYTICS_VERIFICATION_AUTHORITY_REQUEST_2026-05-30.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "authority",
+      "path": "docs/REPO_AUTHORITY_MAP_2026-05-08.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "health",
+      "path": "docs/RUNTIME_UPGRADE_PACKET_SINTENEX_RT_001_OWNERFI_ROUTE_HEALTH_2026-07-06.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "receipts",
+      "path": "docs/RUNTIME_UPGRADE_PACKET_SINTENEX_RT_003_RECEIPT_AUDIT_DECISION_SURFACE_2026-07-06.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "docs/SATURDAY_DAILY_EXECUTIVE_CADENCE_2026-06-13.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "sentinelos_completion",
+      "path": "docs/SENDCOMM_CONCEPT_CLASSIFICATION_AGAINST_SENTINELOS_BOUNDARIES_2026-07-06.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "sentinelos_completion",
+      "path": "docs/SENDCOMM_SENTINELOS_MIGRATION_REVIEW_RESULT_2026-07-03.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "sentinelos_completion",
+      "path": "docs/SENTINELOS_DEMO_PACKAGE_APPROVAL_NOTICE_2026-05-06.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "sentinelos_completion",
+      "path": "docs/SENTINELOS_DEMO_PACKAGE_V2.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "sentinelos_completion",
+      "path": "docs/SENTINELOS_ENTITY_INQUIRY_PORTAL_RECONCILIATION_2026-06-12.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "sentinelos_completion",
+      "path": "docs/SENTINELOS_LIVE_DEMO_SCRIPT_V2.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "sentinelos_completion",
+      "path": "docs/SENTINELOS_OLDER_REPO_AZURE_CLI_QUARANTINE_REVIEW_2026-06-01.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "sentinelos_completion",
+      "path": "docs/SENTINELOS_OPERATIONAL_GOVERNANCE_WORKFLOW_AND_VR_DEPARTMENT_ESTABLISHMENT_2026-07-06.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "sentinelos_completion",
+      "path": "docs/SENTINELOS_PROJECT_SITUATION_AND_PUBLICATION_CONTROL_INDEX_2026-05-30.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "sentinelos_completion",
+      "path": "docs/SENTINELOS_PROOF_SHEET_V2.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "sentinelos_completion",
+      "path": "docs/SENTINELOS_SECURITY_EVENT_TAXONOMY_2026-05-29.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "sentinelos_completion",
+      "path": "docs/SENTINELOS_SOURCE_DOCUMENT_ALIGNMENT_2026-05-06.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "sentinelos_completion",
+      "path": "docs/SENTINELOS_STATE_STEWARDSHIP_MODEL_2026-06-20.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "sentinelos_completion",
+      "path": "docs/SENTINELOS_VIRTUAL_REVIEW_DEPARTMENT_CHARTER_2026-07-06.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "risk",
+      "path": "docs/SENTINEL_APPROVAL_RISK_ANALYSIS_2026-05-04.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "receipts",
+      "path": "docs/SENTINEL_AUTHORITY_RECEIPT_PROOF_PACKET_2026-06-19.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "receipts",
+      "path": "docs/SENTINEL_AUTHORITY_RECEIPT_PROOF_PACKET_APPROVAL_RESULT_2026-06-19.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "sentinelos_completion",
+      "path": "docs/SENTINEL_CATEGORY_COMPLETION_NOTICE_2026-05-04.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "docs/SENTINEL_EXECUTIVE_OPERATING_TEMPLATE_2026-06-01.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "docs/SENTINEL_EXECUTIVE_OPERATING_TEMPLATE_2026-06-11.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "docs/SENTINEL_EXECUTIVE_OPERATING_TEMPLATE_2026-06-19.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "docs/SENTINEL_EXECUTIVE_OPERATING_TEMPLATE_2026-07-01.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "docs/SENTINEL_EXECUTIVE_OPERATING_TEMPLATE_2026-07-03.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "docs/SENTINEL_EXECUTIVE_OPERATING_TEMPLATE_CURRENT_2026-05-31.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "docs/SENTINEL_EXECUTIVE_OPERATING_TEMPLATE_JULY_05_ADDENDUM_2026-07-05.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "docs/SENTINEL_EXECUTIVE_OPERATING_TEMPLATE_JULY_STARTING_POINT_2026-06-30.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "docs/SENTINEL_EXECUTIVE_OPERATING_TEMPLATE_MICROSOFT_SENTINEL_2026-05-29.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "mob",
+      "path": "docs/SENTINEL_EXECUTIVE_OPERATING_TEMPLATE_MOB_REFRESHED_2026-06-15.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "docs/SENTINEL_EXECUTIVE_OPERATING_TEMPLATE_REFRESHED_2026-06-12.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "docs/SENTINEL_EXECUTIVE_OPERATING_TEMPLATE_REFRESHED_2026-06-15.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "docs/SENTINEL_EXECUTIVE_OPERATING_TEMPLATE_REFRESHED_FOR_PROCESSING_2026-06-13.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "docs/SENTINEL_EXECUTIVE_TEMPLATE_ISSUE_ACTION_PROCESSING_2026-05-30.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "docs/SENTINEL_EXECUTIVE_TEMPLATE_PROCESSING_2026-06-01.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "docs/SENTINEL_EXECUTIVE_TEMPLATE_RECOMMENDATIONS_APPROVAL_2026-06-01.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "authority",
+      "path": "docs/SENTINEL_STEERING_DOCUMENT_CANCELLATION_AND_AUTHORITY_LAYER_DIRECTION_2026-06-18.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "docs/SUNDAY_DAILY_EXECUTIVE_CADENCE_CLOSEOUT_2026-06-14.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "docs/SUNDAY_WEEKLY_EXECUTIVE_CADENCE_CLOSEOUT_2026-06-14.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "docs/TASK_TEMPLATES_SYSTEM.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "docs/TASK_TEMPLATE_CHECK_FAILURE_REVIEW_2026-06-15.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "docs/THURSDAY_DAILY_EXECUTIVE_CADENCE_2026-06-18.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "docs/THURSDAY_DAILY_EXECUTIVE_CADENCE_CLOSEOUT_2026-06-18.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "sentinelos_completion",
+      "path": "docs/TILDA_SENTINELOS_SUPPORT_CONTRACT_REVIEW_RESULT_2026-06-15.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "sentinelos_completion",
+      "path": "docs/TILDA_SENTINELOS_SUPPORT_LANE_PROCESSING_RESULT_2026-06-12.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "docs/TUESDAY_EXECUTIVE_CADENCE_CLOSEOUT_2026-06-16.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "board",
+      "path": "docs/VENDOR_ONBOARDING_RULE_SET_V1.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "docs/WEDNESDAY_EXECUTIVE_CADENCE_ACTIVATION_2026-06-17.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "sentinelos_completion",
+      "path": "docs/diagrams/sentinelos_architecture_v2.mmd",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "board",
+      "path": "docs/executive-desk/board/2026-07.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "docs/executive-desk/daily/2026-07-15.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "government_readiness",
+      "path": "docs/executive-desk/government-readiness/2026-07-15.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "mob",
+      "path": "docs/executive-desk/mob/2026-07-15.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "docs/executive-desk/monthly/2026-07.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "receipts",
+      "path": "docs/executive-desk/receipts/2026-07-15T07-13-38.552Z-help.json",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "receipts",
+      "path": "docs/executive-desk/receipts/2026-07-15T07-14-07.079Z-health.json",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "receipts",
+      "path": "docs/executive-desk/receipts/2026-07-15T07-14-46.297Z-executive-daily.json",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "receipts",
+      "path": "docs/executive-desk/receipts/2026-07-15T07-14-58.393Z-executive-weekly.json",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "receipts",
+      "path": "docs/executive-desk/receipts/2026-07-15T07-15-03.154Z-executive-monthly.json",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "receipts",
+      "path": "docs/executive-desk/receipts/2026-07-15T07-15-47.510Z-executive-board.json",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "receipts",
+      "path": "docs/executive-desk/receipts/2026-07-15T07-16-04.905Z-government-readiness.json",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "receipts",
+      "path": "docs/executive-desk/receipts/2026-07-15T07-16-10.317Z-mob-review.json",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "docs/executive-desk/weekly/2026-W29.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "docs/executive-desk-gpt/README.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "docs/executive-desk-gpt/README.pdf",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "docs/executive-desk-gpt/integration-status-2026-06-30.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "docs/executive-desk-gpt/phase-2-safe-read-only-command-gate-2026-07-01.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "docs/executive-desk-gpt/the-executive-desk-instructions.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "docs/executive-desk-gpt/the-executive-desk-instructions.pdf",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "docs/executive-desk-gpt/the-executive-desk-no-actions-instructions.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "docs/executive-desk-gpt/the-executive-desk-openapi.yaml",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "docs/executive-desk-gpt/tunnel-refresh-result-2026-07-01.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "docs/releases/executive-desk/v1.0.0-gate8.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "governance/sentinel-platform/SENTINELOS_EXECUTIVE_CONSTITUTION.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "ops-closeout/2026-06-20/00-executive-closeout.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "mob",
+      "path": "ops-closeout/2026-06-20/05-mob-alignment.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "board",
+      "path": "ops-closeout/2026-06-20/06-board-template.md",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "audit",
+      "path": "scripts/check-audit-stream-metrics.js",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "scripts/check-executive-desk-e2e-demo.js",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "scripts/check-executive-desk-frontend.js",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "government_readiness",
+      "path": "scripts/check-government-outcome-intake-worksheet.js",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "government_readiness",
+      "path": "scripts/check-government-outcomes-surface.js",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "receipts",
+      "path": "scripts/check-ownerfi-proof-health-receipt.js",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "receipts",
+      "path": "scripts/check-receipt-lookup.js",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "scripts/check-saturday-executive-cadence.js",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "scripts/check-task-templates.js",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "board",
+      "path": "scripts/check-vendor-onboarding-ledger.js",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "board",
+      "path": "scripts/check-vendor-onboarding-rules.js",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "executive_templates",
+      "path": "scripts/executive-desk.ps1",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "health",
+      "path": "scripts/healthcheck.js",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    },
+    {
+      "category": "board",
+      "path": "scripts/simulate-vendor-onboarding.js",
+      "evidence_state": "artifact_present_not_behavior_verified"
+    }
+  ]
+}

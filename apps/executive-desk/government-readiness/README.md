@@ -13,6 +13,8 @@ This library holds the core executive artifacts for federal engagement readiness
 - pilot-packages
 - mission-outcomes
 - evidence
+- governance/GBP_CHIEF_OF_STAFF_BRIEF.md
+- governance/GBP_OPERATING_RUNBOOK.md
 
 ## Operating Rule
 

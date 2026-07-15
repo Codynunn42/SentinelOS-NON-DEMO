@@ -1,0 +1,19 @@
+{
+  "status": "executed",
+  "command": "evidence scan",
+  "execution_mode": "local_repository_only",
+  "generated_at": "2026-07-15T07:16:18.989Z",
+  "what_if": false,
+  "summary": "Evidence scan indexed 329 artifacts.",
+  "warnings": [],
+  "blockers": [],
+  "generated_artifacts": [
+    "/Users/codynunn/SentinelOS/SentinelOS-NON-DEMO/SentinelOS-NON-DEMO/docs/executive-desk/evidence/2026-07-15-evidence-index.json",
+    "/Users/codynunn/SentinelOS/SentinelOS-NON-DEMO/SentinelOS-NON-DEMO/docs/executive-desk/evidence/2026-07-15-evidence-summary.md"
+  ],
+  "comm": "Sentinel AI by Cody Nunn | Nunn Cloud",
+  "authority_created": false,
+  "operational_mutation": false,
+  "external_claims_authorized": false,
+  "generated_by": "Local SentinelOS Executive Desk"
+}

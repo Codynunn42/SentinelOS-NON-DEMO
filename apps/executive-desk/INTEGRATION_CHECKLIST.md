@@ -56,6 +56,14 @@ Operational meaning:
 - [ ] Keep government/customer privileged workflows behind authenticated Executive Desk.
 - [ ] Add production monitoring/alerting for proxy, auth failures, and error spikes.
 
+### Sentinel AI Remote Connector
+
+- [ ] Configure a hosted Sentinel AI endpoint through `SENTINEL_AI_BASE_URL`.
+- [ ] Require bearer auth or gateway policy for Sentinel AI health and scan requests.
+- [ ] Use `/api/executive/sentinel-ai/status` to verify endpoint reachability and connection posture.
+- [ ] Use `/api/executive/sentinel-ai/scan` to collect the current course, hardening paths, and local posture signals.
+- [ ] Keep the hosted Sentinel AI connection separate from any local process assumptions.
+
 ## Production Hardening Checklist
 
 ### Security and Access
@@ -74,7 +82,7 @@ Operational meaning:
 
 ### Governance
 
-- [ ] GBP mission package references linked in operating runbook.
+- [ ] GBP mission package references linked in [GBP Chief of Staff Brief](government-readiness/governance/GBP_CHIEF_OF_STAFF_BRIEF.md).
 - [ ] Daily/weekly/monthly cadence finalized in live environment.
 - [ ] MOB updated with Commercial Chapter milestone and operating SOP.
 - [ ] Founder sign-off recorded for public launch scope.
@@ -105,4 +113,5 @@ Operational meaning:
 1. [ ] Finish Stage 1 web repositioning and assessment funnel.
 2. [ ] Publish Stage 2 concierge GPT with strict non-sensitive scope.
 3. [ ] Stand up Stage 3 production environment with auth + postgres + gateway.
-4. [ ] Run final launch dry run with full checklist sign-off.
+4. [ ] Connect Executive Desk to hosted Sentinel AI and verify scan/status endpoints.
+5. [ ] Run final launch dry run with full checklist sign-off.

@@ -24,6 +24,7 @@ Ensure priorities remain aligned, unnecessary expansion is avoided, and governme
 - [ ] Governance and authority controls are clearly integrated.
 - [ ] Human-in-the-loop checkpoints are preserved.
 - [ ] Evidence and reporting pathways are complete.
+- [ ] GBP expectations and directional implementation guidelines reflect the way they want it.
 
 ### Initiative Registry
 

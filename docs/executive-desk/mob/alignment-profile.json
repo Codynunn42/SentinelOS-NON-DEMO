@@ -1,0 +1,12 @@
+{
+    "business_objective": "Government relationship building and readiness with governed execution quality.",
+    "intended_outcome": "Evidence-verified executive operations that can support pilot and outreach sequencing without unauthorized external claims.",
+    "domain_owner": "nunn-corporation-executive-office",
+    "deployment_profile": "local-governed-read-only",
+    "outcome_engines": "government_readiness,sentinelos_completion,executive_desk_operational_cadence",
+    "governance_requirements": "ack_otp_required,local_only,no_external_mutation,no_unauthorized_claims",
+    "internal_external_boundary": "Internal execution and artifacts only; external claims remain unauthorized until explicit approval.",
+    "revenue_model_if_applicable": "held_until_authorized",
+    "operational_owner": "executive-desk-operator",
+    "success_metrics": "All required runtime commands pass; outcome lanes advance from evidence-verification with explicit test evidence."
+}

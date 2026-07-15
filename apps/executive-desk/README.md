@@ -2,6 +2,16 @@
 
 This folder contains scaffolding and specs for Executive Desk v1 — a SentinelOS-powered executive UI focused on governed action: Briefing → Decision → Authority Check → Risk Gate → Command → Receipt → Report.
 
+Executive Priority
+
+Turn Sentinel AI + Executive Desk into a revenue-producing business while maintaining governance, with government relationship building and readiness to start a government engagement as the leading motion.
+
+Operating Summary
+
+- Ready to go: governance doctrine, cadence, board reporting, MOB integration, government messaging, and Gate 6-8 verification.
+- Focus now: GBP mission package, government relationship building, readiness assets, pilot readiness, and Sentinel AI runtime verification.
+- Scan logic: use Sentinel AI to enact the user's logic, show what is ready, and surface the highest-value focus areas for government engagement.
+
 Documentation
 
 - `docs/EXECUTIVE_DESK_V1.md`: high-level design and product vision
@@ -9,6 +19,7 @@ Documentation
 - `gpt-integration.md`: GPT action integration pattern and reference implementation
 - `openapi.yaml`: OpenAPI 3.1 schema (import into Custom GPT Actions)
 - `INTEGRATION_CHECKLIST.md`: phased rollout plan (5 phases, from services to E2E demo)
+- `SENTINEL_AI_WORK_PACKET_DOE_EXECUTIVE_ASSESSMENT.md`: hosted Sentinel AI work packet for DOE-oriented assessment and hardening
 
 Government Readiness (Executive Artifacts)
 
@@ -47,6 +58,10 @@ Implementation Status
   - Local GPT-style request posts to `/proxy/command`
   - Authority Check, Risk Gate, command execution, receipt creation, and receipt lookup verified
   - Public GPT Builder/tunnel execution remains separate and held
+- ✅ Sentinel AI remote connector
+  - Hosted Sentinel AI status and scan endpoints mounted under `/api/executive/sentinel-ai`
+  - Scan output folds in roadmap, checklist, work packet, readiness, cost, and green-energy signals
+  - Remote endpoint uses `SENTINEL_AI_BASE_URL` plus optional bearer token and timeout settings
 
 Quick Start
 
@@ -59,7 +74,9 @@ Quick Start
 7. **Run frontend smoke:** `pnpm run check:executive-desk:frontend`
 8. **Run E2E demo smoke:** `pnpm run check:executive-desk:e2e`
 9. **Start API server:** `API_HOST=127.0.0.1 API_PORT=3137 pnpm exec tsx apps/executive-desk/server.ts`
-10. **Open cockpit:** `http://127.0.0.1:3137/executive`
+10. **Probe Sentinel AI status:** `curl -H 'X-Principal-Id: user@example.com' http://127.0.0.1:3137/api/executive/sentinel-ai/status`
+11. **Run Sentinel AI scan:** `curl -X POST -H 'X-Principal-Id: user@example.com' -H 'Content-Type: application/json' -d '{"focus":"hardening"}' http://127.0.0.1:3137/api/executive/sentinel-ai/scan`
+12. **Open cockpit:** `http://127.0.0.1:3137/executive`
 
 Production proxy auth
 
@@ -68,7 +85,62 @@ Production proxy auth
 - If `AUTH_BEARER_TOKEN` is unset, `JWT_SECRET` is used as fallback.
 - Use this token in GPT Action auth or upstream API gateway auth policy.
 
+Sentinel AI remote connector
+
+- Set `SENTINEL_AI_BASE_URL` to the hosted Sentinel AI endpoint.
+- Optionally set `SENTINEL_AI_HEALTH_PATH` and `SENTINEL_AI_SCAN_PATH` if the remote paths differ from `/health` and `/scan`.
+- Set `SENTINEL_AI_BEARER_TOKEN` or `SENTINEL_AI_API_KEY` when the hosted service requires authentication.
+- Set `SENTINEL_AI_TIMEOUT_MS` to tune the probe timeout for slower gateways.
+- Use `GET /api/executive/sentinel-ai/status` to confirm reachability before scan-driven course setting.
+- Use `POST /api/executive/sentinel-ai/scan` to synthesize the current hardening, cost-reduction, and green-energy course from local and remote signals.
+
+Executive Status Note
+
+- Before: Sentinel AI returned posture and hardening guidance only.
+- After: The scan/status payload now publishes a structured `efficiencyPlan` for cost, latency, compute, and green-mode actions.
+- Plan: Keep the hosted connection gated, then use Sentinel AI to trim cost, reduce latency, right-size compute, and apply the green energy module.
+
 Next Steps
 
 - Keep Gate 8 in regression proof while any public GPT Builder or tunnel proof remains separately held.
 - Gate 9: v2 features remain out of scope for v1.
+
+Local SentinelOS Executive Desk Runtime
+
+- PowerShell orchestration entrypoint: `pwsh ./scripts/sentinel.ps1`
+- Local-only mode with governed report output and no external mutation.
+- Business rules and report composition are implemented in TypeScript runtime modules under `apps/executive-desk`.
+
+Required command set:
+
+- `pwsh ./scripts/sentinel.ps1 executive daily`
+- `pwsh ./scripts/sentinel.ps1 executive weekly`
+- `pwsh ./scripts/sentinel.ps1 executive monthly`
+- `pwsh ./scripts/sentinel.ps1 executive board`
+- `pwsh ./scripts/sentinel.ps1 government readiness`
+- `pwsh ./scripts/sentinel.ps1 mob review`
+- `pwsh ./scripts/sentinel.ps1 evidence scan`
+- `pwsh ./scripts/sentinel.ps1 outcome status`
+- `pwsh ./scripts/sentinel.ps1 health`
+- `pwsh ./scripts/sentinel.ps1 help`
+
+Optional aliases:
+
+- `pwsh ./scripts/sentinel.ps1 daily`
+- `pwsh ./scripts/sentinel.ps1 weekly`
+- `pwsh ./scripts/sentinel.ps1 monthly`
+- `pwsh ./scripts/sentinel.ps1 board`
+
+Dry run:
+
+- `pwsh ./scripts/sentinel.ps1 executive daily -WhatIf`
+
+Generated report targets:
+
+- `docs/executive-desk/daily/YYYY-MM-DD.md`
+- `docs/executive-desk/weekly/YYYY-Www.md`
+- `docs/executive-desk/monthly/YYYY-MM.md`
+- `docs/executive-desk/board/YYYY-MM.md`
+- `docs/executive-desk/government-readiness/YYYY-MM-DD.md`
+- `docs/executive-desk/evidence/YYYY-MM-DD-evidence-index.json`
+- `docs/executive-desk/evidence/YYYY-MM-DD-evidence-summary.md`

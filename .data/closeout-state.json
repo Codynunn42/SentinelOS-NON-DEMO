@@ -11,13 +11,125 @@
       "gbpReference": "GBP-2026-07",
       "mobTemplateRequired": true,
       "mobLastRunStatus": "failed",
-      "updatedAt": "2026-07-14T05:12:25.418Z",
+      "updatedAt": "2026-07-15T07:17:24.637Z",
       "updatedBy": "user@example.com",
-      "mobLastRunAt": "2026-07-14T05:12:25.418Z"
+      "mobLastRunAt": "2026-07-15T07:17:24.637Z"
     }
   },
   "mobRuns": {
     "user@example.com": [
+      {
+        "id": "d3e08bc1-5a00-4225-8e46-07cc0d349a6d",
+        "principalId": "user@example.com",
+        "status": "failed",
+        "timestamp": "2026-07-15T07:17:24.637Z",
+        "executor": "user@example.com"
+      },
+      {
+        "id": "defa3e87-c347-4ca8-8958-61519ad93969",
+        "principalId": "user@example.com",
+        "status": "completed",
+        "timestamp": "2026-07-15T07:17:24.634Z",
+        "executor": "user@example.com"
+      },
+      {
+        "id": "d9aede1c-2f31-4767-9004-533cf98fa877",
+        "principalId": "user@example.com",
+        "status": "failed",
+        "timestamp": "2026-07-15T06:40:15.404Z",
+        "executor": "user@example.com"
+      },
+      {
+        "id": "f92742cc-a448-4af9-af81-31b39175b8c3",
+        "principalId": "user@example.com",
+        "status": "completed",
+        "timestamp": "2026-07-15T06:40:15.402Z",
+        "executor": "user@example.com"
+      },
+      {
+        "id": "cde4622f-481a-472f-b725-2c61cc41b5e7",
+        "principalId": "user@example.com",
+        "status": "failed",
+        "timestamp": "2026-07-15T06:37:58.183Z",
+        "executor": "user@example.com"
+      },
+      {
+        "id": "a9833126-e542-4ab9-913e-8a94104905ff",
+        "principalId": "user@example.com",
+        "status": "completed",
+        "timestamp": "2026-07-15T06:37:58.178Z",
+        "executor": "user@example.com"
+      },
+      {
+        "id": "d635f489-a3b6-4248-9c1f-af3f131a0d32",
+        "principalId": "user@example.com",
+        "status": "failed",
+        "timestamp": "2026-07-15T06:21:04.867Z",
+        "executor": "user@example.com"
+      },
+      {
+        "id": "27c220b6-e60a-4463-9bd0-2bca63283e0d",
+        "principalId": "user@example.com",
+        "status": "completed",
+        "timestamp": "2026-07-15T06:21:04.864Z",
+        "executor": "user@example.com"
+      },
+      {
+        "id": "82387ada-7903-400b-b982-f7e876187b60",
+        "principalId": "user@example.com",
+        "status": "failed",
+        "timestamp": "2026-07-15T06:18:33.643Z",
+        "executor": "user@example.com"
+      },
+      {
+        "id": "54f4ce01-d661-4a94-afee-644ebc910dca",
+        "principalId": "user@example.com",
+        "status": "completed",
+        "timestamp": "2026-07-15T06:18:33.640Z",
+        "executor": "user@example.com"
+      },
+      {
+        "id": "63bfdc42-8bd5-462a-9fa1-64b8b9da2f70",
+        "principalId": "user@example.com",
+        "status": "failed",
+        "timestamp": "2026-07-15T06:16:30.376Z",
+        "executor": "user@example.com"
+      },
+      {
+        "id": "28b82cb6-43e4-49df-bb2a-18f2ba53f310",
+        "principalId": "user@example.com",
+        "status": "completed",
+        "timestamp": "2026-07-15T06:16:30.374Z",
+        "executor": "user@example.com"
+      },
+      {
+        "id": "28b501eb-f7de-4fee-8a1d-69deba4dc353",
+        "principalId": "user@example.com",
+        "status": "failed",
+        "timestamp": "2026-07-15T06:12:41.835Z",
+        "executor": "user@example.com"
+      },
+      {
+        "id": "b66049d8-4ca7-4d48-97b8-51afc4943102",
+        "principalId": "user@example.com",
+        "status": "completed",
+        "timestamp": "2026-07-15T06:12:41.823Z",
+        "executor": "user@example.com"
+      },
+      {
+        "id": "285b1c81-3964-41b6-8286-3824fba4815d",
+        "principalId": "user@example.com",
+        "status": "failed",
+        "timestamp": "2026-07-15T06:12:13.472Z",
+        "executor": "user@example.com"
+      },
+      {
+        "id": "f5d32052-f9fb-4ba3-a0b6-ae45418daf79",
+        "principalId": "user@example.com",
+        "status": "completed",
+        "timestamp": "2026-07-15T06:12:13.460Z",
+        "executor": "user@example.com"
+      },
       {
         "id": "7979d5cd-e1ea-481a-b7f4-b8d2aef7602d",
         "principalId": "user@example.com",

@@ -1,0 +1,14 @@
+{
+    "name": "@nunncorp/executive-desk-runtime",
+    "private": true,
+    "version": "0.1.0",
+    "description": "Local SentinelOS Executive Desk PowerShell runtime",
+    "scripts": {
+        "cli": "tsx --tsconfig tsconfig.cli.json cli/index.ts",
+        "daily": "pnpm run cli -- executive daily",
+        "weekly": "pnpm run cli -- executive weekly",
+        "monthly": "pnpm run cli -- executive monthly",
+        "board": "pnpm run cli -- executive board",
+        "health": "pnpm run cli -- health"
+    }
+}

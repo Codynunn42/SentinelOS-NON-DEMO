@@ -10,6 +10,7 @@ import express, {
     NextFunction,
     Router,
 } from 'express';
+import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { receiptQueriesService } from './receipt-queries';
@@ -27,6 +28,52 @@ import { handleCommand, ProxyCommandRequest } from '../proxy/command-handler';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const publicDir = path.join(__dirname, '..', 'public');
+const executiveDeskRoot = path.join(__dirname, '..');
+
+const SENTINEL_AI_REMOTE_HEALTH_PATH = String(process.env.SENTINEL_AI_HEALTH_PATH || '/health').trim();
+const SENTINEL_AI_REMOTE_SCAN_PATH = String(process.env.SENTINEL_AI_SCAN_PATH || '/scan').trim();
+
+type SentinelAiConnectionConfig = {
+    baseUrl: string;
+    healthPath: string;
+    scanPath: string;
+    bearerToken: string;
+    timeoutMs: number;
+};
+
+type SentinelAiScanSection = {
+    heading: string;
+    items: string[];
+};
+
+type SentinelAiEfficiencyPlan = {
+    costReduction: string[];
+    latencyReduction: string[];
+    computeOptimization: string[];
+    greenMode: string[];
+};
+
+type SentinelAiRemoteProbe = {
+    configured: boolean;
+    reachable: boolean;
+    healthUrl: string | null;
+    scanUrl: string | null;
+    statusCode?: number;
+    payload?: unknown;
+    error?: string;
+};
+
+type SentinelAiScanResponse = {
+    generatedAt: string;
+    currentPosture: string;
+    remote: SentinelAiRemoteProbe;
+    localSignals: SentinelAiScanSection[];
+    efficiencyPlan: SentinelAiEfficiencyPlan;
+    readyToGo: string[];
+    focusAreas: string[];
+    hardeningPaths: string[];
+    recommendedCourse: string[];
+};
 
 // Type extensions for request context
 declare global {
@@ -50,6 +97,267 @@ function authEnabled(): boolean {
 function getExpectedProxyToken(): string {
     const token = process.env.AUTH_BEARER_TOKEN || process.env.JWT_SECRET;
     return String(token || '').trim();
+}
+
+function getSentinelAiConnectionConfig(): SentinelAiConnectionConfig {
+    const baseUrl = String(process.env.SENTINEL_AI_BASE_URL || '').trim();
+    const bearerToken = String(
+        process.env.SENTINEL_AI_BEARER_TOKEN || process.env.SENTINEL_AI_API_KEY || '',
+    ).trim();
+    const timeoutMs = Number.parseInt(String(process.env.SENTINEL_AI_TIMEOUT_MS || '5000'), 10);
+
+    return {
+        baseUrl,
+        healthPath: SENTINEL_AI_REMOTE_HEALTH_PATH,
+        scanPath: SENTINEL_AI_REMOTE_SCAN_PATH,
+        bearerToken,
+        timeoutMs: Number.isFinite(timeoutMs) && timeoutMs > 0 ? timeoutMs : 5000,
+    };
+}
+
+function joinRemoteUrl(baseUrl: string, endpointPath: string): string {
+    const normalizedBase = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`;
+    const normalizedPath = endpointPath.startsWith('/') ? endpointPath.slice(1) : endpointPath;
+    return new URL(normalizedPath, normalizedBase).toString();
+}
+
+async function readArtifact(relativePath: string): Promise<string> {
+    const artifactPath = path.join(executiveDeskRoot, relativePath);
+    try {
+        return await readFile(artifactPath, 'utf8');
+    } catch {
+        return '';
+    }
+}
+
+function collectMatchingLines(content: string, needles: string[]): string[] {
+    const lines = content.split(/\r?\n/);
+    const matches: string[] = [];
+
+    for (const line of lines) {
+        const trimmed = line.trim();
+        if (!trimmed) {
+            continue;
+        }
+
+        if (needles.some((needle) => trimmed.includes(needle))) {
+            matches.push(trimmed);
+        }
+    }
+
+    return matches.slice(0, 12);
+}
+
+function buildHardeningPaths(): string[] {
+    return [
+        'Connect Executive Desk to a hosted Sentinel AI endpoint through SENTINEL_AI_BASE_URL instead of a local process.',
+        'Protect the remote Sentinel AI endpoint with bearer auth or API gateway policy before any scan traffic is allowed.',
+        'Keep /proxy/command behind AUTH_ENABLED=true, rate limiting, and a trusted gateway/WAF path.',
+        'Move receipts and scan evidence to durable storage so remote assessments remain auditable.',
+        'Publish HTTPS-only ingress, CORS allowlists, and rollback steps before enabling any production execution workflow.',
+        'Keep public GPT concierge scope read-only and route privileged work through authenticated Executive Desk flows.',
+        'Use hosted Sentinel AI to assess operating cost once the connection is live, then trim idle services, excess retention, and unused compute.',
+        'Apply the known green energy module to prefer lower-carbon execution windows and consolidate inactive workloads where policy allows.',
+    ];
+}
+
+function buildEfficiencyPlan(): SentinelAiEfficiencyPlan {
+    return {
+        costReduction: [
+            'Use Sentinel AI to identify idle services, unused retention, and low-value scans after the connection is live.',
+            'Reduce operating spend by trimming duplicate workflows and offloading repetitive review work to the hosted scan path.',
+        ],
+        latencyReduction: [
+            'Shorten decision loops by caching remote health results and minimizing payload size for scan requests.',
+            'Prefer the lowest-latency hosted path that keeps the Executive Desk governance checks intact.',
+        ],
+        computeOptimization: [
+            'Increase compute only for approved bottlenecks while right-sizing everything else.',
+            'Consolidate inactive workloads and direct compute toward the highest-value executive workflows.',
+        ],
+        greenMode: [
+            'Enable the known green energy module to bias execution toward lower-carbon windows and placement.',
+            'Prefer carbon-aware scheduling and consolidate workloads when policy and availability allow it.',
+        ],
+    };
+}
+
+function buildReadyToGo(sections: SentinelAiScanSection[]): string[] {
+    const ready = [
+        'Executive Desk architecture, governance doctrine, and evidence-first decision method are already established.',
+        'Government outreach binder, executive messaging, and relationship-first positioning are already documented.',
+        'GBP mission package structure and closeout-state support are already available for the operating runbook.',
+        'Gate 6 to Gate 8 are verified, so the local read-only platform can support demos and receipts.',
+        'Sentinel AI remote probing, scan routing, and efficiency planning are already wired into the Executive Desk API.',
+    ];
+
+    if (sections.some((section) => section.heading.includes('Government readiness'))) {
+        ready.push('Government readiness signals are already present in the scan inputs and can be used as the starting point for outreach work.');
+    }
+
+    return ready;
+}
+
+function buildFocusAreas(remote: SentinelAiRemoteProbe, sections: SentinelAiScanSection[], focusHint: string): string[] {
+    const focus = [
+        'GBP mission package references linked into the operating runbook and cadence tracker.',
+        'Government relationship building and readiness to start the first engagement.',
+        'Customer-facing pilot material, discovery flow, and executive one-pager polish.',
+        'Sentinel AI runtime verification so the hosted connection can return read-only evidence-backed output.',
+        'Revenue motion: convert outreach into pilot meetings, advisory work, and repeatable engagement offers.',
+    ];
+
+    if (!remote.configured) {
+        focus.unshift('Connect the hosted Sentinel AI endpoint before attempting scan-driven course setting.');
+    } else if (!remote.reachable) {
+        focus.unshift('Fix Sentinel AI connectivity or auth before treating it as the operating source of truth.');
+    }
+
+    if (focusHint) {
+        focus.unshift(`User logic focus: ${focusHint}`);
+    }
+
+    if (sections.some((section) => section.heading.includes('Launch hardening'))) {
+        focus.push('Keep hardening and evidence quality ahead of any public claims or new commitments.');
+    }
+
+    if (sections.some((section) => section.heading.includes('Government readiness'))) {
+        focus.push('Use government readiness signals to decide which GBP artifacts should be polished first.');
+    }
+
+    return focus;
+}
+
+function buildRecommendedCourse(
+    remote: SentinelAiRemoteProbe,
+    sections: SentinelAiScanSection[],
+    focusAreas: string[],
+): string[] {
+    const course = [
+        'Use Sentinel AI as a hosted service through Executive Desk rather than relying on a local runtime.',
+        'Wire SENTINEL_AI_BASE_URL, SENTINEL_AI_HEALTH_PATH, and SENTINEL_AI_SCAN_PATH into the Executive Desk runtime.',
+        'Require a bearer token or gateway policy before allowing Sentinel AI scan traffic.',
+        'Keep the local Executive Desk loop read-only until production auth, durable receipts, and gateway controls are fully enabled.',
+        'Use the Government Readiness and Integration Checklist signals as the decision baseline for course correction.',
+        'After the connection is live, have Sentinel AI analyze operating cost, then recommend compute, retention, and workflow reductions that lower spend without breaking governance.',
+        'Enable the known green energy module to bias execution toward lower-carbon placement and scheduling where the hosting platform supports it.',
+    ];
+
+    if (!remote.configured) {
+        course.unshift('No remote Sentinel AI endpoint is configured yet, so the next step is to connect a hosted service before enabling scans.');
+    } else if (remote.reachable) {
+        course.unshift('A remote Sentinel AI endpoint is reachable; keep the connection behind auth and use it for scan-driven course setting.');
+    } else {
+        course.unshift('A remote Sentinel AI endpoint is configured but not reachable; fix connectivity or authentication before using it as the operating source of truth.');
+    }
+
+    if (sections.length > 0) {
+        course.push('Use the current checklist and roadmap signals to prioritize public presence, concierge scope, and production hardening in that order.');
+    }
+
+    course.push(`Primary focus areas: ${focusAreas.slice(0, 3).join('; ')}.`);
+
+    return course;
+}
+
+async function probeRemoteSentinelAi(): Promise<SentinelAiRemoteProbe> {
+    const config = getSentinelAiConnectionConfig();
+
+    if (!config.baseUrl) {
+        return {
+            configured: false,
+            reachable: false,
+            healthUrl: null,
+            scanUrl: null,
+            error: 'SENTINEL_AI_BASE_URL is not configured',
+        };
+    }
+
+    const healthUrl = joinRemoteUrl(config.baseUrl, config.healthPath || '/health');
+    const scanUrl = joinRemoteUrl(config.baseUrl, config.scanPath || '/scan');
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), config.timeoutMs);
+
+    try {
+        const response = await fetch(healthUrl, {
+            method: 'GET',
+            headers: config.bearerToken ? { authorization: `Bearer ${config.bearerToken}` } : undefined,
+            signal: controller.signal,
+        });
+
+        const text = await response.text();
+        let payload: unknown = text;
+
+        try {
+            payload = text ? JSON.parse(text) : text;
+        } catch {
+            payload = text;
+        }
+
+        return {
+            configured: true,
+            reachable: response.ok,
+            healthUrl,
+            scanUrl,
+            statusCode: response.status,
+            payload,
+        };
+    } catch (error) {
+        return {
+            configured: true,
+            reachable: false,
+            healthUrl,
+            scanUrl,
+            error: error instanceof Error ? error.message : 'Unable to reach Sentinel AI',
+        };
+    } finally {
+        clearTimeout(timeout);
+    }
+}
+
+async function buildSentinelAiScanResponse(focusHint: string = ''): Promise<SentinelAiScanResponse> {
+    const [checklist, roadmap, workPacket, readinessLibrary] = await Promise.all([
+        readArtifact('INTEGRATION_CHECKLIST.md'),
+        readArtifact('EXECUTIVE_DESK_V1_ROADMAP.md'),
+        readArtifact('SENTINEL_AI_WORK_PACKET_DOE_EXECUTIVE_ASSESSMENT.md'),
+        readArtifact(path.join('government-readiness', 'README.md')),
+    ]);
+
+    const sections: SentinelAiScanSection[] = [
+        {
+            heading: 'Roadmap signals',
+            items: collectMatchingLines(roadmap, ['Gate 8', 'Gate 9', 'read-only', 'local read-only SentinelOS operation']),
+        },
+        {
+            heading: 'Launch hardening signals',
+            items: collectMatchingLines(checklist, ['Stage 1', 'Stage 2', 'Stage 3', 'Hardening', 'Go/No-Go']),
+        },
+        {
+            heading: 'Sentinel AI work packet',
+            items: collectMatchingLines(workPacket, ['Job 2', 'Job 3', 'Global Constraints', 'Hardening']),
+        },
+        {
+            heading: 'Government readiness posture',
+            items: collectMatchingLines(readinessLibrary, ['Operating Rule', 'Outcome-first', 'evidence']),
+        },
+    ].filter((section) => section.items.length > 0);
+
+    const remote = await probeRemoteSentinelAi();
+    const readyToGo = buildReadyToGo(sections);
+    const focusAreas = buildFocusAreas(remote, sections, focusHint);
+
+    return {
+        generatedAt: new Date().toISOString(),
+        currentPosture:
+            'Executive Desk is ready for a hosted Sentinel AI connection, but the local repository still needs production auth, durable receipts, and gateway hardening before privileged execution should open.',
+        remote,
+        localSignals: sections,
+        efficiencyPlan: buildEfficiencyPlan(),
+        readyToGo,
+        focusAreas,
+        hardeningPaths: buildHardeningPaths(),
+        recommendedCourse: buildRecommendedCourse(remote, sections, focusAreas),
+    };
 }
 
 /**
@@ -734,6 +1042,32 @@ export function mountApiRoutes(app: Express): void {
                 );
                 res.setHeader('Content-Type', 'application/json');
                 res.end(JSON.stringify(payload, null, 2));
+            } catch (err) {
+                next(err);
+            }
+        },
+    );
+
+    protectedRouter.get(
+        '/sentinel-ai/status',
+        async (req: Request, res: Response, next: NextFunction) => {
+            try {
+                const focusHint = typeof req.query.focus === 'string' ? req.query.focus : '';
+                const data = await buildSentinelAiScanResponse(focusHint);
+                res.json({ data });
+            } catch (err) {
+                next(err);
+            }
+        },
+    );
+
+    protectedRouter.post(
+        '/sentinel-ai/scan',
+        async (req: Request, res: Response, next: NextFunction) => {
+            try {
+                const focusHint = typeof req.body?.focus === 'string' ? req.body.focus : '';
+                const data = await buildSentinelAiScanResponse(focusHint);
+                res.json({ data });
             } catch (err) {
                 next(err);
             }

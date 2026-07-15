@@ -6,6 +6,7 @@ info:
     Governed read-only command proxy for Sentinel Executive Desk v1.
     All commands flow through: Authority Check → Risk Gate → Receipt.
     v1 supports only `repo.control.workflow.diagnose` (read-only diagnosis).
+    Executive Desk also exposes hosted Sentinel AI status and scan endpoints for course setting and hardening guidance.
 
 servers:
   - url: https://YOUR_PROXY_URL
@@ -306,6 +307,208 @@ paths:
                     type: array
                     items:
                       type: string
+
+  /api/executive/sentinel-ai/status:
+    get:
+      operationId: getSentinelAiStatus
+      summary: Check hosted Sentinel AI connection status
+      description: >
+        Returns the current hosted Sentinel AI connection posture, including whether
+        the remote endpoint is configured and reachable. The route requires an
+        Executive Desk principal header.
+      parameters:
+        - name: X-Principal-Id
+          in: header
+          required: true
+          description: Principal executing the request.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Sentinel AI connection status and hardening guidance
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+                  data:
+                    type: object
+                    properties:
+                      generatedAt:
+                        type: string
+                        format: date-time
+                      currentPosture:
+                        type: string
+                      remote:
+                        type: object
+                        properties:
+                          configured:
+                            type: boolean
+                          reachable:
+                            type: boolean
+                          healthUrl:
+                            type: string
+                            nullable: true
+                          scanUrl:
+                            type: string
+                            nullable: true
+                          statusCode:
+                            type: integer
+                            nullable: true
+                          payload:
+                            nullable: true
+                          error:
+                            type: string
+                            nullable: true
+                      efficiencyPlan:
+                        type: object
+                        properties:
+                          costReduction:
+                            type: array
+                            items:
+                              type: string
+                          latencyReduction:
+                            type: array
+                            items:
+                              type: string
+                          computeOptimization:
+                            type: array
+                            items:
+                              type: string
+                          greenMode:
+                            type: array
+                            items:
+                              type: string
+                      readyToGo:
+                        type: array
+                        items:
+                          type: string
+                      focusAreas:
+                        type: array
+                        items:
+                          type: string
+                      hardeningPaths:
+                        type: array
+                        items:
+                          type: string
+                      recommendedCourse:
+                        type: array
+                        items:
+                          type: string
+
+  /api/executive/sentinel-ai/scan:
+    post:
+      operationId: scanSentinelAiCourse
+      summary: Synthesize the Sentinel AI hardening course
+      description: >
+        Returns a scan payload that combines local roadmap, checklist, and readiness
+        signals with the hosted Sentinel AI connection posture.
+      parameters:
+        - name: X-Principal-Id
+          in: header
+          required: true
+          description: Principal executing the request.
+          schema:
+            type: string
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                focus:
+                  type: string
+                  description: Optional scan focus label.
+      responses:
+        "200":
+          description: Sentinel AI scan output and recommended course
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+                  data:
+                    type: object
+                    properties:
+                      generatedAt:
+                        type: string
+                        format: date-time
+                      currentPosture:
+                        type: string
+                      remote:
+                        type: object
+                        properties:
+                          configured:
+                            type: boolean
+                          reachable:
+                            type: boolean
+                          healthUrl:
+                            type: string
+                            nullable: true
+                          scanUrl:
+                            type: string
+                            nullable: true
+                          statusCode:
+                            type: integer
+                            nullable: true
+                          payload:
+                            nullable: true
+                          error:
+                            type: string
+                            nullable: true
+                      efficiencyPlan:
+                        type: object
+                        properties:
+                          costReduction:
+                            type: array
+                            items:
+                              type: string
+                          latencyReduction:
+                            type: array
+                            items:
+                              type: string
+                          computeOptimization:
+                            type: array
+                            items:
+                              type: string
+                          greenMode:
+                            type: array
+                            items:
+                              type: string
+                      readyToGo:
+                        type: array
+                        items:
+                          type: string
+                      focusAreas:
+                        type: array
+                        items:
+                          type: string
+                      localSignals:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            heading:
+                              type: string
+                            items:
+                              type: array
+                              items:
+                                type: string
+                      hardeningPaths:
+                        type: array
+                        items:
+                          type: string
+                      recommendedCourse:
+                        type: array
+                        items:
+                          type: string
 
 components:
   securitySchemes:

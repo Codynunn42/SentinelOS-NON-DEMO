@@ -4,6 +4,16 @@
 **Product Vision:** Turn executive intelligence into governed action — with authority checks, risk review, and receipts
 **Current Verification Refresh:** 2026-07-05 Gate 8 local E2E pass
 
+## Executive Priority
+
+Turn Sentinel AI + Executive Desk into a revenue-producing business while maintaining governance, with government relationship building and readiness to start a government engagement as the leading motion.
+
+## Operating Summary
+
+- Ready to go: Executive Desk governance, cadence, board reporting, MOB integration, government messaging, and Gate 6-8 verification.
+- Focus now: GBP mission package, government relationship building, government readiness assets, first pilot readiness, and Sentinel AI runtime verification.
+- Scan logic: use Sentinel AI to enact the user's logic, show what is ready, and surface the highest-value focus areas for government engagement.
+
 ## Completed Gates
 
 ### ✅ Gate 1: Documentation Scaffold
@@ -102,7 +112,7 @@
 
 ### Core Loop (Complete)
 
-```
+```text
 Briefing → Decision → Authority Check → Risk Gate → Command → Receipt → Report
 ```
 
@@ -134,7 +144,7 @@ Every receipt includes:
 ## Implementation Statistics
 
 | Gate | Services | LOC | Files |
-|------|----------|-----|-------|
+| --- | --- | --- | --- |
 | 2 | command-handler, authority-check, risk-gate, receipt-ledger | ~800 | 4 |
 | 3 | receipt-ledger-pg, receipt-ledger-file | ~500 | 2 + db setup |
 | 4 | identity-graph-client, delegation-rules, authority-check (enhanced) | ~600 | 3 |
@@ -146,7 +156,11 @@ Every receipt includes:
 
 ## Next Immediate Steps
 
-1. **Keep Gates 6-8 Verified** — Rerun the verified checks when API, frontend, or proxy code changes
+1. **Build Government Relationships** — Continue DOE outreach, relationship mapping, follow-ups, and readiness to start the first government engagement
+
+2. **Prepare Government Readiness Assets** — Polish the government binder, executive one-pager, discovery framework, and pilot material for first-contact use
+
+3. **Keep Gates 6-8 Verified** — Rerun the verified checks when API, frontend, or proxy code changes
 
    ```bash
    pnpm run check:executive-desk:types
@@ -156,7 +170,15 @@ Every receipt includes:
    pnpm run check:executive-desk:e2e
    ```
 
-2. **Public GPT Builder Proof** — Refresh tunnel/schema and run the Action only under a separate proof gate
+4. **Public GPT Builder Proof** — Refresh tunnel/schema and run the Action only under a separate proof gate
+
+5. **Hosted Sentinel AI Operating Efficiency** — Once the remote connection is live, use Sentinel AI to analyze operating cost, recommend reductions, and apply the known green energy module for lower-carbon scheduling where the platform supports it
+
+## Executive Status Note
+
+- Before: Sentinel AI returned posture and hardening guidance only.
+- After: The scan/status payload now publishes a structured `efficiencyPlan` for cost, latency, compute, and green-mode actions.
+- Plan: Keep the hosted connection gated, then use Sentinel AI to trim cost, reduce latency, right-size compute, and apply the green energy module.
 
 ---
 
