@@ -46,8 +46,8 @@ selection_result:
   gate: SELECT_RELEASE_BLOCKER_TO_RESOLVE_FIRST
   selected_blocker: NC-SOS-001
   selected_reason: dirty_mixed_scope_worktree_controls_release_persistence_and_claim_boundary
-  prepared_manifest: docs/EXACT_RELEASE_STAGING_MANIFEST_REVIEW_2026-06-15.md
-  manifest_review_result: docs/EXACT_RELEASE_STAGING_MANIFEST_REVIEW_RESULT_2026-06-15.md
+  prepared_manifest: docs/governance/EXACT_RELEASE_STAGING_MANIFEST_REVIEW_2026-06-15.md
+  manifest_review_result: docs/governance/EXACT_RELEASE_STAGING_MANIFEST_REVIEW_RESULT_2026-06-15.md
   next_gate: APPROVE_STAGE_AND_COMMIT_RELEASE_V1_GOVERNANCE_PACKET_DOCS_ONLY
   blocked_until_manifest_reviewed:
     - release_execution

@@ -1,7 +1,7 @@
 # Sovereign Key Management And License Lifecycle Control Plan Review Result - 2026-06-17
 
 **COMM:** Sentinel AI by Cody Nunn | Nunn Cloud  
-**Reviewed Artifact:** `docs/SOVEREIGN_KEY_MANAGEMENT_AND_LICENSE_LIFECYCLE_CONTROL_PLAN_2026-06-17.md`  
+**Reviewed Artifact:** `docs/governance/SOVEREIGN_KEY_MANAGEMENT_AND_LICENSE_LIFECYCLE_CONTROL_PLAN_2026-06-17.md`  
 **Mode:** board-level control-direction review  
 **State:** control direction reviewed and approved; implementation and issuance held  
 **Authority Created:** true, limited to control-direction adoption

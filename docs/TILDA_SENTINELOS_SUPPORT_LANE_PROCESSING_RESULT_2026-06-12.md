@@ -8,7 +8,7 @@
 
 | Evidence | Observation | Classification |
 | --- | --- | --- |
-| `docs/SYSTEM_DESIGN.md` | Defines TILDA as the operator-logic label for Forethought Interpretation | Current design contract |
+| `docs/governance/SYSTEM_DESIGN.md` | Defines TILDA as the operator-logic label for Forethought Interpretation | Current design contract |
 | `apps/sentinel/src/forethought/interpretation.js` | Delegates interpretation to the analysis layer and does not execute actions | Implemented bounded interpretation |
 | `apps/sentinel/src/learning/interpretation.js` | Exposes analysis, forethought, and archive-intelligence intake routing | Implemented support surface; not separate TILDA runtime |
 | `docs/PARTNER_PORTAL_REPOSITORY_DISCOVERY_AND_CONTROL_DIRECTION_2026-06-17.md` | Separates Sentinel evidence recording from TILDA interpretation | Future-dated planning evidence; direction supported, execution not established |

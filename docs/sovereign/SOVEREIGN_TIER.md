@@ -119,4 +119,4 @@ Before selling sovereign licenses:
 2. Define the source vs. binary delivery model
 3. Establish the update and support contract model
 4. Define the pricing tiers with legal sign-off
-5. Add sovereign package to the product tier table in `docs/PRODUCT.md`
+5. Add sovereign package to the product tier table in `docs/governance/PRODUCT.md`

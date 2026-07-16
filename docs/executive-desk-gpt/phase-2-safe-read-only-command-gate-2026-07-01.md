@@ -22,7 +22,7 @@ The selected command is supported by repository evidence:
 
 - `apps/sentinel/src/surface/nunncloud.js` registers `repo.control.workflow.diagnose`.
 - `apps/sentinel/src/commands/repo/control.js` implements `handleRepoWorkflowDiagnose`.
-- `docs/REPO_CONTROL_LAYER.md` states that `repo.control.workflow.diagnose` is read-only.
+- `docs/governance/REPO_CONTROL_LAYER.md` states that `repo.control.workflow.diagnose` is read-only.
 - The handler returns `executionMode: read_only_diagnosis`.
 
 ## Why This Command

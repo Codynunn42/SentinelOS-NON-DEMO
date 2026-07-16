@@ -9,11 +9,11 @@
 
 | Evidence | Observation | Review Classification |
 | --- | --- | --- |
-| `docs/TILDA_ORCHESTRATION_SUPPORT_COMMAND_PACKET_2026-06-14.md` | Defines seven TILDA preparation commands, answer shape, routing rules, and stop conditions | sufficient for review-held orchestration preparation |
-| `docs/TILDA_SUPPORT_REQUEST_ANSWER_AND_ROUTING_MATRIX_2026-06-14.md` | Provides current answers and routing for NC-SOS-001 through NC-SOS-015 | sufficient for internal support disbursement |
-| `docs/NUNNCORP_SENTINELOS_ISSUE_SUPPORT_TRACKER_2026-06-14.md` | Tracks 15 support items and links the TILDA packet and matrix | support register updated |
+| `docs/governance/TILDA_ORCHESTRATION_SUPPORT_COMMAND_PACKET_2026-06-14.md` | Defines seven TILDA preparation commands, answer shape, routing rules, and stop conditions | sufficient for review-held orchestration preparation |
+| `docs/governance/TILDA_SUPPORT_REQUEST_ANSWER_AND_ROUTING_MATRIX_2026-06-14.md` | Provides current answers and routing for NC-SOS-001 through NC-SOS-015 | sufficient for internal support disbursement |
+| `docs/governance/NUNNCORP_SENTINELOS_ISSUE_SUPPORT_TRACKER_2026-06-14.md` | Tracks 15 support items and links the TILDA packet and matrix | support register updated |
 | `docs/TILDA_SENTINELOS_SUPPORT_LANE_PROCESSING_RESULT_2026-06-12.md` | Defines TILDA as interpretation and Board-reporting support, not runtime authority | governing boundary preserved |
-| `docs/EXECUTIVE_BOARD_REFRESHED_FOR_PROCESSING_2026-06-13.md` | Lists `REVIEW_TILDA_SENTINELOS_SUPPORT_CONTRACT` as the next Board gate | Board queue remains active |
+| `docs/governance/EXECUTIVE_BOARD_REFRESHED_FOR_PROCESSING_2026-06-13.md` | Lists `REVIEW_TILDA_SENTINELOS_SUPPORT_CONTRACT` as the next Board gate | Board queue remains active |
 
 ## Interpretation Second
 
@@ -73,7 +73,7 @@ conclusion:
   TILDA_orchestration_packet_reviewed: true
   packet_status: approved_for_internal_Monday_disbursement_preparation
   Monday_date: 2026-06-15
-  required_output: docs/MONDAY_INTERNAL_SUPPORT_DISBURSEMENT_PACKET_2026-06-15.md
+  required_output: docs/governance/MONDAY_INTERNAL_SUPPORT_DISBURSEMENT_PACKET_2026-06-15.md
   authority_created: false
 ```
 

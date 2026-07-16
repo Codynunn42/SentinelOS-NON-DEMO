@@ -135,7 +135,7 @@ See:
 
 - [Phase 3 — Outcome Engines](./Phase-3-Outcome-Engines.md)
 - [Phase 4 — Deployment Profiles](./Phase-4-Deployment-Profiles.md)
-- [Phase 5 — Government Executive Desk](./Phase-5-Government-Executive-Desk.md)
+- [Phase 5 — Government Executive Desk](../executive-desk/government-readiness/2026-07-15.md)
 
 ## Outcome
 

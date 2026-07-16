@@ -69,7 +69,7 @@ authorization_result:
 `PROVIDE_MINIMUM_FIRST_GOVERNMENT_OUTCOME_IDENTITY_AND_OUTCOME`
 
 Input processing result:
-`docs/FIRST_GOVERNMENT_OUTCOME_INTAKE_INPUT_PROCESSING_RESULT_2026-06-12.md`
+`docs/governance/FIRST_GOVERNMENT_OUTCOME_INTAKE_INPUT_PROCESSING_RESULT_2026-06-12.md`
 
 The next gate accepts only the minimum owner-provided identity and outcome
 fields within the authorized scope. It creates no authority to obtain missing

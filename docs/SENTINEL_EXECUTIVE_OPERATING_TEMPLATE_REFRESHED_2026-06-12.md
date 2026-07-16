@@ -10,12 +10,12 @@
 
 ```yaml
 governing_inputs:
-  prior_template: docs/SENTINEL_EXECUTIVE_OPERATING_TEMPLATE_2026-06-11.md
-  current_board: docs/EXECUTIVE_BOARD_2026-06-11.md
-  board_summary_update: docs/EXECUTIVE_BOARD_SUMMARY_UPDATE_2026-06-12.md
+  prior_template: docs/governance/SENTINEL_EXECUTIVE_OPERATING_TEMPLATE_2026-06-11.md
+  current_board: docs/governance/EXECUTIVE_BOARD_2026-06-11.md
+  board_summary_update: docs/governance/EXECUTIVE_BOARD_SUMMARY_UPDATE_2026-06-12.md
   tilda_support_result: docs/TILDA_SENTINELOS_SUPPORT_LANE_PROCESSING_RESULT_2026-06-12.md
-  deployment_intake: docs/CURRENT_SENTINEL_DEPLOYMENT_FOOTPRINT_EXECUTIVE_INTAKE_RECONCILIATION_2026-06-12.md
-  memory_layer_reconciliation: docs/POSTGRESQL_MEMORY_LAYER_LIVE_VERIFICATION_RECONCILIATION_2026-06-12.md
+  deployment_intake: docs/governance/CURRENT_SENTINEL_DEPLOYMENT_FOOTPRINT_EXECUTIVE_INTAKE_RECONCILIATION_2026-06-12.md
+  memory_layer_reconciliation: docs/governance/POSTGRESQL_MEMORY_LAYER_LIVE_VERIFICATION_RECONCILIATION_2026-06-12.md
   clarity_query_result: docs/CLARITY_MEMORY_LAYER_PARTNER_PORTAL_SPECIFICS_QUERY_RESULT_2026-06-17.md
 ```
 

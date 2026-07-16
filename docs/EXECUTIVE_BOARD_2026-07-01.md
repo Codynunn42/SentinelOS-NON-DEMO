@@ -4,7 +4,7 @@
 **Mode:** board template; July 1 implementation preparation; governance-first  
 **Corporate Constitution:** `governance/constitution/NUNN_CORPORATION_CONSTITUTION.md`  
 **SentinelOS Executive Constitution:** `governance/sentinel-platform/SENTINELOS_EXECUTIVE_CONSTITUTION.md`  
-**MOB Constant:** `docs/NUNN_CORPORATION_MASTER_OPERATING_BINDER_2026-06-15.md`  
+**MOB Constant:** `docs/GBP/doctrine/NUNN_CORPORATION_MASTER_OPERATING_BINDER_2026-06-15.md`  
 **CEO Address:** `docs/EXECUTIVE_BOARD_ADDRESS_2026-07-01.md`  
 **Authority Created:** false
 

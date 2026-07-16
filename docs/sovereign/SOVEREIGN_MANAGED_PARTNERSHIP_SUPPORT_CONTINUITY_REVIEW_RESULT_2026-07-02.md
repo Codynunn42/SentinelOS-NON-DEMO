@@ -3,7 +3,7 @@
 **COMM:** Sentinel AI by Cody Nunn | Nunn Cloud  
 **Mode:** review-held processing result  
 **Reviewed Draft:** `docs/sovereign/SOVEREIGN_MANAGED_PARTNERSHIP_SUPPORT_CONTINUITY_DRAFT_2026-07-02.md`  
-**Governing Source:** `docs/SOVEREIGN_BUYER_PACKAGE_INTAKE_RECONCILIATION_2026-06-11.md`  
+**Governing Source:** `docs/governance/SOVEREIGN_BUYER_PACKAGE_INTAKE_RECONCILIATION_2026-06-11.md`  
 **External Use:** held  
 **Authority Created:** false
 

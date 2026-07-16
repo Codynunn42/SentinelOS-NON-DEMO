@@ -14,15 +14,15 @@ June 14, 2026, including Friday, Saturday, and Sunday review-held outputs.
 
 ```yaml
 weekly_inputs:
-  Friday_daily: docs/FRIDAY_DAILY_EXECUTIVE_CADENCE_CLOSEOUT_2026-06-12.md
-  Friday_weekly: docs/FRIDAY_WEEKLY_EXECUTIVE_CADENCE_CLOSEOUT_2026-06-12.md
-  Saturday_daily: docs/SATURDAY_DAILY_EXECUTIVE_CADENCE_2026-06-13.md
-  Sunday_daily: docs/SUNDAY_DAILY_EXECUTIVE_CADENCE_CLOSEOUT_2026-06-14.md
-  Board: docs/EXECUTIVE_BOARD_REFRESHED_FOR_PROCESSING_2026-06-13.md
+  Friday_daily: docs/governance/FRIDAY_DAILY_EXECUTIVE_CADENCE_CLOSEOUT_2026-06-12.md
+  Friday_weekly: docs/governance/FRIDAY_WEEKLY_EXECUTIVE_CADENCE_CLOSEOUT_2026-06-12.md
+  Saturday_daily: docs/governance/SATURDAY_DAILY_EXECUTIVE_CADENCE_2026-06-13.md
+  Sunday_daily: docs/governance/SUNDAY_DAILY_EXECUTIVE_CADENCE_CLOSEOUT_2026-06-14.md
+  Board: docs/governance/EXECUTIVE_BOARD_REFRESHED_FOR_PROCESSING_2026-06-13.md
   release_packet: SENTINEL-RELEASE-v1.md
-  support_tracker: docs/NUNNCORP_SENTINELOS_ISSUE_SUPPORT_TRACKER_2026-06-14.md
-  governance_settlement: docs/GOVERNANCE_COMPLIANCE_SETTLEMENT_PACKET_2026-06-14.md
-  Monday_disbursement: docs/MONDAY_INTERNAL_SUPPORT_DISBURSEMENT_PACKET_2026-06-15.md
+  support_tracker: docs/governance/NUNNCORP_SENTINELOS_ISSUE_SUPPORT_TRACKER_2026-06-14.md
+  governance_settlement: docs/governance/GOVERNANCE_COMPLIANCE_SETTLEMENT_PACKET_2026-06-14.md
+  Monday_disbursement: docs/governance/MONDAY_INTERNAL_SUPPORT_DISBURSEMENT_PACKET_2026-06-15.md
 ```
 
 ## Evidence First

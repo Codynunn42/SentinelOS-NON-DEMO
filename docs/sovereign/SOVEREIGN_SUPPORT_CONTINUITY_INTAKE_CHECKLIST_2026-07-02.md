@@ -2,7 +2,7 @@
 
 **COMM:** Sentinel AI by Cody Nunn | Nunn Cloud  
 **Mode:** review-held intake checklist  
-**Governing Source:** `docs/SOVEREIGN_BUYER_PACKAGE_INTAKE_RECONCILIATION_2026-06-11.md`  
+**Governing Source:** `docs/governance/SOVEREIGN_BUYER_PACKAGE_INTAKE_RECONCILIATION_2026-06-11.md`  
 **Related Draft:** `docs/sovereign/SOVEREIGN_MANAGED_PARTNERSHIP_SUPPORT_CONTINUITY_DRAFT_2026-07-02.md`  
 **External Use:** held  
 **Authority Created:** false

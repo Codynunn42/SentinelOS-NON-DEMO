@@ -10,9 +10,9 @@
 | Evidence | Observation | Classification |
 | --- | --- | --- |
 | `SENTINEL-RELEASE-v1.md` | Release v1 governance packet exists and separates allowed internal claims from prohibited claims | review-held release paperwork |
-| `docs/GOVERNANCE_COMPLIANCE_SETTLEMENT_PACKET_2026-06-14.md` | Governance and compliance settled to evidence boundary, with release and persistence held | governing compliance packet |
-| `docs/GOVERNANCE_COMPLIANCE_EVIDENCE_INDEX_2026-06-14.md` | Lists current evidence and missing referenced config/schema paths | evidence register |
-| `docs/NUNNCORP_SENTINELOS_ISSUE_SUPPORT_TRACKER_2026-06-14.md` | Tracks release blockers NC-SOS-001, NC-SOS-002, NC-SOS-006, and NC-SOS-007 | release blocker register |
+| `docs/governance/GOVERNANCE_COMPLIANCE_SETTLEMENT_PACKET_2026-06-14.md` | Governance and compliance settled to evidence boundary, with release and persistence held | governing compliance packet |
+| `docs/governance/GOVERNANCE_COMPLIANCE_EVIDENCE_INDEX_2026-06-14.md` | Lists current evidence and missing referenced config/schema paths | evidence register |
+| `docs/governance/NUNNCORP_SENTINELOS_ISSUE_SUPPORT_TRACKER_2026-06-14.md` | Tracks release blockers NC-SOS-001, NC-SOS-002, NC-SOS-006, and NC-SOS-007 | release blocker register |
 
 ## Interpretation Second
 

@@ -8,7 +8,7 @@
 
 | Candidate Evidence | Observation | Classification |
 | --- | --- | --- |
-| `docs/SENTINELOS_PROJECT_SITUATION_AND_PUBLICATION_CONTROL_INDEX_2026-05-30.md` | Records `Nexus` as a private/internal Client Operations Portal with pilot-ready classification | SentinelOS repository record; not an external partner-portal implementation contract |
+| `docs/governance/SENTINELOS_PROJECT_SITUATION_AND_PUBLICATION_CONTROL_INDEX_2026-05-30.md` | Records `Nexus` as a private/internal Client Operations Portal with pilot-ready classification | SentinelOS repository record; not an external partner-portal implementation contract |
 | `/Users/codynunn/nunncorp-global-mono/apps/nexus-ui/` | Minimal Next.js Nexus UI exists in the active monorepo; current page is a Stargate-themed command/status surface | implemented frontend candidate; partner roles and workflows not identified |
 | `/Users/codynunn/Documents/GitHub/nunncorp-global-mono/apps/nexus-ui/` | Contains an OwnerFI pilot Sentinel console and access-request intake | separate checkout candidate; not an authoritative partner-portal specification |
 | `/Users/codynunn/Documents/nunncorp/partner_portal_blueprint.html` | Describes partner onboarding, Nexus UI, governance, SSO, RBAC review, and traceability testing | local design artifact; production-gate instruction is not authorized |
@@ -68,7 +68,7 @@ partner_portal_control_direction:
     - identity_SSO_and_external_RBAC_contract
     - publication_and_branding_rules
     - implementation_repository_and_deployment_target
-  query_manifest: docs/CLARITY_MEMORY_LAYER_PARTNER_PORTAL_SPECIFICS_QUERY_MANIFEST_2026-06-17.md
+  query_manifest: docs/governance/CLARITY_MEMORY_LAYER_PARTNER_PORTAL_SPECIFICS_QUERY_MANIFEST_2026-06-17.md
   next_gate: AUTHORIZE_READ_ONLY_CLARITY_PARTNER_PORTAL_SPECIFICS_QUERY
   implementation_authority: false
   source_retrieval_authority: false

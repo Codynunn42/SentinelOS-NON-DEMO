@@ -93,6 +93,6 @@ execution. Review approval does not authorize running Azure CLI commands.
 `AUTHORIZE_EXACT_READ_ONLY_CURRENT_SENTINEL_DEPLOYMENT_FOOTPRINT_DISCOVERY`
 
 That gate would authorize only the commands and output fields in
-`docs/EXACT_READ_ONLY_CURRENT_SENTINEL_DEPLOYMENT_FOOTPRINT_DISCOVERY_MANIFEST_2026-06-13.md`.
+`docs/governance/EXACT_READ_ONLY_CURRENT_SENTINEL_DEPLOYMENT_FOOTPRINT_DISCOVERY_MANIFEST_2026-06-13.md`.
 It would not authorize mutation, KQL, health probes, data-plane access, secret
 access, staging, commit, push, deployment, or external contact.

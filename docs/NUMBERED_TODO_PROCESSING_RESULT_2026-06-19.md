@@ -2,7 +2,7 @@
 
 **COMM:** Sentinel AI by Cody Nunn | Nunn Cloud  
 **Mode:** numbered TODO processing; evidence-first; review-held  
-**Source Cadence:** `docs/THURSDAY_DAILY_EXECUTIVE_CADENCE_CLOSEOUT_2026-06-18.md`  
+**Source Cadence:** `docs/governance/THURSDAY_DAILY_EXECUTIVE_CADENCE_CLOSEOUT_2026-06-18.md`  
 **Status:** Processed  
 **Authority Created:** false
 
@@ -56,7 +56,7 @@ smallest_accountable_AI_proof_surface:
 
 ```yaml
 sovereign_manifest_review:
-  reviewed_artifact: docs/SOVEREIGN_KEY_MANAGEMENT_IMPLEMENTATION_MANIFEST_2026-06-17.md
+  reviewed_artifact: docs/governance/SOVEREIGN_KEY_MANAGEMENT_IMPLEMENTATION_MANIFEST_2026-06-17.md
   review_result: useful_exact_future_manifest_not_implementation_ready
   supported:
     - Ed25519_direction
@@ -132,16 +132,16 @@ Sentinel_AI_background_matriculation:
 support_outcome:
   current_state: numbered_TODOs_processed_with_docs_only_decisions_completed_and_execution_gates_held
   evidence:
-    - docs/THURSDAY_DAILY_EXECUTIVE_CADENCE_CLOSEOUT_2026-06-18.md
-    - docs/EXECUTIVE_SNAPSHOT_2026-06-17.md
-    - docs/SENTINEL_EXECUTIVE_OPERATING_TEMPLATE_2026-06-11.md
-    - docs/EXECUTIVE_BOARD_2026-06-11.md
-    - docs/SENTINEL_AUTHORITY_RECEIPT_PROOF_PACKET_APPROVAL_RESULT_2026-06-19.md
-    - docs/FIXTURE_ONLY_AUTHORITY_RECEIPT_PROOF_IMPLEMENTATION_MANIFEST_2026-06-19.md
-    - docs/SOVEREIGN_KEY_MANAGEMENT_IMPLEMENTATION_MANIFEST_2026-06-17.md
+    - docs/governance/THURSDAY_DAILY_EXECUTIVE_CADENCE_CLOSEOUT_2026-06-18.md
+    - docs/governance/EXECUTIVE_SNAPSHOT_2026-06-17.md
+    - docs/governance/SENTINEL_EXECUTIVE_OPERATING_TEMPLATE_2026-06-11.md
+    - docs/governance/EXECUTIVE_BOARD_2026-06-11.md
+    - docs/governance/SENTINEL_AUTHORITY_RECEIPT_PROOF_PACKET_APPROVAL_RESULT_2026-06-19.md
+    - docs/governance/FIXTURE_ONLY_AUTHORITY_RECEIPT_PROOF_IMPLEMENTATION_MANIFEST_2026-06-19.md
+    - docs/governance/SOVEREIGN_KEY_MANAGEMENT_IMPLEMENTATION_MANIFEST_2026-06-17.md
     - docs/CLARITY_MEMORY_LAYER_PARTNER_PORTAL_SPECIFICS_QUERY_RESULT_2026-06-17.md
-    - docs/FIXTURE_ONLY_SENTINEL_NEXUS_BHINDI_VAULT_POC_IMPLEMENTATION_RESULT_2026-06-17.md
-    - docs/TILDA_SENTINELOS_SUPPORT_CONTRACT_REVIEW_RESULT_2026-06-15.md
+    - docs/governance/FIXTURE_ONLY_SENTINEL_NEXUS_BHINDI_VAULT_POC_IMPLEMENTATION_RESULT_2026-06-17.md
+    - docs/governance/TILDA_SENTINELOS_SUPPORT_CONTRACT_REVIEW_RESULT_2026-06-15.md
   support_needed:
     - exact_runtime_restore_approval_if_Azure_mutation_is_desired
     - exact_docs_only_staging_set_if_persistence_is_desired
