@@ -148,7 +148,7 @@ Next action if deferred:
 
 **Recommended path:** Produce a month-end operating closeout that lists verified truth, stale claims, deferred decisions, and July priorities.
 
-**Why now:** The current date is 2026-06-30, so month-end closeout is time-sensitive. Closing the month correctly protects the next execution cycle from stale or inflated claims.
+**Why now:** As of 2026-06-30, month-end closeout is time-sensitive. Closing the month correctly protects the next execution cycle from stale or inflated claims.
 
 **Options considered:**
 
