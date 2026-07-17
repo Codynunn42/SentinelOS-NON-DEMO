@@ -68,6 +68,73 @@ h2 {
   min-width: min(100%, 440px);
 }
 
+.session-strip {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.signin-shell {
+  padding: 30px 28px 0;
+}
+
+.signin-card {
+  max-width: 520px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 20px;
+  display: grid;
+  gap: 12px;
+}
+
+.signin-copy {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.signin-status {
+  min-height: 24px;
+  font-size: 13px;
+  color: var(--steel);
+}
+
+.signin-status.ok {
+  color: var(--green);
+}
+
+.signin-status.warn {
+  color: var(--amber);
+}
+
+.signin-status.error {
+  color: var(--red);
+}
+
+.signin-form {
+  display: grid;
+  gap: 8px;
+}
+
+.signin-form label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+body.signed-out .desk-shell,
+body.signed-out .principal-strip {
+  display: none;
+}
+
+body.signed-in .signin-shell {
+  display: none;
+}
+
 .principal-strip label {
   color: var(--muted);
   font-size: 12px;

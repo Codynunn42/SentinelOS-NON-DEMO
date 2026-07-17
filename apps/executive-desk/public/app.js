@@ -1,5 +1,12 @@
 const state = {
   principalId: 'user@example.com',
+  session: {
+    accessToken: '',
+    expiresAt: '',
+    connected: false,
+    remoteConfigured: false,
+    remoteReachable: false
+  },
   risk: null,
   receipts: { data: [], total: 0 },
   receiptStats: null,
@@ -34,6 +41,15 @@ const state = {
 const el = {
   principalId: document.getElementById('principalId'),
   refreshButton: document.getElementById('refreshButton'),
+  sessionStrip: document.getElementById('sessionStrip'),
+  sessionStatus: document.getElementById('sessionStatus'),
+  signOutButton: document.getElementById('signOutButton'),
+  signinShell: document.getElementById('signinShell'),
+  connectStatus: document.getElementById('connectStatus'),
+  signinForm: document.getElementById('signinForm'),
+  signinEmail: document.getElementById('signinEmail'),
+  signinPassword: document.getElementById('signinPassword'),
+  signinButton: document.getElementById('signinButton'),
   riskScore: document.getElementById('riskScore'),
   riskDecision: document.getElementById('riskDecision'),
   receiptTotal: document.getElementById('receiptTotal'),
@@ -80,8 +96,18 @@ const el = {
   mobExportBundleButton: document.getElementById('mobExportBundleButton')
 };
 
+const SESSION_STORAGE_KEY = 'executiveDeskSentinelSession';
+
 function headers() {
-  return { 'X-Principal-Id': state.principalId };
+  const base = {
+    'X-Principal-Id': state.principalId
+  };
+
+  if (state.session.accessToken) {
+    base.Authorization = `Bearer ${state.session.accessToken}`;
+  }
+
+  return base;
 }
 
 async function api(path, options = {}) {
@@ -115,6 +141,143 @@ async function apiDownload(path) {
   const nameMatch = contentDisposition.match(/filename="?([^";]+)"?/i);
   const filename = nameMatch?.[1] || 'mob-runs-export';
   return { blob, filename };
+}
+
+function updateAuthShell() {
+  const signedIn = state.session.connected;
+  document.body.classList.toggle('signed-in', signedIn);
+  document.body.classList.toggle('signed-out', !signedIn);
+  el.sessionStrip.hidden = !signedIn;
+
+  if (signedIn) {
+    const exp = state.session.expiresAt ? ` until ${formatTime(state.session.expiresAt)}` : '';
+    el.sessionStatus.textContent = `Signed in as ${state.principalId}${exp}`;
+  }
+}
+
+function persistSession() {
+  if (!state.session.connected) {
+    window.localStorage.removeItem(SESSION_STORAGE_KEY);
+    return;
+  }
+
+  window.localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify({
+    principalId: state.principalId,
+    accessToken: state.session.accessToken,
+    expiresAt: state.session.expiresAt
+  }));
+}
+
+function restoreSession() {
+  const raw = window.localStorage.getItem(SESSION_STORAGE_KEY);
+  if (!raw) {
+    return false;
+  }
+
+  try {
+    const parsed = JSON.parse(raw);
+    const expiresAt = parsed.expiresAt || '';
+    const expired = expiresAt ? new Date(expiresAt).getTime() <= Date.now() : false;
+
+    if (!parsed.principalId || !parsed.accessToken || expired) {
+      window.localStorage.removeItem(SESSION_STORAGE_KEY);
+      return false;
+    }
+
+    state.principalId = parsed.principalId;
+    state.session.accessToken = parsed.accessToken;
+    state.session.expiresAt = expiresAt;
+    state.session.connected = true;
+    el.principalId.value = state.principalId;
+    return true;
+  } catch {
+    window.localStorage.removeItem(SESSION_STORAGE_KEY);
+    return false;
+  }
+}
+
+function setConnectStatus(message, tone = 'warn') {
+  el.connectStatus.textContent = message;
+  el.connectStatus.className = `signin-status ${tone}`;
+}
+
+async function loadConnectionStatus() {
+  try {
+    const response = await fetch('/api/executive/connect/status');
+    const payload = await response.json();
+    const data = payload.data || {};
+
+    state.session.remoteConfigured = !!data.configured;
+    state.session.remoteReachable = !!data.reachable;
+
+    if (!data.configured) {
+      setConnectStatus('Sentinel AI is not configured yet. Set SENTINEL_AI_BASE_URL and restart this app.', 'error');
+      return;
+    }
+
+    if (!data.reachable) {
+      setConnectStatus('Sentinel AI is configured but unreachable. Start local Sentinel AI or verify auth/network.', 'warn');
+      return;
+    }
+
+    setConnectStatus('Sentinel AI is reachable. Sign in to connect this app.', 'ok');
+  } catch {
+    setConnectStatus('Unable to verify Sentinel AI connection right now.', 'error');
+  }
+}
+
+async function signIn(event) {
+  event.preventDefault();
+  const email = el.signinEmail.value.trim();
+  const password = el.signinPassword.value;
+
+  if (!email || !password) {
+    setConnectStatus('Email and password are required.', 'error');
+    return;
+  }
+
+  el.signinButton.disabled = true;
+  setConnectStatus('Signing in through Sentinel AI...', 'warn');
+
+  try {
+    const response = await fetch('/api/executive/connect/signin', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      throw new Error(payload.details || payload.error || 'Sign-in failed');
+    }
+
+    const session = payload.data?.session || {};
+    state.principalId = session.principalId || email;
+    state.session.accessToken = session.accessToken || state.principalId;
+    state.session.expiresAt = session.expiresAt || '';
+    state.session.connected = true;
+    el.principalId.value = state.principalId;
+    persistSession();
+    updateAuthShell();
+    setConnectStatus('Sign-in successful. Syncing dashboard...', 'ok');
+    await refresh();
+  } catch (error) {
+    state.session.connected = false;
+    persistSession();
+    updateAuthShell();
+    setConnectStatus(error.message || 'Sign-in failed.', 'error');
+  } finally {
+    el.signinButton.disabled = false;
+  }
+}
+
+function signOut() {
+  state.session.connected = false;
+  state.session.accessToken = '';
+  state.session.expiresAt = '';
+  persistSession();
+  updateAuthShell();
+  setConnectStatus('Signed out. Sign in again to reconnect to SentinelOS.', 'warn');
 }
 
 function chip(value) {
@@ -561,6 +724,11 @@ async function runMobTemplate() {
 }
 
 async function refresh() {
+  if (!state.session.connected) {
+    toast('Sign in to SentinelOS first.');
+    return;
+  }
+
   state.principalId = el.principalId.value.trim();
   if (!state.principalId) {
     toast('Principal is required.');
@@ -616,6 +784,8 @@ async function refresh() {
 }
 
 el.refreshButton.addEventListener('click', refresh);
+el.signinForm.addEventListener('submit', signIn);
+el.signOutButton.addEventListener('click', signOut);
 el.principalId.addEventListener('keydown', (event) => {
   if (event.key === 'Enter') refresh();
 });
@@ -689,5 +859,10 @@ el.mobExportBundleButton.addEventListener('click', () => {
 renderCloseoutControls();
 renderMobHistory();
 renderMobPanel();
+updateAuthShell();
+loadConnectionStatus();
 
-refresh();
+if (restoreSession()) {
+  updateAuthShell();
+  refresh();
+}

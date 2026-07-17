@@ -32,13 +32,28 @@ const executiveDeskRoot = path.join(__dirname, '..');
 
 const SENTINEL_AI_REMOTE_HEALTH_PATH = String(process.env.SENTINEL_AI_HEALTH_PATH || '/health').trim();
 const SENTINEL_AI_REMOTE_SCAN_PATH = String(process.env.SENTINEL_AI_SCAN_PATH || '/scan').trim();
+const SENTINEL_AI_REMOTE_SIGNIN_PATH = String(process.env.SENTINEL_AI_SIGNIN_PATH || '/auth/signin').trim();
 
 type SentinelAiConnectionConfig = {
     baseUrl: string;
     healthPath: string;
     scanPath: string;
+    signInPath: string;
     bearerToken: string;
     timeoutMs: number;
+};
+
+type SignInResponse = {
+    session: {
+        principalId: string;
+        accessToken: string;
+        expiresAt: string;
+    };
+    sentinel: {
+        configured: boolean;
+        baseUrl: string | null;
+        signInUrl: string | null;
+    };
 };
 
 type SentinelAiScanSection = {
@@ -110,6 +125,7 @@ function getSentinelAiConnectionConfig(): SentinelAiConnectionConfig {
         baseUrl,
         healthPath: SENTINEL_AI_REMOTE_HEALTH_PATH,
         scanPath: SENTINEL_AI_REMOTE_SCAN_PATH,
+        signInPath: SENTINEL_AI_REMOTE_SIGNIN_PATH,
         bearerToken,
         timeoutMs: Number.isFinite(timeoutMs) && timeoutMs > 0 ? timeoutMs : 5000,
     };
@@ -119,6 +135,100 @@ function joinRemoteUrl(baseUrl: string, endpointPath: string): string {
     const normalizedBase = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`;
     const normalizedPath = endpointPath.startsWith('/') ? endpointPath.slice(1) : endpointPath;
     return new URL(normalizedPath, normalizedBase).toString();
+}
+
+function normalizePrincipalId(value: unknown): string {
+    if (typeof value === 'string' && value.trim()) {
+        return value.trim();
+    }
+    return '';
+}
+
+async function signInWithSentinelAi(email: string, password: string): Promise<SignInResponse> {
+    const config = getSentinelAiConnectionConfig();
+    const expiresAt = new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString();
+
+    if (!config.baseUrl) {
+        throw Object.assign(new Error('SENTINEL_AI_BASE_URL is not configured'), {
+            statusCode: 503,
+            code: 'SENTINEL_AI_NOT_CONFIGURED',
+        });
+    }
+
+    const signInUrl = joinRemoteUrl(config.baseUrl, config.signInPath || '/auth/signin');
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), config.timeoutMs);
+
+    try {
+        const response = await fetch(signInUrl, {
+            method: 'POST',
+            headers: {
+                'content-type': 'application/json',
+                ...(config.bearerToken ? { authorization: `Bearer ${config.bearerToken}` } : {}),
+            },
+            body: JSON.stringify({ email, password, client: 'executive-desk' }),
+            signal: controller.signal,
+        });
+
+        const rawText = await response.text();
+        const payload = rawText ? JSON.parse(rawText) : {};
+
+        if (!response.ok) {
+            const message = typeof payload?.error === 'string'
+                ? payload.error
+                : typeof payload?.message === 'string'
+                    ? payload.message
+                    : `Sentinel AI sign-in failed with ${response.status}`;
+
+            throw Object.assign(new Error(message), {
+                statusCode: response.status === 401 ? 401 : 502,
+                code: response.status === 401 ? 'INVALID_CREDENTIALS' : 'SENTINEL_AI_SIGNIN_FAILED',
+            });
+        }
+
+        const principalId = normalizePrincipalId(payload?.principalId)
+            || normalizePrincipalId(payload?.user?.principalId)
+            || normalizePrincipalId(payload?.user?.email)
+            || email;
+
+        const accessToken = normalizePrincipalId(payload?.accessToken)
+            || normalizePrincipalId(payload?.token)
+            || principalId;
+
+        return {
+            session: {
+                principalId,
+                accessToken,
+                expiresAt: normalizePrincipalId(payload?.expiresAt) || expiresAt,
+            },
+            sentinel: {
+                configured: true,
+                baseUrl: config.baseUrl,
+                signInUrl,
+            },
+        };
+    } catch (error) {
+        if (error instanceof SyntaxError) {
+            throw Object.assign(new Error('Sentinel AI sign-in returned a non-JSON payload'), {
+                statusCode: 502,
+                code: 'SENTINEL_AI_INVALID_RESPONSE',
+            });
+        }
+
+        if (error instanceof Error && 'statusCode' in error) {
+            throw error;
+        }
+
+        throw Object.assign(
+            new Error(error instanceof Error ? error.message : 'Unable to reach Sentinel AI sign-in endpoint'),
+            {
+                statusCode: 502,
+                code: 'SENTINEL_AI_UNREACHABLE',
+            },
+        );
+    } finally {
+        clearTimeout(timeout);
+    }
 }
 
 async function readArtifact(relativePath: string): Promise<string> {
@@ -505,6 +615,45 @@ export function mountApiRoutes(app: Express): void {
         res.sendFile(path.join(publicDir, 'index.html'));
     });
     app.use('/executive', express.static(publicDir));
+
+    app.get('/api/executive/connect/status', async (_req: Request, res: Response, next: NextFunction) => {
+        try {
+            const probe = await probeRemoteSentinelAi();
+            const config = getSentinelAiConnectionConfig();
+
+            res.json({
+                data: {
+                    ...probe,
+                    signInUrl: probe.configured
+                        ? joinRemoteUrl(config.baseUrl, config.signInPath || '/auth/signin')
+                        : null,
+                },
+            });
+        } catch (err) {
+            next(err);
+        }
+    });
+
+    app.post('/api/executive/connect/signin', async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const email = normalizePrincipalId(req.body?.email).toLowerCase();
+            const password = normalizePrincipalId(req.body?.password);
+
+            if (!email || !password) {
+                res.status(400).json({
+                    error: 'Bad Request',
+                    details: 'email and password are required',
+                    code: 'MISSING_CREDENTIALS',
+                });
+                return;
+            }
+
+            const data = await signInWithSentinelAi(email, password);
+            res.json({ data });
+        } catch (err) {
+            next(err);
+        }
+    });
 
     app.post('/proxy/command', proxyAuthMiddleware, rateLimitMiddleware, async (
         req: Request,

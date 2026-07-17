@@ -14,12 +14,33 @@
       <p class="eyebrow">SentinelOS</p>
       <h1>Executive Desk</h1>
     </div>
+    <div class="session-strip" id="sessionStrip" hidden>
+      <span id="sessionStatus">Signed out</span>
+      <button id="signOutButton" type="button">Sign Out</button>
+    </div>
     <div class="principal-strip">
       <label for="principalId">Principal</label>
       <input id="principalId" value="user@example.com" autocomplete="off">
       <button id="refreshButton" type="button">Refresh</button>
     </div>
   </header>
+
+  <section class="signin-shell" id="signinShell">
+    <article class="signin-card">
+      <p class="eyebrow">App Objective</p>
+      <h2>Connect App to SentinelOS</h2>
+      <p class="signin-copy">This app only handles sign-in and connection to local Sentinel AI for SentinelOS access.
+      </p>
+      <div class="signin-status" id="connectStatus">Checking Sentinel AI connection...</div>
+      <form id="signinForm" class="signin-form">
+        <label for="signinEmail">Email</label>
+        <input id="signinEmail" type="email" autocomplete="username" required>
+        <label for="signinPassword">Password</label>
+        <input id="signinPassword" type="password" autocomplete="current-password" required>
+        <button id="signinButton" type="submit">Sign In to SentinelOS</button>
+      </form>
+    </article>
+  </section>
 
   <main class="desk-shell">
     <section class="summary-band" aria-label="Operating summary">

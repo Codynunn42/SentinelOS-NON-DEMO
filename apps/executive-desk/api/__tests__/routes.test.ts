@@ -52,6 +52,24 @@ describe('Executive Desk API Routes', () => {
         });
     });
 
+    describe('Sentinel Connect', () => {
+        it('should expose connect status without auth', async () => {
+            const res = await request(app).get('/api/executive/connect/status');
+
+            assert.strictEqual(res.status, 200);
+            assert.strictEqual(typeof res.body.data.configured, 'boolean');
+        });
+
+        it('should require credentials for sign-in', async () => {
+            const res = await request(app)
+                .post('/api/executive/connect/signin')
+                .send({ email: 'user@example.com' });
+
+            assert.strictEqual(res.status, 400);
+            assert.strictEqual(res.body.code, 'MISSING_CREDENTIALS');
+        });
+    });
+
     describe('Frontend Surface', () => {
         it('should serve the Executive Desk cockpit', async () => {
             const res = await request(app).get('/executive');
