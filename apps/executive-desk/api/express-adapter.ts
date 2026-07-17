@@ -580,6 +580,38 @@ function requestIdMiddleware(req: Request, res: Response, next: NextFunction): v
     next();
 }
 
+function getAllowedOrigins(): string[] {
+    const raw = String(process.env.EXECUTIVE_DESK_ALLOWED_ORIGINS || '').trim();
+    if (!raw) {
+        return [];
+    }
+
+    return raw
+        .split(',')
+        .map((origin) => origin.trim())
+        .filter(Boolean);
+}
+
+function corsMiddleware(req: Request, res: Response, next: NextFunction): void {
+    const allowedOrigins = getAllowedOrigins();
+    const origin = String(req.headers.origin || '').trim();
+
+    if (origin && (allowedOrigins.includes('*') || allowedOrigins.includes(origin))) {
+        res.setHeader('Access-Control-Allow-Origin', origin);
+        res.setHeader('Vary', 'Origin');
+        res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Principal-Id, X-Request-Id');
+        res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, OPTIONS');
+        res.setHeader('Access-Control-Allow-Credentials', 'true');
+    }
+
+    if (req.method === 'OPTIONS') {
+        res.status(204).end();
+        return;
+    }
+
+    next();
+}
+
 /**
  * Error handling middleware
  */
@@ -611,6 +643,7 @@ export function mountApiRoutes(app: Express): void {
     // Global middleware
     app.use(express.json());
     app.use(requestIdMiddleware);
+    app.use(corsMiddleware);
     app.get('/executive', (_req: Request, res: Response) => {
         res.sendFile(path.join(publicDir, 'index.html'));
     });

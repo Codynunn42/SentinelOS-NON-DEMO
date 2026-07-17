@@ -1,5 +1,6 @@
 const state = {
   principalId: 'user@example.com',
+  apiBaseUrl: '',
   session: {
     accessToken: '',
     expiresAt: '',
@@ -47,6 +48,7 @@ const el = {
   signinShell: document.getElementById('signinShell'),
   connectStatus: document.getElementById('connectStatus'),
   signinForm: document.getElementById('signinForm'),
+  apiBaseUrl: document.getElementById('apiBaseUrl'),
   signinEmail: document.getElementById('signinEmail'),
   signinPassword: document.getElementById('signinPassword'),
   signinButton: document.getElementById('signinButton'),
@@ -97,6 +99,51 @@ const el = {
 };
 
 const SESSION_STORAGE_KEY = 'executiveDeskSentinelSession';
+const API_BASE_STORAGE_KEY = 'executiveDeskApiBaseUrl';
+
+function normalizeApiBase(value) {
+  if (!value) return '';
+  const raw = String(value).trim();
+  if (!raw) return '';
+
+  try {
+    const url = new URL(raw);
+    return `${url.origin}`;
+  } catch {
+    return '';
+  }
+}
+
+function resolveApiPath(path) {
+  if (!state.apiBaseUrl) {
+    return path;
+  }
+
+  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+  return `${state.apiBaseUrl}${normalizedPath}`;
+}
+
+function loadApiBaseUrl() {
+  const paramValue = new URLSearchParams(window.location.search).get('apiBase');
+  const storedValue = window.localStorage.getItem(API_BASE_STORAGE_KEY);
+  const selected = normalizeApiBase(paramValue) || normalizeApiBase(storedValue) || window.location.origin;
+
+  state.apiBaseUrl = selected;
+  if (el.apiBaseUrl) {
+    el.apiBaseUrl.value = selected;
+  }
+
+  window.localStorage.setItem(API_BASE_STORAGE_KEY, selected);
+}
+
+function persistApiBaseUrl() {
+  const selected = normalizeApiBase(el.apiBaseUrl?.value) || window.location.origin;
+  state.apiBaseUrl = selected;
+  if (el.apiBaseUrl) {
+    el.apiBaseUrl.value = selected;
+  }
+  window.localStorage.setItem(API_BASE_STORAGE_KEY, selected);
+}
 
 function headers() {
   const base = {
@@ -111,7 +158,7 @@ function headers() {
 }
 
 async function api(path, options = {}) {
-  const response = await fetch(path, {
+  const response = await fetch(resolveApiPath(path), {
     method: options.method || 'GET',
     headers: {
       ...headers(),
@@ -127,7 +174,7 @@ async function api(path, options = {}) {
 }
 
 async function apiDownload(path) {
-  const response = await fetch(path, {
+  const response = await fetch(resolveApiPath(path), {
     headers: headers(),
   });
 
@@ -203,7 +250,7 @@ function setConnectStatus(message, tone = 'warn') {
 
 async function loadConnectionStatus() {
   try {
-    const response = await fetch('/api/executive/connect/status');
+    const response = await fetch(resolveApiPath('/api/executive/connect/status'));
     const payload = await response.json();
     const data = payload.data || {};
 
@@ -211,7 +258,7 @@ async function loadConnectionStatus() {
     state.session.remoteReachable = !!data.reachable;
 
     if (!data.configured) {
-      setConnectStatus('Sentinel AI is not configured yet. Set SENTINEL_AI_BASE_URL and restart this app.', 'error');
+      setConnectStatus(`Sentinel AI is not configured on ${state.apiBaseUrl}. Set SENTINEL_AI_BASE_URL on the API server and restart it.`, 'error');
       return;
     }
 
@@ -220,14 +267,15 @@ async function loadConnectionStatus() {
       return;
     }
 
-    setConnectStatus('Sentinel AI is reachable. Sign in to connect this app.', 'ok');
+    setConnectStatus(`Sentinel AI is reachable via ${state.apiBaseUrl}. Sign in to connect this app.`, 'ok');
   } catch {
-    setConnectStatus('Unable to verify Sentinel AI connection right now.', 'error');
+    setConnectStatus(`Unable to verify Sentinel AI at ${state.apiBaseUrl}. Check API URL, CORS, and network.`, 'error');
   }
 }
 
 async function signIn(event) {
   event.preventDefault();
+  persistApiBaseUrl();
   const email = el.signinEmail.value.trim();
   const password = el.signinPassword.value;
 
@@ -240,7 +288,7 @@ async function signIn(event) {
   setConnectStatus('Signing in through Sentinel AI...', 'warn');
 
   try {
-    const response = await fetch('/api/executive/connect/signin', {
+    const response = await fetch(resolveApiPath('/api/executive/connect/signin'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password })
@@ -785,6 +833,10 @@ async function refresh() {
 
 el.refreshButton.addEventListener('click', refresh);
 el.signinForm.addEventListener('submit', signIn);
+el.apiBaseUrl.addEventListener('change', () => {
+  persistApiBaseUrl();
+  loadConnectionStatus();
+});
 el.signOutButton.addEventListener('click', signOut);
 el.principalId.addEventListener('keydown', (event) => {
   if (event.key === 'Enter') refresh();
@@ -859,6 +911,7 @@ el.mobExportBundleButton.addEventListener('click', () => {
 renderCloseoutControls();
 renderMobHistory();
 renderMobPanel();
+loadApiBaseUrl();
 updateAuthShell();
 loadConnectionStatus();
 

@@ -126,6 +126,11 @@ h2 {
   color: var(--muted);
 }
 
+.signin-form input[type="url"] {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 12px;
+}
+
 body.signed-out .desk-shell,
 body.signed-out .principal-strip {
   display: none;
