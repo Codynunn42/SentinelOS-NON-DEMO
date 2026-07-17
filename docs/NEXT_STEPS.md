@@ -36,7 +36,7 @@ Live verification completed on 2026-04-28:
 
 ## Cadence Restart
 
-On 2026-06-30, execution restarts with a daily cadence, weekly closeout, and end-of-month closeout discipline. Use `docs/CADENCE_CLOSEOUT_PLAN_2026-06-30.md` as the operating plan for sequencing next steps and for adding deep dive decision analysis before each meaningful action.
+As of 2026-06-30, execution restarts with a daily cadence, weekly closeout, and end-of-month closeout discipline. Use [CADENCE_CLOSEOUT_PLAN_2026-06-30](CADENCE_CLOSEOUT_PLAN_2026-06-30.md) as the operating plan for sequencing next steps and for adding deep dive decision analysis before each meaningful action.
 
 ## Engineering Next
 
