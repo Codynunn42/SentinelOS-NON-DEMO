@@ -1,0 +1,38 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "MissionIntentEnvelope",
+    "type": "object",
+    "required": [
+        "missionId",
+        "principalId",
+        "requestedAction",
+        "justification",
+        "executionBoundary"
+    ],
+    "properties": {
+        "missionId": {
+            "type": "string",
+            "minLength": 6
+        },
+        "principalId": {
+            "type": "string",
+            "minLength": 3
+        },
+        "requestedAction": {
+            "type": "string",
+            "minLength": 3
+        },
+        "justification": {
+            "type": "string",
+            "minLength": 20
+        },
+        "executionBoundary": {
+            "type": "string",
+            "enum": [
+                "local-only",
+                "intra-perimeter",
+                "external-release-prohibited"
+            ]
+        }
+    }
+}

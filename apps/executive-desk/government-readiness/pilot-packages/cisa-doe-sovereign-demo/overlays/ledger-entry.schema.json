@@ -1,0 +1,50 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "VerificationLedgerEntry",
+    "type": "object",
+    "required": [
+        "id",
+        "timestamp",
+        "actor",
+        "action",
+        "decision",
+        "gate",
+        "signature",
+        "previousSignature"
+    ],
+    "properties": {
+        "id": {
+            "type": "string"
+        },
+        "timestamp": {
+            "type": "string",
+            "format": "date-time"
+        },
+        "actor": {
+            "type": "string"
+        },
+        "action": {
+            "type": "string"
+        },
+        "decision": {
+            "type": "string",
+            "enum": [
+                "issued",
+                "executed",
+                "blocked",
+                "rejected"
+            ]
+        },
+        "gate": {
+            "type": "string"
+        },
+        "signature": {
+            "type": "string",
+            "minLength": 32
+        },
+        "previousSignature": {
+            "type": "string",
+            "minLength": 6
+        }
+    }
+}

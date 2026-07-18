@@ -94,7 +94,7 @@ Turn Sentinel AI + Executive Desk into a revenue-producing business while mainta
 
 ## Pending Gates (Roadmap)
 
-### ⏳ Gate 9: v2 Features (Out of Scope for v1)
+### ⏳ Gate 9: v2 Mission Packages (Out of Scope for v1)
 
 - Write command support (mutations with approval chains)
 - Multi-tier approval workflows

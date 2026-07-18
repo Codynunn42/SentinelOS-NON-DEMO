@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Executive View</title>
+    <link rel="stylesheet" href="./styles.css">
+</head>
+
+<body data-view="executive">
+    <main class="package-shell">
+        <header class="subnav">
+            <a class="back-link" href="./index.html">Package Home</a>
+            <a class="back-link" href="./operator-view.html">Operator View</a>
+        </header>
+
+        <section class="hero-panel compact">
+            <p class="eyebrow">Executive Faceplane</p>
+            <h1>Mission Governance and Workflow Integrity</h1>
+            <p class="hero-copy">This white glove executive faceplane shows how the OS docks to the mission scope,
+                recognizes the job profile, and loads the exact governance boundaries required before action moves
+                forward.</p>
+            <div class="metric-strip" id="executiveMetrics"></div>
+        </section>
+
+        <section class="proof-panel mission-panel">
+            <div>
+                <p class="eyebrow">Docking Scope</p>
+                <h2>Mission Profile and Faceplane Controls</h2>
+            </div>
+            <div id="missionFaceplane" class="faceplane-grid"></div>
+        </section>
+
+        <section class="proof-panel mission-panel">
+            <div>
+                <p class="eyebrow">Accuracy Evidence</p>
+                <h2>Accuracy Scorecard and Validation Posture</h2>
+            </div>
+            <div id="executiveEvidence" class="faceplane-grid"></div>
+        </section>
+
+        <section class="two-up">
+            <article class="stage-panel">
+                <div class="panel-header">
+                    <div>
+                        <p class="eyebrow">Interactive Control Plane</p>
+                        <h2>Mission Workflow Simulation</h2>
+                    </div>
+                    <button class="action-button" id="advanceScenario" type="button">Advance Scenario</button>
+                </div>
+                <div id="scenarioCard" class="scenario-card"></div>
+                <div id="stageTimeline" class="timeline"></div>
+            </article>
+
+            <article class="stage-panel">
+                <div class="panel-header">
+                    <div>
+                        <p class="eyebrow">Strategic Impact</p>
+                        <h2>Decision Integrity Matrix</h2>
+                    </div>
+                </div>
+                <div id="impactMatrix" class="impact-matrix"></div>
+                <div class="callout success">
+                    <strong>White Glove Plug-And-Play Posture</strong>
+                    <p>The package demonstrates governance behavior without external connectivity, preserving sovereign
+                        evaluation conditions while keeping the faceplane simple for each mission owner.</p>
+                </div>
+            </article>
+        </section>
+    </main>
+    <script src="./ledger-data.js"></script>
+    <script src="./scenario-report.js"></script>
+    <script src="./app.js"></script>
+</body>
+
+</html>

@@ -26,7 +26,14 @@ export async function runWeeklyCadence(context: CommandContext): Promise<Command
             buildSection('Government Readiness Report', [
                 'Outcome-first posture maintained across government artifacts.',
                 'GBP implementation expectations remain explicit in governance runbook.',
+                'Government packages must remain zero-dependency and runnable inside customer perimeters.',
                 'No certification/compliance/customer authorization claim is made.',
+            ]),
+            '',
+            buildSection('Sovereign Package Standard', [
+                'Executive view leads with risk, mission governance, and interactive proof.',
+                'Operator view leads with ledger inspection, schemas, policies, and interoperability overlays.',
+                'Interactive control plane, verification ledger, and executable scaffolds are required together.',
             ]),
             '',
             buildSection('Evidence Status Report', [
@@ -40,6 +47,7 @@ export async function runWeeklyCadence(context: CommandContext): Promise<Command
             ]),
             '',
             buildSection('Action Register', [
+                'Package a local-first pilot asset that can run without calling home.',
                 'Refresh government contact follow-up notes.',
                 'Polish pilot one-pager and discovery sequence.',
                 'Close evidence gaps before external outreach claims.',

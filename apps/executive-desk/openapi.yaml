@@ -363,6 +363,21 @@ paths:
                           error:
                             type: string
                             nullable: true
+                      reasoningLens:
+                        type: object
+                        properties:
+                          mode:
+                            type: string
+                          objective:
+                            type: string
+                          priorities:
+                            type: array
+                            items:
+                              type: string
+                          constraints:
+                            type: array
+                            items:
+                              type: string
                       efficiencyPlan:
                         type: object
                         properties:
@@ -463,6 +478,21 @@ paths:
                           error:
                             type: string
                             nullable: true
+                      reasoningLens:
+                        type: object
+                        properties:
+                          mode:
+                            type: string
+                          objective:
+                            type: string
+                          priorities:
+                            type: array
+                            items:
+                              type: string
+                          constraints:
+                            type: array
+                            items:
+                              type: string
                       efficiencyPlan:
                         type: object
                         properties:

@@ -1,0 +1,192 @@
+{
+  "startedAt": "2026-07-18T07:45:13.952Z",
+  "finishedAt": "2026-07-18T07:45:20.036Z",
+  "strictSec001": true,
+  "totals": {
+    "allGates": 8,
+    "implemented": 8,
+    "passedImplemented": 8,
+    "failedImplemented": 0,
+    "notImplemented": 0
+  },
+  "reports": [
+    {
+      "gateId": "SEC-001",
+      "gateName": "Hosted Authentication Enforcement",
+      "objective": "Reject missing/invalid credentials and allow valid credentials.",
+      "method": "pnpm run check:sec-001:strict",
+      "expectedResult": "No key: 401/403, Invalid key: 401/403, Valid key: 200",
+      "observedResult": "passed (exitCode=0, durationMs=1355)",
+      "evidence": {
+        "script": "check:sec-001:strict",
+        "execution": {
+          "status": "passed",
+          "exitCode": 0,
+          "durationMs": 1355,
+          "startedAt": "2026-07-18T07:45:13.955Z",
+          "finishedAt": "2026-07-18T07:45:15.310Z"
+        }
+      },
+      "pass": true,
+      "reviewer": "unassigned",
+      "timestamp": "2026-07-18T07:45:15.312Z",
+      "notes": [
+        "SEC-001 evaluated from artifact pass=true."
+      ]
+    },
+    {
+      "gateId": "GOV-001",
+      "gateName": "Governance Path Execution",
+      "objective": "Verify policy and risk governance execute in the end-to-end control flow.",
+      "method": "pnpm run check:executive-desk:e2e",
+      "expectedResult": "Governed command path executes with authority/risk checks and mutating command blocks.",
+      "observedResult": "passed (exitCode=0, durationMs=1273)",
+      "evidence": {
+        "script": "check:executive-desk:e2e",
+        "execution": {
+          "status": "passed",
+          "exitCode": 0,
+          "durationMs": 1273,
+          "startedAt": "2026-07-18T07:45:15.312Z",
+          "finishedAt": "2026-07-18T07:45:16.585Z"
+        }
+      },
+      "pass": true,
+      "reviewer": "unassigned",
+      "timestamp": "2026-07-18T07:45:16.585Z",
+      "notes": []
+    },
+    {
+      "gateId": "EVD-001",
+      "gateName": "Evidence and Receipt Coverage",
+      "objective": "Verify receipt generation and lookup for governed requests.",
+      "method": "pnpm run check:receipts",
+      "expectedResult": "Executed command produces auditable receipt retrievable by receipt ID.",
+      "observedResult": "passed (exitCode=0, durationMs=442)",
+      "evidence": {
+        "script": "check:receipts",
+        "execution": {
+          "status": "passed",
+          "exitCode": 0,
+          "durationMs": 442,
+          "startedAt": "2026-07-18T07:45:16.585Z",
+          "finishedAt": "2026-07-18T07:45:17.027Z"
+        }
+      },
+      "pass": true,
+      "reviewer": "unassigned",
+      "timestamp": "2026-07-18T07:45:17.027Z",
+      "notes": []
+    },
+    {
+      "gateId": "TEN-001",
+      "gateName": "Tenant Isolation",
+      "objective": "Prove no cross-tenant data or action leakage under concurrent execution.",
+      "method": "pnpm run check:ten-001",
+      "expectedResult": "Cross-tenant access attempts are denied and fully audited.",
+      "observedResult": "passed (exitCode=0, durationMs=467)",
+      "evidence": {
+        "script": "check:ten-001",
+        "execution": {
+          "status": "passed",
+          "exitCode": 0,
+          "durationMs": 467,
+          "startedAt": "2026-07-18T07:45:17.027Z",
+          "finishedAt": "2026-07-18T07:45:17.494Z"
+        }
+      },
+      "pass": true,
+      "reviewer": "unassigned",
+      "timestamp": "2026-07-18T07:45:17.494Z",
+      "notes": []
+    },
+    {
+      "gateId": "PER-001",
+      "gateName": "Performance SLO",
+      "objective": "Verify latency and throughput remain within approved SLO ranges.",
+      "method": "pnpm run check:per-001",
+      "expectedResult": "SLO thresholds hold and governance invariants remain 100 percent.",
+      "observedResult": "passed (exitCode=0, durationMs=905)",
+      "evidence": {
+        "script": "check:per-001",
+        "execution": {
+          "status": "passed",
+          "exitCode": 0,
+          "durationMs": 905,
+          "startedAt": "2026-07-18T07:45:17.494Z",
+          "finishedAt": "2026-07-18T07:45:18.399Z"
+        }
+      },
+      "pass": true,
+      "reviewer": "unassigned",
+      "timestamp": "2026-07-18T07:45:18.399Z",
+      "notes": []
+    },
+    {
+      "gateId": "REC-001",
+      "gateName": "Recovery and Resilience",
+      "objective": "Validate graceful recovery from transient failures and restart scenarios.",
+      "method": "pnpm run check:rec-001",
+      "expectedResult": "System recovers from malformed input and policy blocks, restarts cleanly, and governed execution remains available.",
+      "observedResult": "passed (exitCode=0, durationMs=519)",
+      "evidence": {
+        "script": "check:rec-001",
+        "execution": {
+          "status": "passed",
+          "exitCode": 0,
+          "durationMs": 519,
+          "startedAt": "2026-07-18T07:45:18.399Z",
+          "finishedAt": "2026-07-18T07:45:18.918Z"
+        }
+      },
+      "pass": true,
+      "reviewer": "unassigned",
+      "timestamp": "2026-07-18T07:45:18.918Z",
+      "notes": []
+    },
+    {
+      "gateId": "DRF-001",
+      "gateName": "Governance Drift Control",
+      "objective": "Validate drift governance core baselines, threshold controls, and policy ledger integrity.",
+      "method": "pnpm run check:governance-drift-core",
+      "expectedResult": "Drift monitor emits expected postures and ledger hash chain remains valid under config updates and acknowledgements.",
+      "observedResult": "passed (exitCode=0, durationMs=539)",
+      "evidence": {
+        "script": "check:governance-drift-core",
+        "execution": {
+          "status": "passed",
+          "exitCode": 0,
+          "durationMs": 539,
+          "startedAt": "2026-07-18T07:45:18.918Z",
+          "finishedAt": "2026-07-18T07:45:19.457Z"
+        }
+      },
+      "pass": true,
+      "reviewer": "unassigned",
+      "timestamp": "2026-07-18T07:45:19.457Z",
+      "notes": []
+    },
+    {
+      "gateId": "XE-001",
+      "gateName": "XE Governed Execution",
+      "objective": "Validate target packet, recorded intent, and governed XE execute envelope/audit flow.",
+      "method": "pnpm run check:xe-execute",
+      "expectedResult": "XE execute returns EXECUTED with governed scan/fix/set stage results and auditable execution reference.",
+      "observedResult": "passed (exitCode=0, durationMs=578)",
+      "evidence": {
+        "script": "check:xe-execute",
+        "execution": {
+          "status": "passed",
+          "exitCode": 0,
+          "durationMs": 578,
+          "startedAt": "2026-07-18T07:45:19.457Z",
+          "finishedAt": "2026-07-18T07:45:20.035Z"
+        }
+      },
+      "pass": true,
+      "reviewer": "unassigned",
+      "timestamp": "2026-07-18T07:45:20.035Z",
+      "notes": []
+    }
+  ]
+}

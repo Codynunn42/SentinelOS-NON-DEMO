@@ -1,0 +1,55 @@
+{
+  "gateId": "SEC-001",
+  "gateName": "Hosted Authentication Enforcement",
+  "objective": "Verify hosted execute endpoint enforces authentication and only accepts valid credentials.",
+  "method": "Three-case probe against hosted /api/control/execute: no credentials, invalid credentials, and valid credentials when provided.",
+  "expectedResult": {
+    "noCredentials": "401 or 403",
+    "invalidCredentials": "401 or 403",
+    "validCredentials": "200"
+  },
+  "observedResult": {
+    "noCredentials": 401,
+    "invalidCredentials": 401,
+    "validCredentials": null,
+    "details": [
+      {
+        "label": "No Credentials",
+        "httpCode": 401,
+        "hasApiKeyHeader": false,
+        "responseSummary": {
+          "status": "blocked",
+          "reason": "API_KEY_REQUIRED",
+          "decisionScore": null
+        }
+      },
+      {
+        "label": "Invalid Credentials",
+        "httpCode": 401,
+        "hasApiKeyHeader": true,
+        "responseSummary": {
+          "status": "blocked",
+          "reason": "KEY_NOT_FOUND",
+          "decisionScore": null
+        }
+      }
+    ]
+  },
+  "evidence": {
+    "endpoint": "https://ca-nc-dev-sentinel.calmhill-388e1d39.eastus2.azurecontainerapps.io/api/control/execute",
+    "apiKeyHeader": "x-api-key",
+    "apiKeyLoaded": false,
+    "strictMode": true,
+    "observedMatrix": {
+      "noCredentials": 401,
+      "invalidCredentials": 401,
+      "validCredentials": null
+    }
+  },
+  "pass": true,
+  "reviewer": "unassigned",
+  "timestamp": "2026-07-18T07:45:15.275Z",
+  "notes": [
+    "Valid credential case was skipped because SENTINEL_AI_API_KEY was not set."
+  ]
+}

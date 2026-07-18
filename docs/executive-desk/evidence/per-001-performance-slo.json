@@ -1,0 +1,269 @@
+{
+  "gateId": "PER-001",
+  "gateName": "Performance SLO",
+  "objective": "Verify synthetic department-scale load remains within approved SLO ranges while governance and evidence invariants remain intact.",
+  "method": "Run the faceplane department scenario across 10, 100, and 1000 virtual-operator profiles and validate latency, throughput, checklist, and governance counters.",
+  "expectedResult": {
+    "profiles": [
+      {
+        "label": "scale-10",
+        "virtualOperators": 10,
+        "maxP95MissionMs": 25,
+        "maxP99MissionMs": 50,
+        "minThroughputCommandsPerSecond": 10
+      },
+      {
+        "label": "scale-100",
+        "virtualOperators": 100,
+        "maxP95MissionMs": 50,
+        "maxP99MissionMs": 100,
+        "minThroughputCommandsPerSecond": 100
+      },
+      {
+        "label": "scale-1000",
+        "virtualOperators": 1000,
+        "maxP95MissionMs": 100,
+        "maxP99MissionMs": 200,
+        "minThroughputCommandsPerSecond": 500
+      }
+    ],
+    "governanceInvariants": [
+      "faceplaneCount remains 10",
+      "scenarioCommands equals 10 x commandsPerRun",
+      "loadCommands equals virtualOperators x commandsPerRun",
+      "approvals + blocked does not exceed loadCommands",
+      "required checklist items remain verified"
+    ]
+  },
+  "observedResult": [
+    {
+      "label": "scale-10",
+      "passed": true,
+      "startedAt": "2026-07-18T07:45:17.854Z",
+      "finishedAt": "2026-07-18T07:45:17.972Z",
+      "durationMs": 116,
+      "config": {
+        "virtualOperators": 10,
+        "commandsPerRun": 6,
+        "telemetryActivityCount": 6,
+        "repetitions": 2
+      },
+      "thresholds": {
+        "maxP95MissionMs": 25,
+        "maxP99MissionMs": 50,
+        "minThroughputCommandsPerSecond": 10
+      },
+      "observed": {
+        "faceplaneCount": 10,
+        "scenarioCommands": 60,
+        "loadCommands": 60,
+        "totalApprovals": 43,
+        "totalBlocked": 3,
+        "throughputCommandsPerSecond": 54545.45,
+        "latency": {
+          "p50MissionMs": 0.065,
+          "p95MissionMs": 0.434,
+          "p99MissionMs": 0.434,
+          "p95DockingMs": 0.363
+        },
+        "validationChecklist": [
+          {
+            "label": "Scenario executed successfully",
+            "status": "verified"
+          },
+          {
+            "label": "Receipts generated",
+            "status": "verified"
+          },
+          {
+            "label": "Read-only execution",
+            "status": "verified"
+          },
+          {
+            "label": "Evidence archived",
+            "status": "verified"
+          },
+          {
+            "label": "Independent reproduction completed",
+            "status": "pending"
+          },
+          {
+            "label": "Performance benchmark repeated",
+            "status": "pending"
+          },
+          {
+            "label": "Hardware documented",
+            "status": "verified"
+          },
+          {
+            "label": "Production comparison completed",
+            "status": "pending"
+          },
+          {
+            "label": "Hosted Sentinel AI validation completed",
+            "status": "pending"
+          }
+        ],
+        "reportArtifact": "/Users/codynunn/SentinelOS/SentinelOS-NON-DEMO/SentinelOS-NON-DEMO/apps/executive-desk/government-readiness/pilot-packages/cisa-doe-sovereign-demo/scenario-report.json",
+        "markdownArtifact": "/Users/codynunn/SentinelOS/SentinelOS-NON-DEMO/SentinelOS-NON-DEMO/docs/executive-desk/evidence/2026-07-18T07-45-17.955Z-faceplane-department-scenario.md"
+      },
+      "issues": []
+    },
+    {
+      "label": "scale-100",
+      "passed": true,
+      "startedAt": "2026-07-18T07:45:17.972Z",
+      "finishedAt": "2026-07-18T07:45:18.106Z",
+      "durationMs": 132,
+      "config": {
+        "virtualOperators": 100,
+        "commandsPerRun": 6,
+        "telemetryActivityCount": 6,
+        "repetitions": 2
+      },
+      "thresholds": {
+        "maxP95MissionMs": 50,
+        "maxP99MissionMs": 100,
+        "minThroughputCommandsPerSecond": 100
+      },
+      "observed": {
+        "faceplaneCount": 10,
+        "scenarioCommands": 60,
+        "loadCommands": 600,
+        "totalApprovals": 366,
+        "totalBlocked": 67,
+        "throughputCommandsPerSecond": 72481.28,
+        "latency": {
+          "p50MissionMs": 0.054,
+          "p95MissionMs": 0.198,
+          "p99MissionMs": 0.314,
+          "p95DockingMs": 0.128
+        },
+        "validationChecklist": [
+          {
+            "label": "Scenario executed successfully",
+            "status": "verified"
+          },
+          {
+            "label": "Receipts generated",
+            "status": "verified"
+          },
+          {
+            "label": "Read-only execution",
+            "status": "verified"
+          },
+          {
+            "label": "Evidence archived",
+            "status": "verified"
+          },
+          {
+            "label": "Independent reproduction completed",
+            "status": "pending"
+          },
+          {
+            "label": "Performance benchmark repeated",
+            "status": "pending"
+          },
+          {
+            "label": "Hardware documented",
+            "status": "verified"
+          },
+          {
+            "label": "Production comparison completed",
+            "status": "pending"
+          },
+          {
+            "label": "Hosted Sentinel AI validation completed",
+            "status": "pending"
+          }
+        ],
+        "reportArtifact": "/Users/codynunn/SentinelOS/SentinelOS-NON-DEMO/SentinelOS-NON-DEMO/apps/executive-desk/government-readiness/pilot-packages/cisa-doe-sovereign-demo/scenario-report.json",
+        "markdownArtifact": "/Users/codynunn/SentinelOS/SentinelOS-NON-DEMO/SentinelOS-NON-DEMO/docs/executive-desk/evidence/2026-07-18T07-45-18.090Z-faceplane-department-scenario.md"
+      },
+      "issues": []
+    },
+    {
+      "label": "scale-1000",
+      "passed": true,
+      "startedAt": "2026-07-18T07:45:18.106Z",
+      "finishedAt": "2026-07-18T07:45:18.368Z",
+      "durationMs": 261,
+      "config": {
+        "virtualOperators": 1000,
+        "commandsPerRun": 6,
+        "telemetryActivityCount": 6,
+        "repetitions": 2
+      },
+      "thresholds": {
+        "maxP95MissionMs": 100,
+        "maxP99MissionMs": 200,
+        "minThroughputCommandsPerSecond": 500
+      },
+      "observed": {
+        "faceplaneCount": 10,
+        "scenarioCommands": 60,
+        "loadCommands": 6000,
+        "totalApprovals": 3750,
+        "totalBlocked": 719,
+        "throughputCommandsPerSecond": 111160.52,
+        "latency": {
+          "p50MissionMs": 0.04,
+          "p95MissionMs": 0.088,
+          "p99MissionMs": 0.284,
+          "p95DockingMs": 0.035
+        },
+        "validationChecklist": [
+          {
+            "label": "Scenario executed successfully",
+            "status": "verified"
+          },
+          {
+            "label": "Receipts generated",
+            "status": "verified"
+          },
+          {
+            "label": "Read-only execution",
+            "status": "verified"
+          },
+          {
+            "label": "Evidence archived",
+            "status": "verified"
+          },
+          {
+            "label": "Independent reproduction completed",
+            "status": "pending"
+          },
+          {
+            "label": "Performance benchmark repeated",
+            "status": "pending"
+          },
+          {
+            "label": "Hardware documented",
+            "status": "verified"
+          },
+          {
+            "label": "Production comparison completed",
+            "status": "pending"
+          },
+          {
+            "label": "Hosted Sentinel AI validation completed",
+            "status": "pending"
+          }
+        ],
+        "reportArtifact": "/Users/codynunn/SentinelOS/SentinelOS-NON-DEMO/SentinelOS-NON-DEMO/apps/executive-desk/government-readiness/pilot-packages/cisa-doe-sovereign-demo/scenario-report.json",
+        "markdownArtifact": "/Users/codynunn/SentinelOS/SentinelOS-NON-DEMO/SentinelOS-NON-DEMO/docs/executive-desk/evidence/2026-07-18T07-45-18.354Z-faceplane-department-scenario.md"
+      },
+      "issues": []
+    }
+  ],
+  "evidence": {
+    "scenarioScript": "scripts/run-faceplane-department-scenario.js",
+    "profileCount": 3
+  },
+  "pass": true,
+  "reviewer": "unassigned",
+  "timestamp": "2026-07-18T07:45:18.369Z",
+  "notes": [
+    "PER-001 is synthetic and single-process; it does not substitute for hosted or distributed production performance validation."
+  ]
+}

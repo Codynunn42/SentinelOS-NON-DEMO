@@ -16,6 +16,7 @@ app.listen(PORT, HOST, () => {
     console.log('Available endpoints:');
     console.log('  GET  /health                              — Health check (no auth)');
     console.log('  GET  /executive                           — Read-only cockpit');
+    console.log('  GET  /executive/sovereign-demo            — White glove sovereign evaluation package');
     console.log('  GET  /api/executive/connect/status        — Sentinel AI connectivity status (no auth)');
     console.log('  POST /api/executive/connect/signin        — Sentinel AI sign-in handshake (no auth)');
     console.log('  POST /proxy/command                       — Governed read-only command proxy');

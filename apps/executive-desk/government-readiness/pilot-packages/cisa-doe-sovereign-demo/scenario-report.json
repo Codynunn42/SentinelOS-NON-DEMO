@@ -1,0 +1,120 @@
+{
+  "generatedAt": "2026-07-18T07:45:18.351Z",
+  "reasoningLens": {
+    "mode": "quantitative_accuracy",
+    "objective": "Favor accurate mission fit, repeatable evidence, and quantified reasoning over raw throughput headlines."
+  },
+  "accuracyScorecard": {
+    "objective": "Accuracy of mission docking, governance fit, and evidence posture.",
+    "missionFitCoverage": "10/10 faceplanes validated by SDK manifest checks",
+    "governancePosture": "9 approval-gated faceplanes, 1 read-only faceplanes",
+    "evidenceCompleteness": "5/9 checklist items verified",
+    "hostedValidation": "pending",
+    "note": "Accuracy is currently demonstrated through synthetic SDK-backed docking evidence, not hosted end-to-end execution."
+  },
+  "verifiedEvidence": [
+    "Ten synthetic faceplane profiles were docked through the faceplane SDK.",
+    "Scenario execution completed and archived JSON and Markdown evidence artifacts.",
+    "The run remained read-only and synthetic with no privileged execution path opened.",
+    "Latency and throughput figures were measured from a single local process on the documented host."
+  ],
+  "proposedEvidence": [
+    "Hosted Sentinel AI should be configured and measured separately for scan-driven optimization.",
+    "Performance claims should not be treated as production or distributed-system evidence until independently reproduced.",
+    "Department-scale load figures should be compared against a live backend and durable persistence path before external use."
+  ],
+  "validationChecklist": [
+    {
+      "label": "Scenario executed successfully",
+      "status": "verified"
+    },
+    {
+      "label": "Receipts generated",
+      "status": "verified"
+    },
+    {
+      "label": "Read-only execution",
+      "status": "verified"
+    },
+    {
+      "label": "Evidence archived",
+      "status": "verified"
+    },
+    {
+      "label": "Independent reproduction completed",
+      "status": "pending"
+    },
+    {
+      "label": "Performance benchmark repeated",
+      "status": "pending"
+    },
+    {
+      "label": "Hardware documented",
+      "status": "verified"
+    },
+    {
+      "label": "Production comparison completed",
+      "status": "pending"
+    },
+    {
+      "label": "Hosted Sentinel AI validation completed",
+      "status": "pending"
+    }
+  ],
+  "methodology": {
+    "scenarioType": "synthetic_sdk_backed_faceplane_simulation",
+    "commandsPerRun": 6,
+    "virtualOperators": 1000,
+    "repetitions": 2
+  },
+  "repeatability": {
+    "repetitions": 2,
+    "scenarioP95MissionMs": {
+      "min": 0.034,
+      "max": 0.066,
+      "average": 0.05
+    },
+    "loadP95MissionMs": {
+      "min": 0.04,
+      "max": 0.05,
+      "average": 0.045
+    },
+    "throughputCommandsPerSecond": {
+      "min": 137763.19,
+      "max": 156604.81,
+      "average": 147184
+    }
+  },
+  "environment": {
+    "host": "Codys-MacBook-Air.local",
+    "platform": "darwin 25.4.0",
+    "arch": "arm64",
+    "cpuModel": "Apple M1",
+    "logicalCpuCount": 8,
+    "totalMemoryBytes": 8589934592,
+    "nodeVersion": "v20.19.6",
+    "executionMode": "single_process_local_synthetic_simulation"
+  },
+  "scenarioSummary": {
+    "faceplanes": 10,
+    "commands": 60,
+    "approvals": 35,
+    "blocked": 5,
+    "averageMissionMs": 0.434,
+    "p95MissionMs": 2.624
+  },
+  "reproductionRecipe": {
+    "prerequisites": [
+      "Node.js 20+",
+      "Repository checked out locally",
+      "Read-only execution posture maintained",
+      "No hosted Sentinel AI dependency required for the synthetic run"
+    ],
+    "command": "node scripts/run-faceplane-department-scenario.js --commandsPerRun=6 --telemetryActivityCount=6 --virtualOperators=1000 --repetitions=2",
+    "notes": [
+      "Run from the repository root.",
+      "Repeat the scenario multiple times and compare the variance section rather than quoting a single result.",
+      "Treat all results as synthetic until compared against a hosted or durable backend path."
+    ]
+  }
+}

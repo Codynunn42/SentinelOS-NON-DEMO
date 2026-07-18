@@ -94,3 +94,37 @@ Read-only `/proxy/command` endpoint handler for Executive Desk v1.
 2. Import `openapi.yaml` into Custom GPT Actions
 3. Test end-to-end with sample GPT query
 4. Add authentication (Bearer token or OIDC)
+
+## SentinelOS Command Invocation
+
+The proxy v1 command scope above remains unchanged. For Sentinel tenant command routing, use the same envelope format with `tenant: "sentinelos"` and a Sentinel command id.
+
+### Bridge Gaps Report (Read-Only)
+
+```json
+{
+  "tenant": "sentinelos",
+  "command": "governance.bridgegaps.report",
+  "payload": {
+    "principalId": "user@example.com",
+    "mode": "doctor",
+    "source": "docs/executive-desk/evidence/2026-07-18-gbp-gate-traceability-report.md"
+  }
+}
+```
+
+### Expected Result Shape
+
+- `result.command` is `governance.bridgegaps.report`
+- `result.northStarAssessment.status` is one of `aligned | partial | not_aligned`
+- `result.doctrineAssessment.coverage` and `result.doctrineAssessment.unmappedRequirements` are always present
+- `result.bridgeGapSummary` includes `critical`, `high`, `medium`, and `low`
+- `result.doctorMode` includes `diagnosis`, `blockingConditions`, and `recommendedFixes`
+- `result.lightMode` includes ordered `nextSteps`, `dependencies`, and `expectedOutcomes`
+- `result.fixAndSet` includes `eligible` and `blockedBy`
+- `result.receipt` includes `id`, `timestamp`, and `audit`
+
+### Notes
+
+- This command is read-only and does not mutate runtime, deployment, or Azure state.
+- Policy scope requirement is `platform:admin`.

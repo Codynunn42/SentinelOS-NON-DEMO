@@ -44,8 +44,15 @@ export async function runDailyCadence(context: CommandContext): Promise<CommandE
             '',
             buildSection('Active Priorities', [
                 'GBP mission package execution quality and craftsmanship.',
+                'Sovereign pilot package design with zero-dependency local execution.',
                 'Government relationship building and readiness evidence.',
                 'Runtime verification for Sentinel AI and Executive Desk command path.',
+            ]),
+            '',
+            buildSection('Government Package Standard', [
+                'Deliver a dual-front-door package for executives and operators.',
+                'Keep the demonstration self-contained with no external cloud dependency.',
+                'Show the interactive control plane, verification ledger, and executable overlay scaffolds together.',
             ]),
             '',
             buildSection('Governance Exceptions', [
@@ -85,6 +92,7 @@ export async function runDailyCadence(context: CommandContext): Promise<CommandE
             renderSentinelCompletionMarkdown(completion),
             '',
             buildSection('Executive Notes and Decisions Required', [
+                'Confirm sovereign package standard for CISA/DOE-facing pilot materials.',
                 'Confirm GBP top-5 ready and top-5 focus remain current.',
                 'Approve next government relationship-building sequence and follow-up list.',
             ]),

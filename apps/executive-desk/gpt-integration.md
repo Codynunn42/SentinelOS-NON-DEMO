@@ -2,6 +2,17 @@
 
 This guide defines how to configure the GPT safely for SentinelOS.
 
+## Board-Level Entry Point
+
+Mission first. Technology second.
+
+Before configuring GPT action surfaces, leadership and governance reviewers should start with the Phase 6 board package:
+
+- `government-readiness/BOARD_INDEX.md`
+- `government-readiness/governance/GBP_PHASE_6_OPERATIONAL_DOCTRINE.md`
+
+This keeps GPT integration decisions aligned with mission package governance, ORL posture, and certification evidence boundaries.
+
 It follows the staged rollout:
 
 1. Stage 1: public concierge (no backend actions)

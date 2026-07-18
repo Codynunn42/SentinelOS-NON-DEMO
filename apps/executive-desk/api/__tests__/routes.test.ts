@@ -94,6 +94,29 @@ describe('Executive Desk API Routes', () => {
             assert(res.text.includes('.panel-grid'));
             assert(res.text.includes('grid-template-columns'));
         });
+
+        it('should serve the sovereign demo landing page', async () => {
+            const res = await request(app).get('/executive/sovereign-demo');
+
+            assert.strictEqual(res.status, 302);
+            assert.strictEqual(res.headers.location, '/executive/sovereign-demo/');
+        });
+
+        it('should serve the sovereign demo landing page on the canonical route', async () => {
+            const res = await request(app).get('/executive/sovereign-demo/');
+
+            assert.strictEqual(res.status, 200);
+            assert(res.text.includes('Sovereign Pilot Package'));
+            assert(res.text.includes('White Glove'));
+        });
+
+        it('should serve sovereign demo assets', async () => {
+            const res = await request(app).get('/executive/sovereign-demo/app.js');
+
+            assert.strictEqual(res.status, 200);
+            assert(res.text.includes('PACKAGE_DATA'));
+            assert(res.text.includes('__SOVEREIGN_LEDGER__'));
+        });
     });
 
     describe('Proxy Command E2E Surface', () => {

@@ -51,6 +51,7 @@ const commandScopes = {
   'architecture.reconstruction.begin': 'platform:admin',
   'governance.canonicalize.platform': 'platform:admin',
   'governance.nextsteps.quantitative.light': 'platform:admin',
+  'governance.bridgegaps.report': 'platform:admin',
   'operational.upgrade.assess': 'platform:admin',
   'operational.upgrade.plan.prepare': 'platform:admin',
   'contract.reclamation.assess': 'platform:admin',

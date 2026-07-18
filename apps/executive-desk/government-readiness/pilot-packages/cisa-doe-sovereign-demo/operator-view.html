@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Operator View</title>
+    <link rel="stylesheet" href="./styles.css">
+</head>
+
+<body data-view="operator">
+    <main class="package-shell">
+        <header class="subnav">
+            <a class="back-link" href="./index.html">Package Home</a>
+            <a class="back-link" href="./executive-view.html">Executive View</a>
+        </header>
+
+        <section class="hero-panel compact">
+            <p class="eyebrow">Operator Faceplane</p>
+            <h1>Verification Ledger and Overlay Scaffolds</h1>
+            <p class="hero-copy">Inspect the signed action chain, mission-scope docking controls, governance
+                checkpoints, and portable scaffolds intended for a white glove plug-and-play engineering validation
+                path.</p>
+            <div class="metric-strip" id="operatorMetrics"></div>
+        </section>
+
+        <section class="proof-panel mission-panel">
+            <div>
+                <p class="eyebrow">Docked Job Surface</p>
+                <h2>Job-Specific Controls and Compliance Measures</h2>
+            </div>
+            <div id="missionControls" class="faceplane-grid"></div>
+        </section>
+
+        <section class="proof-panel mission-panel">
+            <div>
+                <p class="eyebrow">Accuracy Evidence</p>
+                <h2>Verified vs Proposed Validation</h2>
+            </div>
+            <div id="evidencePosture" class="faceplane-grid"></div>
+            <div id="validationChecklist" class="checklist-grid"></div>
+        </section>
+
+        <section class="two-up">
+            <article class="stage-panel">
+                <div class="panel-header">
+                    <div>
+                        <p class="eyebrow">Truth-Time Verification</p>
+                        <h2>Signed Ledger Chain</h2>
+                    </div>
+                </div>
+                <div id="ledgerChain" class="ledger-chain"></div>
+            </article>
+
+            <article class="stage-panel">
+                <div class="panel-header">
+                    <div>
+                        <p class="eyebrow">Overlay Scaffolds</p>
+                        <h2>Portable Engineering Artifacts</h2>
+                    </div>
+                </div>
+                <div id="overlayList" class="overlay-list"></div>
+            </article>
+        </section>
+
+        <section class="stage-panel">
+            <div class="panel-header">
+                <div>
+                    <p class="eyebrow">Overlay Preview</p>
+                    <h2>Selected Scaffold</h2>
+                </div>
+            </div>
+            <div id="overlayPreview" class="code-preview"></div>
+        </section>
+    </main>
+    <script src="./ledger-data.js"></script>
+    <script src="./scenario-report.js"></script>
+    <script src="./app.js"></script>
+</body>
+
+</html>

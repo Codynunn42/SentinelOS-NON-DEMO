@@ -29,6 +29,12 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const publicDir = path.join(__dirname, '..', 'public');
 const executiveDeskRoot = path.join(__dirname, '..');
+const sovereignDemoDir = path.join(
+    executiveDeskRoot,
+    'government-readiness',
+    'pilot-packages',
+    'cisa-doe-sovereign-demo',
+);
 
 const SENTINEL_AI_REMOTE_HEALTH_PATH = String(process.env.SENTINEL_AI_HEALTH_PATH || '/health').trim();
 const SENTINEL_AI_REMOTE_SCAN_PATH = String(process.env.SENTINEL_AI_SCAN_PATH || '/scan').trim();
@@ -40,6 +46,8 @@ type SentinelAiConnectionConfig = {
     scanPath: string;
     signInPath: string;
     bearerToken: string;
+    apiKey: string;
+    apiKeyHeader: string;
     timeoutMs: number;
 };
 
@@ -68,6 +76,13 @@ type SentinelAiEfficiencyPlan = {
     greenMode: string[];
 };
 
+type SentinelAiReasoningLens = {
+    mode: string;
+    objective: string;
+    priorities: string[];
+    constraints: string[];
+};
+
 type SentinelAiRemoteProbe = {
     configured: boolean;
     reachable: boolean;
@@ -82,6 +97,7 @@ type SentinelAiScanResponse = {
     generatedAt: string;
     currentPosture: string;
     remote: SentinelAiRemoteProbe;
+    reasoningLens: SentinelAiReasoningLens;
     localSignals: SentinelAiScanSection[];
     efficiencyPlan: SentinelAiEfficiencyPlan;
     readyToGo: string[];
@@ -114,11 +130,31 @@ function getExpectedProxyToken(): string {
     return String(token || '').trim();
 }
 
+function buildReasoningLens(): SentinelAiReasoningLens {
+    const mode = String(process.env.SENTINEL_AI_REASONING_LENS || 'quantitative_accuracy').trim() || 'quantitative_accuracy';
+
+    return {
+        mode,
+        objective: 'Optimize for accuracy, traceable problem solving, and defensible evidence before speed or headline throughput.',
+        priorities: [
+            'Quantify problem decomposition and mission-scope fit before recommending action.',
+            'Separate verified evidence from proposed next steps in every decision artifact.',
+            'Prefer repeatability, variance tracking, and reproducibility over one-off benchmark claims.',
+            'Use latency metrics to detect risk to accuracy and operator trust, not as standalone success criteria.'
+        ],
+        constraints: [
+            'No privileged execution should open without governance, receipts, and explicit approval boundaries.',
+            'Synthetic results must be labeled synthetic until independently reproduced or compared with hosted execution.',
+            'Hosted Sentinel AI optimization remains gated until SENTINEL_AI_BASE_URL and auth controls are configured.'
+        ],
+    };
+}
+
 function getSentinelAiConnectionConfig(): SentinelAiConnectionConfig {
     const baseUrl = String(process.env.SENTINEL_AI_BASE_URL || '').trim();
-    const bearerToken = String(
-        process.env.SENTINEL_AI_BEARER_TOKEN || process.env.SENTINEL_AI_API_KEY || '',
-    ).trim();
+    const bearerToken = String(process.env.SENTINEL_AI_BEARER_TOKEN || '').trim();
+    const apiKey = String(process.env.SENTINEL_AI_API_KEY || '').trim();
+    const apiKeyHeader = String(process.env.SENTINEL_AI_API_KEY_HEADER || 'x-api-key').trim() || 'x-api-key';
     const timeoutMs = Number.parseInt(String(process.env.SENTINEL_AI_TIMEOUT_MS || '5000'), 10);
 
     return {
@@ -127,8 +163,24 @@ function getSentinelAiConnectionConfig(): SentinelAiConnectionConfig {
         scanPath: SENTINEL_AI_REMOTE_SCAN_PATH,
         signInPath: SENTINEL_AI_REMOTE_SIGNIN_PATH,
         bearerToken,
+        apiKey,
+        apiKeyHeader,
         timeoutMs: Number.isFinite(timeoutMs) && timeoutMs > 0 ? timeoutMs : 5000,
     };
+}
+
+function buildRemoteAuthHeaders(config: SentinelAiConnectionConfig): Record<string, string> {
+    const headers: Record<string, string> = {};
+
+    if (config.bearerToken) {
+        headers.authorization = `Bearer ${config.bearerToken}`;
+    }
+
+    if (config.apiKey) {
+        headers[config.apiKeyHeader] = config.apiKey;
+    }
+
+    return headers;
 }
 
 function joinRemoteUrl(baseUrl: string, endpointPath: string): string {
@@ -164,7 +216,7 @@ async function signInWithSentinelAi(email: string, password: string): Promise<Si
             method: 'POST',
             headers: {
                 'content-type': 'application/json',
-                ...(config.bearerToken ? { authorization: `Bearer ${config.bearerToken}` } : {}),
+                ...buildRemoteAuthHeaders(config),
             },
             body: JSON.stringify({ email, password, client: 'executive-desk' }),
             signal: controller.signal,
@@ -391,7 +443,7 @@ async function probeRemoteSentinelAi(): Promise<SentinelAiRemoteProbe> {
     try {
         const response = await fetch(healthUrl, {
             method: 'GET',
-            headers: config.bearerToken ? { authorization: `Bearer ${config.bearerToken}` } : undefined,
+            headers: buildRemoteAuthHeaders(config),
             signal: controller.signal,
         });
 
@@ -461,6 +513,7 @@ async function buildSentinelAiScanResponse(focusHint: string = ''): Promise<Sent
         currentPosture:
             'Executive Desk is ready for a hosted Sentinel AI connection, but the local repository still needs production auth, durable receipts, and gateway hardening before privileged execution should open.',
         remote,
+        reasoningLens: buildReasoningLens(),
         localSignals: sections,
         efficiencyPlan: buildEfficiencyPlan(),
         readyToGo,
@@ -647,6 +700,15 @@ export function mountApiRoutes(app: Express): void {
     app.get('/executive', (_req: Request, res: Response) => {
         res.sendFile(path.join(publicDir, 'index.html'));
     });
+    app.get('/executive/sovereign-demo', (req: Request, res: Response) => {
+        if (req.originalUrl.endsWith('/')) {
+            res.sendFile(path.join(sovereignDemoDir, 'index.html'));
+            return;
+        }
+
+        res.redirect(302, '/executive/sovereign-demo/');
+    });
+    app.use('/executive/sovereign-demo', express.static(sovereignDemoDir));
     app.use('/executive', express.static(publicDir));
 
     app.get('/api/executive/connect/status', async (_req: Request, res: Response, next: NextFunction) => {

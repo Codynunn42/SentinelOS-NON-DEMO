@@ -1,0 +1,25 @@
+<policies>
+    <inbound>
+        <base />
+        <set-variable name="execution-boundary"
+            value="@(context.Request.Headers.GetValueOrDefault(&quot;x-execution-boundary&quot;, &quot;external-release-prohibited&quot;))" />
+        <choose>
+            <when
+                condition="@(context.Variables.GetValueOrDefault<string>(&quot;execution-boundary&quot;) != &quot;local-only&quot;)">
+                <return-response>
+                    <set-status code="403" reason="Blocked by sovereign package policy" />
+                    <set-body>{"error":"external_release_not_authorized"}</set-body>
+                </return-response>
+            </when>
+        </choose>
+    </inbound>
+    <backend>
+        <base />
+    </backend>
+    <outbound>
+        <base />
+    </outbound>
+    <on-error>
+        <base />
+    </on-error>
+</policies>

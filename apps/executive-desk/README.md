@@ -1,5 +1,15 @@
 # Executive Desk (apps/executive-desk)
 
+Mission first. Technology second.
+
+Leadership Fast Path
+
+1. Board index: [government-readiness/BOARD_INDEX.md](government-readiness/BOARD_INDEX.md)
+2. Phase 6 doctrine: [government-readiness/governance/GBP_PHASE_6_OPERATIONAL_DOCTRINE.md](government-readiness/governance/GBP_PHASE_6_OPERATIONAL_DOCTRINE.md)
+3. Mission package framework: [government-readiness/governance/GBP_PHASE_6_MISSION_PACKAGE_TEMPLATE_CISA_GOVERNANCE_OVERLAY.md](government-readiness/governance/GBP_PHASE_6_MISSION_PACKAGE_TEMPLATE_CISA_GOVERNANCE_OVERLAY.md)
+4. ORL scorecard: [government-readiness/governance/GBP_PHASE_6_ORL_ASSESSMENT_SCORECARD_TEMPLATE.md](government-readiness/governance/GBP_PHASE_6_ORL_ASSESSMENT_SCORECARD_TEMPLATE.md)
+5. Promotion policy: [government-readiness/governance/CERTIFICATION_PROMOTION_POLICY.md](government-readiness/governance/CERTIFICATION_PROMOTION_POLICY.md)
+
 This folder contains scaffolding and specs for Executive Desk v1 — a SentinelOS-powered executive UI focused on governed action: Briefing → Decision → Authority Check → Risk Gate → Command → Receipt → Report.
 
 Executive Priority
@@ -23,6 +33,7 @@ Documentation
 
 Government Readiness (Executive Artifacts)
 
+- `government-readiness/BOARD_INDEX.md`: board-facing entry point for Phase 6 review
 - `GOVERNMENT_READINESS_DAILY_CADENCE_2026-07-14.md`: daily mission cadence and end-of-day success criteria
 - `government-readiness/README.md`: Government Readiness Library overview and usage
 - `government-readiness/DOE/EXECUTIVE_INTRODUCTION_ONE_PAGER.md`: executive introduction for government outreach
@@ -66,17 +77,18 @@ Implementation Status
 Quick Start
 
 1. **Understand the design:** [docs/EXECUTIVE_DESK_V1.md](../docs/EXECUTIVE_DESK_V1.md)
-2. **Review panel specs:** [panels.md](panels.md)
-3. **Check proxy implementation status:** [PROXY_IMPLEMENTATION_COMPLETE.md](PROXY_IMPLEMENTATION_COMPLETE.md)
-4. **Run proxy harness:** `pnpm run check:executive-desk:proxy`
-5. **Run API route suite:** `pnpm run check:executive-desk:api`
-6. **Run TypeScript check:** `pnpm run check:executive-desk:types`
-7. **Run frontend smoke:** `pnpm run check:executive-desk:frontend`
-8. **Run E2E demo smoke:** `pnpm run check:executive-desk:e2e`
-9. **Start API server:** `API_HOST=127.0.0.1 API_PORT=3137 pnpm exec tsx apps/executive-desk/server.ts`
-10. **Probe Sentinel AI status:** `curl -H 'X-Principal-Id: user@example.com' http://127.0.0.1:3137/api/executive/sentinel-ai/status`
-11. **Run Sentinel AI scan:** `curl -X POST -H 'X-Principal-Id: user@example.com' -H 'Content-Type: application/json' -d '{"focus":"hardening"}' http://127.0.0.1:3137/api/executive/sentinel-ai/scan`
-12. **Open cockpit:** `http://127.0.0.1:3137/executive`
+2. **Review board index:** [government-readiness/BOARD_INDEX.md](government-readiness/BOARD_INDEX.md)
+3. **Review panel specs:** [panels.md](panels.md)
+4. **Check proxy implementation status:** [PROXY_IMPLEMENTATION_COMPLETE.md](PROXY_IMPLEMENTATION_COMPLETE.md)
+5. **Run proxy harness:** `pnpm run check:executive-desk:proxy`
+6. **Run API route suite:** `pnpm run check:executive-desk:api`
+7. **Run TypeScript check:** `pnpm run check:executive-desk:types`
+8. **Run frontend smoke:** `pnpm run check:executive-desk:frontend`
+9. **Run E2E demo smoke:** `pnpm run check:executive-desk:e2e`
+10. **Start API server:** `API_HOST=127.0.0.1 API_PORT=3137 pnpm exec tsx apps/executive-desk/server.ts`
+11. **Probe Sentinel AI status:** `curl -H 'X-Principal-Id: user@example.com' http://127.0.0.1:3137/api/executive/sentinel-ai/status`
+12. **Run Sentinel AI scan:** `curl -X POST -H 'X-Principal-Id: user@example.com' -H 'Content-Type: application/json' -d '{"focus":"hardening"}' http://127.0.0.1:3137/api/executive/sentinel-ai/scan`
+13. **Open cockpit:** `http://127.0.0.1:3137/executive`
 
 Production proxy auth
 
@@ -89,8 +101,11 @@ Sentinel AI remote connector
 
 - Set `SENTINEL_AI_BASE_URL` to the hosted Sentinel AI endpoint.
 - Optionally set `SENTINEL_AI_HEALTH_PATH` and `SENTINEL_AI_SCAN_PATH` if the remote paths differ from `/health` and `/scan`.
-- Set `SENTINEL_AI_BEARER_TOKEN` or `SENTINEL_AI_API_KEY` when the hosted service requires authentication.
+- Set `SENTINEL_AI_BEARER_TOKEN` when the hosted service expects Authorization bearer auth.
+- Set `SENTINEL_AI_API_KEY` when the hosted service expects API-key auth.
+- Set `SENTINEL_AI_API_KEY_HEADER` to override the API-key header name (defaults to `x-api-key`).
 - Set `SENTINEL_AI_TIMEOUT_MS` to tune the probe timeout for slower gateways.
+- Set `SENTINEL_AI_REASONING_LENS=quantitative_accuracy` to keep Sentinel AI optimized for accuracy, traceable reasoning, and defensible evidence over raw speed claims.
 - Use `GET /api/executive/sentinel-ai/status` to confirm reachability before scan-driven course setting.
 - Use `POST /api/executive/sentinel-ai/scan` to synthesize the current hardening, cost-reduction, and green-energy course from local and remote signals.
 

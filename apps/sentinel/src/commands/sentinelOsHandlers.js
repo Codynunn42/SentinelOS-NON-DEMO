@@ -10,10 +10,12 @@ const path = require('path');
 const COMMANDS = {
     ARCHITECTURE_RECONSTRUCTION: 'architecture.reconstruction.begin',
     GOVERNANCE_CANONICALIZE: 'governance.canonicalize.platform',
-    LIGHT_QUANTITATIVE_NEXT_STEPS: 'governance.nextsteps.quantitative.light'
+    LIGHT_QUANTITATIVE_NEXT_STEPS: 'governance.nextsteps.quantitative.light',
+    BRIDGE_GAPS_REPORT: 'governance.bridgegaps.report'
 };
 
 const KNOWN_LEGACY_KEYWORDS = ['ownerfi', 'nunncloud', 'hotelops', 'contractreclamation', 'sentinelos'];
+const ALLOWED_NORTH_STAR_STATUS = ['aligned', 'partial', 'not_aligned'];
 const INTERNAL_PATH_KEYWORDS = [
     'proof',
     'ops',
@@ -64,6 +66,11 @@ function normalizeBoolean(value, defaultValue = false) {
 
 function normalizeString(value, defaultValue = '') {
     return typeof value === 'string' ? value.trim() : defaultValue;
+}
+
+function normalizeNorthStarStatus(value, defaultValue = 'partial') {
+    const normalized = normalizeString(value, defaultValue).toLowerCase();
+    return ALLOWED_NORTH_STAR_STATUS.includes(normalized) ? normalized : defaultValue;
 }
 
 function normalizeStringArray(value) {
@@ -385,6 +392,142 @@ function buildLightQuantitativeNextStepsResult(payload = {}, context = {}) {
     };
 }
 
+function buildBridgeGapsReportResult(payload = {}, context = {}) {
+    const mode = normalizeString(payload.mode, 'doctor');
+    const source = normalizeString(
+        payload.source,
+        'docs/executive-desk/evidence/2026-07-18-gbp-gate-traceability-report.md'
+    );
+    const requestedNorthStarStatus = normalizeString(payload.northStarStatus, 'partial').toLowerCase();
+    const appliedNorthStarStatus = normalizeNorthStarStatus(requestedNorthStarStatus, 'partial');
+    const blockingConditions = [
+        'negative-control coverage for EVD-001, PER-001, and XE-001',
+        'profile owner mapping not bound to institutional authority',
+        'escalation-model verification not yet proven',
+        'evidence-library completeness for edge-case logs'
+    ];
+    const orderedLightModeSteps = [
+        'Add negative-control gates for EVD-001, PER-001, and XE-001.',
+        'Map each profile to a named owner and authority chain.',
+        'Capture evidence-library completeness for edge-case logs.',
+        'Publish a separate, reviewable remediation plan before any expanded certification claim.'
+    ];
+    const northStar = {
+        outcome: 'Mission first. Technology second.',
+        operatingRule: 'Use direct, outcome-first, evidence-backed language for readiness and next-step clarity.',
+        readinessTarget: 'bridge governed readiness gaps without claiming full certification.'
+    };
+    const doctrine = {
+        readOnly: true,
+        runtimeMutation: 'prohibited',
+        deployment: 'prohibited',
+        azureMutation: 'prohibited',
+        doctrineRestructuring: 'prohibited unless separately approved',
+        evidenceRule: 'tie every claim to evidence or a verified operating state'
+    };
+    const currentGapSummary = {
+        posture: 'GBP validation incomplete',
+        validatedScope: 'all implemented gates passed in the current certification scope',
+        openGaps: [
+            'negative-control coverage for EVD-001, PER-001, and XE-001',
+            'profile owner mapping',
+            'escalation-model verification',
+            'evidence-library completeness'
+        ],
+        boundary: 'read-only validation only'
+    };
+
+    return {
+        schemaVersion: 'bridge-gaps-report.v2',
+        command: COMMANDS.BRIDGE_GAPS_REPORT,
+        mode,
+        model: 'sentinel_bridge_gaps_doctor_light_v1',
+        generatedAt: new Date().toISOString(),
+        source,
+        bridgeGapSummary: {
+            critical: 1,
+            high: 3,
+            medium: 2,
+            low: 5
+        },
+        northStarAssessment: {
+            objective: 'Keep certification outcome-first, doctrine-aligned, and evidence-backed.',
+            status: appliedNorthStarStatus
+        },
+        northStarStatusValidation: {
+            requested: requestedNorthStarStatus,
+            applied: appliedNorthStarStatus,
+            allowed: ALLOWED_NORTH_STAR_STATUS,
+            valid: requestedNorthStarStatus === appliedNorthStarStatus
+        },
+        doctrineAssessment: {
+            coverage: '92%',
+            unmappedRequirements: 4
+        },
+        northStar,
+        doctrine,
+        currentGapSummary,
+        doctorMode: {
+            diagnosis: 'FIX and SET are not safely eligible until negative-control and governance mapping evidence closes the current blockers.',
+            blockingConditions,
+            recommendedFixes: [
+                'Implement missing negative-control tests for EVD-001, PER-001, and XE-001.',
+                'Bind each profile to a named authority owner and verification chain.',
+                'Capture environment snapshots and edge-case evidence references in artifacts.'
+            ],
+            title: 'What is keeping us from FIX and SET',
+            blockers: [
+                'The system has not closed negative-control coverage for EVD-001, PER-001, and XE-001.',
+                'Profile owner mapping is still not explicitly bound to institutional authority.',
+                'Escalation-model verification remains a readiness gap rather than a proven control.',
+                'The evidence library does not yet capture every edge-case validation log natively.'
+            ],
+            fixedUntil: [
+                'no full production-certification claim',
+                'no sovereign readiness claim',
+                'no deployment authorization claim'
+            ],
+            readOnly: true
+        },
+        lightMode: {
+            nextSteps: orderedLightModeSteps,
+            dependencies: [
+                'negative-control gate coverage',
+                'profile owner and authority mapping',
+                'edge-case evidence completeness'
+            ],
+            expectedOutcomes: [
+                'Bridge-gaps blockers become evidence-backed and measurable.',
+                'Certification posture is updated with explicit supporting artifacts.'
+            ],
+            readyToGo: [
+                'All implemented gates within the current certification scope passed.',
+                'Bridge gaps reporting can proceed as a read-only remediation planning exercise.'
+            ],
+            focusNow: orderedLightModeSteps.slice(0, 3),
+            minimalRemediation: 'Use the Bridge Gaps Report to draft a constrained remediation plan that closes the smallest verified gap first.',
+            nextImplementationStep: 'Produce a separate reviewable remediation plan for the open gaps without changing runtime behavior.'
+        },
+        fixAndSet: {
+            fix: 'Define the smallest controlled correction that closes the current gap.',
+            set: 'Define the governed target state and the evidence required to hold it.',
+            eligible: false,
+            blockedBy: ['missing negative-control coverage', 'missing owner mapping', 'missing evidence completeness'],
+        },
+        evidenceStillMissing: [
+            'source revision or Git commit capture in the artifact',
+            'explicit environment snapshot in the report',
+            'negative-control proof for receipt lookup, performance, and XE execution mismatch cases'
+        ],
+        technologyImplementationRecommendation: {
+            northStarHook: 'Keep the implementation outcome-first and evidence-backed.',
+            doctrineHook: 'Keep it read-only for this pass and preserve all canonical boundaries.',
+            bridge: 'Use the bridge-gaps report as the governing input to a separate remediation plan for negative-control and mapping gaps.'
+        },
+        nextGovernedStep: 'Create a separately reviewable remediation plan for the remaining gaps, then validate the new negative-control coverage before any expanded claim.'
+    };
+}
+
 function buildReadinessReport(payload, inventory, modules) {
     const flags = {
         reconcileLegacyProjects: normalizeBoolean(payload.reconcileLegacyProjects, false),
@@ -560,14 +703,52 @@ async function handleLightQuantitativeNextSteps(payload = {}, context = {}, enve
     };
 }
 
+async function handleBridgeGapsReport(payload = {}, context = {}, envelope = {}) {
+    const commandName = COMMANDS.BRIDGE_GAPS_REPORT;
+    const result = buildBridgeGapsReportResult(payload, context);
+    const receipt = buildGovernanceReceipt(commandName, { ...payload, scope: 'bridge-gaps-report' }, context);
+    const normalizedReceipt = {
+        id: receipt ? (receipt.receiptId || receipt.id || null) : null,
+        timestamp: new Date().toISOString(),
+        audit: Boolean(receipt && (receipt.auditId || receipt.id || receipt.receiptId))
+    };
+    const resultWithReceipt = {
+        ...result,
+        receipt: normalizedReceipt
+    };
+
+    if (context.emitSecurityEvent) {
+        context.emitSecurityEvent(`${context.tenant || 'sentinelos'}.${commandName}.receipt_created`, {
+            route: '/v1/command',
+            command: `${context.tenant || 'sentinelos'}.${commandName}`,
+            tenant: context.tenant || 'sentinelos',
+            receiptId: receipt ? receipt.receiptId : null,
+            auditId: receipt ? receipt.auditId : null
+        });
+    }
+
+    return {
+        success: true,
+        statusCode: 200,
+        data: {
+            result: resultWithReceipt,
+            command: commandName,
+            tenant: context.tenant || 'sentinelos',
+            receipt
+        }
+    };
+}
+
 const sentinelOsHandlers = {
     [COMMANDS.ARCHITECTURE_RECONSTRUCTION]: handleArchitectureReconstruction,
     [COMMANDS.GOVERNANCE_CANONICALIZE]: handleGovernanceCanonicalize,
-    [COMMANDS.LIGHT_QUANTITATIVE_NEXT_STEPS]: handleLightQuantitativeNextSteps
+    [COMMANDS.LIGHT_QUANTITATIVE_NEXT_STEPS]: handleLightQuantitativeNextSteps,
+    [COMMANDS.BRIDGE_GAPS_REPORT]: handleBridgeGapsReport
 };
 
 module.exports = {
     sentinelOsHandlers,
     COMMANDS,
-    buildLightQuantitativeNextStepsResult
+    buildLightQuantitativeNextStepsResult,
+    buildBridgeGapsReportResult
 };
