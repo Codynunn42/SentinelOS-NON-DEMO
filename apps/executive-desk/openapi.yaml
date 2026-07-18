@@ -15,6 +15,10 @@ servers:
 paths:
   /proxy/command:
     post:
+      security:
+        - bearerAuth: []
+        - entraOAuth2:
+            - Governance.Approve
       operationId: executeGovernedReadOnlyCommand
       summary: Execute a governed read-only diagnostic command
       description: >
@@ -310,6 +314,10 @@ paths:
 
   /api/executive/sentinel-ai/status:
     get:
+      security:
+        - bearerAuth: []
+        - entraOAuth2:
+            - Executive.Read
       operationId: getSentinelAiStatus
       summary: Check hosted Sentinel AI connection status
       description: >
@@ -416,6 +424,10 @@ paths:
 
   /api/executive/sentinel-ai/scan:
     post:
+      security:
+        - bearerAuth: []
+        - entraOAuth2:
+            - Infrastructure.Manage
       operationId: scanSentinelAiCourse
       summary: Synthesize the Sentinel AI hardening course
       description: >
@@ -520,6 +532,26 @@ paths:
                         type: array
                         items:
                           type: string
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Bearer token used for proxy auth and protected API routes.
+    entraOAuth2:
+      type: oauth2
+      description: Microsoft Entra delegated scopes for Executive Desk protected APIs.
+      flows:
+        authorizationCode:
+          authorizationUrl: https://login.microsoftonline.com/common/oauth2/v2.0/authorize
+          tokenUrl: https://login.microsoftonline.com/common/oauth2/v2.0/token
+          scopes:
+            Executive.Read: Read executive posture and non-mutating operational data.
+            Governance.Approve: Execute governed actions that alter governance state.
+            Infrastructure.Manage: Run infrastructure-affecting operational actions.
+            Vault.Read: Read evidence, receipt, and audit exports.
                       localSignals:
                         type: array
                         items:

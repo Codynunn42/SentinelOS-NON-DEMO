@@ -112,6 +112,7 @@ declare global {
         interface Request {
             principalId?: string;
             requestId?: string;
+            tokenScopes?: string[];
         }
     }
 }
@@ -125,9 +126,110 @@ function authEnabled(): boolean {
     return String(process.env.AUTH_ENABLED || 'false').toLowerCase() === 'true';
 }
 
+function scopeEnforcementEnabled(): boolean {
+    return String(process.env.ENTRA_SCOPE_ENFORCEMENT || 'false').toLowerCase() === 'true';
+}
+
+function allowUserImpersonationFallback(): boolean {
+    return String(process.env.ENTRA_ALLOW_USER_IMPERSONATION_FALLBACK || 'true').toLowerCase() === 'true';
+}
+
 function getExpectedProxyToken(): string {
     const token = process.env.AUTH_BEARER_TOKEN || process.env.JWT_SECRET;
     return String(token || '').trim();
+}
+
+function decodeJwtPayload(token: string): Record<string, unknown> | null {
+    const segments = token.split('.');
+    if (segments.length !== 3) {
+        return null;
+    }
+
+    try {
+        const payload = segments[1]
+            .replace(/-/g, '+')
+            .replace(/_/g, '/');
+        const padded = payload + '='.repeat((4 - (payload.length % 4)) % 4);
+        const decoded = Buffer.from(padded, 'base64').toString('utf8');
+        return JSON.parse(decoded) as Record<string, unknown>;
+    } catch {
+        return null;
+    }
+}
+
+function parseScopes(raw: unknown): string[] {
+    if (typeof raw !== 'string') {
+        return [];
+    }
+
+    return raw
+        .split(/[\s,]+/)
+        .map((scope) => scope.trim())
+        .filter(Boolean);
+}
+
+function getRequestScopes(req: Request): string[] {
+    const headerValues = [
+        req.headers['x-auth-scopes'],
+        req.headers['x-msal-scopes'],
+        req.headers['x-token-scopes'],
+        req.headers['x-scope'],
+    ];
+
+    const scopes = new Set<string>();
+
+    headerValues.forEach((value) => {
+        if (typeof value === 'string') {
+            parseScopes(value).forEach((scope) => scopes.add(scope));
+        }
+    });
+
+    const authHeader = String(req.headers.authorization || '');
+    const bearer = authHeader.match(/^Bearer\s+(.+)$/i)?.[1]?.trim();
+    if (bearer) {
+        const payload = decodeJwtPayload(bearer);
+        if (payload) {
+            parseScopes(payload.scp).forEach((scope) => scopes.add(scope));
+            parseScopes(payload.scope).forEach((scope) => scopes.add(scope));
+        }
+    }
+
+    return Array.from(scopes);
+}
+
+function requireScopes(requiredScopes: string[], mode: 'any' | 'all' = 'any') {
+    return (req: Request, res: Response, next: NextFunction): void => {
+        if (!scopeEnforcementEnabled()) {
+            next();
+            return;
+        }
+
+        const granted = getRequestScopes(req);
+        req.tokenScopes = granted;
+
+        const hasRequired = mode === 'all'
+            ? requiredScopes.every((scope) => granted.includes(scope))
+            : requiredScopes.some((scope) => granted.includes(scope));
+
+        if (!hasRequired) {
+            const legacyFallback = allowUserImpersonationFallback() && granted.includes('user_impersonation');
+            if (legacyFallback) {
+                next();
+                return;
+            }
+
+            res.status(403).json({
+                error: 'Forbidden',
+                details: 'Token does not include required scope',
+                code: 'MISSING_REQUIRED_SCOPE',
+                requiredScopes,
+                grantedScopes: granted,
+            });
+            return;
+        }
+
+        next();
+    };
 }
 
 function buildReasoningLens(): SentinelAiReasoningLens {
@@ -711,7 +813,7 @@ export function mountApiRoutes(app: Express): void {
     app.use('/executive/sovereign-demo', express.static(sovereignDemoDir));
     app.use('/executive', express.static(publicDir));
 
-    app.get('/api/executive/connect/status', async (_req: Request, res: Response, next: NextFunction) => {
+    app.get('/api/executive/connect/status', authMiddleware, rateLimitMiddleware, requireScopes(['Executive.Read']), async (_req: Request, res: Response, next: NextFunction) => {
         try {
             const probe = await probeRemoteSentinelAi();
             const config = getSentinelAiConnectionConfig();
@@ -729,7 +831,7 @@ export function mountApiRoutes(app: Express): void {
         }
     });
 
-    app.post('/api/executive/connect/signin', async (req: Request, res: Response, next: NextFunction) => {
+    app.post('/api/executive/connect/signin', authMiddleware, rateLimitMiddleware, requireScopes(['Infrastructure.Manage']), async (req: Request, res: Response, next: NextFunction) => {
         try {
             const email = normalizePrincipalId(req.body?.email).toLowerCase();
             const password = normalizePrincipalId(req.body?.password);
@@ -750,7 +852,7 @@ export function mountApiRoutes(app: Express): void {
         }
     });
 
-    app.post('/proxy/command', proxyAuthMiddleware, rateLimitMiddleware, async (
+    app.post('/proxy/command', proxyAuthMiddleware, rateLimitMiddleware, requireScopes(['Governance.Approve']), async (
         req: Request,
         res: Response,
         next: NextFunction,
@@ -769,7 +871,7 @@ export function mountApiRoutes(app: Express): void {
     protectedRouter.use(rateLimitMiddleware);
 
     // Receipt endpoints
-    protectedRouter.get('/receipts', async (req: Request, res: Response, next: NextFunction) => {
+    protectedRouter.get('/receipts', requireScopes(['Vault.Read']), async (req: Request, res: Response, next: NextFunction) => {
         try {
             const service = await receiptQueriesService;
             const skip = req.query.skip ? parseInt(req.query.skip as string, 10) : 0;
@@ -812,6 +914,7 @@ export function mountApiRoutes(app: Express): void {
 
     protectedRouter.get(
         '/receipts/export',
+        requireScopes(['Vault.Read']),
         async (req: Request, res: Response, next: NextFunction) => {
             try {
                 const service = await receiptQueriesService;
@@ -856,6 +959,7 @@ export function mountApiRoutes(app: Express): void {
 
     protectedRouter.get(
         '/receipts/stats',
+        requireScopes(['Executive.Read', 'Vault.Read']),
         async (req: Request, res: Response, next: NextFunction) => {
             try {
                 const service = await receiptQueriesService;
@@ -889,6 +993,7 @@ export function mountApiRoutes(app: Express): void {
 
     protectedRouter.get(
         '/receipts/:id',
+        requireScopes(['Vault.Read']),
         async (req: Request, res: Response, next: NextFunction) => {
             try {
                 const service = await receiptQueriesService;
@@ -914,6 +1019,7 @@ export function mountApiRoutes(app: Express): void {
     // Delegation endpoints
     protectedRouter.get(
         '/delegations',
+        requireScopes(['Executive.Read']),
         async (req: Request, res: Response, next: NextFunction) => {
             try {
                 const service = await delegationQueriesService;
@@ -935,6 +1041,7 @@ export function mountApiRoutes(app: Express): void {
 
     protectedRouter.get(
         '/delegations/:id',
+        requireScopes(['Executive.Read']),
         async (req: Request, res: Response, next: NextFunction) => {
             try {
                 const service = await delegationQueriesService;
@@ -960,6 +1067,7 @@ export function mountApiRoutes(app: Express): void {
     // Risk assessment endpoints
     protectedRouter.get(
         '/risk/status',
+        requireScopes(['Executive.Read']),
         async (req: Request, res: Response, next: NextFunction) => {
             try {
                 const service = await getRiskApiService();
@@ -973,6 +1081,7 @@ export function mountApiRoutes(app: Express): void {
 
     protectedRouter.get(
         '/risk/factors',
+        requireScopes(['Executive.Read']),
         async (req: Request, res: Response, next: NextFunction) => {
             try {
                 const service = await getRiskApiService();
@@ -998,6 +1107,7 @@ export function mountApiRoutes(app: Express): void {
     // Closeout state endpoints
     protectedRouter.get(
         '/closeout/state',
+        requireScopes(['Executive.Read']),
         async (req: Request, res: Response, next: NextFunction) => {
             try {
                 const principalId = String(req.principalId || '');
@@ -1011,6 +1121,7 @@ export function mountApiRoutes(app: Express): void {
 
     protectedRouter.put(
         '/closeout/state',
+        requireScopes(['Governance.Approve']),
         async (req: Request, res: Response, next: NextFunction) => {
             try {
                 const principalId = String(req.principalId || '');
@@ -1033,6 +1144,7 @@ export function mountApiRoutes(app: Express): void {
 
     protectedRouter.get(
         '/closeout/mob-runs',
+        requireScopes(['Executive.Read']),
         async (req: Request, res: Response, next: NextFunction) => {
             try {
                 const principalId = String(req.principalId || '');
@@ -1099,6 +1211,7 @@ export function mountApiRoutes(app: Express): void {
 
     protectedRouter.post(
         '/closeout/mob-runs',
+        requireScopes(['Governance.Approve']),
         async (req: Request, res: Response, next: NextFunction) => {
             try {
                 const principalId = String(req.principalId || '');
@@ -1130,6 +1243,7 @@ export function mountApiRoutes(app: Express): void {
 
     protectedRouter.get(
         '/closeout/mob-runs/export',
+        requireScopes(['Vault.Read']),
         async (req: Request, res: Response, next: NextFunction) => {
             try {
                 const principalId = String(req.principalId || '');
@@ -1212,6 +1326,7 @@ export function mountApiRoutes(app: Express): void {
 
     protectedRouter.get(
         '/closeout/export-bundle',
+        requireScopes(['Vault.Read']),
         async (req: Request, res: Response, next: NextFunction) => {
             try {
                 const principalId = String(req.principalId || '');
@@ -1294,6 +1409,7 @@ export function mountApiRoutes(app: Express): void {
 
     protectedRouter.get(
         '/sentinel-ai/status',
+        requireScopes(['Executive.Read']),
         async (req: Request, res: Response, next: NextFunction) => {
             try {
                 const focusHint = typeof req.query.focus === 'string' ? req.query.focus : '';
@@ -1307,6 +1423,7 @@ export function mountApiRoutes(app: Express): void {
 
     protectedRouter.post(
         '/sentinel-ai/scan',
+        requireScopes(['Infrastructure.Manage']),
         async (req: Request, res: Response, next: NextFunction) => {
             try {
                 const focusHint = typeof req.body?.focus === 'string' ? req.body.focus : '';

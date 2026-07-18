@@ -90,6 +90,71 @@ Before enabling public action use:
 - log every request with request ID and audit reference,
 - block sensitive payload fields from logging.
 
+## Microsoft Entra ID Configuration Model (SPA + Protected API)
+
+For Executive Desk web clients and governed API calls, use a two-application model:
+
+1. Frontend application registration (SPA/Web App)
+2. Backend protected API registration
+
+### Environment Variables
+
+- `NEXT_PUBLIC_AZURE_CLIENT_ID`
+  - Frontend Application (Client) ID.
+  - Identifies which app initiated sign-in.
+- `NEXT_PUBLIC_AZURE_API_AUDIENCE`
+  - Protected API identifier URI (for example `api://<api-app-id>`).
+  - Must match the `aud` claim expected by API validation.
+- `NEXT_PUBLIC_AZURE_API_SCOPE`
+  - Delegated permission requested by the frontend (for example `api://<api-app-id>/user_impersonation`).
+  - Must map to an exposed API scope and be validated in backend authorization.
+
+### Why Audience and Scope Are Both Required
+
+- Audience answers: which API is this token for?
+- Scope answers: what permission is being requested on that API?
+
+Both must be validated by backend policy together with issuer, signature, and expiry.
+
+### MSAL Request Shape
+
+```typescript
+const loginRequest = {
+  scopes: [process.env.NEXT_PUBLIC_AZURE_API_SCOPE!],
+};
+```
+
+### Backend Validation Minimum
+
+For each bearer token on protected API routes, validate:
+
+1. `iss` is expected tenant/authority issuer.
+2. `aud` matches `NEXT_PUBLIC_AZURE_API_AUDIENCE`.
+3. signature is valid for issuer keys.
+4. token is not expired.
+5. `scp` includes required scope(s).
+
+### Execution Next Step: Granular Scope Model
+
+Current delegated scope can remain `user_impersonation` for transition, but target model should move to domain scopes that map to Executive OS capabilities.
+
+Recommended initial scope set:
+
+- `Executive.Read`
+- `Executive.Write`
+- `Governance.Review`
+- `Governance.Approve`
+- `Infrastructure.Manage`
+- `Vault.Read`
+- `Vault.Write`
+
+Role/scopes principle:
+
+- RBAC roles express who a principal is.
+- OAuth scopes express what a client app requests to do.
+
+Keep both enforced to preserve least-privilege posture as services scale.
+
 ## Example Safe Test Payload
 
 ```json

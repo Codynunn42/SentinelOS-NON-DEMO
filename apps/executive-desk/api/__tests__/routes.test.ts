@@ -53,8 +53,17 @@ describe('Executive Desk API Routes', () => {
     });
 
     describe('Sentinel Connect', () => {
-        it('should expose connect status without auth', async () => {
+        it('should require principal for connect status', async () => {
             const res = await request(app).get('/api/executive/connect/status');
+
+            assert.strictEqual(res.status, 401);
+            assert.strictEqual(res.body.code, 'MISSING_PRINCIPAL');
+        });
+
+        it('should expose connect status with auth', async () => {
+            const res = await request(app)
+                .get('/api/executive/connect/status')
+                .set('X-Principal-Id', 'user@example.com');
 
             assert.strictEqual(res.status, 200);
             assert.strictEqual(typeof res.body.data.configured, 'boolean');
@@ -63,10 +72,69 @@ describe('Executive Desk API Routes', () => {
         it('should require credentials for sign-in', async () => {
             const res = await request(app)
                 .post('/api/executive/connect/signin')
+                .set('X-Principal-Id', 'user@example.com')
                 .send({ email: 'user@example.com' });
 
             assert.strictEqual(res.status, 400);
             assert.strictEqual(res.body.code, 'MISSING_CREDENTIALS');
+        });
+    });
+
+    describe('Scope Authorization', () => {
+        const principal = 'user@example.com';
+
+        let prevScopeEnforcement: string | undefined;
+        let prevImpersonationFallback: string | undefined;
+
+        before(() => {
+            prevScopeEnforcement = process.env.ENTRA_SCOPE_ENFORCEMENT;
+            prevImpersonationFallback = process.env.ENTRA_ALLOW_USER_IMPERSONATION_FALLBACK;
+            process.env.ENTRA_SCOPE_ENFORCEMENT = 'true';
+            process.env.ENTRA_ALLOW_USER_IMPERSONATION_FALLBACK = 'false';
+        });
+
+        after(() => {
+            if (prevScopeEnforcement === undefined) {
+                delete process.env.ENTRA_SCOPE_ENFORCEMENT;
+            } else {
+                process.env.ENTRA_SCOPE_ENFORCEMENT = prevScopeEnforcement;
+            }
+
+            if (prevImpersonationFallback === undefined) {
+                delete process.env.ENTRA_ALLOW_USER_IMPERSONATION_FALLBACK;
+            } else {
+                process.env.ENTRA_ALLOW_USER_IMPERSONATION_FALLBACK = prevImpersonationFallback;
+            }
+        });
+
+        it('should reject missing scopes for Vault.Read-protected endpoint', async () => {
+            const res = await request(app)
+                .get('/api/executive/receipts')
+                .set('X-Principal-Id', principal);
+
+            assert.strictEqual(res.status, 403);
+            assert.strictEqual(res.body.code, 'MISSING_REQUIRED_SCOPE');
+        });
+
+        it('should reject wrong scopes for Vault.Read-protected endpoint', async () => {
+            const res = await request(app)
+                .get('/api/executive/receipts')
+                .set('X-Principal-Id', principal)
+                .set('X-Auth-Scopes', 'Executive.Read');
+
+            assert.strictEqual(res.status, 403);
+            assert.strictEqual(res.body.code, 'MISSING_REQUIRED_SCOPE');
+            assert(Array.isArray(res.body.requiredScopes));
+            assert.strictEqual(res.body.requiredScopes.includes('Vault.Read'), true);
+        });
+
+        it('should accept required scope for Vault.Read-protected endpoint', async () => {
+            const res = await request(app)
+                .get('/api/executive/receipts')
+                .set('X-Principal-Id', principal)
+                .set('X-Auth-Scopes', 'Vault.Read');
+
+            assert.strictEqual(res.status, 200);
         });
     });
 

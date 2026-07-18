@@ -79,6 +79,7 @@
     "check:asset-classification": "node scripts/classify-sentinel-assets.js",
     "check:ownerfi-ai-financial-manifest": "node scripts/verify-manifest-checksums.js",
     "check:white-glove-support-request": "node scripts/check-white-glove-support-request.js",
+    "generate:executive-calendar": "node scripts/generate-execution-calendar.js",
     "release:anchor": "node scripts/generate-system-release-anchor.js",
     "posture:containment": "node scripts/check-containment-posture.js",
     "simulate:vendor-onboarding": "node scripts/simulate-vendor-onboarding.js",
