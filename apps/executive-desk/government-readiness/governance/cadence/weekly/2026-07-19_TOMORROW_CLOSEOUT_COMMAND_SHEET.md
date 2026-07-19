@@ -1,13 +1,17 @@
 # Tomorrow Closeout Command Sheet
 
 Date: 2026-07-19  
+Start Time: 9:30 AM local  
 Meeting Type: Weekly Closeout Preparation  
-Duration: 30 minutes  
+Duration: 45 minutes  
 Chair: COO Audience  
 Recorder: Governance Operations Audience  
 Mode: Controlled Operations
 
 ## 1) Five-Minute Opening Script (Chair)
+
+Chair quick reference:
+Use 2026-07-19_CHAIR_QUICK_CARD.md for condensed live speaking prompts.
 
 Opening statement:
 We are in controlled operations mode. The objective of this session is to confirm weekly duties are complete, verify monthly duty continuity, and close with assigned actions and deadlines for the next cycle.
@@ -34,6 +38,7 @@ Prompt:
 Recorder, confirm each weekly duty status, owner, and evidence reference.
 
 Required output:
+
 - Duty status: In control or exception
 - Evidence path read aloud
 - Owner confirmation
@@ -44,6 +49,7 @@ Prompt:
 Recorder, confirm monthly strategy audit, compliance score report, and assurance summary status.
 
 Required output:
+
 - Completion state
 - Any residual blockers
 - Expected next publication date
@@ -54,6 +60,7 @@ Prompt:
 List any open exceptions and state whether escalation policy triggers are met.
 
 Decision language:
+
 - If trigger met: Escalate now and assign accountable owner + due date.
 - If trigger not met: Record as monitored exception with next review date.
 

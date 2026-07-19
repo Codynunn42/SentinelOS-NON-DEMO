@@ -8,6 +8,10 @@ const workbookPath = path.join(
     repoRoot,
     'apps/executive-desk/government-readiness/governance/NUNN_CORP_2030_EXECUTION_WORKBOOK.md',
 );
+const calendarRegistryPath = path.join(
+    repoRoot,
+    'apps/executive-desk/government-readiness/governance/cadence/CALENDAR_EVENT_REGISTRY_2026-07-19.json',
+);
 const outputPath = path.join(
     repoRoot,
     'docs/executive-desk/calendar/nunn-corp-2030-deliverables.ics',
@@ -45,6 +49,10 @@ function addDays(dateStr, days) {
 
 function toIcsDate(dateStr) {
     return dateStr.replace(/-/g, '');
+}
+
+function toIcsDateTimeLocal(dateStr, timeStr) {
+    return `${toIcsDate(dateStr)}T${timeStr.replace(':', '')}00`;
 }
 
 function escapeIcsText(value) {
@@ -105,6 +113,20 @@ function parseDeliverables(markdown) {
     return items;
 }
 
+function loadCalendarRegistry() {
+    if (!fs.existsSync(calendarRegistryPath)) {
+        return [];
+    }
+
+    const raw = fs.readFileSync(calendarRegistryPath, 'utf8');
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed.events)) {
+        return [];
+    }
+
+    return parsed.events.filter((event) => isValidIsoDate(event.start));
+}
+
 function toEvent(item, uidPrefix) {
     const uid = `${uidPrefix}-${item.due}-${Buffer.from(item.step).toString('hex').slice(0, 16)}`;
     const summary = `Deliverable: ${item.step}`;
@@ -140,8 +162,16 @@ function buildIcs(events) {
         lines.push('BEGIN:VEVENT');
         lines.push(`UID:${escapeIcsText(ev.uid)}`);
         lines.push(`DTSTAMP:${dtstamp}`);
-        lines.push(`DTSTART;VALUE=DATE:${toIcsDate(ev.start)}`);
-        lines.push(`DTEND;VALUE=DATE:${toIcsDate(ev.end)}`);
+        if (ev.allDay === false) {
+            lines.push(`DTSTART:${toIcsDateTimeLocal(ev.start, ev.startTime)}`);
+            lines.push(`DTEND:${toIcsDateTimeLocal(ev.end, ev.endTime)}`);
+        } else {
+            lines.push(`DTSTART;VALUE=DATE:${toIcsDate(ev.start)}`);
+            lines.push(`DTEND;VALUE=DATE:${toIcsDate(ev.end)}`);
+        }
+        if (ev.rrule) {
+            lines.push(`RRULE:${ev.rrule}`);
+        }
         lines.push(`SUMMARY:${escapeIcsText(ev.summary)}`);
         lines.push(`DESCRIPTION:${escapeIcsText(ev.description)}`);
         lines.push(`CATEGORIES:${escapeIcsText(ev.categories)}`);
@@ -169,6 +199,8 @@ function main() {
         .sort((a, b) => a.due.localeCompare(b.due) || a.step.localeCompare(b.step));
 
     const events = deliverables.map((item) => toEvent(item, 'nunn-deliverable'));
+    const registryEvents = loadCalendarRegistry().filter((event) => event.start >= fromDate);
+    events.unshift(...registryEvents);
 
     // Requested leadership marker.
     events.unshift({
@@ -178,6 +210,7 @@ function main() {
             'Leadership milestone marker. Controlled operations and cadence execution are active with Sentinel AI completion declared for this process.',
         start: fromDate,
         end: addDays(fromDate, 1),
+        allDay: true,
         categories: 'NUNN2030,MILESTONE,SENTINEL_AI',
     });
 

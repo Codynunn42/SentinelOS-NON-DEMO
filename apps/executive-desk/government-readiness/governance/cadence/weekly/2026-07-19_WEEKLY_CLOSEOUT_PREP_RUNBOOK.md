@@ -12,6 +12,7 @@ Ensure weekly duties are completed, evidence is attached, and monthly duties rem
 ## 2) Tomorrow Prep Checklist (Execution Order)
 
 0. Use 2026-07-19_TOMORROW_CLOSEOUT_COMMAND_SHEET.md as the live meeting script.
+0.2 Read 2026-07-18_KICKOFF_PREFLIGHT_STATUS.md for branch and drift baseline.
 0.25 Read 2026-07-18_NIGHTLY_SUPPORT_BOTTLENECK_PRESSING_MATTERS_PASS.md for final-pass support and bottleneck status.
 0.5 Use 2026-07-19_WEEKLY_CLOSEOUT_SESSION_OUTPUT.md as the live recorder output file.
 1. Confirm all weekly artifacts are present and current.
