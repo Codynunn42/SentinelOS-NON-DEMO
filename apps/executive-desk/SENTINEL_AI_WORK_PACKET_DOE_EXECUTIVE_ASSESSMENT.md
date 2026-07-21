@@ -167,3 +167,5 @@ Primary operator focus remains on:
 - preparing the public-facing Executive Assessment funnel
 
 This packet exists to keep content and intake design moving in parallel.
+
+DATABASE_URL=postgres://user:password@sentinel-postgres:5432/sentinelos
