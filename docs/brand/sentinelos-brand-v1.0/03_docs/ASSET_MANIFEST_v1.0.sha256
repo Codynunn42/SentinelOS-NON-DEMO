@@ -1,0 +1,15 @@
+# SentinelOS Brand Asset Manifest
+# Format: <sha256>  <relative-path>
+# Generated: 2026-07-21T21:13:18.296Z
+
+b87846217b805836144f20d1c71d98cc74503f91554dcf7a1e8733be079d0c6c  01_vectors/sentinelos-app-icon.svg
+b87846217b805836144f20d1c71d98cc74503f91554dcf7a1e8733be079d0c6c  01_vectors/sentinelos-favicon-matrix.svg
+b87846217b805836144f20d1c71d98cc74503f91554dcf7a1e8733be079d0c6c  01_vectors/sentinelos-mono-black.svg
+b87846217b805836144f20d1c71d98cc74503f91554dcf7a1e8733be079d0c6c  01_vectors/sentinelos-mono-white.svg
+b87846217b805836144f20d1c71d98cc74503f91554dcf7a1e8733be079d0c6c  01_vectors/sentinelos-primary-dark.svg
+b87846217b805836144f20d1c71d98cc74503f91554dcf7a1e8733be079d0c6c  01_vectors/sentinelos-primary-light.svg
+899d73435268f2fc1d720c952e2632686882b32ddc67f94d3ef250ceb3d47b2a  02_icons/app-icon-ios-1024x1024.png
+2623a1d350bfe25c1178bde79916e4e954a543873ad20e88f14d2a0d010f1c71  02_icons/app-icon-macos-512x512.png
+63b1b7e34c35468937c346bb8ec023fb0300cec3accc9e86847d52f6d9056895  02_icons/favicon-32x32.png
+fb24ab628763324b7611a369ed15696149ec5fd39fd371812b0fbb9302e7cf71  02_icons/favicon.ico
+21165a0b792106020f7f1053ab8659281c5b5e24e0cb057a782afb4b67effbc8  02_icons/github-org-avatar-64x64.png

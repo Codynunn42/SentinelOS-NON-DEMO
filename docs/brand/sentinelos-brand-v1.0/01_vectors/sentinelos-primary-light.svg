@@ -1,0 +1,115 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 600" width="100%" height="100%">
+  <defs>
+    <style>
+      /* Brand Color Palette */
+      .bg-dark { fill: #060D17; }
+      .brand-navy { fill: #0A1A2F; }
+      .brand-blue { fill: #00AEEF; }
+      .brand-silver { fill: #C7D1D9; }
+      .brand-white { fill: #FFFFFF; }
+      
+      /* Typography */
+      .text-title { font-family: 'Montserrat', 'Inter', 'Helvetica Neue', sans-serif; font-weight: 800; font-size: 46px; letter-spacing: 6px; fill: #FFFFFF; }
+      .text-title-alt { fill: #00AEEF; }
+      .text-subtitle { font-family: 'Montserrat', 'Inter', 'Helvetica Neue', sans-serif; font-weight: 700; font-size: 13px; letter-spacing: 7px; fill: #C7D1D9; text-transform: uppercase; }
+      
+      /* Grid / Utility Lines */
+      .label-text { font-family: 'Inter', sans-serif; font-weight: 600; font-size: 12px; fill: #00AEEF; letter-spacing: 2px; text-transform: uppercase; }
+      .divider-line { stroke: #0A1A2F; stroke-width: 2; }
+    </style>
+  </defs>
+
+  <!-- Background for Dark Mode Native Viewing -->
+  <rect class="bg-dark" width="1000" height="600" />
+
+  <!-- ================================================================= -->
+  <!-- SECTION 1: PRIMARY HORIZONTAL BRANDMARK                           -->
+  <!-- ================================================================= -->
+  <g transform="translate(50, 40)">
+    <text x="0" y="20" class="label-text">01 / Primary Horizontal System</text>
+
+    <g transform="translate(20, 50)">
+      <!-- 5. Hexagon Integration (Structural Base) -->
+      <polygon points="90,10 160,50 160,130 90,170 20,130 20,50" fill="none" stroke="#00AEEF" stroke-width="2" stroke-opacity="0.3" />
+      
+      <!-- 4. Widened Shield Silhouette (10% broader for presence) -->
+      <!-- Shield Base Shell -->
+      <path d="M 90,18 L 152,50 L 152,112 C 152,148 90,174 90,174 C 90,174 28,148 28,112 L 28,50 Z" class="brand-navy" stroke="#00AEEF" stroke-width="2" />
+
+      <!-- 2. Integrated Negative Space "S" Monogram -->
+      <!-- Top Wing of 'S' -->
+      <path d="M 132,60 L 72,60 C 60,60 56,76 68,84 L 112,94 C 128,100 124,124 108,124 L 48,124" fill="none" stroke="#FFFFFF" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" />
+      <!-- High-Tech Inner Core Accent -->
+      <path d="M 132,60 L 72,60 C 60,60 56,76 68,84 L 112,94 C 128,100 124,124 108,124 L 48,124" fill="none" stroke="#00AEEF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+
+      <!-- 1. Simplified Orbital Ring (Single Clean Sweep) -->
+      <path d="M 15,100 C 15,60 165,40 165,95" fill="none" stroke="#00AEEF" stroke-width="3.5" stroke-linecap="round" opacity="0.85" />
+      <circle cx="165" cy="95" r="4" class="brand-white" />
+    </g>
+
+    <!-- Typography Block -->
+    <g transform="translate(240, 125)">
+      <!-- Wordmark -->
+      <text x="0" y="0" class="text-title">SENTINEL<tspan class="text-title-alt">OS</tspan></text>
+      
+      <!-- 3. Subtitle (Increased Weight & Size for Legibility) -->
+      <text x="4" y="32" class="text-subtitle">EXECUTIVE PLATFORM</text>
+    </g>
+  </g>
+
+  <line x1="50" y1="280" x2="950" y2="280" class="divider-line" />
+
+  <!-- ================================================================= -->
+  <!-- SECTION 2: STANDALONE APP ICON / EMBLEM                           -->
+  <!-- ================================================================= -->
+  <g transform="translate(50, 310)">
+    <text x="0" y="20" class="label-text">02 / App Icon &amp; Shield Emblem</text>
+    
+    <g transform="translate(30, 45)">
+      <!-- Rounded Container for Mobile/App Icon -->
+      <rect x="0" y="0" width="160" height="160" rx="36" class="brand-navy" stroke="#00AEEF" stroke-width="2" />
+      
+      <!-- Icon Centered Scale -->
+      <g transform="translate(-10, -5)">
+        <!-- Hexagon -->
+        <polygon points="90,20 150,55 150,125 90,160 30,125 30,55" fill="none" stroke="#00AEEF" stroke-width="2" stroke-opacity="0.25" />
+        
+        <!-- Shield -->
+        <path d="M 90,26 L 142,55 L 142,110 C 142,140 90,162 90,162 C 90,162 38,140 38,110 L 38,55 Z" fill="#060D17" stroke="#C7D1D9" stroke-width="1.5" />
+        
+        <!-- 'S' Core -->
+        <path d="M 124,65 L 72,65 C 62,65 58,78 68,85 L 112,93 C 124,100 120,118 108,118 L 56,118" fill="none" stroke="#00AEEF" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" />
+        
+        <!-- Orbital Arc -->
+        <path d="M 22,95 C 22,65 158,50 158,90" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" />
+        <circle cx="158" cy="90" r="3.5" class="brand-blue" />
+      </g>
+    </g>
+  </g>
+
+  <!-- ================================================================= -->
+  <!-- SECTION 3: MICRO-FAVICON & AVATAR OPTIMIZATION (32px to 64px)     -->
+  <!-- ================================================================= -->
+  <g transform="translate(500, 310)">
+    <text x="0" y="20" class="label-text">03 / Favicon &amp; GitHub Avatar (Ultra-Low Res)</text>
+    
+    <!-- 64x64 Simulation -->
+    <g transform="translate(40, 60)">
+      <rect x="0" y="0" width="64" height="64" rx="14" class="brand-blue" />
+      <!-- Simplified Pure High-Contrast Monogram Shield for 64px -->
+      <path d="M 32,10 L 52,21 L 52,41 C 52,52 32,60 32,60 C 32,60 12,52 12,41 L 12,21 Z" class="brand-navy" />
+      <path d="M 42,26 L 26,26 C 22,26 20,31 24,33 L 40,36 C 44,38 42,45 38,45 L 22,45" fill="none" stroke="#FFFFFF" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" />
+      <text x="80" y="38" font-family="'Inter', sans-serif" font-weight="700" font-size="14" fill="#C7D1D9">64px Avatar</text>
+    </g>
+
+    <!-- 32x32 Simulation -->
+    <g transform="translate(240, 76)">
+      <rect x="0" y="0" width="32" height="32" rx="7" class="brand-navy" stroke="#00AEEF" stroke-width="1" />
+      <!-- Maximum clarity at 32px: Stripped of orbits, pure bold geometric 'S' Shield -->
+      <path d="M 16,5 L 26,11 L 26,21 C 26,26 16,30 16,30 C 16,30 6,26 6,21 L 6,11 Z" fill="#00AEEF" />
+      <path d="M 20,13 L 13,13 L 13,17 L 19,18 L 19,23 L 12,23" fill="none" stroke="#060D17" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+      <text x="50" y="21" font-family="'Inter', sans-serif" font-weight="700" font-size="14" fill="#C7D1D9">32px Favicon</text>
+    </g>
+  </g>
+
+</svg>

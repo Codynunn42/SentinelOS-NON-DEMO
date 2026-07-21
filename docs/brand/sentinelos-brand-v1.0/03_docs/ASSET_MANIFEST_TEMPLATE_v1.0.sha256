@@ -1,0 +1,17 @@
+# SentinelOS Brand Asset Manifest (Template)
+# Format: <sha256>  <relative-path>
+# Replace each PLACEHOLDER_SHA256 with the computed checksum before release.
+
+PLACEHOLDER_SHA256  01_vectors/sentinelos-primary-dark.svg
+PLACEHOLDER_SHA256  01_vectors/sentinelos-primary-light.svg
+PLACEHOLDER_SHA256  01_vectors/sentinelos-mono-white.svg
+PLACEHOLDER_SHA256  01_vectors/sentinelos-mono-black.svg
+PLACEHOLDER_SHA256  01_vectors/sentinelos-app-icon.svg
+PLACEHOLDER_SHA256  01_vectors/sentinelos-favicon-matrix.svg
+PLACEHOLDER_SHA256  02_icons/app-icon-macos-512x512.png
+PLACEHOLDER_SHA256  02_icons/app-icon-ios-1024x1024.png
+PLACEHOLDER_SHA256  02_icons/github-org-avatar-400x400.png
+PLACEHOLDER_SHA256  02_icons/favicon.ico
+
+# Example command (macOS):
+# shasum -a 256 01_vectors/* 02_icons/*
