@@ -9,6 +9,9 @@
         "weekly": "pnpm run cli -- executive weekly",
         "monthly": "pnpm run cli -- executive monthly",
         "board": "pnpm run cli -- executive board",
-        "health": "pnpm run cli -- health"
+        "health": "pnpm run cli -- health",
+        "api:start:local-sentinel": "SENTINEL_AI_BASE_URL=http://127.0.0.1:3001 SENTINEL_AI_HEALTH_PATH=/health SENTINEL_AI_SCAN_PATH=/proxy/command tsx server.ts",
+        "api:sentinel-status": "curl -sS -X GET http://127.0.0.1:3000/api/executive/sentinel-ai/status -H 'X-Principal-Id: founder@nunncorp.example'",
+        "api:sentinel-scan:oauth-fix": "curl -sS -X POST http://127.0.0.1:3000/api/executive/sentinel-ai/scan -H 'content-type: application/json' -H 'X-Principal-Id: founder@nunncorp.example' -d '{\"focus\":\"oauth handshake failures - scan and fix\"}'"
     }
 }

@@ -90,6 +90,23 @@ Quick Start
 12. **Run Sentinel AI scan:** `curl -X POST -H 'X-Principal-Id: user@example.com' -H 'Content-Type: application/json' -d '{"focus":"hardening"}' http://127.0.0.1:3137/api/executive/sentinel-ai/scan`
 13. **Open cockpit:** `http://127.0.0.1:3137/executive`
 
+Local Sentinel AI scan/fix profile (recommended for local troubleshooting):
+
+- Start with known-good connector wiring: `pnpm run start:executive-desk:local-sentinel`
+- Check status: `curl -H 'X-Principal-Id: user@example.com' http://127.0.0.1:3000/api/executive/sentinel-ai/status`
+- Run scan/fix-focused pass: `curl -X POST -H 'X-Principal-Id: user@example.com' -H 'Content-Type: application/json' -d '{"focus":"oauth handshake failures - scan and fix"}' http://127.0.0.1:3000/api/executive/sentinel-ai/scan`
+
+Scripted equivalents:
+
+- From repo root:
+  - `pnpm run start:executive-desk:local-sentinel`
+  - `pnpm run scan:executive-desk:sentinel-status`
+  - `pnpm run scan:executive-desk:sentinel-oauth-fix`
+- From `apps/executive-desk`:
+  - `pnpm run api:start:local-sentinel`
+  - `pnpm run api:sentinel-status`
+  - `pnpm run api:sentinel-scan:oauth-fix`
+
 Production proxy auth
 
 - Set `AUTH_ENABLED=true` to require bearer auth on `POST /proxy/command`.
