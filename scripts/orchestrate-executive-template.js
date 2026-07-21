@@ -12,11 +12,20 @@ const inputs = [
   'docs/governance/EXECUTIVE_DRIFT_FOCUS_REPORT_2026-06-18.md'
 ];
 
-const templatePath = path.join(root, 'docs/governance/EXECUTIVE_TEMPLATE_CANONICAL.md');
-if (!fs.existsSync(templatePath)) {
-  console.error('Missing template:', templatePath);
+const templateCandidates = [
+  'docs/governance/EXECUTIVE_TEMPLATE_CANONICAL.md',
+  'apps/executive-desk/government-readiness/governance/EXECUTIVE_TEMPLATE_CANONICAL.md',
+  'apps/executive-desk/government-readiness/governance/EXECUTIVE_TEMPLATES_EXECUTION_PACK_2026-07-18.md'
+];
+
+const templateRel = templateCandidates.find((p) => fs.existsSync(path.join(root, p)));
+if (!templateRel) {
+  console.error('Missing template. Checked:');
+  templateCandidates.forEach((p) => console.error(`- ${path.join(root, p)}`));
   process.exit(1);
 }
+
+const templatePath = path.join(root, templateRel);
 const template = fs.readFileSync(templatePath, 'utf8');
 
 const status = inputs.map((p) => {
@@ -40,6 +49,11 @@ const output = template
   .replace('{{DECISIONS}}', decisions)
   .replace('{{EVIDENCE_INDEX}}', evidence);
 
-const outPath = path.join(root, `docs/governance/EXECUTIVE_PACKET_${date}.md`);
+const outDir = path.join(root, 'docs/governance');
+if (!fs.existsSync(outDir)) {
+  fs.mkdirSync(outDir, { recursive: true });
+}
+const outPath = path.join(outDir, `EXECUTIVE_PACKET_${date}.md`);
 fs.writeFileSync(outPath, output);
 console.log('Generated:', outPath);
+console.log('Template used:', templatePath);
