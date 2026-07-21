@@ -150,4 +150,91 @@ drift_focus_report:
   commit_authority: false
   runtime_authority: false
   external_contact_authority: false
+
+
+```zsh
+cd /Users/codynunn/SentinelOS/SentinelOS-NON-DEMO/SentinelOS-NON-DEMO
+cat > docs/governance/SUPPORT_ESCALATION_GATE_TEMPLATE_2026-07-20.md <<'EOF'
+# Support Escalation Gate Template - 2026-07-20
+
+**Gate ID:**  
+**Date (UTC):**  
+**Prepared By:**  
+**Reviewer:**  
+**Lane:**  
+**Request ID:**
+
+## 1) Problem Summary
+
+- What is failing:
+- Impact scope:
+- Severity (`Sev-1|Sev-2|Sev-3`):
+- Business risk:
+
+## 2) Sentinel-First Evidence
+
+- Health receipt path:
+- Scan receipt path:
+- Internal remediation attempts:
+- Why unresolved internally:
+
+## 3) Cloud Attribution
+
+- Primary lane (`Azure|AWS|Other`):
+- Service/component:
+- Evidence of provider-side dependency/fault:
+
+## 4) Requested External Support Action
+
+- Provider (`Azure Support|AWS Business Support|Other`):
+- Exact question/request:
+- Expected response artifact:
+- Required timeline:
+
+## 5) Governance Controls
+
+- `staging_authority`: false
+- `commit_authority`: false
+- `runtime_authority`: false
+- `external_contact_authority`: (true only if approved below)
+
+## 6) Decision
+
+- Decision (`approve|hold|defer`):
+- Rationale:
+- Conditions:
+- Expiration of approval window:
+
+## 7) Sign-Off
+
+- Prepared by:
+- Reviewer:
+- Executive approver (if required):
+EOF
+```
+
+```json
+{
+  "scripts": {
+    "governance:runbook": "node scripts/orchestrate-executive-template.js",
+    "governance:gate": "node scripts/enforce-executive-packet-gate.js",
+    "governance:pre-escalation": "node scripts/enforce-pre-escalation-gate.js",
+    "governance:evidence-ledger": "node scripts/record-evidence-ledger.js",
+    "governance:flow": "node scripts/run-governance-flow.js",
+    "governance:flow:internal": "node scripts/run-governance-flow.js --skip-pre-escalation",
+    "governance:flow:aws": "node scripts/run-governance-flow.js --provider=aws --reason=\"Managed service issue requires external support\"",
+    "governance:flow:azure": "node scripts/run-governance-flow.js --provider=azure --reason=\"Provider-side dependency requires governed review\"",
+    "governance:daily": "node scripts/run-governance-flow.js --skip-pre-escalation && npm run governance:gate"
+  }
+}
+```
+
+## DOE-First Daily Cadence
+
+Nunn Corporation operates its standard daily governance flow under a DOE-first posture.
+
+The default command is:
+
+```zsh
+npm run governance:daily
 ```
