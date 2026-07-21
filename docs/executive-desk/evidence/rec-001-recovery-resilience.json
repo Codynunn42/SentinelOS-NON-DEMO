@@ -29,8 +29,8 @@
   },
   "pass": true,
   "reviewer": "unassigned",
-  "timestamp": "2026-07-18T07:45:18.904Z",
-  "startedAt": "2026-07-18T07:45:18.874Z",
+  "timestamp": "2026-07-21T21:50:44.538Z",
+  "startedAt": "2026-07-21T21:50:44.516Z",
   "notes": [
     "REC-001 validates graceful recovery and restart behavior, not durable evidence persistence across process restarts."
   ]

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-18T07:45:18.351Z",
+  "generatedAt": "2026-07-21T21:50:44.075Z",
   "reasoningLens": {
     "mode": "quantitative_accuracy",
     "objective": "Favor accurate mission fit, repeatable evidence, and quantified reasoning over raw throughput headlines."
@@ -71,18 +71,18 @@
     "repetitions": 2,
     "scenarioP95MissionMs": {
       "min": 0.034,
-      "max": 0.066,
-      "average": 0.05
+      "max": 0.223,
+      "average": 0.129
     },
     "loadP95MissionMs": {
       "min": 0.04,
-      "max": 0.05,
+      "max": 0.051,
       "average": 0.045
     },
     "throughputCommandsPerSecond": {
-      "min": 137763.19,
-      "max": 156604.81,
-      "average": 147184
+      "min": 140858.3,
+      "max": 155686.45,
+      "average": 148272.375
     }
   },
   "environment": {
@@ -98,10 +98,10 @@
   "scenarioSummary": {
     "faceplanes": 10,
     "commands": 60,
-    "approvals": 35,
-    "blocked": 5,
-    "averageMissionMs": 0.434,
-    "p95MissionMs": 2.624
+    "approvals": 34,
+    "blocked": 11,
+    "averageMissionMs": 0.38,
+    "p95MissionMs": 1.773
   },
   "reproductionRecipe": {
     "prerequisites": [

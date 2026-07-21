@@ -39,7 +39,7 @@
     "endpoint": "https://ca-nc-dev-sentinel.calmhill-388e1d39.eastus2.azurecontainerapps.io/api/control/execute",
     "apiKeyHeader": "x-api-key",
     "apiKeyLoaded": false,
-    "strictMode": true,
+    "strictMode": false,
     "observedMatrix": {
       "noCredentials": 401,
       "invalidCredentials": 401,
@@ -48,7 +48,7 @@
   },
   "pass": true,
   "reviewer": "unassigned",
-  "timestamp": "2026-07-18T07:45:15.275Z",
+  "timestamp": "2026-07-21T21:50:41.178Z",
   "notes": [
     "Valid credential case was skipped because SENTINEL_AI_API_KEY was not set."
   ]

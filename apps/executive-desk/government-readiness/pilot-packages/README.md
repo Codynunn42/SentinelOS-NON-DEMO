@@ -23,3 +23,8 @@ Each pilot package should include:
 The package should function as a secure, self-contained environment rather than a slide deck with recommendations.
 
 Use [SOVEREIGN_PILOT_PACKAGE_STANDARD.md](SOVEREIGN_PILOT_PACKAGE_STANDARD.md) as the baseline for every government-ready package.
+
+## Current Pilot Artifacts
+
+- [HOTEL_EXECUTIVE_AI_PILOT_SOW_v1.md](HOTEL_EXECUTIVE_AI_PILOT_SOW_v1.md): Connectivity-first pilot SOW and success criteria for executive GPT integration.
+- [HOTEL_EXECUTIVE_AI_PHASE1_EVIDENCE_RUNBOOK_v1.md](HOTEL_EXECUTIVE_AI_PHASE1_EVIDENCE_RUNBOOK_v1.md): Step-by-step execution and evidence capture checklist for Phase 1 connectivity sign-off.
