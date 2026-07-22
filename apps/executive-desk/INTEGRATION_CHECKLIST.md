@@ -2,6 +2,9 @@
 
 This checklist is the source of truth for current readiness and the public launch path.
 
+Launch owner: Cody Dale Nunn, Founder and CEO  
+Execution rule: Work the immediate next actions in numbered order. Do not mark an action or stage complete until every listed control has current evidence.
+
 ## Current Verified Status (Local v1)
 
 ### Gate Completion
@@ -110,8 +113,8 @@ Operational meaning:
 
 ## Immediate Next Actions (Priority Order)
 
-1. [ ] Finish Stage 1 web repositioning and assessment funnel.
-2. [ ] Publish Stage 2 concierge GPT with strict non-sensitive scope.
-3. [ ] Stand up Stage 3 production environment with auth + postgres + gateway.
-4. [ ] Connect Executive Desk to hosted Sentinel AI and verify scan/status endpoints.
-5. [ ] Run final launch dry run with full checklist sign-off.
+1. [ ] Finish Stage 1 web repositioning and assessment funnel. — Owner: Cody Dale Nunn — State: In progress
+2. [ ] Publish Stage 2 concierge GPT with strict non-sensitive scope. — Owner: Cody Dale Nunn — State: Queued after Stage 1
+3. [ ] Stand up Stage 3 production environment with auth + postgres + gateway. — Owner: Cody Dale Nunn — State: Queued after Stage 2
+4. [ ] Connect Executive Desk to hosted Sentinel AI and verify scan/status endpoints. — Owner: Cody Dale Nunn — State: Queued after Stage 3
+5. [ ] Run final launch dry run with full checklist sign-off. — Owner: Cody Dale Nunn — State: Queued after connector verification
