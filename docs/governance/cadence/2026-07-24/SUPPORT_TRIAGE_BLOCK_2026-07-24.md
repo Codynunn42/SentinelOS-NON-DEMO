@@ -26,11 +26,13 @@ The SentinelOS API connection appeared close to EV-RUN-002 readiness, with conce
 | HTTP | Status `000`; no application response | No HTTP evidence |
 | Cloudflare tunnel | Healthy, one replica, no routes | Connector alive; no published route |
 
+The Cloudflare observation above is the retained July 24 point-in-time result. A July 25 read-only check superseded it for current-state decisions: public Cloudflare-proxied DNS records and local ingress configuration were observed, while approval, ownership, route history, endpoint health, and production acceptance remained unverified. See [Step 4 Hold Verification](EXECUTIVE_DESK_SUPPORT_STEP_04_HOLD_VERIFICATION_2026-07-25.md).
+
 ## Triage Finding
 
 The active blocker is Azure subscription recovery and suspended Container Apps compute. The available evidence does not support classifying the Cloudflare tunnel as the cause of the Azure hostname failure.
 
-The tunnel is not currently a usable alternate route because it has no published route. That is a separate configuration state, not the cause of the Azure managed environment suspension.
+Cloudflare remains unusable as an approved alternate production route because its observed DNS and ingress configuration lack reconciled authority, validation, and acceptance. That is separate from, and not established as the cause of, the Azure managed environment suspension.
 
 ## Actions Taken
 
@@ -113,8 +115,8 @@ Each packet must distinguish fact, interpretation, and recommendation; identify 
 | Azure subscription propagation | Restore an `Enabled` subscription without overstating recovery | `Warned`; payment reported complete; propagation timing remains uncertain | Account owner and Azure Billing control subscription recovery | Account owner monitors; escalate after the documented window | Capture `Enabled` state and recovery timestamp | Active - handling conditionally approved; closure evidence pending |
 | Container App recovery validation | Establish whether managed compute and the canonical endpoint recovered | `ManagedClusterSuspended`; no application response; post-recovery state unknown | No validation approval until the requested recovery-state packet is reviewed | Return with subscription state, app provisioning, revisions, ingress, replicas, and traffic evidence | After approval, retain DNS, TLS, health, and command evidence | Returned for evidence - not authorized for closure |
 | EV-RUN-002 capture | Produce non-destructive governed connection evidence | Blocked by runtime; no passing HTTP evidence exists | Protocol conditions and review roles must be satisfied before execution | Evidence custodian prepares capture structure and waits for recovery | Hash package and obtain independent review | Active - future run conditionally approved; closure evidence pending |
-| Production hostname approval | Establish an approved governed hostname and scope | `api.nunncorporation.com` is proposed, not approved | Named hostname approver and Cody disposition required | Keep proposed hostname inactive and prepare evidence only under later direction | Retain any future signed decision and verify approved configuration | Held - no activation or closure authorized |
-| Cloudflare route decision | Decide whether an alternate route is necessary and governed | Tunnel healthy with one replica and no routes; it is not the Azure suspension cause | Program Gate Council and Cody disposition required before route creation | Keep route creation held | Preserve current no-route evidence and any future decision record | Held - no route or closure authorized |
+| Production hostname approval | Establish an approved governed hostname and scope | `api.nunncorporation.com` resolves publicly but is not approved; ownership and history remain unresolved | Named DNS administrator, hostname approver, and Cody disposition required | Preserve no-production-use hold and return reconciliation evidence | Retain any future signed decision and verify approved configuration | Held - no production use or closure authorized |
+| Cloudflare route decision | Decide whether an alternate route is necessary and governed | Public DNS, local ingress, and active tunnel connections observed; route authority and history unresolved | Program Gate Council and Cody disposition required before technical action | Return authoritative DNS and route reconciliation evidence | Preserve July 24 observation, July 25 exception, and any future decision | Held - configuration exception returned for evidence |
 
 The Executive Desk review is complete for the current state of all five items. WGSS lifecycle completion is not claimed: each item still requires its listed follow-through evidence and a separate closure review.
 
@@ -132,7 +134,7 @@ The Executive Desk review is complete for the current state of all five items. W
 | Container App recovery validation | Return for evidence | Present subscription state, app provisioning, revision, ingress, replica, and traffic evidence before validation approval | Not issued |
 | EV-RUN-002 capture | Approved with conditions | Execute only after runtime recovery and all retained protocol prerequisites are satisfied | Not issued |
 | Production hostname approval | Held | No approval or activation while Gate 1 and readiness requirements remain incomplete | Not issued |
-| Cloudflare route decision | Held | No public route creation; reconsider only through a later governed review | Not issued |
+| Cloudflare route decision | Held | No technical action; reconcile existing public DNS and local ingress authority before reconsideration | Not issued |
 
 Executive Desk sign-off applies only to an item explicitly marked `Completed` after WGSS closure evidence is reviewed. Approval of current handling is not completion, production authorization, or acceptance.
 

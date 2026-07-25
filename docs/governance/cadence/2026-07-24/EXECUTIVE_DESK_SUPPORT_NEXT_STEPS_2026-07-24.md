@@ -18,8 +18,8 @@ Continue evidence preparation and recovery monitoring within the recorded author
 | Azure subscription propagation | Approved with conditions | Monitoring may continue; closure evidence is required |
 | Container App recovery validation | Return for evidence | Prepare and return the recovery-state packet before validation approval |
 | EV-RUN-002 capture | Approved with conditions | Preparation may continue; execution waits for recovery and protocol prerequisites |
-| Production hostname approval | Held | No approval or activation |
-| Cloudflare route decision | Held | No route creation |
+| Production hostname approval | Held | Public DNS exists, but no production use, validation, or acceptance is authorized |
+| Cloudflare route decision | Held | Existing DNS and ingress configuration returned for authority and history evidence; no technical action authorized |
 
 ## Immediate Next Steps
 
@@ -48,12 +48,13 @@ Begin only when Azure reports `Enabled`.
 
 | Sequence | Action | Owner | Evidence required | Executive checkpoint |
 | --- | --- | --- | --- | --- |
-| 1 | Capture Azure subscription state and recovery timestamp | Account owner / runtime operator | Read-only output showing `Enabled` | Azure item returns for closure review |
-| 2 | Assemble the Container App recovery-state packet | Runtime operator | App provisioning, revision, ingress, replica, and traffic state | Cody reviews returned evidence before validation |
-| 3 | If approved, perform bounded DNS, TLS, and `/health` validation | Runtime operator | Timestamped transport and response artifacts | Container App item returns for closure review |
-| 4 | If health and protocol prerequisites pass, execute EV-RUN-002 once | Evidence custodian / runtime operator | Complete non-destructive capture with secrets excluded | Technical and governance review required |
-| 5 | Hash and independently review the EV-RUN-002 package | Evidence custodian / independent reviewer | SHA-256 manifest and reviewer disposition | Cody receives the completed review packet |
-| 6 | Present each eligible item separately for Executive Desk closure | Service Steward | Completed WGSS checklist and evidence references | Cody may sign off only eligible items |
+| 1 | Capture Azure subscription state and recovery timestamp | Account owner / runtime operator | Read-only output showing `Enabled` | Azure item returns for review |
+| 2 | Assemble the Container App recovery-state packet | Runtime operator | App provisioning, revision, ingress, replica, and traffic state | Packet remains evidence only |
+| 3 | Return the Container App packet to Cody before endpoint validation | Service Steward | Complete recovery-state packet and recommendation | Cody approves, conditions, holds, or returns validation |
+| 4 | If approved, perform bounded DNS, TLS, and `/health` validation | Runtime operator | Timestamped transport and response artifacts | Container App item returns for closure review |
+| 5 | If health and protocol prerequisites pass, execute EV-RUN-002 once | Evidence custodian / runtime operator | Complete non-destructive capture with secrets excluded | Technical and governance review required |
+| 6 | Hash and independently review the EV-RUN-002 package | Evidence custodian / independent reviewer | SHA-256 manifest and reviewer disposition | Cody receives the completed review packet |
+| 7 | Present each eligible item separately for Executive Desk closure | Service Steward | Completed WGSS checklist and evidence references | Cody may sign off only eligible items |
 
 ## Escalation Trigger
 

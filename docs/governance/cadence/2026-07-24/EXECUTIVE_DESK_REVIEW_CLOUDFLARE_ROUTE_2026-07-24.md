@@ -6,7 +6,7 @@
 **Prepared by:** Evidence custodian  
 **Review authority:** Cody Nunn, Executive Desk / Service Steward  
 **Review date:** 2026-07-24  
-**Record status:** Held
+**Record status:** Held; July 25 configuration exception returned for evidence
 
 ## Review Purpose
 
@@ -17,35 +17,38 @@ Prevent an alternate public route from being created or treated as production au
 | Field | Record |
 | --- | --- |
 | Need and outcome | Determine whether an alternate route is necessary after primary-path recovery is understood |
-| Current status | Tunnel healthy with one replica and no routes; route creation held |
-| Impact | No Cloudflare public endpoint exists; Azure remains the primary recovery path |
+| Current status | Public DNS and local tunnel ingress configuration exist without recorded approval; route decision remains held |
+| Impact | A public DNS surface exists but is not approved, validated, or accepted as a production endpoint; Azure remains the primary recovery path |
 | Accountable owner | Open - Program Gate Council is a decision body, not a named individual owner |
-| Next action | Preserve no-route state and current evidence |
-| Escalation | Return to Program Gate Council and Cody before any route configuration |
+| Next action | Reconcile authoritative DNS and route ownership without changing configuration |
+| Escalation | Return the reconciliation packet to Cody before investigation expands or any configuration changes |
 
 ## Fact, Interpretation, and Recommendation
 
 ### Facts
 
-- The Cloudflare tunnel was observed healthy with one replica and no published routes.
+- On July 24, the Cloudflare tunnel was observed healthy with one replica and no published routes.
+- On July 25, public DNS returned Cloudflare-proxied A and AAAA records for `api.nunncorporation.com`.
+- Local Cloudflare ingress configuration maps that hostname to `http://localhost:3000`.
+- Read-only tunnel inventory reported four active connections; it did not identify authoritative DNS ownership or route history.
 - The available evidence does not identify Cloudflare as the cause of Azure managed compute suspension.
 
 ### Interpretation
 
-- Connector health does not make the tunnel a usable or approved public endpoint.
-- Route creation would be a separate consequential configuration change.
+- Public DNS and connector health do not establish an approved, healthy, or accepted production endpoint.
+- The July 24 no-route claim is superseded for current-state decisions by the July 25 exception record.
 
 ### Recommendation
 
 - Maintain the hold while Azure recovery remains the primary path.
-- Reconsider only with a need statement, architecture and security implications, authority, rollback, monitoring, and continuity plan.
+- Reconcile authoritative DNS record ownership, route target, history, and configuration authority before any new action.
 
 ## WGSS Review
 
 | Commitment | State | Evidence or gap |
 | --- | --- | --- |
 | Listen before recommending | Satisfied | Concern about the tunnel and desired continuity are recorded |
-| Understand before designing | Satisfied | Tunnel state and separation from the Azure failure are documented |
+| Understand before designing | Open | Public DNS and local ingress are observed, but authoritative ownership and route history are unresolved |
 | Explain before implementing | Satisfied for hold only | Current implications and recommendation are explicit |
 | Confirm before executing | Satisfied for hold only | Cody recorded `Held`; no route authority exists |
 | Document before closing | Open | No final route decision or closure evidence exists |
@@ -56,20 +59,20 @@ Prevent an alternate public route from being created or treated as production au
 
 **Disposition:** Held  
 **Conditions for reconsideration:** Demonstrated need, primary-path finding, named owner, architecture and security review, rollback, monitoring, and explicit approval.  
-**Authorized scope:** Preserve the no-route state and evidence.  
+**Authorized scope:** Preserve evidence and the held decision; prepare the required reconciliation packet only under explicit authority.  
 **Explicitly not authorized:** Public hostname mapping, route creation, tunnel mutation, production substitution, or acceptance.
 
 ## Next Steps
 
 | Sequence | Action | Owner | Trigger | State |
 | --- | --- | --- | --- | --- |
-| 1 | Preserve current no-route evidence | Evidence custodian | Current | Active |
-| 2 | Assign a named accountable owner if reconsidered | Executive Desk | Before any new proposal | Not started |
-| 3 | Prepare governed comparison packet | Assigned owner | Later Executive direction | Not authorized yet |
-| 4 | Return for separate decision | Service Steward | Packet complete | Blocked |
+| 1 | Preserve the July 24 observation and July 25 exception evidence | Evidence custodian | Current | Complete |
+| 2 | Assign named DNS and Cloudflare administrators | Executive Desk | Before reconciliation work | Not started |
+| 3 | Prepare sanitized DNS ownership, route target, and history evidence | Assigned administrators | Explicit authority | Returned for evidence |
+| 4 | Return for separate decision | Service Steward | Reconciliation packet complete | Blocked |
 
 ## Closure Review
 
 **Closure status:** Not eligible  
-**Reason:** The route is held, no final decision exists, and accountability and follow-through remain open.  
+**Reason:** The route is held, observed configuration lacks reconciled authority and history, and accountability and follow-through remain open.  
 **Executive Desk closure sign-off:** Not issued
