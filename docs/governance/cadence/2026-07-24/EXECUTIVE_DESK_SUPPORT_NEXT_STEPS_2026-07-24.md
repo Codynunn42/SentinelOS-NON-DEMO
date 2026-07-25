@@ -28,9 +28,19 @@ These actions do not require production or runtime mutation.
 | Sequence | Action | Owner | Required evidence | State |
 | --- | --- | --- | --- | --- |
 | 1 | Retain the reviewed support triage and Executive Desk decisions | Service Steward | [Step 1 checksum record](EXECUTIVE_DESK_SUPPORT_STEP_01_RETENTION_RECORD_2026-07-24.md) and commit `af81a77a4f22faf03c2c3cbaea14cbcd0a592ae3` | Complete - Executive Desk signed off |
-| 2 | Prepare one Executive Desk review record per support item using the reusable template | Evidence custodian | Five item records with current facts, uncertainty, authority, and decision | Not started |
+| 2 | Prepare one Executive Desk review record per support item using the reusable template | Evidence custodian | [Step 2 checksum record](EXECUTIVE_DESK_SUPPORT_STEP_02_RETENTION_RECORD_2026-07-24.md) and five validated item records listed below | Complete - Executive Desk signed off |
 | 3 | Prepare the empty EV-RUN-002 capture structure and metadata fields without invoking the runtime | Evidence custodian | Capture path, metadata schema, and secret-exclusion check | Not started |
 | 4 | Preserve the production hostname and Cloudflare no-route holds | Program Gate Council | Unchanged configuration and decision record | Active |
+
+### Step 2 Item Records
+
+- [Azure subscription propagation](EXECUTIVE_DESK_REVIEW_AZURE_SUBSCRIPTION_2026-07-24.md)
+- [Container App recovery validation](EXECUTIVE_DESK_REVIEW_CONTAINER_APP_RECOVERY_2026-07-24.md)
+- [EV-RUN-002 capture](EXECUTIVE_DESK_REVIEW_EV_RUN_002_2026-07-24.md)
+- [Production hostname approval](EXECUTIVE_DESK_REVIEW_PRODUCTION_HOSTNAME_2026-07-24.md)
+- [Cloudflare route decision](EXECUTIVE_DESK_REVIEW_CLOUDFLARE_ROUTE_2026-07-24.md)
+
+All five records remain ineligible for closure. Step 2 review concerns the completeness and accuracy of the prepared records, not technical completion or support closure.
 
 ## Recovery-Triggered Steps
 
