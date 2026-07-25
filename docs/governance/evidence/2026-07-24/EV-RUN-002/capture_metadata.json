@@ -1,0 +1,54 @@
+{
+  "schema_version": "1.0.0",
+  "evidence_id": "EV-RUN-002",
+  "packet_status": "prepared_without_execution",
+  "execution_authorized": false,
+  "invocation_count": 0,
+  "prepared_date": "2026-07-24",
+  "timestamp_america_phoenix": null,
+  "target": {
+    "server_url": null,
+    "hostname_approval_reference": null,
+    "operation_id": null,
+    "http_method": "GET",
+    "path": "/health"
+  },
+  "contract": {
+    "api_contract_version": "2.0.0",
+    "openapi_version": null,
+    "retained_contract_path": null,
+    "sha256": null
+  },
+  "gpt_action": {
+    "gpt_revision": null,
+    "action_name": null,
+    "visibility": null,
+    "runtime_version": null
+  },
+  "capture": {
+    "request_artifact": null,
+    "response_artifact": null,
+    "transport_artifact": null,
+    "http_status": null,
+    "evidence_location": null
+  },
+  "secret_exclusion": {
+    "protocol": "SECRET_EXCLUSION_PROTOCOL.md",
+    "pre_capture_check": "pending",
+    "post_capture_sanitization": "pending",
+    "independent_secret_scan": "pending",
+    "secret_values_retained": false
+  },
+  "integrity": {
+    "sha256_manifest": null,
+    "manifest_verified": false
+  },
+  "accountability": {
+    "evidence_custodian": null,
+    "runtime_operator": null,
+    "independent_reviewer": null,
+    "review_date": null
+  },
+  "decision": "Deferred Pending Evidence",
+  "closure_status": "Not eligible"
+}
