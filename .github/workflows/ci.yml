@@ -23,6 +23,7 @@ jobs:
 
       - name: Start API
         env:
+          PORT: 3000
           SENTINEL_HMAC_SECRET: ci-test-secret
         run: |
           node apps/api/server.js &
