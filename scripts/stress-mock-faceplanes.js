@@ -61,6 +61,23 @@ function buildAggregateSummary(results, durationMs) {
     };
 }
 
+function getTelemetryActivityCount(run, fallback = 0) {
+    if (!run || !Array.isArray(run.results)) {
+        return Number.isFinite(Number(fallback)) ? Number(fallback) : 0;
+    }
+
+    const totalActivities = run.results.reduce((sum, item) => {
+        const activityCount = Array.isArray(item && item.telemetry && item.telemetry.activities)
+            ? item.telemetry.activities.length
+            : 0;
+        return sum + activityCount;
+    }, 0);
+
+    return totalActivities > 0
+        ? totalActivities
+        : (Number.isFinite(Number(fallback)) ? Number(fallback) : 0);
+}
+
 function saveRunSummary(runId, resultSet, iterations, config, aggregateSummary) {
     ensureArtifactDirectory();
     const fileName = `${runId}.json`;
@@ -137,12 +154,14 @@ async function runIteration(index, config) {
     const run = result.data && result.data.run ? result.data.run : null;
     const totals = run ? (run.totals || run.summary || {}) : {};
     const faceplanes = run ? (run.faceplanes || (run.faceplane ? [run.faceplane] : [])) : [];
+    const telemetryActivityCount = getTelemetryActivityCount(run, config.telemetryActivityCount);
 
     const commandCount = run ? (Number.isFinite(Number(totals.commandCount)) ? Number(totals.commandCount) : null) : null;
     const approvalCount = run ? (Number.isFinite(Number(totals.approvalCount)) ? Number(totals.approvalCount) : null) : null;
     const blockedCount = run ? (Number.isFinite(Number(totals.blockedCount)) ? Number(totals.blockedCount) : null) : null;
-    const approvalRatio = commandCount ? Number((approvalCount / commandCount).toFixed(3)) : 0;
-    const blockRatio = commandCount ? Number((blockedCount / commandCount).toFixed(3)) : 0;
+    const approvalRatio = commandCount && approvalCount !== null ? Number((approvalCount / commandCount).toFixed(3)) : 0;
+    const blockRatio = commandCount && blockedCount !== null ? Number((blockedCount / commandCount).toFixed(3)) : 0;
+    const traceCompleteness = calculateTraceCompleteness(telemetryActivityCount, commandCount);
 
     return {
         iteration: index + 1,
@@ -164,7 +183,8 @@ async function runIteration(index, config) {
             approvalRatio,
             blockRatio,
             driftRecommendationsGenerated: calculateDriftRecommendations(approvalRatio, blockRatio, commandCount),
-            traceCompleteness: calculateTraceCompleteness(telemetryActivityCount, commandCount),
+            traceCompleteness,
+            telemetryActivityCount,
             timestamp: new Date().toISOString(),
             correlationId: commandCorrelationId
         } : null,
@@ -199,12 +219,17 @@ function calculateDriftRecommendations(approvalRatio, blockRatio, commandCount) 
 }
 
 function calculateTraceCompleteness(telemetryActivityCount, commandCount) {
-    // Trace completeness based on telemetry activity vs expected
-    const expectedTelemetryPerCommand = 2; // Expected telemetry events per command
-    const expectedTotalTelemetry = commandCount * expectedTelemetryPerCommand;
-    const actualTelemetry = telemetryActivityCount;
+    const actualTelemetry = Number.isFinite(Number(telemetryActivityCount)) ? Number(telemetryActivityCount) : 0;
+    const totalCommands = Number.isFinite(Number(commandCount)) ? Number(commandCount) : 0;
 
-    if (expectedTotalTelemetry === 0) return 1.0;
+    if (totalCommands <= 0) {
+        return actualTelemetry === 0 ? 1 : 0;
+    }
+
+    const expectedTelemetryPerCommand = 2; // Expected telemetry events per command
+    const expectedTotalTelemetry = totalCommands * expectedTelemetryPerCommand;
+
+    if (expectedTotalTelemetry === 0) return 1;
 
     const completeness = Math.min(actualTelemetry / expectedTotalTelemetry, 1.0);
     return Number(completeness.toFixed(2));

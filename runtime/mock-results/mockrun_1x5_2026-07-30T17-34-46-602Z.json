@@ -1,0 +1,55 @@
+{
+  "runId": "mockrun_1x5_2026-07-30T17-34-46-602Z",
+  "timestamp": "2026-07-30T17:34:46.611Z",
+  "iterations": 1,
+  "config": {
+    "commandsPerRun": 5,
+    "approvalRate": 0.35,
+    "blockRate": 0.15,
+    "telemetryState": "LIMITED",
+    "telemetryActivityCount": 12
+  },
+  "aggregateSummary": {
+    "totalCommands": 15,
+    "totalApprovals": 5,
+    "totalBlocks": 3,
+    "avgApprovalRatio": 0.333,
+    "avgBlockRatio": 0.2,
+    "avgTraceCompleteness": 1,
+    "totalDriftRecommendations": 0,
+    "durationMs": 4.32
+  },
+  "results": [
+    {
+      "iteration": 1,
+      "durationMs": 4.32,
+      "success": true,
+      "statusCode": 200,
+      "blocked": false,
+      "summary": {
+        "faceplanes": [
+          "ownerfi",
+          "hotelops",
+          "itad"
+        ],
+        "runId": "mock_run_all_1785432886610",
+        "commandCount": 15,
+        "approvalCount": 5,
+        "blockedCount": 3
+      },
+      "iterationSummary": {
+        "commandCount": 15,
+        "approvalCount": 5,
+        "blockedCount": 3,
+        "approvalRatio": 0.333,
+        "blockRatio": 0.2,
+        "driftRecommendationsGenerated": 0,
+        "traceCompleteness": 1,
+        "telemetryActivityCount": 36,
+        "timestamp": "2026-07-30T17:34:46.610Z",
+        "correlationId": "62e83aad-fd29-49f3-920f-8eee614ff2b5"
+      },
+      "error": null
+    }
+  ]
+}

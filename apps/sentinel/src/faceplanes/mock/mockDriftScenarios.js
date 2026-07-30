@@ -53,8 +53,49 @@ const SCENARIO_DEFINITIONS = {
   }
 };
 
+function normalizeScenarioKey(scenarioKey) {
+  if (!scenarioKey) return null;
+
+  const normalized = String(scenarioKey).trim();
+  if (!normalized) return null;
+
+  if (DRIFT_SCENARIOS[normalized]) {
+    return DRIFT_SCENARIOS[normalized];
+  }
+
+  if (SCENARIO_DEFINITIONS[normalized]) {
+    return normalized;
+  }
+
+  const matchedEntry = Object.entries(DRIFT_SCENARIOS).find(([, value]) => value === normalized);
+  return matchedEntry ? matchedEntry[0] : null;
+}
+
+function validateScenario(scenarioKey) {
+  const normalizedKey = normalizeScenarioKey(scenarioKey);
+  if (!normalizedKey) {
+    return { valid: false, error: 'Unknown scenario' };
+  }
+
+  const scenario = SCENARIO_DEFINITIONS[normalizedKey];
+  const commandOverride = scenario.commandOverride || {};
+  const approvalRate = Number.isFinite(Number(commandOverride.approvalRate))
+    ? Number(commandOverride.approvalRate)
+    : 0;
+  const blockRate = Number.isFinite(Number(commandOverride.blockRate))
+    ? Number(commandOverride.blockRate)
+    : 0;
+
+  if (approvalRate + blockRate > 1) {
+    return { valid: false, error: 'Approval and block rates exceed 100 percent' };
+  }
+
+  return { valid: true, key: normalizedKey, scenario };
+}
+
 function getScenario(scenarioKey) {
-  return SCENARIO_DEFINITIONS[scenarioKey] || null;
+  const result = validateScenario(scenarioKey);
+  return result.valid ? result.scenario : null;
 }
 
 function getAllScenarios() {
@@ -68,5 +109,7 @@ module.exports = {
   DRIFT_SCENARIOS,
   SCENARIO_DEFINITIONS,
   getAllScenarios,
-  getScenario
+  getScenario,
+  normalizeScenarioKey,
+  validateScenario
 };

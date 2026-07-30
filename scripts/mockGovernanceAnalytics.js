@@ -21,6 +21,28 @@ const path = require('path');
 
 const RESULTS_DIR = path.join(__dirname, '..', 'runtime', 'mock-results');
 
+function safePercentageChange(end, start) {
+    if (!Number.isFinite(Number(end)) || !Number.isFinite(Number(start))) {
+        return 0;
+    }
+
+    if (start === 0) {
+        if (end === 0) return 0;
+        return end > 0 ? 100 : -100;
+    }
+
+    return ((end - start) / start) * 100;
+}
+
+function calculateRate(numerator, denominator, defaultValue = 0) {
+    const normalizedNumerator = Number(numerator);
+    const normalizedDenominator = Number(denominator);
+    if (!Number.isFinite(normalizedNumerator) || !Number.isFinite(normalizedDenominator) || normalizedDenominator <= 0) {
+        return defaultValue;
+    }
+    return normalizedNumerator / normalizedDenominator;
+}
+
 class MockGovernanceAnalytics {
     constructor() {
         this.artifacts = [];
@@ -38,14 +60,19 @@ class MockGovernanceAnalytics {
             .sort();
 
         this.artifacts = files.map(file => {
-            const filePath = path.join(RESULTS_DIR, file);
-            const data = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-            const artifact = {
-                file,
-                ...data
-            };
-            return this.normalizeArtifact(artifact);
-        });
+            try {
+                const filePath = path.join(RESULTS_DIR, file);
+                const data = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+                const artifact = {
+                    file,
+                    ...data
+                };
+                return this.normalizeArtifact(artifact);
+            } catch (error) {
+                console.warn(`⚠️  Failed to load governance artifact ${file}: ${error.message}`);
+                return null;
+            }
+        }).filter(Boolean);
 
         console.log(`Loaded ${this.artifacts.length} governance artifacts`);
     }
@@ -88,9 +115,7 @@ class MockGovernanceAnalytics {
             };
         }
 
-        if (!artifact.runId) {
-            artifact.runId = artifact.runId || artifact.timestamp || artifact.file;
-        }
+        artifact.runId = artifact.runId || artifact.timestamp || `unknown_${artifact.file}`;
 
         return artifact;
     }
@@ -123,8 +148,8 @@ class MockGovernanceAnalytics {
             const val1 = summary1[metric];
             const val2 = summary2[metric];
             const diff = val2 - val1;
-            const pctChange = val1 !== 0 ? ((diff / val1) * 100).toFixed(1) : 'N/A';
-            console.log(`${metric}: ${val1} → ${val2} (${diff > 0 ? '+' : ''}${diff}, ${pctChange}%)`);
+            const pctChange = `${safePercentageChange(val2, val1).toFixed(1)}%`;
+            console.log(`${metric}: ${val1} → ${val2} (${diff > 0 ? '+' : ''}${diff}, ${pctChange})`);
         });
     }
 
@@ -169,7 +194,7 @@ class MockGovernanceAnalytics {
         };
 
         Object.entries(trends).forEach(([metric, data]) => {
-            const change = ((data.end - data.start) / data.start * 100).toFixed(1);
+            const change = safePercentageChange(data.end, data.start).toFixed(1);
             console.log(`${metric}: ${data.start} → ${data.end} (${data.direction} by ${change}%)`);
         });
 
@@ -189,6 +214,10 @@ class MockGovernanceAnalytics {
     }
 
     calculateVolatility(values) {
+        if (!Array.isArray(values) || values.length < 2) {
+            return 0;
+        }
+
         const mean = values.reduce((a, b) => a + b) / values.length;
         const variance = values.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / values.length;
         return Math.sqrt(variance);
@@ -260,8 +289,8 @@ class MockGovernanceAnalytics {
         console.log(`Total Approvals: ${totals.totalApprovals}`);
         console.log(`Total Blocks: ${totals.totalBlocks}`);
         console.log(`Total Drift Recommendations: ${totals.totalDriftRecs}`);
-        console.log(`Overall Approval Rate: ${((totals.totalApprovals / totals.totalCommands) * 100).toFixed(1)}%`);
-        console.log(`Overall Block Rate: ${((totals.totalBlocks / totals.totalCommands) * 100).toFixed(1)}%`);
+        console.log(`Overall Approval Rate: ${(calculateRate(totals.totalApprovals, totals.totalCommands) * 100).toFixed(1)}%`);
+        console.log(`Overall Block Rate: ${(calculateRate(totals.totalBlocks, totals.totalCommands) * 100).toFixed(1)}%`);
 
         // Run frequency analysis
         const timestamps = this.artifacts.map(a => new Date(a.timestamp));

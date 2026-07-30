@@ -6,7 +6,7 @@
 const { buildRun: buildOwnerfiRun } = require('./ownerfiMockOps');
 const { buildRun: buildHotelOpsRun } = require('./hotelOpsMockOps');
 const { buildRun: buildItadRun } = require('./itadMockOps');
-const { getScenario } = require('./mockDriftScenarios');
+const { validateScenario } = require('./mockDriftScenarios');
 
 const RUNNERS = {
   ownerfi: buildOwnerfiRun,
@@ -15,7 +15,6 @@ const RUNNERS = {
 };
 
 function buildRunConfig(faceplane, config = {}) {
-  const scenario = config.driftScenario ? getScenario(config.driftScenario) : null;
   const base = {
     commandsPerRun: config.commandsPerRun || 5,
     approvalRate: config.approvalRate ?? 0.3,
@@ -24,11 +23,25 @@ function buildRunConfig(faceplane, config = {}) {
     telemetryActivityCount: config.telemetryActivityCount || 4
   };
 
+  const scenarioResult = config.driftScenario ? validateScenario(config.driftScenario) : null;
+  if (scenarioResult && !scenarioResult.valid) {
+    console.warn(`Unknown or invalid drift scenario "${config.driftScenario}". Running default mock configuration.`);
+    return base;
+  }
+
+  const scenario = scenarioResult ? scenarioResult.scenario : null;
+
   if (scenario) {
+    const telemetryActivityCount = Number.isFinite(Number(scenario.telemetryOverride && scenario.telemetryOverride.activityCount))
+      ? Number(scenario.telemetryOverride.activityCount)
+      : base.telemetryActivityCount;
+
     return {
       ...base,
+      commandsPerRun: Number.isFinite(Number(scenario.commandCount)) ? Number(scenario.commandCount) : base.commandsPerRun,
       ...(scenario.commandOverride || {}),
-      ...(scenario.telemetryOverride || {}),
+      telemetryState: (scenario.telemetryOverride && scenario.telemetryOverride.telemetryState) || base.telemetryState,
+      telemetryActivityCount,
       driftScenario: config.driftScenario,
       scenarioDescription: scenario.description,
       expectedDriftType: scenario.expectedDriftType,
@@ -64,9 +77,10 @@ function runAll(config = {}) {
 
   const totals = results.reduce((acc, run) => {
     if (run.error) return acc;
-    acc.commandCount += run.summary.commandCount;
-    acc.approvalCount += run.summary.approvalCount;
-    acc.blockedCount += run.summary.blockedCount;
+    const summary = run.summary || {};
+    acc.commandCount += Number.isFinite(Number(summary.commandCount)) ? Number(summary.commandCount) : 0;
+    acc.approvalCount += Number.isFinite(Number(summary.approvalCount)) ? Number(summary.approvalCount) : 0;
+    acc.blockedCount += Number.isFinite(Number(summary.blockedCount)) ? Number(summary.blockedCount) : 0;
     return acc;
   }, { commandCount: 0, approvalCount: 0, blockedCount: 0 });
 
