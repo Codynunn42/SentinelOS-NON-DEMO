@@ -18,6 +18,7 @@
     "check:proof-ui-flow": "node scripts/check-proof-ui-flow.js",
     "check:approvals": "node scripts/check-approval-access.js",
     "check:idempotency": "node scripts/check-idempotency.js",
+    "check:planning-api": "node scripts/check-planning-api.js",
     "check:keys": "node scripts/check-key-registry.js",
     "check:governance-drift": "node scripts/check-governance-drift-monitor.js",
     "check:governance-drift-core": "node scripts/check-drift-governance-core.js",

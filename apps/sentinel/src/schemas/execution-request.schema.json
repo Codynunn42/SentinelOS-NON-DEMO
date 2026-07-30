@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ExecutionRequest",
+  "type": "object",
+  "required": ["planningId", "commandId", "approvalId"],
+  "properties": {
+    "planningId": { "type": "string", "minLength": 1 },
+    "commandId": { "type": "string", "minLength": 1 },
+    "approvalId": { "type": "string", "minLength": 1 }
+  }
+}

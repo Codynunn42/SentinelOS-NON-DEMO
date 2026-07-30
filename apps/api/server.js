@@ -48,6 +48,7 @@ const {
   getOpenAIConfigForTenant,
   getOpenAIFaceplaneStatus
 } = require('../sentinel/src/faceplanes/openai/openaiRoutes');
+const { createPlanningRoute } = require('./routes/v1/planning');
 const { buildSentinelGPTActionOpenAPI } = require('../sentinel/src/faceplanes/openai/gptActionManifest');
 const {
   buildBoundaryOutput,
@@ -1377,9 +1378,22 @@ async function resolvePilotApproval(req, res, route, body, access) {
   });
 }
 
+const handlePlanningRoute = createPlanningRoute({
+  authenticateCommand,
+  emitSecurityEvent,
+  enforceRateLimit,
+  normalizeCommandEnvelope,
+  readJsonBody,
+  sendJson
+});
+
 const server = http.createServer(async (req, res) => {
   const requestUrl = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
   const pathname = requestUrl.pathname;
+
+  if (handlePlanningRoute(req, res, { pathname, requestUrl })) {
+    return;
+  }
 
   if (pathname === '/' && req.method === 'GET') {
     auditSurfaceView(req, requestUrl, pathname, 'landing');

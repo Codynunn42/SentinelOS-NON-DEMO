@@ -67,3 +67,37 @@ ALTER TABLE governance_signals ADD COLUMN IF NOT EXISTS event_id TEXT;
 ALTER TABLE governance_signals ADD COLUMN IF NOT EXISTS tenant_id TEXT;
 ALTER TABLE governance_signals ADD COLUMN IF NOT EXISTS actor TEXT;
 ALTER TABLE governance_signals ADD COLUMN IF NOT EXISTS details JSONB NOT NULL DEFAULT '{}'::jsonb;
+
+CREATE TABLE IF NOT EXISTS command_lifecycle (
+  command_id TEXT PRIMARY KEY,
+  planning_id TEXT NOT NULL UNIQUE,
+  tenant_id TEXT,
+  command TEXT NOT NULL,
+  actor_id TEXT,
+  envelope_version TEXT NOT NULL,
+  current_state TEXT NOT NULL,
+  state_version INT NOT NULL DEFAULT 0,
+  idempotency_key TEXT NOT NULL UNIQUE,
+  request_hash TEXT NOT NULL,
+  policy_decision JSONB NOT NULL DEFAULT '{}'::jsonb,
+  next_action TEXT,
+  approval_id TEXT,
+  trace_id TEXT,
+  request_payload JSONB NOT NULL DEFAULT '{}'::jsonb,
+  created_at TIMESTAMP NOT NULL,
+  updated_at TIMESTAMP NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS command_lifecycle_events (
+  event_id TEXT PRIMARY KEY,
+  command_id TEXT NOT NULL,
+  planning_id TEXT NOT NULL,
+  event_type TEXT NOT NULL,
+  previous_state TEXT,
+  next_state TEXT,
+  actor_type TEXT NOT NULL,
+  actor_id TEXT NOT NULL,
+  metadata_json JSONB NOT NULL DEFAULT '{}'::jsonb,
+  trace_id TEXT,
+  occurred_at TIMESTAMP NOT NULL
+);
