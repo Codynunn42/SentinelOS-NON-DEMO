@@ -51,7 +51,7 @@ function isKnownLifecycleState(state) {
 }
 
 function isAllowedTransition(previousState, nextState) {
-  return Boolean(ALLOWED_TRANSITIONS[previousState] || []).includes(nextState);
+  return (ALLOWED_TRANSITIONS[previousState] || []).includes(nextState);
 }
 
 module.exports = {
