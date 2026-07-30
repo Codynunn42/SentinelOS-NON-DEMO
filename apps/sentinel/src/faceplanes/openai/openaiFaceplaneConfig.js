@@ -1,5 +1,6 @@
 const { hasText } = require('../../shared/validation');
 const INTERNAL_TENANT_ID = 'nunn-internal';
+const EXECUTIVE_DESK_TENANT_ID = 'sentinelos';
 const FACEPLANE_NAME = 'openai';
 const FACEPLANE_VERSION = 'Faceplane_OpenAI_v1';
 const INTERNAL_GOVERNANCE_LAB_TIER = 'internal_governance_lab';
@@ -7,6 +8,20 @@ const INTERNAL_GOVERNANCE_LAB_TIER = 'internal_governance_lab';
 const OPENAI_FACEPLANE_CONFIGS = Object.freeze({
   [INTERNAL_TENANT_ID]: Object.freeze({
     tenantId: INTERNAL_TENANT_ID,
+    gaasTier: INTERNAL_GOVERNANCE_LAB_TIER,
+    openaiModelVersion: 'stubbed-openai-v1',
+    maxTokenLimit: 2048,
+    escalationSensitivityMultiplier: 1.25,
+    humanApprovalRequired: true,
+    driftTrackingEnabled: true,
+    auditLogEnabled: true,
+    validationMode: 'internal_only',
+    verboseLoggingEnabled: true,
+    productionSlaClaimsEnabled: false,
+    thresholdExperimentationAllowed: true
+  }),
+  [EXECUTIVE_DESK_TENANT_ID]: Object.freeze({
+    tenantId: EXECUTIVE_DESK_TENANT_ID,
     gaasTier: INTERNAL_GOVERNANCE_LAB_TIER,
     openaiModelVersion: 'stubbed-openai-v1',
     maxTokenLimit: 2048,
@@ -94,6 +109,7 @@ module.exports = {
   FACEPLANE_VERSION,
   INTERNAL_GOVERNANCE_LAB_TIER,
   INTERNAL_TENANT_ID,
+  EXECUTIVE_DESK_TENANT_ID,
   assertTenantScope,
   getOpenAIFaceplaneConfig,
   getOpenAIFaceplaneStatus,

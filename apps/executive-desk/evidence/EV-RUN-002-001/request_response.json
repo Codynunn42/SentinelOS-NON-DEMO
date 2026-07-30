@@ -1,0 +1,72 @@
+{
+    "method": "GET",
+    "endpoint_path": "/health",
+    "public_endpoint": "https://api.nunncorporation.com/health",
+    "local_target": "Sentinel API via Cloudflare Tunnel",
+    "action_name": "getProxyHealth",
+    "operation_id": "getProxyHealth",
+    "timestamp_utc": "2026-07-26T14:18:18.214Z",
+    "request_id": "evrun002-20260726T141818Z",
+    "headers": {
+        "authorization": "redacted"
+    },
+    "http_status": 200,
+    "observed_result": "Pass",
+    "payload": {
+        "status": "ok",
+        "service": "sentinel-api",
+        "mode": "non-demo",
+        "tier": "PUBLIC",
+        "database": "enabled"
+    },
+    "error": null,
+    "evidence_record": {
+        "control_id": "EV-RUN-002",
+        "record_id": "EV-RUN-002-001",
+        "title": "Health-Only Action Runtime Validation",
+        "version": "1.0",
+        "status": "Submitted for Final Review",
+        "control_type": "Runtime Validation Gate",
+        "boundary": "Read-only health verification only",
+        "submitted_by": "Cody Nunn",
+        "review_owner": "Cody Nunn",
+        "submitted_at_utc": "2026-07-26T14:18:18.214Z",
+        "openapi_version": "3.1.0",
+        "gpt_name": "Sentinel Executive Desk",
+        "gpt_revision_id": "Unverified",
+        "action_boundary": {
+            "permitted": [
+                "getProxyHealth"
+            ],
+            "prohibited": [
+                "state-changing actions",
+                "workflow execution",
+                "command execution",
+                "authorization escalation"
+            ]
+        },
+        "validation_path": [
+            "GPT Action",
+            "api.nunncorporation.com",
+            "Cloudflare Tunnel (cloudflared 2026.7.3 / darwin_arm64)",
+            "Sentinel API (port 80 / non-demo)",
+            "GET /health",
+            "200 OK Health Response"
+        ],
+        "runtime_version": {
+            "cloudflared": "2026.7.3"
+        },
+        "service_version": {
+            "sentinel-api": {
+                "value": "Not exposed by application runtime",
+                "source": "/version endpoint unavailable; startup logs reviewed"
+            }
+        },
+        "governance_review": {
+            "mutation_operation_executed": false,
+            "command_execution_tested": false,
+            "authorization_escalation_performed": false,
+            "health_only_boundary_preserved": true
+        }
+    }
+}

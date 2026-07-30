@@ -1,0 +1,22 @@
+evidence_id: EV-RUN-002-001
+
+action:
+  name: getProxyHealth
+  operationId: getProxyHealth
+
+request:
+  method: GET
+  path: /health
+  server: https://api.nunncorporation.com
+
+response:
+  http_status: 200
+  status: ok
+  service: sentinel-api
+
+validation:
+  mutation_attempted: false
+  state_change_attempted: false
+
+status:
+  runtime_validation: successful

@@ -86,6 +86,40 @@ function callStubbedOpenAIAdapter({ prompt, config }) {
   });
 }
 
+function buildMetadataEvidenceBridge(metadata = {}) {
+  if (metadata.objective !== 'metadata_evidence_bridge') {
+    return null;
+  }
+
+  const revisionId = typeof metadata.revision_id === 'string' && metadata.revision_id.trim()
+    ? metadata.revision_id.trim()
+    : 'Unverified';
+  const versionLabel = typeof metadata.version_label === 'string' && metadata.version_label.trim()
+    ? metadata.version_label.trim()
+    : 'Unverified';
+  const revisionTimestamp = typeof metadata.revision_timestamp === 'string' && metadata.revision_timestamp.trim()
+    ? metadata.revision_timestamp.trim()
+    : 'Unverified';
+
+  const hasAnyCaptured = revisionId !== 'Unverified' || versionLabel !== 'Unverified' || revisionTimestamp !== 'Unverified';
+
+  return {
+    evidenceId: typeof metadata.evidenceId === 'string' && metadata.evidenceId.trim()
+      ? metadata.evidenceId.trim()
+      : 'EV-RUN-002-001-V2',
+    revision_id: revisionId,
+    version_label: versionLabel,
+    revision_timestamp: revisionTimestamp,
+    builder_visibility: hasAnyCaptured ? 'exposed' : 'not_exposed',
+    required_response: !hasAnyCaptured,
+    response_prompt: hasAnyCaptured
+      ? 'Confirm captured values and approve evidence synchronization.'
+      : 'Provide revision_id, version_label, and revision_timestamp from Builder publish details (or explicitly confirm not exposed).',
+    required_fields: ['revision_id', 'version_label', 'revision_timestamp'],
+    posture: hasAnyCaptured ? 'ready' : 'conditional'
+  };
+}
+
 function executeOpenAIWorkflow(input = {}, principal = {}, options = {}) {
   const prompt = typeof input.prompt === 'string' ? input.prompt.trim() : '';
   const tenantId = typeof input.tenantId === 'string' ? input.tenantId.trim() : '';
@@ -134,6 +168,7 @@ function executeOpenAIWorkflow(input = {}, principal = {}, options = {}) {
     ? routeOpenAIEscalation({ workflow, risk, config, principal })
     : null;
   const response = escalationCase ? null : callStubbedOpenAIAdapter({ prompt, config });
+  const metadataEvidence = buildMetadataEvidenceBridge(metadata);
   const auditEntry = appendOpenAIAuditEntry({
     workflowId,
     tenantId,
@@ -159,6 +194,7 @@ function executeOpenAIWorkflow(input = {}, principal = {}, options = {}) {
     risk,
     escalationCase,
     response,
+    metadataEvidence,
     auditEntry
   };
 }

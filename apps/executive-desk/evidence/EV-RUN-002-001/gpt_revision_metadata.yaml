@@ -1,0 +1,21 @@
+evidence_id: EV-RUN-002-001
+gpt_identity:
+  name: "Sentinel Executive Desk 2"
+  platform: "ChatGPT Custom GPT"
+revision:
+  revision_id: "Unverified"
+  version_label: "Unverified"
+  revision_timestamp: "Unverified"
+  source_capture_status: "Not captured; marked Unverified"
+action_surface:
+  server: "https://api.nunncorporation.com"
+  action_name: "getProxyHealth"
+  operation_id: "getProxyHealth"
+  method: "GET"
+  path: "/health"
+capture:
+  captured_at_utc: "2026-07-26T14:18:18.214Z"
+  captured_by: "Cody Nunn"
+verification:
+  source: "GPT Builder Version/Revision History"
+  statement: "Revision metadata source was not captured. No inferred values used."

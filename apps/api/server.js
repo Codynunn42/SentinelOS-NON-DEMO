@@ -2853,6 +2853,7 @@ const server = http.createServer(async (req, res) => {
         risk: result.risk,
         escalationCase: result.escalationCase,
         response: result.response,
+        metadataEvidence: result.metadataEvidence,
         auditEntry: result.auditEntry
       });
     });
