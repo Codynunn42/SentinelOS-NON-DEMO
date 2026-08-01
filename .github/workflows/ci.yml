@@ -22,6 +22,8 @@ jobs:
         run: npm install || true
 
       - name: Start API
+        env:
+          SENTINEL_HMAC_SECRET: ci-placeholder-secret
         run: |
           node apps/api/server.js &
           sleep 2
