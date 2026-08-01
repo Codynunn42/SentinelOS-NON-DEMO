@@ -41,6 +41,50 @@ function hashAuditEntry(entry, prevHash) {
     .digest('hex');
 }
 
+function verifyAuditChain(entries = auditLog) {
+  if (!Array.isArray(entries)) {
+    return {
+      valid: false,
+      reason: 'entries_not_array',
+      checked: 0
+    };
+  }
+
+  for (let index = 0; index < entries.length; index += 1) {
+    const entry = entries[index];
+    const expectedPrevHash = index === 0 ? null : entries[index - 1].auditHash;
+
+    if (!entry || entry.prevHash !== expectedPrevHash) {
+      return {
+        valid: false,
+        reason: 'previous_hash_mismatch',
+        index,
+        expectedPrevHash,
+        actualPrevHash: entry ? entry.prevHash : null,
+        checked: index
+      };
+    }
+
+    const expectedAuditHash = hashAuditEntry(entry, entry.prevHash);
+    if (entry.auditHash !== expectedAuditHash) {
+      return {
+        valid: false,
+        reason: 'audit_hash_mismatch',
+        index,
+        expectedAuditHash,
+        actualAuditHash: entry.auditHash,
+        checked: index
+      };
+    }
+  }
+
+  return {
+    valid: true,
+    checked: entries.length,
+    lastAuditHash: entries.length ? entries[entries.length - 1].auditHash : null
+  };
+}
+
 function fromAuditRow(row) {
   if (!row) {
     return null;
@@ -148,6 +192,8 @@ const auditLogger = {
     } catch (error) {
       const failureEntry = {
         eventId: crypto.randomUUID(),
+        correlationId: hashedEntry.correlationId || null,
+        tenant: entry.tenant || null,
         command: 'system.audit.persist_failed',
         payload: { originalCommand: entry.command },
         result: {
@@ -159,6 +205,11 @@ const auditLogger = {
         timestamp: new Date().toISOString()
       };
       failureEntry.result.governanceSignals = evaluateGovernanceSignals(failureEntry);
+      failureEntry.inputPayloadHash = hashPayload(failureEntry.payload);
+      failureEntry.signatureVersion = 'system';
+      failureEntry.prevHash = lastAuditHash;
+      failureEntry.auditHash = hashAuditEntry(failureEntry, failureEntry.prevHash);
+      lastAuditHash = failureEntry.auditHash;
       auditLog.push(failureEntry);
       publishAuditEvent(failureEntry);
     }
@@ -168,6 +219,10 @@ const auditLogger = {
 
   getAll() {
     return auditLog;
+  },
+
+  verifyChain(entries = auditLog) {
+    return verifyAuditChain(entries);
   },
 
   getByTenant(tenant) {
@@ -263,5 +318,7 @@ const auditLogger = {
 
 module.exports = {
   auditLogger,
+  hashAuditEntry,
+  verifyAuditChain,
   subscribeAuditEvents
 };

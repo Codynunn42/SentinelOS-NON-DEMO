@@ -1,0 +1,40 @@
+{
+  "envelopeId": "ENV-2026-05-15-001-INFRASTRUCTURE-TRUTH",
+  "operation": "infrastructure.truth.reconcile",
+  "title": "Infrastructure Truth Reconciliation",
+  "priority": "critical",
+  "posture": "hardening_and_consolidation",
+  "objective": "Reconcile deployment truth across the live Azure Container App runtime, deployment manifests, docs/DEPLOYMENT.md, azure/container-app.yaml, public bridge status, and local operational assumptions.",
+  "scope": [
+    "Azure Container App runtime",
+    "deployment manifests",
+    "docs/DEPLOYMENT.md",
+    "azure/container-app.yaml",
+    "public bridge status",
+    "local operational assumptions"
+  ],
+  "tasks": [
+    "Export current live Container App configuration.",
+    "Compare target ports, ingress, env vars, runtime assumptions, health routes, and revision posture.",
+    "Identify scaffold-only configuration, stale deployment assumptions, and runtime/documentation drift.",
+    "Produce Infrastructure Truth Report, Canonical Runtime Map, and recommended authoritative deployment source.",
+    "Preserve fail-closed posture, governed execution continuity, and no-bypass execution."
+  ],
+  "rules": [
+    "No destructive cleanup.",
+    "No runtime modification without verification.",
+    "Preserve operational continuity.",
+    "Treat live runtime as authoritative unless proven otherwise.",
+    "Do not expose secret values in generated reports."
+  ],
+  "outputs": [
+    "docs/INFRASTRUCTURE_TRUTH_RECONCILIATION_2026-05-15.md"
+  ],
+  "status": "executed_read_only",
+  "executedAt": "2026-05-15",
+  "validation": [
+    "az containerapp show --name ca-nc-dev-sentinel --resource-group rg-nc-dev-sentinel -o json",
+    "curl -sS https://ca-nc-dev-sentinel.calmhill-388e1d39.eastus2.azurecontainerapps.io/health",
+    "curl -sS https://nunncorporation.com/api/status"
+  ]
+}

@@ -547,7 +547,7 @@
         <div>
           <div class="eyebrow">SentinelOS Proof Surface</div>
           <h1>Deal Execution Engine</h1>
-          <p class="subhead">Bad deals do not get through. Every button sends an intent through the Control Plane into <code>/v1/command</code>, then Sentinel decides.</p>
+          <p class="subhead">Bad deals do not get through. Every button sends an intent through the Control Plane into <code>/v1/command</code>, then Sentinel returns governed status.</p>
           <div class="xe-launch" aria-label="XE Command Plane shortcut">
             <span class="kbd">Ctrl</span>
             <span class="kbd">K</span>
@@ -559,10 +559,10 @@
 
       <div class="grid">
         <section class="panel">
-          <h2>Deal Actions</h2>
+          <h2>Deal Intent</h2>
           <div class="actions">
             <button id="submitButton" type="button" onclick="submitDeal()">Submit Deal</button>
-            <button id="executeButton" type="button" class="danger" onclick="executeDeal()">Execute Deal</button>
+            <button id="executeButton" type="button" class="danger" onclick="executeDeal()">Request Execution</button>
             <button id="approveButton" type="button" class="success" onclick="approveDeal()">Approve Deal</button>
           </div>
           <div class="actions two">
@@ -663,18 +663,18 @@
       <div class="xe-header">
         <div class="xe-title">
           <strong id="xeTitle">XE Command Plane</strong>
-          <span>Intent launcher -> Control Plane -> governed execution</span>
+          <span>Intent launcher -> Control Plane -> approval-bound workflow</span>
         </div>
         <span class="kbd">Esc</span>
       </div>
-      <input id="xeInput" autocomplete="off" placeholder="Type: submit deal, execute deal, approve deal">
+      <input id="xeInput" autocomplete="off" placeholder="Type: submit deal, request approval, approve deal">
       <div class="xe-suggestions" aria-label="XE command suggestions">
         <div class="xe-suggestion" data-xe-command="submit deal">
           <strong>submit deal</strong>
           <span class="pill ok">deal.submit</span>
         </div>
         <div class="xe-suggestion" data-xe-command="execute deal">
-          <strong>execute deal</strong>
+          <strong>request approval</strong>
           <span class="pill blocked">deal.execute</span>
         </div>
         <div class="xe-suggestion" data-xe-command="approve deal">
@@ -868,7 +868,7 @@
             score: getTrustScore(result, 72),
             alert: getAlerts(result, 'Review Needed'),
             stateText: 'Submitted',
-            reason: `Application ${state.applicationId || 'created'} is staged. Execution remains controlled until approval.`
+            reason: `Application ${state.applicationId || 'created'} is staged. Action remains controlled until approval.`
           });
           logActivity('Deal submitted through Control Plane', 'ok');
         } else {
@@ -883,7 +883,7 @@
 
     async function executeDeal() {
       setBusy(true);
-      setStatus('Sentinel is deciding before execution...', '');
+      setStatus('Sentinel is checking approval state...', '');
 
       try {
         const response = await runIntent('deal.execute', {
@@ -893,19 +893,19 @@
 
         if (result.status === 'blocked') {
           showBlocked(result, 'Deal Blocked');
-          logActivity('Deal blocked before execution', 'blocked');
+          logActivity('Deal stopped at approval gate', 'blocked');
         } else if (result.status === 'executed') {
           state.dealId = result.dealId || result.result && result.result.dealId;
-          setStatus('Deal Executed - Approved Path', 'ok');
+          setStatus('Deal Completed - Approved Path', 'ok');
           setDecision({
             score: getTrustScore(result, 96),
             alert: getAlerts(result, 'None'),
-            stateText: 'Executed',
-            reason: 'Deal executed safely.'
+            stateText: 'Approved',
+            reason: 'Approved deal completed through governed path.'
           });
-          logActivity('Approved deal executed through Sentinel Core', 'ok');
+          logActivity('Approved deal completed through Sentinel Core', 'ok');
         } else {
-          showBlocked(result, 'Execution returned review state');
+          showBlocked(result, 'Approval path returned review state');
         }
       } catch (error) {
         showBlocked({ error: error.message }, 'Execution failed');
@@ -956,7 +956,7 @@
         score: getTrustScore(result, 40),
         alert: getAlerts(result, 'Approval Required'),
         stateText: 'Blocked',
-        reason: reason === 'approval_required' ? 'Approval required before execution.' : reason,
+        reason: reason === 'approval_required' ? 'Approval required before approved action.' : reason,
         kind: 'blocked'
       });
       logActivity(`${label}: ${reason}`, 'blocked');

@@ -1,6 +1,6 @@
 {
   "productName": "SentinelOS Deal Execution Engine",
-  "positioning": "We ensure deals only execute when they are valid, approved, and safe.",
+  "positioning": "SentinelOS routes deals through validity, approval, and audit checks before an approval-bound workflow proceeds.",
   "languageMap": {
     "Trust Score": "Decision Score",
     "Governance Signals": "Risk Alerts",

@@ -9,6 +9,9 @@ on:
 jobs:
   sentinel-api:
     runs-on: ubuntu-latest
+    env:
+      NODE_ENV: test
+      SENTINEL_HMAC_SECRET: ci-smoke-secret
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -26,10 +29,14 @@ jobs:
           SENTINEL_HMAC_SECRET: ci-placeholder-secret
         run: |
           node apps/api/server.js &
-          sleep 2
 
-      - name: Run healthcheck
-        run: node scripts/healthcheck.js
+      - name: Wait for healthcheck
+        run: |
+          for i in {1..15}; do
+            node scripts/healthcheck.js && exit 0
+            sleep 2
+          done
+          exit 1
 
       - name: Done
         run: echo "Sentinel API health validated"

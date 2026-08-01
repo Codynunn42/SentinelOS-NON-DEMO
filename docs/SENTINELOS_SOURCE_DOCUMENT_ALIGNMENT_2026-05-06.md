@@ -13,10 +13,10 @@
 `SentinelOS_Whitepaper_v2.pdf` is the strongest current source because it explicitly corrects the roadmap and names the operating layers:
 
 ```txt
-SentinelOS = Execution OS
+SentinelOS = Governed Execution Operating Framework
 Face Planes = Interaction Layer
 GaaS = Policy Layer
-Docking = Enforcement Boundary
+Docking = Governance Boundary
 ```
 
 ## Core Alignment
@@ -121,7 +121,7 @@ This means each face plane must declare:
 Use this as the internal architecture shorthand:
 
 ```txt
-Execution OS + Interaction Layer + Policy Layer + Enforcement Boundary
+Governed Execution Operating Framework + Interaction Layer + Policy Layer + Governance Boundary
 ```
 
 Mapped to repo terms:
@@ -148,7 +148,7 @@ These documents strengthen the current direction. They do not require SentinelOS
 They support a broader model:
 
 ```txt
-SentinelOS is the governed execution OS.
+SentinelOS is the governed execution operating framework.
 Face planes adapt it to customers, workflows, and regulated domains.
 GaaS policy packs map the rules.
 Docking keeps each surface inside approved boundaries.

@@ -7,17 +7,17 @@ Status: current external narrative and proof package
 Use this line everywhere:
 
 ```txt
-SentinelOS = Execution OS
+SentinelOS = Governed Execution Operating Framework
 Face Planes = Interaction Layer
 GaaS = Policy Layer
-Docking = Enforcement Boundary
+Docking = Governance Boundary
 ```
 
 Official proof story:
 
 ```txt
 We do not replace your system.
-We control what your system is allowed to do.
+We coordinate what your system is allowed to do through policy, approval, and audit.
 ```
 
 ## What To Show
@@ -39,7 +39,7 @@ Submit action
 -> Audit log
 ```
 
-Do not show ten workflows. Do not start with architecture. Show the system making a decision.
+Do not show ten workflows. Do not start with architecture. Show the system checking authorization before action.
 
 ## Visual Diagrams
 
@@ -78,7 +78,7 @@ Say:
 
 ```txt
 SentinelOS governs execution before action happens.
-We do not build apps. We control how apps behave.
+We do not build apps. We coordinate how apps behave through governed boundaries.
 ```
 
 Avoid:

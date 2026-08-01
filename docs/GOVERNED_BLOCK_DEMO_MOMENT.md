@@ -55,7 +55,7 @@ Then stop.
 
 Most systems execute first and log afterward.
 
-SentinelOS decides before execution.
+SentinelOS checks authorization before execution.
 
 The important behavior is:
 

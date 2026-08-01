@@ -2,10 +2,10 @@
 
 **COMM:** Sentinel AI by Cody Nunn | Nunn Cloud
 
-SentinelOS is a multi-tenant execution system that deploys business operations as isolated surface planes.
+SentinelOS is a multi-tenant governed execution operating framework that organizes business operations as isolated surface planes.
 
 SentinelOS:
-- executes workflows
+- coordinates approved workflows
 - persists and audits actions
 - scales across clients without rebuilding
 

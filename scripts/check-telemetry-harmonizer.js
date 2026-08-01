@@ -43,12 +43,20 @@ async function main() {
   assert.strictEqual(harmonized.details[0].status, 'SAFE_TO_SEND');
   assert.strictEqual(harmonized.details[1].status, 'APPROVAL_REQUIRED');
   assert.strictEqual(harmonized.details[2].status, 'BLOCKED');
+  assert.strictEqual(harmonized.details[0].severity, 'info');
+  assert.strictEqual(harmonized.details[1].severity, 'warning');
+  assert.strictEqual(harmonized.details[2].severity, 'elevated');
+  assert.strictEqual(harmonized.severitySummary.info, 1);
+  assert.strictEqual(harmonized.severitySummary.warning, 1);
+  assert.strictEqual(harmonized.severitySummary.elevated, 2);
+  assert.strictEqual(harmonized.severitySummary.highest, 'elevated');
   assert(harmonized.details.every((detail) => detail.timestamp));
   assert.strictEqual(harmonized.safeToSend[0].type, 'SAFE_TO_SEND');
   assert.strictEqual(harmonized.requiresApproval[0].item, 'deal.execution');
   assert(harmonized.blocked.some((finding) => finding.item === 'external.export'));
   assert.strictEqual(harmonized.auditArtifact.artifactType, 'governed_telemetry_harmonization');
   assert.strictEqual(harmonized.auditArtifact.summary.blocked, 2);
+  assert.strictEqual(harmonized.auditArtifact.severitySummary.highest, 'elevated');
   assert(harmonized.auditHash && harmonized.auditHash.length === 64);
 
   const normal = handleTelemetryState('ON', {

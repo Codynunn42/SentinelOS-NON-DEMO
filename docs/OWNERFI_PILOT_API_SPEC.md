@@ -2,7 +2,7 @@
 
 **METADATA:** `[PILOT] [API-SPEC] [CONTROLLED-RELEASE]`
 
-**DISCLAIMER:** This is a pilot-phase API specification for validation purposes only. The API is subject to change and should not be considered production-ready.
+**DISCLAIMER:** This is a pilot-phase API specification for validation purposes only. The API is subject to change and is not approved for production use.
 
 Status: Pilot validation spec
 

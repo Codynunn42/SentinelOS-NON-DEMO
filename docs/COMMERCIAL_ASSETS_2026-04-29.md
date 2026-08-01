@@ -85,7 +85,7 @@ It is a governed execution layer that enables systems to operate safely, consist
 
 ### Opportunity
 
-As systems become more autonomous, the need shifts from intelligence to controlled execution.
+As systems become more automated, the need shifts from intelligence to controlled execution.
 
 SentinelOS provides the layer that ensures systems:
 
@@ -116,9 +116,9 @@ I wanted to reach out with something a bit different from the typical AI or SaaS
 
 We have been building a system that focuses on how workflows actually run, not just how they are tracked or automated.
 
-SentinelOS sits on top of existing systems and executes workflows with structure, persistence, and audit built in. Recently, we upgraded it to enforce policy before execution, meaning the system can now block actions based on risk and require human approval when needed.
+SentinelOS sits on top of existing systems and coordinates approved workflows with structure, persistence, and audit built in. Recently, we upgraded it to apply policy before execution, meaning the system can now block actions based on risk and require human approval when needed.
 
-In simple terms, it does not just run workflows. It controls whether they are allowed to run at all.
+In simple terms, it does not just run workflows. It checks whether they are authorized to run at all.
 
 We have a live environment demonstrating this end-to-end, including execution, persistence, audit, and governance.
 

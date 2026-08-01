@@ -164,7 +164,7 @@ async function runIteration(index, config) {
             approvalRatio,
             blockRatio,
             driftRecommendationsGenerated: calculateDriftRecommendations(approvalRatio, blockRatio, commandCount),
-            traceCompleteness: calculateTraceCompleteness(telemetryActivityCount, commandCount),
+            traceCompleteness: calculateTraceCompleteness(config.telemetryActivityCount, commandCount),
             timestamp: new Date().toISOString(),
             correlationId: commandCorrelationId
         } : null,
@@ -211,9 +211,22 @@ function calculateTraceCompleteness(telemetryActivityCount, commandCount) {
 }
 
 async function main() {
-    const iterations = process.argv[2] ? Number(process.argv[2]) : 3;
+    // Parse command line arguments
+    const args = process.argv.slice(2);
+    let iterations = 3;
+    let commandsPerRun = 40;
+
+    for (let i = 0; i < args.length; i += 1) {
+        if (args[i] === '--iterations' && i + 1 < args.length) {
+            iterations = Number(args[i + 1]);
+        }
+        if (args[i] === '--commands' && i + 1 < args.length) {
+            commandsPerRun = Number(args[i + 1]);
+        }
+    }
+
     const config = {
-        commandsPerRun: process.argv[3] ? Number(process.argv[3]) : 40,
+        commandsPerRun,
         approvalRate: 0.35,
         blockRate: 0.15,
         telemetryState: 'LIMITED',

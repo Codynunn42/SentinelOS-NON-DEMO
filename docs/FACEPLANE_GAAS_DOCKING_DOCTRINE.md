@@ -4,9 +4,9 @@
 
 ## Position
 
-SentinelOS must remain the operating system.
+SentinelOS must remain the governed execution operating framework.
 
-It should not become a one-off customer application, a regulated finance app, a hotel app, a payroll app, or any other vertical product. SentinelOS is the governed execution OS that runs and constrains those surfaces.
+It should not become a one-off customer application, a regulated finance app, a hotel app, a payroll app, or any other vertical product. SentinelOS is the governed execution operating framework that coordinates and constrains those surfaces.
 
 The customer-specific or regulation-specific experience is a **face plane**.
 

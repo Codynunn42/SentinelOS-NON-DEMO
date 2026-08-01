@@ -5,7 +5,7 @@
 ## Current System State
 
 ```txt
-Core Capability: Governed Execution OS
+Core Capability: Governed Execution Operating Framework
 Proof Path: Submit → BLOCKED until approval → Execute → Audit
 Status: Live verified on 2026-05-07
 Latest Change: Added Customer Operations plane for support commands

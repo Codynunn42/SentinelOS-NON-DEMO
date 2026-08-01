@@ -141,7 +141,7 @@ Approved as the v1.2.0 maturity package:
 Release position:
 
 ```txt
-SentinelOS is a governed execution OS that enforces, measures, and proves system behavior.
+SentinelOS is a governed execution operating framework that measures, verifies, and preserves system behavior.
 ```
 
 Live control boundary:

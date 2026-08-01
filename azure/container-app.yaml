@@ -1,28 +1,127 @@
 # SentinelOS NON-DEMO - Azure Container Apps
 # COMM: Sentinel AI by Cody Nunn | Nunn Cloud
+#
+# GOVERNANCE STATUS:
+# [KEEP:A4.2-RECONCILED-DEPLOYMENT-REVIEW]
+#
+# A4.2 reconciled this manifest to the fresh sanitized Azure runtime export.
+# This file is repo-local deploy-authoritative shape evidence, not deployment
+# approval. Do not apply this YAML to Azure until a separate deployment
+# approval confirms direct env values, secret bindings, rollback posture, and
+# runtime mutation authority.
+#
+# Source evidence:
+# - docs/AZURE_CONTAINER_APP_SANITIZED_EXPORT_2026-05-18.md
+# - docs/GENERATED_RUNTIME_MAP_2026-05-17.md
+# - docs/A4_2_PRE_APPROVAL_GOVERNANCE_REVIEW_2026-05-18.md
+#
+# Secret handling:
+# - secret values are intentionally absent
+# - direct env values are intentionally absent
+# - secretRef posture mirrors the sanitized runtime export
+# - deployment requires a separate value/binding review
 
-name: sentinel-api
-location: eastus2
-
+id: /subscriptions/82bd72d4-00ef-400d-839b-e168e980c510/resourceGroups/rg-nc-dev-sentinel/providers/Microsoft.App/containerapps/ca-nc-dev-sentinel
+location: East US 2
+name: ca-nc-dev-sentinel
+resourceGroup: rg-nc-dev-sentinel
 type: Microsoft.App/containerApps
 
 properties:
-  managedEnvironmentId: <REPLACE_WITH_ENVIRONMENT_ID>
+  managedEnvironmentId: /subscriptions/82bd72d4-00ef-400d-839b-e168e980c510/resourceGroups/rg-nc-dev-sentinel/providers/Microsoft.App/managedEnvironments/cae-nc-dev-sentinel
   configuration:
+    activeRevisionsMode: Single
     ingress:
       external: true
-      targetPort: 3000
-    registries: []
+      targetPort: 80
+      transport: Auto
+      allowInsecure: false
+      exposedPort: 0
+      traffic:
+        - latestRevision: true
+          weight: 100
+    registries:
+      - server: acrncdevsentinel.azurecr.io
+        username: acrncdevsentinel
+        passwordSecretRef: registry-password
     secrets:
+      - name: azure-client-secret
+      - name: billing-sign-key
+      - name: database-url
+      - name: registry-password
       - name: sentinel-api-key
-        value: <REPLACE_WITH_SENTINEL_API_KEY>
+      - name: sentinel-github-token
+      - name: stripe-secret-key
+      - name: sentinel-hmac-secret
   template:
+    revisionSuffix: ""
     containers:
-      - name: sentinel-api
-        image: <REPLACE_WITH_IMAGE>
+      - name: sentinel
+        image: acrncdevsentinel.azurecr.io/sentinel-api:phase1-approval-continuity-3e7308a-20260513-0645
         env:
+          - name: NODE_ENV
+          - name: PORT
+          - name: SENTINEL_VERSION
+          - name: AZURE_TENANT_ID
+          - name: AZURE_API_AUDIENCE
+          - name: AZURE_AUTHORITY
+          - name: AZURE_REDIRECT_URI
+          - name: AZURE_CLIENT_ID
+          - name: AZURE_CLIENT_SECRET
+            secretRef: azure-client-secret
+          - name: APPLICATIONINSIGHTS_CONNECTION_STRING
+          - name: REPORTING_WEBHOOK_URL
+          - name: DATABASE_URL
+            secretRef: database-url
+          - name: STRIPE_SECRET_KEY
+            secretRef: stripe-secret-key
+          - name: BILLING_SIGN_KEY
+            secretRef: billing-sign-key
+          - name: APPCONFIG_ENDPOINT
+          - name: SENTINEL_AUTH_MODE
+          - name: SENTINEL_SMOKE_AUTH
+          - name: SENTINEL_ENV
+          - name: SENTINEL_GITHUB_TOKEN
+            secretRef: sentinel-github-token
           - name: SENTINEL_API_KEY
             secretRef: sentinel-api-key
+          - name: SENTINEL_KEY_ROTATED_AT
+          - name: SENTINEL_HMAC_SECRET
+            secretRef: sentinel-hmac-secret
+        probes:
+          - type: Liveness
+            httpGet:
+              path: /health
+              port: 80
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 30
+            timeoutSeconds: 3
+            failureThreshold: 3
+          - type: Readiness
+            httpGet:
+              path: /health
+              port: 80
+              scheme: HTTP
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          - type: Startup
+            httpGet:
+              path: /health
+              port: 80
+              scheme: HTTP
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 30
         resources:
           cpu: 0.5
+          ephemeralStorage: 2Gi
           memory: 1Gi
+    scale:
+      minReplicas: 1
+      maxReplicas: 2
+      pollingInterval: 30
+      cooldownPeriod: 300
