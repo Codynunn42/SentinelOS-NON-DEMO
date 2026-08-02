@@ -62,6 +62,9 @@
     "check:c4-providers": "node scripts/check-c4-providers.js",
     "check:c4": "node scripts/check-c4-broker.js && node scripts/check-c4-providers.js",
     "check:federation-envelope": "node scripts/check-federation-envelope.js",
+    "check:cprm": "node scripts/check-cprm.js",
+    "check:fpmr": "node scripts/check-fpmr.js",
+    "check:pffl": "node scripts/check-pffl.js",
     "db:apply-schema": "node scripts/db-apply-schema.js",
     "db:smoke": "node scripts/db-smoke.js"
   },
