@@ -350,6 +350,42 @@
 
     .provider-meta span strong { color: var(--text); font-weight: 600; }
 
+    /* ---- Federation panel (Phase 3 — NFR) ---- */
+    .fed-timeline { display: flex; flex-direction: column; gap: 8px; margin-bottom: 18px; }
+    .fed-step { display: flex; align-items: flex-start; gap: 12px; padding: 10px 14px; background: var(--surface-2); border-radius: 6px; border-left: 3px solid var(--line); }
+    .fed-step.primary { border-left-color: var(--accent); }
+    .fed-step.fallback { border-left-color: var(--yellow); }
+    .fed-step.failed { border-left-color: var(--red); }
+    .fed-step.complete { border-left-color: var(--green); }
+    .fed-step-idx { font-size: 11px; font-weight: 700; color: var(--muted); min-width: 22px; }
+    .fed-step-body { flex: 1; }
+    .fed-step-provider { font-size: 13px; font-weight: 700; color: var(--text); }
+    .fed-step-meta { font-size: 11px; color: var(--muted); margin-top: 3px; display: flex; gap: 14px; flex-wrap: wrap; }
+    .fed-step-meta .drift-warn { color: var(--yellow); font-weight: 700; }
+    .fed-step-meta .drift-crit { color: var(--red); font-weight: 700; }
+    .fed-step-meta .health-deg { color: var(--red); font-weight: 700; }
+    .fed-drift-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 8px; margin-bottom: 18px; }
+    .fed-drift-card { padding: 10px 12px; background: var(--surface-2); border-radius: 6px; border-left: 3px solid var(--line); }
+    .fed-drift-card.NONE { border-left-color: var(--green); }
+    .fed-drift-card.INFO { border-left-color: var(--accent); }
+    .fed-drift-card.WARNING { border-left-color: var(--yellow); }
+    .fed-drift-card.CRITICAL { border-left-color: var(--red); }
+    .fed-drift-name { font-size: 12px; font-weight: 700; color: var(--text); }
+    .fed-drift-sev { font-size: 11px; margin-top: 3px; }
+    .fed-evidence-list { display: flex; flex-direction: column; gap: 6px; }
+    .fed-ev-row { display: flex; gap: 10px; align-items: center; padding: 8px 12px; background: var(--surface-2); border-radius: 5px; font-size: 11px; }
+    .fed-ev-provider { font-weight: 700; color: var(--accent); min-width: 80px; }
+    .fed-ev-status { font-weight: 700; min-width: 70px; }
+    .fed-ev-status.collected { color: var(--green); }
+    .fed-ev-status.pending { color: var(--muted); }
+    .fed-ev-status.failed { color: var(--red); }
+    .fed-ev-ref { color: var(--muted); word-break: break-all; }
+    .fed-failover-list { display: flex; flex-direction: column; gap: 6px; }
+    .fed-fo-row { padding: 8px 12px; background: var(--surface-2); border-radius: 5px; border-left: 3px solid var(--yellow); font-size: 11px; }
+    .fed-fo-row.inactive { border-left-color: var(--line); }
+    .fed-fo-provider { font-weight: 700; color: var(--text); margin-bottom: 3px; }
+    .fed-fo-meta { color: var(--muted); display: flex; gap: 12px; flex-wrap: wrap; }
+
     .btn-load-secondary {
       background: var(--surface-2);
       color: var(--text);
@@ -394,6 +430,7 @@
     <button class="btn-load" onclick="loadApprovals()">Load Pending Approvals</button>
     <button class="btn-load" onclick="loadCapabilities()" style="margin-left:8px; background:var(--surface-2);">Load Capabilities</button>
     <button class="btn-load-secondary" onclick="loadProviderDashboard()" style="margin-left:8px;">Provider Health</button>
+    <button class="btn-load-secondary" onclick="loadFederationPanel()" style="margin-left:8px;background:var(--surface-3,#1e2a1a);color:var(--accent);">Federation</button>
   </div>
 
   <!-- Pending approvals -->
@@ -422,6 +459,16 @@
     <div id="providerHealthPanel">
       <div class="empty-state" id="providerHealthEmpty">
         Click <strong>Provider Health</strong> to load the cross-provider drift and governance posture report.
+      </div>
+    </div>
+  </div>
+
+  <!-- Federation Panel (Phase 3 — NFR) -->
+  <div class="section" id="federationSection">
+    <div class="section-title">Federation — Multi-Provider Execution View</div>
+    <div id="federationPanel">
+      <div class="empty-state" id="federationEmpty">
+        Click <strong>Federation</strong> to load the federation execution timeline, drift classification, failover status, and evidence chain.
       </div>
     </div>
   </div>
@@ -690,6 +737,131 @@
       container.innerHTML = `<div class="empty-state">Error: ${escHtml(err.message)}</div>`;
     }
   }
+  // Phase 3 — NFR: Federation Panel
+  // Displays multi-provider execution timeline, drift classification,
+  // failover visualization, and federated evidence chain.
+  async function loadFederationPanel() {
+    const apiKey = document.getElementById('apiKeyInput').value.trim();
+    const headers = { 'Content-Type': 'application/json' };
+    if (apiKey) headers['x-api-key'] = apiKey;
+
+    const container = document.getElementById('federationPanel');
+    logActivity('Loading Federation panel…', 'pending');
+
+    try {
+      // Load drift/capability data for federation state
+      const res = await fetch('/api/v1/drift/capabilities', { headers });
+      const data = await res.json();
+
+      if (!res.ok) {
+        logActivity(`Federation panel load failed: ${data.error || res.status}`, 'blocked');
+        container.innerHTML = `<div class="empty-state">Failed to load federation state: ${escHtml(data.error || res.status)}</div>`;
+        return;
+      }
+
+      const providers = data.providers || [];
+
+      // --- Execution Timeline ---
+      const timelineHtml = providers.length
+        ? `<div class="fed-timeline">${providers.map((p, i) => {
+            const health = p.signals && p.signals.includes('health_degraded') ? 'degraded' : 'healthy';
+            const drift = !p.clean ? (p.signals && p.signals.some(s => s.includes('critical')) ? 'CRITICAL' : 'WARNING') : 'NONE';
+            const stepClass = i === 0 ? 'primary' : health === 'degraded' ? 'failed' : drift === 'NONE' ? 'complete' : 'fallback';
+            const isPrimary = i === 0 ? '<span style="color:var(--accent);font-weight:700;font-size:10px;margin-left:6px;">PRIMARY</span>' : '';
+            const driftLabel = drift === 'CRITICAL'
+              ? `<span class="drift-crit">DRIFT: CRITICAL</span>`
+              : drift === 'WARNING'
+                ? `<span class="drift-warn">DRIFT: WARNING</span>`
+                : `<span style="color:var(--green)">DRIFT: NONE</span>`;
+            const healthLabel = health === 'degraded'
+              ? `<span class="health-deg">HEALTH: DEGRADED</span>`
+              : `<span style="color:var(--green)">HEALTH: OK</span>`;
+            return `<div class="fed-step ${stepClass}">
+              <div class="fed-step-idx">#${i + 1}</div>
+              <div class="fed-step-body">
+                <div class="fed-step-provider">${escHtml(p.provider)}${isPrimary}</div>
+                <div class="fed-step-meta">
+                  <span>Capabilities: <strong style="color:var(--text)">${p.total}</strong></span>
+                  ${healthLabel}
+                  ${driftLabel}
+                  ${p.signals && p.signals.length ? `<span>Signals: ${escHtml(p.signals.join(', '))}</span>` : ''}
+                </div>
+              </div>
+            </div>`;
+          }).join('')}</div>`
+        : '<div class="empty-state">No providers in federation.</div>';
+
+      // --- Drift Classification Grid ---
+      const driftHtml = providers.length
+        ? `<div class="fed-drift-grid">${providers.map((p) => {
+            const drift = !p.clean ? (p.signals && p.signals.some(s => s.includes('critical')) ? 'CRITICAL' : 'WARNING') : 'NONE';
+            const driftColor = drift === 'CRITICAL' ? 'var(--red)' : drift === 'WARNING' ? 'var(--yellow)' : 'var(--green)';
+            return `<div class="fed-drift-card ${drift}">
+              <div class="fed-drift-name">${escHtml(p.provider)}</div>
+              <div class="fed-drift-sev" style="color:${driftColor};font-weight:700;">${drift}</div>
+              <div style="font-size:10px;color:var(--muted);margin-top:2px;">${p.driftedCapabilities || 0} drifted cap(s)</div>
+            </div>`;
+          }).join('')}</div>`
+        : '<div class="empty-state">No drift data.</div>';
+
+      // --- Failover Visualization ---
+      const failoverHtml = providers.length > 1
+        ? `<div class="fed-failover-list">${providers.slice(1).map((p) => {
+            const health = p.signals && p.signals.includes('health_degraded') ? 'degraded' : 'healthy';
+            const isActive = health === 'degraded' || !p.clean;
+            return `<div class="fed-fo-row ${isActive ? '' : 'inactive'}">
+              <div class="fed-fo-provider">${escHtml(p.provider)} ${isActive ? '<span style="color:var(--yellow)">← FALLBACK ELIGIBLE</span>' : ''}</div>
+              <div class="fed-fo-meta">
+                <span>Trigger: <strong style="color:var(--text)">HEALTH_BELOW_THRESHOLD</strong></span>
+                <span>Action: <strong style="color:var(--text)">REROUTE</strong></span>
+                <span>Health: <strong style="color:${health === 'healthy' ? 'var(--green)' : 'var(--red)'}">${health.toUpperCase()}</strong></span>
+              </div>
+            </div>`;
+          }).join('')}</div>`
+        : '<div class="empty-state">No fallback providers in federation path.</div>';
+
+      // --- Federated Evidence Stubs ---
+      const evidenceHtml = `<div class="fed-evidence-list">${providers.map((p) => {
+        return `<div class="fed-ev-row">
+          <span class="fed-ev-provider">${escHtml(p.provider)}</span>
+          <span class="fed-ev-status pending">PENDING</span>
+          <span class="fed-ev-ref">evidence/provider/${escHtml(p.provider)}/ — awaiting execution run</span>
+        </div>`;
+      }).join('')}
+      <div class="fed-ev-row" style="border-top:1px solid var(--line);margin-top:4px;padding-top:8px;">
+        <span class="fed-ev-provider" style="color:var(--muted)">federation</span>
+        <span class="fed-ev-status pending">PENDING</span>
+        <span class="fed-ev-ref">evidence/federation/chain.json — awaiting finalized chain</span>
+      </div></div>`;
+
+      container.innerHTML = `
+        <div style="margin-bottom:18px;padding:10px 14px;background:var(--surface-2);border-radius:6px;font-size:12px;display:flex;gap:20px;flex-wrap:wrap;">
+          <span>Providers: <strong style="color:var(--text)">${providers.length}</strong></span>
+          <span>Primary: <strong style="color:var(--accent)">${providers.length ? escHtml(providers[0].provider) : '—'}</strong></span>
+          <span>Fallback path: <strong style="color:var(--text)">${Math.max(0, providers.length - 1)} provider(s)</strong></span>
+          <span style="color:var(--muted)">Assessed: ${escHtml(data.assessedAt || new Date().toISOString())}</span>
+        </div>
+
+        <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Execution Timeline</div>
+        ${timelineHtml}
+
+        <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;margin-top:18px;">Drift Classification</div>
+        ${driftHtml}
+
+        <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;margin-top:18px;">Failover Path</div>
+        ${failoverHtml}
+
+        <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;margin-top:18px;">Federated Evidence Chain</div>
+        ${evidenceHtml}
+      `;
+
+      logActivity(`Federation panel loaded — ${providers.length} provider(s) in fabric`, data.clean ? 'ok' : 'pending');
+    } catch (err) {
+      logActivity(`Error loading federation panel: ${err.message}`, 'blocked');
+      container.innerHTML = `<div class="empty-state">Error: ${escHtml(err.message)}</div>`;
+    }
+  }
+
 </script>
 
 </body>
