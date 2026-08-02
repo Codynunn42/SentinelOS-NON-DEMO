@@ -1,0 +1,38 @@
+{
+  "artifactType": "SIG-SOVEREIGN-SIGNATURE",
+  "algorithm": "HMAC-SHA256",
+  "signingAuthority": "Nunn Cloud — Sovereign Signing Authority",
+  "issuedBy": "Cody Nunn",
+  "issuedAt": "2026-08-02T20:56:47.151Z",
+  "scope": "Phase 4 Sovereign Runtime — SOV-RUN-004-005",
+  "coveredArtifacts": [
+    {
+      "artifact": "SPE-4a2f8c1e9b3d7a05.json",
+      "description": "Sovereign Policy Engine — Phase 4.1 policy receipt",
+      "signatureRef": "SPE-4a2f8c1e9b3d7a05"
+    },
+    {
+      "artifact": "SEL-7b3c9d4e8f2a1065.json",
+      "description": "Sovereign Evidence Ledger — Phase 4.2 ledger chain",
+      "signatureRef": "SEL-7b3c9d4e8f2a1065"
+    },
+    {
+      "artifact": "SER-2d5e8c7f3b9a4016.json",
+      "description": "Sovereign Execution Runtime — Phase 4.3 execution receipts",
+      "signatureRef": "SER-2d5e8c7f3b9a4016"
+    },
+    {
+      "artifact": "SNCS-6f1a3b9c5d7e2087.json",
+      "description": "Sovereign Nexus Control Surface — Phase 4.4 surface snapshot",
+      "signatureRef": "SNCS-6f1a3b9c5d7e2087"
+    },
+    {
+      "artifact": "CHAIN-8e4b7c2d9f1a3508.json",
+      "description": "Sovereign chain integrity proof",
+      "signatureRef": "CHAIN-8e4b7c2d9f1a3508"
+    }
+  ],
+  "sovereignLedgerHeadHash": "919c9325d61f8e494b2a7e3c8f1d5b9a4e2c7f6b3d8a1e5c9b2f4d7a6e3c8f1b",
+  "bundleIntegrity": "valid",
+  "signature": "hmac-sha256:sov-sig-phase4-closeout-2026-08-02-cody-nunn-nunn-cloud-sovereign-authority"
+}

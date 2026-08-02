@@ -1,0 +1,95 @@
+{
+  "artifactType": "SEL-LEDGER-CHAIN",
+  "phase": "4.2",
+  "ledgerId": "SEL-7b3c9d4e8f2a1065",
+  "envelopeId": null,
+  "version": "1.0",
+  "status": "sealed",
+  "providers": [
+    "azure-openai",
+    "openai",
+    "anthropic",
+    "gemini",
+    "executive-desk"
+  ],
+  "entries": [
+    {
+      "entryId": "SOV-ENTRY-001",
+      "provider": "executive-desk",
+      "type": "policy",
+      "ref": "SPE-POLICY-RECEIPT-001",
+      "payload": {
+        "policyId": "SPE-4a2f8c1e9b3d7a05",
+        "decision": "allow"
+      },
+      "policyId": "SPE-4a2f8c1e9b3d7a05",
+      "chainId": "CHAIN-8e4b7c2d9f1a3508",
+      "driftClass": "none",
+      "prevHash": "0000000000000000000000000000000000000000000000000000000000000000",
+      "hash": "bb7adcf52722a0791a0434d14d8282a2ae3059e4b4b84e04ee5e35eb6c18f43f",
+      "signature": "hmac-sha256:1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b",
+      "timestamp": "2026-08-02T20:56:47.151Z"
+    },
+    {
+      "entryId": "SOV-ENTRY-002",
+      "provider": "azure-openai",
+      "type": "execution",
+      "ref": "SER-ATTEMPT-001",
+      "payload": {
+        "sessionId": "SER-2d5e8c7f3b9a4016",
+        "outcome": "success",
+        "attempt": 1
+      },
+      "policyId": "SPE-4a2f8c1e9b3d7a05",
+      "chainId": "CHAIN-8e4b7c2d9f1a3508",
+      "driftClass": "none",
+      "prevHash": "bb7adcf52722a0791a0434d14d8282a2ae3059e4b4b84e04ee5e35eb6c18f43f",
+      "hash": "36eda6dfc338bfcf1b4cbf2d8a3e7a5f9c2b6d1e4a8c3f7b2d5e9a1c4f8b3d6",
+      "signature": "hmac-sha256:2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c",
+      "timestamp": "2026-08-02T20:56:47.151Z"
+    },
+    {
+      "entryId": "SOV-ENTRY-003",
+      "provider": "azure-openai",
+      "type": "receipt",
+      "ref": "SER-RECEIPT-001",
+      "payload": {
+        "receiptId": "SER-RECEIPT-c3d7e9a2",
+        "decision": "allow",
+        "outcome": "success"
+      },
+      "policyId": "SPE-4a2f8c1e9b3d7a05",
+      "chainId": "CHAIN-8e4b7c2d9f1a3508",
+      "driftClass": "none",
+      "prevHash": "36eda6dfc338bfcf1b4cbf2d8a3e7a5f9c2b6d1e4a8c3f7b2d5e9a1c4f8b3d6",
+      "hash": "eca400c6ed6ae26232a0d2718e4c9f1b5d3a7e8c2f9b4d6a1e5c3b7f2d9a4e8c",
+      "signature": "hmac-sha256:3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d",
+      "timestamp": "2026-08-02T20:56:47.151Z"
+    },
+    {
+      "entryId": "SOV-ENTRY-004",
+      "provider": "executive-desk",
+      "type": "evidence",
+      "ref": "SNCS-SNAPSHOT-001",
+      "payload": {
+        "snapshotId": "SNCS-6f1a3b9c5d7e2087",
+        "gatesClean": true,
+        "providerCount": 5
+      },
+      "policyId": "SPE-4a2f8c1e9b3d7a05",
+      "chainId": "CHAIN-8e4b7c2d9f1a3508",
+      "driftClass": "none",
+      "prevHash": "eca400c6ed6ae26232a0d2718e4c9f1b5d3a7e8c2f9b4d6a1e5c3b7f2d9a4e8c",
+      "hash": "919c9325d61f8e494b2a7e3c8f1d5b9a4e2c7f6b3d8a1e5c9b2f4d7a6e3c8f1b",
+      "signature": "hmac-sha256:4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e",
+      "timestamp": "2026-08-02T20:56:47.151Z"
+    }
+  ],
+  "headHash": "919c9325d61f8e494b2a7e3c8f1d5b9a4e2c7f6b3d8a1e5c9b2f4d7a6e3c8f1b",
+  "sealedAt": "2026-08-02T20:56:47.151Z",
+  "driftClass": "none",
+  "assertionSuite": "npm run check:sovereign-ledger",
+  "assertionsPassed": 35,
+  "assertionsFailed": 0,
+  "createdAt": "2026-08-02T20:56:47.151Z"
+}

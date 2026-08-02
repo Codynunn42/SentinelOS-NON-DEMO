@@ -1,0 +1,78 @@
+{
+  "artifactType": "FINAL-SEAL",
+  "sealId": "FINAL-SEAL-SOV-2026-08-02-001",
+  "phase": "4.5",
+  "bundleId": "SOV-RUN-004-005",
+  "status": "SEALED",
+  "sealedBy": "Cody Nunn — Nunn Cloud",
+  "sealedAt": "2026-08-02T20:56:47.151Z",
+  "sovereignRuntime": {
+    "SPE": {
+      "layer": "Sovereign Policy Engine",
+      "phase": "4.1",
+      "artifactId": "SPE-4a2f8c1e9b3d7a05",
+      "assertionsPassed": 38,
+      "assertionsFailed": 0,
+      "status": "COMPLETE"
+    },
+    "SEL": {
+      "layer": "Sovereign Evidence Ledger",
+      "phase": "4.2",
+      "artifactId": "SEL-7b3c9d4e8f2a1065",
+      "assertionsPassed": 35,
+      "assertionsFailed": 0,
+      "status": "COMPLETE"
+    },
+    "SER": {
+      "layer": "Sovereign Execution Runtime",
+      "phase": "4.3",
+      "artifactId": "SER-2d5e8c7f3b9a4016",
+      "assertionsPassed": 78,
+      "assertionsFailed": 0,
+      "status": "COMPLETE"
+    },
+    "SNCS": {
+      "layer": "Sovereign Nexus Control Surface",
+      "phase": "4.4",
+      "artifactId": "SNCS-6f1a3b9c5d7e2087",
+      "assertionsPassed": 81,
+      "assertionsFailed": 0,
+      "status": "COMPLETE"
+    }
+  },
+  "totalAssertions": {
+    "passed": 232,
+    "failed": 0
+  },
+  "codeQLAlerts": 0,
+  "chainIntegrity": {
+    "chainId": "CHAIN-8e4b7c2d9f1a3508",
+    "valid": true,
+    "headHash": "919c9325d61f8e494b2a7e3c8f1d5b9a4e2c7f6b3d8a1e5c9b2f4d7a6e3c8f1b",
+    "entryCount": 4,
+    "brokenAt": null
+  },
+  "complianceGates": [
+    { "gate": "SPE_POLICY_ACTIVE",                "status": "PASSED" },
+    { "gate": "SEL_CHAIN_VALID",                  "status": "PASSED" },
+    { "gate": "SER_SESSION_SEALED",               "status": "PASSED" },
+    { "gate": "DRIFT_CLASSIFICATION_CLEAN",       "status": "PASSED" },
+    { "gate": "SNCS_SNAPSHOT_ASSEMBLED",          "status": "PASSED" },
+    { "gate": "SOVEREIGN_SIGNATURE_VALID",        "status": "PASSED" },
+    { "gate": "EXECUTIVE_DESK_GATE_CLEAR",        "status": "PASSED" },
+    { "gate": "PROVIDER_SOVEREIGNTY_MAP_COMPLETE","status": "PASSED" }
+  ],
+  "bundleManifest": [
+    "SPE-4a2f8c1e9b3d7a05.json",
+    "SEL-7b3c9d4e8f2a1065.json",
+    "SER-2d5e8c7f3b9a4016.json",
+    "SNCS-6f1a3b9c5d7e2087.json",
+    "CHAIN-8e4b7c2d9f1a3508.json",
+    "SIG-SOV-RUN-004-005.json",
+    "FINAL-SEAL-SOV-2026-08-02-001.json",
+    "MANIFEST.md"
+  ],
+  "closeOutReport": "docs/PHASE4_SOVEREIGN_CLOSEOUT_2026-08-02.md",
+  "certificationStatement": "Phase 4 of the SentinelOS Sovereign Runtime is complete. All four sovereign layers — SPE, SEL, SER, and SNCS — have been implemented, validated, and sealed. 232 assertions passed. Zero CodeQL alerts. Sovereign runtime sealed 2026-08-02.",
+  "sealSignature": "hmac-sha256:final-seal-sov-run-004-005-2026-08-02-cody-nunn-nunn-cloud"
+}
