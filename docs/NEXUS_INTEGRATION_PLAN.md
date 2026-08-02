@@ -125,22 +125,28 @@ Key fields:
 - [x] Create this integration plan document
 - [x] Update `SURFACE_PLANES.md` and `STATUS_REPORT.md`
 
-### Phase 2 — App Shell
+### Phase 2 — App Shell ✅
 
-- [ ] Create `apps/nexus/` application directory
-- [ ] Port sentinel-console command surface from nunncorp-global-mono
-- [ ] Wire NEXUS intent through `/v1/command` envelope with `tenant: "nexus"`
-- [ ] Command palette routing to `nexus.intent.emit`
-- [ ] High-risk action detection routing to `nexus.command.execute`
-- [ ] Build NEXUS GaaS policy pack (`apps/sentinel/src/governance/gaas/nexus-policy.js`)
+- [x] Create `apps/nexus/` application directory
+- [x] Port sentinel-console command surface from nunncorp-global-mono
+- [x] Wire NEXUS intent through `/v1/command` envelope with `tenant: "nexus"`
+- [x] Command palette routing to `nexus.intent.emit`
+- [x] High-risk action detection routing to `nexus.command.execute`
+- [x] Build NEXUS GaaS policy pack (`apps/sentinel/src/governance/gaas/nexus-policy.js`)
+- [x] NEXUS Command Console UI (`apps/nexus/public/nexus-console.html`)
+- [x] Executive Desk oversight UI (`apps/nexus/public/nexus-executive.html`)
+- [x] API routes `/nexus` and `/nexus/executive` registered and audited
 
-### Phase 3 — Executive Desk Surface
+### Phase 3 — C3 Capability Adoption Layer
 
-- [ ] Build Executive Desk UI at `/executive`
-- [ ] Surface pending NEXUS approval checkpoints
-- [ ] Approve/reject workflow wired to `/approvals/:id/approve` and `/approvals/:id/reject`
-- [ ] Executive telemetry stream (`executive.oversight.*`)
-- [ ] Executive Desk access protected behind `nexus:executive` scope
+**Mission:** Transform NEXUS from an integrated application into a governed capability provider. The Command Envelope API becomes the canonical execution contract for SentinelOS — every future integration (TILDA, Microsoft 365, GitHub, government systems) implements this same contract.
+
+- [x] **C3.1** — Command Envelope API: `POST /api/v1/command-envelope`, `/api/v1/planning`, `/api/v1/execution`, `/api/v1/evidence`
+- [x] **C3.2** — Capability Registry: `apps/sentinel/src/capabilities/registry.js` + `resolver.js`
+- [x] **C3.3** — Dock Manifest Standard: `manifest-schema.js` + `dock-manifest.schema.json` + nexus-faceplane.json migration
+- [x] **C3.4** — Executive Desk capability surface: registry-aware, manifest-aware oversight UI
+- [x] **C3.5** — AI Capability Broker: goal → capability → provider routing (`capabilities/broker.js`)
+- [x] **C3 Close** — `NEXUS_C3_CHECKPOINT_REPORT.md` + STATUS_REPORT.md final update
 
 ---
 
@@ -156,4 +162,4 @@ Key fields:
 
 **Owner:** Sentinel AI by Cody Nunn | Nunn Cloud
 **Date:** 2026-08-02
-**Status:** Phase 1 Complete — Phase 2 Ready
+**Status:** Phase 1 Complete — Phase 2 Complete — Phase 3 (C3 Capability Adoption Layer) Complete — C4 Ready

@@ -329,6 +329,7 @@
     <span class="auth-label">API Key:</span>
     <input id="apiKeyInput" class="auth-input" type="password" placeholder="x-api-key (executive-scoped)" autocomplete="off">
     <button class="btn-load" onclick="loadApprovals()">Load Pending Approvals</button>
+    <button class="btn-load" onclick="loadCapabilities()" style="margin-left:8px; background:var(--surface-2);">Load Capabilities</button>
   </div>
 
   <!-- Pending approvals -->
@@ -337,6 +338,16 @@
     <div id="pendingList">
       <div class="empty-state" id="pendingEmpty">
         No pending approvals loaded. Enter your API key and click Load.
+      </div>
+    </div>
+  </div>
+
+  <!-- Capability Registry Panel -->
+  <div class="section">
+    <div class="section-title">Registered Capabilities</div>
+    <div id="capabilityRegistry">
+      <div class="empty-state" id="capabilityEmpty">
+        Enter your API key and click Load Capabilities to inspect the Capability Registry.
       </div>
     </div>
   </div>
@@ -484,6 +495,61 @@
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;');
+  }
+
+  async function loadCapabilities() {
+    const apiKey = document.getElementById('apiKeyInput').value.trim();
+    const headers = { 'Content-Type': 'application/json' };
+    if (apiKey) headers['x-api-key'] = apiKey;
+
+    const container = document.getElementById('capabilityRegistry');
+    logActivity('Loading Capability Registry…', 'pending');
+
+    try {
+      const res = await fetch('/api/v1/capabilities', { headers });
+      const data = await res.json();
+
+      if (!res.ok) {
+        logActivity(`Capability Registry load failed: ${data.error || res.status}`, 'blocked');
+        container.innerHTML = `<div class="empty-state">Failed to load capabilities: ${escHtml(data.error || res.status)}</div>`;
+        return;
+      }
+
+      const capabilities = data.capabilities || [];
+      if (!capabilities.length) {
+        container.innerHTML = '<div class="empty-state">No capabilities registered.</div>';
+        logActivity('No capabilities registered', 'ok');
+        return;
+      }
+
+      container.innerHTML = capabilities.map((cap) => {
+        const evidenceBadge = cap.governance && cap.governance.evidenceRequired
+          ? '<span style="color:var(--yellow);font-size:10px;font-weight:700;margin-left:6px;">EVIDENCE REQUIRED</span>'
+          : '';
+        const lifecycleBadge = cap.lifecycle && cap.lifecycle.status === 'active'
+          ? '<span style="color:var(--green);font-size:10px;font-weight:700;margin-left:6px;">ACTIVE</span>'
+          : `<span style="color:var(--muted);font-size:10px;font-weight:700;margin-left:6px;">${escHtml((cap.lifecycle || {}).status || 'UNKNOWN').toUpperCase()}</span>`;
+        return `<div class="approval-card" style="margin-bottom:10px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <span style="font-size:12px;font-weight:700;color:var(--accent);">${escHtml(cap.capabilityId)}</span>
+            ${lifecycleBadge}${evidenceBadge}
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px;font-size:11px;color:var(--muted);">
+            <span>Provider: <strong style="color:var(--text)">${escHtml(cap.provider)}</strong></span>
+            <span>Type: <strong style="color:var(--text)">${escHtml(cap.type)}</strong></span>
+            <span>Endpoint: <strong style="color:var(--text)">${escHtml(cap.endpoint)}</strong></span>
+            <span>Min Role: <strong style="color:var(--text)">${escHtml((cap.authority || {}).minimumRole || '—')}</strong></span>
+            <span>Health: <strong style="color:var(--text)">${escHtml(cap.healthEndpoint || '—')}</strong></span>
+            <span>Version: <strong style="color:var(--text)">${escHtml(cap.version || '—')}</strong></span>
+          </div>
+        </div>`;
+      }).join('');
+
+      logActivity(`Loaded ${capabilities.length} registered capability(ies)`, 'ok');
+    } catch (err) {
+      logActivity(`Error loading capabilities: ${err.message}`, 'blocked');
+      container.innerHTML = `<div class="empty-state">Error: ${escHtml(err.message)}</div>`;
+    }
   }
 </script>
 

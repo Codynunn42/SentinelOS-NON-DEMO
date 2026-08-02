@@ -4,15 +4,17 @@
 
 ## Current Phase
 
-NEXUS Integration to SentinelOS (Active Build)
+C3 — Capability Adoption Layer (Active Build)
 
 ## Summary
 
-SentinelOS NON-DEMO is now the canonical home for NEXUS integration. This repository owns the NEXUS command console face plane and the Executive Desk oversight layer. All NEXUS actions route through the SentinelOS governance core — no direct execution bypass. The Executive Desk holds approval authority over all high-risk NEXUS execution.
+SentinelOS NON-DEMO is the canonical home for the NEXUS integration and the SentinelOS Capability Adoption Layer. NEXUS is no longer a feature — it is the first governed capability provider within SentinelOS.
 
-The operating foundation is solid: authenticated API, governance preflight, audit trail, Postgres persistence, live Azure deployment, and a proven OwnerFi surface plane. NEXUS builds on this foundation as the primary governed command console face plane.
+The Capability Adoption Layer establishes the standardized contract through which any integrated system participates in SentinelOS: discover, dock, register capabilities, govern, orchestrate through the Command Envelope API, and operate through the Executive Desk. Every future system — TILDA, Microsoft 365, GitHub, government systems — follows the same lifecycle.
 
-Phase 1 of NEXUS integration is complete. NEXUS is registered in the surface registry, its docking manifest is live, Executive Desk oversight plane is defined, and policy enforcement rules are wired. Phase 2 (app shell + GaaS policy pack) is ready to execute.
+The operating foundation is solid: authenticated API, governance preflight, audit trail, Postgres persistence, live Azure deployment, Executive Desk oversight surface, and a proven OwnerFi surface plane. C3 builds on this foundation to establish the platform contract.
+
+NEXUS Phase 1 (surface registration, policy, docking manifest) and Phase 2 (app shell, Executive Desk UI, GaaS policy pack) are complete — C2.3 and C2.4 PASS issued. C3 (Capability Adoption Layer) is now active.
 
 ## Completed
 
@@ -83,30 +85,39 @@ Phase 1 of NEXUS integration is complete. NEXUS is registered in the surface reg
 
 ## In Progress
 
-- **NEXUS Integration Phase 1 complete** — surface registered, docking manifest live, Executive Desk plane defined, policy enforcement wired
-- NEXUS Phase 2 (app shell + GaaS policy pack) ready to execute
+- **C4** — Multi-provider AI capability selection; TILDA, Microsoft 365, GitHub, government system docking; cross-provider Executive Desk
+
+## Completed (NEXUS Phases 1–2)
+
+- NEXUS surface registered, docking manifest live, Executive Desk plane defined, policy enforcement wired — C2.3 PASS
+- NEXUS app shell (`apps/nexus/`) built, NEXUS GaaS policy pack built, Executive Desk UI built, API routes registered — C2.4 PASS
 
 ## Gaps
 
 - no full role-based key model yet
 - live Sentinel analytics rules not yet created
-- NEXUS app shell (`apps/nexus/`) not yet built — Phase 2
-- NEXUS GaaS policy pack not yet built — Phase 2
-- Executive Desk UI surface not yet built — Phase 3
 - no active billing, checkout, payment, or funnel execution path in this repo
 - `ca-sentinelos-proof` appears to be an older health-only host and should not be used as the current shareable proof URL
 
+## C3 Gate Status
+
+| Gate | Deliverable | Status |
+|------|-------------|--------|
+| C3.0 | Status correction | PASS |
+| C3.1 | Command Envelope API | PASS |
+| C3.2 | Capability Registry | PASS |
+| C3.3 | Dock Manifest Standard | PASS |
+| C3.4 | Executive Desk capability surface | PASS |
+| C3.5 | AI Capability Broker | PASS |
+
 ## Next Actions
 
-1. **NEXUS Phase 2 — App Shell**: Create `apps/nexus/` with ported sentinel-console; wire intent through `/v1/command` with `tenant: "nexus"`
-2. **NEXUS Phase 2 — GaaS Policy Pack**: Build `apps/sentinel/src/governance/gaas/nexus-policy.js`
-3. **NEXUS Phase 3 — Executive Desk UI**: Build oversight surface at `/executive`; wire approval/reject to Approval Layer
-4. **Code Optimization** (deferred, still valid): Execute Phases 1-3 of CODE_OPTIMIZATION_PLAN as a separate pass after NEXUS Phase 2 stabilizes
+1. **C4** — Multi-provider AI capability selection; TILDA, Microsoft 365, GitHub docking; cross-provider Executive Desk
 
 ## Risk Level
 
-Low. NEXUS Phase 1 adds surface registration, policy scopes, and manifest only — no changes to existing surfaces or runtime behavior. All existing surfaces (ownerfi, hotelops, customerops, nunncloud) are unaffected.
+Low. C3 adds new API surface and new modules — no changes to existing surfaces, handlers, or runtime behavior. All existing surfaces (ownerfi, hotelops, customerops, nunncloud, nexus) are unaffected.
 
 ## Direction
 
-This repository is directed at NEXUS integration to SentinelOS. NEXUS is the governed command console face plane. The Executive Desk is oversight. All NEXUS execution passes through the SentinelOS governance core. See `docs/NEXUS_INTEGRATION_PLAN.md` for full architecture and build order.
+This repository is directed at the SentinelOS Capability Adoption Layer. NEXUS is the first governed capability provider. Every future system docks through the same lifecycle: discover, dock, register, govern, orchestrate, operate. The Command Envelope API is the canonical execution contract. The Executive Desk is the governance oversight surface. See `docs/NEXUS_INTEGRATION_PLAN.md` for full architecture and build order.

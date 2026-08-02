@@ -35,6 +35,10 @@
   ],
   "routes": [
     "/v1/command",
+    "/api/v1/command-envelope",
+    "/api/v1/planning",
+    "/api/v1/execution",
+    "/api/v1/evidence",
     "/approvals",
     "/v1/audit"
   ],
@@ -53,5 +57,36 @@
     "approvalRequired": ["nexus.command.execute"],
     "autoApproved": ["nexus.status.read", "nexus.console.init"],
     "operatorApproved": ["nexus.intent.emit"]
+  },
+  "dockManifest": {
+    "system": {
+      "name": "NEXUS",
+      "version": "1.0"
+    },
+    "provides": [
+      "Executive Planning",
+      "Executive Evidence",
+      "Workflow Routing",
+      "Operational Reporting"
+    ],
+    "apis": [
+      "planning",
+      "execution",
+      "evidence",
+      "command-envelope"
+    ],
+    "security": {
+      "authentication": "JWT"
+    },
+    "governance": {
+      "evidence": "required"
+    },
+    "runtime": {
+      "healthEndpoint": "/health"
+    },
+    "lifecycle": {
+      "status": "active",
+      "registeredAt": "2026-08-02T00:00:00.000Z"
+    }
   }
 }
