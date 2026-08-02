@@ -1,0 +1,27 @@
+backlog:
+  - id: NX-IMP-001
+    title: Activate bridge spec after C2.2 verification
+    priority: P1
+    owner: Executive Desk
+    status: In Progress
+  - id: NX-IMP-002
+    title: Populate domain model mappings from real NEXUS entities
+    priority: P1
+    owner: Integration Team
+    status: Not Started
+  - id: NX-IMP-003
+    title: Finalize runtime and security profiles
+    priority: P1
+    owner: Platform Ops
+    status: Not Started
+  - id: NX-IMP-004
+    title: Attach C2.3 validation evidence and disposition
+    priority: P2
+    owner: Executive Desk
+    status: Not Started
+
+- id: NX-IMP-005
+  title: C2.4 implementation verification run
+  priority: P1
+  owner: Executive Desk
+  status: In Progress

@@ -1,0 +1,8 @@
+=== Cadence Consistency Summary ===
+Sat Aug  1 22:36:00 MST 2026
+Keyword hits:
+     201 evidence/EV-RUN-002-001/consistency-scan/cadence_keyword_scan.txt
+Date hits:
+     211 evidence/EV-RUN-002-001/consistency-scan/cadence_date_scan.txt
+Owner hits:
+     156 evidence/EV-RUN-002-001/consistency-scan/cadence_owner_scan.txt

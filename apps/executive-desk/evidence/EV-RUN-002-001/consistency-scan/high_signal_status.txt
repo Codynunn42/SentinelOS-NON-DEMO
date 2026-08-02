@@ -1,0 +1,17 @@
+cadence/2026-07-27_EXECUTIVE_TEMPLATE.md:20:- Final closure posture: [Approved / Conditional Hold]
+cadence/2026-07-27_EXECUTIVE_TEMPLATE.md:66:- Approved now:
+cadence/2026-07-27_EXECUTIVE_TEMPLATE.md:68:- Pending:
+cadence/2026-07-27_TODAY_CADENCE_ACTIONS.md:129:- Pending source capture:
+cadence/2026-07-27_EXECUTIVE_TEMPLATE.md.bak.20260801-223537:46:- Approved carry-forward items: EV-RUN-002-001 disposition closure and metadata exact-value normalization.
+cadence/2026-07-27_EXECUTIVE_TEMPLATE.md.bak.20260801-223537:67:- Trust and approval gate: Pending final EV-RUN-002-001 disposition.
+cadence/2026-07-27_EXECUTIVE_TEMPLATE.md.bak.20260801-223537:82:- Approval status: Pending
+cadence/2026-07-31_EXECUTIVE_WORKING_BLOCK.md:46:- Approved carry-forward items: EV-RUN-002-001 disposition closure and metadata exact-value normalization.
+cadence/2026-07-31_EXECUTIVE_WORKING_BLOCK.md:67:- Trust and approval gate: Pending final EV-RUN-002-001 disposition.
+cadence/2026-07-31_EXECUTIVE_WORKING_BLOCK.md:82:- Approval status: Pending
+cadence/2026-07-27_EV-RUN-002-001_METADATA_REPLACEMENT_CHECKLIST.md:25:- Status: Pending
+cadence/2026-07-27_EV-RUN-002-001_METADATA_REPLACEMENT_CHECKLIST.md:34:- Status: Pending
+cadence/2026-07-27_EV-RUN-002-001_METADATA_REPLACEMENT_CHECKLIST.md:43:- Status: Pending
+cadence/2026-07-27_EV-RUN-002-001_METADATA_REPLACEMENT_CHECKLIST.md:52:- Status: Pending refresh at time of source capture
+cadence/2026-07-27_EV-RUN-002-001_METADATA_REPLACEMENT_CHECKLIST.md:61:- Status: Pending
+cadence/2026-07-27_EV-RUN-002-001_METADATA_REPLACEMENT_CHECKLIST.md:70:- Status: Pending
+cadence/2026-07-27_BOARD_PREREAD_SKELETON.md:44:- GPT Builder revision completeness: Pending source capture (explicitly Unverified)

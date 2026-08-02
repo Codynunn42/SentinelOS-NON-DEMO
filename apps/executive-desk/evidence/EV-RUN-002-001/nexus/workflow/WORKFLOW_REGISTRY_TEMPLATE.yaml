@@ -1,0 +1,13 @@
+metadata:
+  owner: "Cody Nunn (Interim, role: Executive Desk)"
+  registry: "NEXUS Workflow Registry"
+workflows:
+  - id: "NEXUS-WF-001"
+    name: ""
+    trigger: ""
+    participants: []
+    approvalsRequired: true
+    escalationPolicy: ""
+    sla: ""
+    evidenceArtifacts: []
+    policyRefs: []
