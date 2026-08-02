@@ -68,6 +68,7 @@
     "check:fecs": "node scripts/check-fecs.js",
     "check:phase3": "node scripts/check-federation-envelope.js && node scripts/check-cprm.js && node scripts/check-fpmr.js && node scripts/check-pffl.js && node scripts/check-fecs.js",
     "check:sovereign-policy": "node scripts/check-sovereign-policy.js",
+    "check:sovereign-ledger": "node scripts/check-sovereign-ledger.js",
     "db:apply-schema": "node scripts/db-apply-schema.js",
     "db:smoke": "node scripts/db-smoke.js"
   },
