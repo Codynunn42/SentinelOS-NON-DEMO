@@ -69,6 +69,7 @@ const { analyzeDrift } = require('../sentinel/src/drift/driftAnalyzer');
 const { list: listDriftRecommendations, getSummary: getDriftSummary } = require('../sentinel/src/drift/driftStore');
 const { createTrace, recordStage, completeTrace, getTrace, listTraces } = require('../sentinel/src/audit/executionTrace');
 const { enforceSovereignBoot } = require('../sentinel/src/sovereign/sovereignBoot');
+const { createDemoSurface } = require('../sentinel/src/sovereign/controlSurface');
 const { resolveTier, classifyOperation } = require('../sentinel/src/tiers/tierResolver');
 const { TIERS } = require('../sentinel/src/tiers/tierRegistry');
 
@@ -85,6 +86,7 @@ const STRIPE_CHECKOUT_CSS_PATH = path.join(__dirname, 'public', 'stripe-checkout
 const STRIPE_COMPLETE_CSS_PATH = path.join(__dirname, 'public', 'stripe-complete.css');
 const NEXUS_CONSOLE_PATH = path.join(__dirname, '..', '..', 'nexus', 'public', 'nexus-console.html');
 const NEXUS_EXECUTIVE_PATH = path.join(__dirname, '..', '..', 'nexus', 'public', 'nexus-executive.html');
+const NEXUS_SOVEREIGN_PATH = path.join(__dirname, '..', '..', 'nexus', 'public', 'nexus-sovereign.html');
 const RATE_LIMIT_WINDOW_MS = 60 * 1000;
 const RATE_LIMIT_MAX_REQUESTS = 30;
 const commandRateLimits = new Map();
@@ -1405,6 +1407,11 @@ const server = http.createServer(async (req, res) => {
   if (pathname === '/nexus/executive' && req.method === 'GET') {
     auditSurfaceView(req, requestUrl, pathname, 'nexus-executive');
     return sendHtmlFile(res, NEXUS_EXECUTIVE_PATH);
+  }
+
+  if (pathname === '/nexus/sovereign' && req.method === 'GET') {
+    auditSurfaceView(req, requestUrl, pathname, 'nexus-sovereign');
+    return sendHtmlFile(res, NEXUS_SOVEREIGN_PATH);
   }
 
   if (pathname === '/operator-escalations' && req.method === 'GET') {
@@ -3569,6 +3576,29 @@ const server = http.createServer(async (req, res) => {
   // -------------------------------------------------------------------------
   // C3 — Capability Adoption Layer: Command Envelope API
   // -------------------------------------------------------------------------
+
+  // Phase 4.4 — Sovereign Nexus Control Surface: sovereign status endpoint
+  if (pathname === '/api/v1/sovereign/status' && req.method === 'GET') {
+    const access = authorizeRoute(req, res, '/api/v1/sovereign/status', {
+      command: 'audit.read',
+      requiredScope: 'audit:read'
+    });
+    if (!access) return;
+
+    try {
+      const snapshot = createDemoSurface();
+      return sendJson(res, 200, {
+        status: 'ok',
+        ...snapshot
+      });
+    } catch (sncsErr) {
+      return sendJson(res, 500, {
+        status: 'error',
+        error: 'SNCS_SURFACE_ERROR',
+        reason: sncsErr.message
+      });
+    }
+  }
 
   if (pathname === '/api/v1/command-envelope' && req.method === 'POST') {
     const principal = authenticateCommand(req, '/api/v1/command-envelope', res);

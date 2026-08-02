@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sovereign Nexus Control Surface — SentinelOS</title>
+  <style>
+    :root {
+      --bg: #060a0e;
+      --surface: #0a1018;
+      --surface-2: #0f1a26;
+      --line: #162030;
+      --text: #e8f1fa;
+      --muted: #6b8099;
+      --accent: #4f9cf9;
+      --green: #56d49a;
+      --yellow: #f5c842;
+      --red: #f07070;
+      --gold: #e8b84a;
+      --sovereign: #c084fc;
+      --sovereign-dim: #7c3aed22;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+      font-size: 14px;
+    }
+
+    /* ---- Header ---- */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 28px;
+      border-bottom: 1px solid var(--line);
+      background: var(--surface);
+    }
+
+    .header-left { display: flex; align-items: center; gap: 12px; }
+
+    .sncs-logo {
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      color: var(--sovereign);
+    }
+
+    .sncs-sub {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+    }
+
+    .sovereign-badge {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: var(--sovereign-dim);
+      border: 1px solid var(--sovereign);
+      border-radius: 4px;
+      padding: 3px 9px;
+      color: var(--sovereign);
+    }
+
+    .header-right { display: flex; align-items: center; gap: 10px; }
+
+    .back-link {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--accent);
+      text-decoration: none;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 6px 12px;
+    }
+
+    .btn-load {
+      font-size: 12px;
+      font-weight: 700;
+      background: var(--sovereign-dim);
+      border: 1px solid var(--sovereign);
+      border-radius: 6px;
+      padding: 6px 14px;
+      color: var(--sovereign);
+      cursor: pointer;
+      letter-spacing: 0.02em;
+    }
+
+    .btn-load:hover { background: #7c3aed33; }
+
+    /* ---- Layout ---- */
+    .page {
+      max-width: 1060px;
+      margin: 0 auto;
+      padding: 28px 24px;
+    }
+
+    .page-title {
+      font-size: 22px;
+      font-weight: 800;
+      margin-bottom: 6px;
+    }
+
+    .page-subtitle {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 24px;
+    }
+
+    /* ---- Sovereign status bar ---- */
+    .sovereign-bar {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      background: var(--sovereign-dim);
+      border: 1px solid var(--sovereign);
+      border-radius: 8px;
+      padding: 12px 18px;
+      margin-bottom: 28px;
+      font-size: 13px;
+      flex-wrap: wrap;
+    }
+
+    .sovereign-bar-icon { font-size: 18px; }
+
+    .sbar-item { display: flex; flex-direction: column; gap: 2px; }
+    .sbar-label { font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+    .sbar-value { font-size: 13px; font-weight: 700; color: var(--sovereign); }
+
+    /* ---- Grid ---- */
+    .panel-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .panel-grid .panel-wide { grid-column: 1 / -1; }
+
+    @media (max-width: 720px) {
+      .panel-grid { grid-template-columns: 1fr; }
+      .panel-grid .panel-wide { grid-column: auto; }
+    }
+
+    /* ---- Panel ---- */
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--line);
+      background: var(--surface-2);
+    }
+
+    .panel-title {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .panel-badge {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 4px;
+      letter-spacing: 0.04em;
+    }
+
+    .badge-sovereign { background: var(--sovereign-dim); color: var(--sovereign); border: 1px solid var(--sovereign); }
+    .badge-ok { background: #0d1e0f; color: var(--green); border: 1px solid #1d3a1d; }
+    .badge-warn { background: #1a1400; color: var(--yellow); border: 1px solid #3a2d00; }
+    .badge-crit { background: #1a0a0a; color: var(--red); border: 1px solid #3a1a1a; }
+    .badge-sealed { background: #10101e; color: var(--accent); border: 1px solid #1a2036; }
+
+    .panel-body { padding: 14px 16px; }
+
+    /* ---- Provider health ---- */
+    .provider-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: 6px;
+      margin-bottom: 8px;
+      background: var(--surface-2);
+      border: 1px solid var(--line);
+    }
+
+    .provider-row:last-child { margin-bottom: 0; }
+
+    .prov-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .prov-dot.healthy { background: var(--green); }
+    .prov-dot.failover { background: var(--yellow); }
+    .prov-dot.degraded { background: var(--red); }
+    .prov-dot.unknown { background: var(--muted); }
+
+    .prov-name { font-weight: 700; color: var(--text); min-width: 80px; }
+    .prov-meta { display: flex; gap: 10px; flex-wrap: wrap; font-size: 12px; color: var(--muted); }
+    .prov-tag { font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 4px; }
+    .tag-primary { background: #0e1e30; color: var(--accent); border: 1px solid #1a3050; }
+    .tag-failover { background: #1a1400; color: var(--yellow); }
+    .tag-healthy { background: #0d1e0f; color: var(--green); }
+    .tag-degraded { background: #1a0a0a; color: var(--red); }
+
+    /* ---- Drift ---- */
+    .drift-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      border-radius: 6px;
+      margin-bottom: 6px;
+      background: var(--surface-2);
+    }
+
+    .drift-row:last-child { margin-bottom: 0; }
+
+    .drift-class {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      min-width: 70px;
+    }
+
+    .drift-none { color: var(--green); }
+    .drift-info { color: var(--accent); }
+    .drift-warning { color: var(--yellow); }
+    .drift-critical { color: var(--red); }
+
+    .drift-provider { font-weight: 700; min-width: 80px; }
+    .drift-count { color: var(--muted); font-size: 12px; }
+
+    /* ---- Evidence entries ---- */
+    .ev-entry {
+      padding: 9px 12px;
+      border-left: 3px solid var(--line);
+      margin-bottom: 6px;
+      border-radius: 0 6px 6px 0;
+      background: var(--surface-2);
+      font-size: 12px;
+    }
+
+    .ev-entry:last-child { margin-bottom: 0; }
+    .ev-entry.policy { border-left-color: var(--sovereign); }
+    .ev-entry.execution { border-left-color: var(--accent); }
+    .ev-entry.failover { border-left-color: var(--yellow); }
+    .ev-entry.receipt { border-left-color: var(--green); }
+    .ev-entry.drift { border-left-color: var(--red); }
+
+    .ev-row-top { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+    .ev-index { color: var(--muted); min-width: 24px; font-size: 11px; }
+    .ev-type { font-weight: 700; text-transform: uppercase; font-size: 11px; letter-spacing: 0.04em; }
+    .ev-provider { color: var(--muted); font-size: 11px; }
+    .ev-hash { color: var(--muted); font-family: monospace; font-size: 11px; margin-left: auto; }
+
+    .ev-row-bottom { display: flex; gap: 10px; flex-wrap: wrap; color: var(--muted); }
+
+    /* ---- Timeline ---- */
+    .tl-step {
+      display: flex;
+      gap: 10px;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .tl-step:last-child { border-bottom: none; }
+
+    .tl-step-num {
+      min-width: 24px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--muted);
+      padding-top: 1px;
+    }
+
+    .tl-step-body { flex: 1; }
+
+    .tl-step-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+
+    .tl-step-meta { display: flex; gap: 10px; font-size: 11px; color: var(--muted); flex-wrap: wrap; }
+    .tl-step-time { font-size: 11px; color: var(--muted); }
+
+    /* ---- Compliance ---- */
+    .gate-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 12px;
+      border-radius: 6px;
+      margin-bottom: 6px;
+      background: var(--surface-2);
+      border: 1px solid var(--line);
+    }
+
+    .gate-row:last-child { margin-bottom: 0; }
+
+    .gate-status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .gate-status-dot.passed { background: var(--green); }
+    .gate-status-dot.blocked { background: var(--red); }
+    .gate-status-dot.open { background: var(--yellow); }
+    .gate-status-dot.deferred { background: var(--muted); }
+
+    .gate-label { font-weight: 700; flex: 1; }
+    .gate-status { font-size: 11px; font-weight: 700; letter-spacing: 0.04em; }
+    .gate-status.passed { color: var(--green); }
+    .gate-status.blocked { color: var(--red); }
+    .gate-status.open { color: var(--yellow); }
+    .gate-status.deferred { color: var(--muted); }
+
+    /* ---- Activity log ---- */
+    .activity-log {
+      background: var(--surface-2);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px 16px;
+      max-height: 180px;
+      overflow-y: auto;
+      font-family: 'Consolas', 'Menlo', monospace;
+      font-size: 12px;
+    }
+
+    .log-line { padding: 3px 0; border-bottom: 1px solid var(--line); color: var(--muted); }
+    .log-line:last-child { border-bottom: none; }
+    .log-line.ok { color: var(--green); }
+    .log-line.warn { color: var(--yellow); }
+    .log-line.blocked { color: var(--red); }
+    .log-line.pending { color: var(--accent); }
+    .log-line.sovereign { color: var(--sovereign); }
+    .log-ts { color: var(--muted); opacity: 0.6; margin-right: 8px; font-size: 10px; }
+
+    /* ---- Misc ---- */
+    .empty-state { color: var(--muted); font-size: 13px; padding: 10px 0; }
+    .stat-row { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 14px; }
+    .stat-item { display: flex; flex-direction: column; gap: 2px; }
+    .stat-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); }
+    .stat-val { font-size: 14px; font-weight: 800; color: var(--text); }
+
+    /* ---- Integrity banner ---- */
+    .integrity-banner {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      border-radius: 6px;
+      margin-bottom: 12px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .integrity-ok { background: #0d1e0f; border: 1px solid #1d3a1d; color: var(--green); }
+    .integrity-fail { background: #1a0a0a; border: 1px solid #3a1a1a; color: var(--red); }
+
+    /* ---- Loading spinner ---- */
+    .loading { color: var(--muted); font-size: 13px; padding: 14px 0; text-align: center; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <span class="sncs-logo">SOVEREIGN NEXUS</span>
+    <span class="sncs-sub">Control Surface</span>
+    <span class="sovereign-badge">Phase 4.4</span>
+  </div>
+  <div class="header-right">
+    <button class="btn-load" id="loadBtn" onclick="loadSovereignSurface()">Load Sovereign State</button>
+    <a href="/nexus/executive" class="back-link">← Executive Desk</a>
+  </div>
+</header>
+
+<div class="page">
+  <div class="page-title">Sovereign Execution Control Surface</div>
+  <div class="page-subtitle">Live sovereign state assembled from SPE · SEL · SER — policy-sovereign, ledger-sovereign, runtime-sovereign</div>
+
+  <!-- Sovereign status bar -->
+  <div class="sovereign-bar" id="sovereignBar" style="display:none;">
+    <span class="sovereign-bar-icon">⬡</span>
+    <div class="sbar-item">
+      <span class="sbar-label">Session</span>
+      <span class="sbar-value" id="sbarSession">—</span>
+    </div>
+    <div class="sbar-item">
+      <span class="sbar-label">Status</span>
+      <span class="sbar-value" id="sbarStatus">—</span>
+    </div>
+    <div class="sbar-item">
+      <span class="sbar-label">Ledger</span>
+      <span class="sbar-value" id="sbarLedger">—</span>
+    </div>
+    <div class="sbar-item">
+      <span class="sbar-label">Command</span>
+      <span class="sbar-value" id="sbarCommand">—</span>
+    </div>
+    <div class="sbar-item">
+      <span class="sbar-label">Policy</span>
+      <span class="sbar-value" id="sbarPolicy">—</span>
+    </div>
+    <div class="sbar-item">
+      <span class="sbar-label">Snapshot</span>
+      <span class="sbar-value" id="sbarSnapshot">—</span>
+    </div>
+  </div>
+
+  <!-- Panel grid -->
+  <div class="panel-grid">
+
+    <!-- Panel 1: Sovereign Provider Health -->
+    <div class="panel" id="panelProviderHealth">
+      <div class="panel-header">
+        <span class="panel-title">Sovereign Provider Health</span>
+        <span class="panel-badge badge-sovereign" id="phBadge">AWAITING</span>
+      </div>
+      <div class="panel-body" id="providerHealthBody">
+        <div class="loading">Load sovereign state to view provider health.</div>
+      </div>
+    </div>
+
+    <!-- Panel 2: Sovereign Drift Classification -->
+    <div class="panel" id="panelDrift">
+      <div class="panel-header">
+        <span class="panel-title">Sovereign Drift Classification</span>
+        <span class="panel-badge badge-sovereign" id="driftBadge">AWAITING</span>
+      </div>
+      <div class="panel-body" id="driftBody">
+        <div class="loading">Load sovereign state to view drift classification.</div>
+      </div>
+    </div>
+
+    <!-- Panel 3: Sovereign Evidence Viewer -->
+    <div class="panel panel-wide" id="panelEvidence">
+      <div class="panel-header">
+        <span class="panel-title">Sovereign Evidence Viewer</span>
+        <span class="panel-badge badge-sovereign" id="evidenceBadge">AWAITING</span>
+      </div>
+      <div class="panel-body" id="evidenceBody">
+        <div class="loading">Load sovereign state to inspect the evidence ledger.</div>
+      </div>
+    </div>
+
+    <!-- Panel 4: Sovereign Execution Timeline -->
+    <div class="panel" id="panelTimeline">
+      <div class="panel-header">
+        <span class="panel-title">Sovereign Execution Timeline</span>
+        <span class="panel-badge badge-sovereign" id="timelineBadge">AWAITING</span>
+      </div>
+      <div class="panel-body" id="timelineBody">
+        <div class="loading">Load sovereign state to view execution timeline.</div>
+      </div>
+    </div>
+
+    <!-- Panel 5: Sovereign Compliance Panel -->
+    <div class="panel" id="panelCompliance">
+      <div class="panel-header">
+        <span class="panel-title">Sovereign Compliance Panel</span>
+        <span class="panel-badge badge-sovereign" id="complianceBadge">AWAITING</span>
+      </div>
+      <div class="panel-body" id="complianceBody">
+        <div class="loading">Load sovereign state to view compliance gates.</div>
+      </div>
+    </div>
+
+  </div><!-- /panel-grid -->
+
+  <!-- Activity Log -->
+  <div style="margin-top: 28px;">
+    <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px;">Sovereign Activity Log</div>
+    <div class="activity-log" id="activityLog">
+      <div class="log-line">Sovereign Nexus Control Surface ready — awaiting state load.</div>
+    </div>
+  </div>
+
+</div><!-- /page -->
+
+<script>
+  'use strict';
+
+  function escHtml(str) {
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  function logActivity(message, type = '') {
+    const log = document.getElementById('activityLog');
+    const ts = new Date().toLocaleTimeString();
+    const line = document.createElement('div');
+    line.className = `log-line ${type}`;
+    line.innerHTML = `<span class="log-ts">${ts}</span>${escHtml(message)}`;
+    log.prepend(line);
+  }
+
+  function driftBadgeClass(driftLabel) {
+    if (!driftLabel || driftLabel === 'NONE') return 'badge-ok';
+    if (driftLabel === 'INFO') return 'badge-sovereign';
+    if (driftLabel === 'WARNING') return 'badge-warn';
+    if (driftLabel === 'CRITICAL') return 'badge-crit';
+    return 'badge-sovereign';
+  }
+
+  function driftColorClass(driftLabel) {
+    if (!driftLabel || driftLabel === 'NONE') return 'drift-none';
+    if (driftLabel === 'INFO') return 'drift-info';
+    if (driftLabel === 'WARNING') return 'drift-warning';
+    if (driftLabel === 'CRITICAL') return 'drift-critical';
+    return '';
+  }
+
+  function renderProviderHealth(ph) {
+    const body = document.getElementById('providerHealthBody');
+    const badge = document.getElementById('phBadge');
+
+    badge.className = 'panel-badge badge-ok';
+    badge.textContent = `${ph.total} provider(s)`;
+
+    const statsHtml = `<div class="stat-row">
+      <div class="stat-item"><span class="stat-label">Total</span><span class="stat-val">${ph.total}</span></div>
+      <div class="stat-item"><span class="stat-label">Primary</span><span class="stat-val" style="color:var(--accent)">${escHtml(ph.primaryProvider || '—')}</span></div>
+      <div class="stat-item"><span class="stat-label">Failover Path</span><span class="stat-val">${ph.failoverPath.length} provider(s)</span></div>
+      <div class="stat-item"><span class="stat-label">Session Drift</span><span class="stat-val ${driftColorClass(ph.sessionDriftClass)}">${escHtml(ph.sessionDriftClass || 'NONE').toUpperCase()}</span></div>
+    </div>`;
+
+    const providersHtml = ph.providers.map((p) => {
+      const isPrimary = p.provider === ph.primaryProvider;
+      const dotClass = p.healthStatus === 'healthy' ? 'healthy' : p.healthStatus === 'failover' ? 'failover' : p.healthStatus === 'degraded' ? 'degraded' : 'unknown';
+      const primaryTag = isPrimary ? '<span class="prov-tag tag-primary">PRIMARY</span>' : (p.wasFailoverTarget ? '<span class="prov-tag tag-failover">FAILOVER</span>' : '');
+      const healthTag = `<span class="prov-tag tag-${p.healthStatus}" style="background:var(--surface);border:1px solid var(--line)">${escHtml(p.healthStatus.toUpperCase())}</span>`;
+      const driftTag = p.driftLabel !== 'NONE' ? `<span class="${driftColorClass(p.driftLabel)}" style="font-size:11px;font-weight:700">${escHtml(p.driftLabel)}</span>` : '';
+      return `<div class="provider-row">
+        <span class="prov-dot ${dotClass}"></span>
+        <span class="prov-name">${escHtml(p.provider)}</span>
+        <div class="prov-meta">
+          ${primaryTag}
+          ${healthTag}
+          ${driftTag}
+          <span>${p.executionAttempts} attempt(s)</span>
+          <span>${p.receipts} receipt(s)</span>
+        </div>
+      </div>`;
+    }).join('');
+
+    // Failover path
+    const failoverHtml = ph.failoverPath.length
+      ? `<div style="margin-top:12px">
+          <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px">Failover Path</div>
+          ${ph.failoverPath.map((fp) => `<div class="drift-row">
+            <span style="color:var(--yellow);font-size:11px;font-weight:700">${escHtml(fp.role.toUpperCase())}</span>
+            <span>${escHtml(fp.provider)}</span>
+            <span class="drift-count">${escHtml(fp.healthStatus)}</span>
+          </div>`).join('')}
+        </div>`
+      : '';
+
+    body.innerHTML = statsHtml + providersHtml + failoverHtml;
+    logActivity(`Provider health loaded — ${ph.total} provider(s), primary: ${ph.primaryProvider}`, 'ok');
+  }
+
+  function renderDrift(drift) {
+    const body = document.getElementById('driftBody');
+    const badge = document.getElementById('driftBadge');
+
+    const overallLabel = drift.overallDriftLabel || 'NONE';
+    badge.className = `panel-badge ${driftBadgeClass(overallLabel)}`;
+    badge.textContent = `DRIFT: ${overallLabel}`;
+
+    const statsHtml = `<div class="stat-row">
+      <div class="stat-item"><span class="stat-label">Overall</span><span class="stat-val ${driftColorClass(overallLabel)}">${escHtml(overallLabel)}</span></div>
+      <div class="stat-item"><span class="stat-label">Escalated</span><span class="stat-val" style="color:${drift.driftEscalated ? 'var(--yellow)' : 'var(--green)'}">${drift.driftEscalated ? 'YES' : 'NO'}</span></div>
+      <div class="stat-item"><span class="stat-label">Drift Events</span><span class="stat-val">${drift.totalDriftEvents}</span></div>
+    </div>`;
+
+    const provDriftHtml = drift.providerDrift.map((pd) => {
+      return `<div class="drift-row">
+        <span class="drift-class ${driftColorClass(pd.worstDriftLabel)}">${escHtml(pd.worstDriftLabel)}</span>
+        <span class="drift-provider">${escHtml(pd.provider)}</span>
+        <span class="drift-count">${pd.entryCount} entries</span>
+      </div>`;
+    }).join('');
+
+    const timelineHtml = drift.driftTimeline.length
+      ? `<div style="margin-top:12px">
+          <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px">Drift Event Timeline</div>
+          ${drift.driftTimeline.map((ev) => `<div class="drift-row">
+            <span class="drift-class ${driftColorClass(ev.driftLabel)} drift-${(ev.driftLabel || 'none').toLowerCase()}">${escHtml(ev.driftLabel)}</span>
+            <span class="drift-provider">${escHtml(ev.provider)}</span>
+            <span class="drift-count">${escHtml(ev.type)}</span>
+            <span style="margin-left:auto;font-size:10px;color:var(--muted)">${escHtml(new Date(ev.timestamp).toLocaleTimeString())}</span>
+          </div>`).join('')}
+        </div>`
+      : '<div class="empty-state" style="margin-top:8px">No drift events recorded in this session.</div>';
+
+    body.innerHTML = statsHtml + (provDriftHtml || '<div class="empty-state">No provider drift data.</div>') + timelineHtml;
+    logActivity(`Drift classification loaded — overall: ${overallLabel}, ${drift.totalDriftEvents} event(s)`, drift.driftEscalated ? 'warn' : 'ok');
+  }
+
+  function renderEvidence(ev) {
+    const body = document.getElementById('evidenceBody');
+    const badge = document.getElementById('evidenceBadge');
+
+    const sealed = ev.status === 'sealed';
+    badge.className = `panel-badge ${sealed ? 'badge-sealed' : 'badge-sovereign'}`;
+    badge.textContent = sealed ? 'SEALED' : ev.status.toUpperCase();
+
+    const integrityBannerClass = ev.integrity.valid ? 'integrity-ok' : 'integrity-fail';
+    const integrityIcon = ev.integrity.valid ? '✓' : '✗';
+    const integrityText = ev.integrity.valid ? 'Ledger chain integrity verified — tamper-evident' : `Chain integrity FAILED: ${ev.integrity.reason}`;
+
+    const integrityHtml = `<div class="integrity-banner ${integrityBannerClass}">
+      <span>${integrityIcon}</span>
+      <span>${escHtml(integrityText)}</span>
+    </div>`;
+
+    const statsHtml = `<div class="stat-row">
+      <div class="stat-item"><span class="stat-label">Ledger ID</span><span class="stat-val" style="font-size:12px;font-family:monospace">${escHtml(ev.ledgerId)}</span></div>
+      <div class="stat-item"><span class="stat-label">Entries</span><span class="stat-val">${ev.totalEntries}</span></div>
+      <div class="stat-item"><span class="stat-label">Status</span><span class="stat-val" style="color:${sealed ? 'var(--accent)' : 'var(--text)'}">${escHtml(ev.status.toUpperCase())}</span></div>
+      <div class="stat-item"><span class="stat-label">Head Hash</span><span class="stat-val" style="font-size:11px;font-family:monospace;color:var(--muted)">${escHtml(ev.headHash || '—')}</span></div>
+    </div>`;
+
+    const typeColor = { policy: 'var(--sovereign)', execution: 'var(--accent)', failover: 'var(--yellow)', receipt: 'var(--green)', drift: 'var(--red)' };
+    const entriesHtml = ev.entries.map((entry) => {
+      const col = typeColor[entry.type] || 'var(--muted)';
+      return `<div class="ev-entry ${entry.type}">
+        <div class="ev-row-top">
+          <span class="ev-index">#${entry.index}</span>
+          <span class="ev-type" style="color:${col}">${escHtml(entry.type.toUpperCase())}</span>
+          <span class="ev-provider">${escHtml(entry.provider)}</span>
+          ${entry.driftLabel !== 'NONE' ? `<span class="${driftColorClass(entry.driftLabel)}" style="font-size:10px;font-weight:700;margin-left:4px">${escHtml(entry.driftLabel)}</span>` : ''}
+          <span class="ev-hash">${escHtml(entry.hash || '—')}</span>
+        </div>
+        <div class="ev-row-bottom">
+          <span>${escHtml(entry.entryId)}</span>
+          ${entry.policyId ? `<span>policy: ${escHtml(entry.policyId)}</span>` : ''}
+          <span>${escHtml(new Date(entry.timestamp).toLocaleTimeString())}</span>
+        </div>
+      </div>`;
+    }).join('');
+
+    body.innerHTML = integrityHtml + statsHtml + (entriesHtml || '<div class="empty-state">No ledger entries.</div>');
+    logActivity(`Evidence ledger loaded — ${ev.totalEntries} entr(ies), integrity: ${ev.integrity.valid ? 'valid ✓' : 'FAILED ✗'}`, ev.integrity.valid ? 'ok' : 'blocked');
+  }
+
+  function renderTimeline(tl) {
+    const body = document.getElementById('timelineBody');
+    const badge = document.getElementById('timelineBadge');
+
+    const statusColor = { complete: 'badge-ok', failed: 'badge-crit', blocked: 'badge-crit', deferred: 'badge-warn', executing: 'badge-sovereign', pending: 'badge-sovereign' };
+    badge.className = `panel-badge ${statusColor[tl.status] || 'badge-sovereign'}`;
+    badge.textContent = (tl.status || 'UNKNOWN').toUpperCase();
+
+    const statsHtml = `<div class="stat-row">
+      <div class="stat-item"><span class="stat-label">Command</span><span class="stat-val">${escHtml(tl.command)}</span></div>
+      <div class="stat-item"><span class="stat-label">Attempts</span><span class="stat-val">${tl.attempts}</span></div>
+      <div class="stat-item"><span class="stat-label">Receipts</span><span class="stat-val">${tl.receiptCount}</span></div>
+      <div class="stat-item"><span class="stat-label">Steps</span><span class="stat-val">${tl.totalSteps}</span></div>
+    </div>`;
+
+    const typeColor = { policy: 'var(--sovereign)', execution: 'var(--accent)', failover: 'var(--yellow)', receipt: 'var(--green)', drift: 'var(--red)' };
+    const timelineHtml = tl.timeline.map((step) => {
+      const col = typeColor[step.type] || 'var(--muted)';
+      return `<div class="tl-step">
+        <span class="tl-step-num">${step.step}</span>
+        <div class="tl-step-body">
+          <div class="tl-step-label" style="color:${col}">${escHtml(step.label)}</div>
+          <div class="tl-step-meta">
+            <span style="color:var(--muted)">${escHtml(step.entryId)}</span>
+            ${step.driftLabel !== 'NONE' ? `<span class="${driftColorClass(step.driftLabel)}">${escHtml(step.driftLabel)}</span>` : ''}
+            <span class="tl-step-time">${escHtml(new Date(step.timestamp).toLocaleTimeString())}</span>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+
+    body.innerHTML = statsHtml + (timelineHtml || '<div class="empty-state">No timeline steps.</div>');
+    logActivity(`Execution timeline loaded — ${tl.totalSteps} steps, ${tl.attempts} attempt(s)`, 'ok');
+  }
+
+  function renderCompliance(cp) {
+    const body = document.getElementById('complianceBody');
+    const badge = document.getElementById('complianceBadge');
+
+    if (!cp) {
+      body.innerHTML = '<div class="empty-state">No policy bound to this session.</div>';
+      logActivity('Compliance panel — no policy bound', 'pending');
+      return;
+    }
+
+    const clean = cp.gatesClean;
+    badge.className = `panel-badge ${clean ? 'badge-ok' : cp.gatesSummary.blocked > 0 ? 'badge-crit' : 'badge-warn'}`;
+    badge.textContent = clean ? 'CLEAN' : cp.gatesSummary.blocked > 0 ? 'BLOCKED' : 'PENDING';
+
+    const driftTag = cp.driftEnforcementElevated
+      ? `<span style="color:var(--yellow);font-size:11px;font-weight:700">DRIFT ENFORCEMENT: ${escHtml(cp.driftEnforcementLabel.toUpperCase())}</span>`
+      : `<span style="color:var(--muted);font-size:11px">Drift enforcement: ${escHtml(cp.driftEnforcementLabel)}</span>`;
+
+    const statsHtml = `<div class="stat-row">
+      <div class="stat-item"><span class="stat-label">Policy ID</span><span class="stat-val" style="font-size:12px">${escHtml(cp.policyId)}</span></div>
+      <div class="stat-item"><span class="stat-label">Priority</span><span class="stat-val">${escHtml(cp.priority)}</span></div>
+      <div class="stat-item"><span class="stat-label">Status</span><span class="stat-val">${escHtml(cp.policyStatus.toUpperCase())}</span></div>
+      <div class="stat-item"><span class="stat-label">Gates</span><span class="stat-val">${cp.gatesSummary.passed}/${cp.gatesSummary.total} passed</span></div>
+    </div>
+    <div style="margin-bottom:12px">${driftTag}</div>`;
+
+    const gatesHtml = cp.gates.map((gate) => {
+      return `<div class="gate-row">
+        <span class="gate-status-dot ${gate.status}"></span>
+        <span class="gate-label">${escHtml(gate.label)}</span>
+        <span class="gate-status ${gate.status}">${escHtml(gate.status.toUpperCase())}</span>
+        ${gate.reason ? `<span style="font-size:11px;color:var(--muted)">${escHtml(gate.reason)}</span>` : ''}
+      </div>`;
+    }).join('');
+
+    body.innerHTML = statsHtml + (gatesHtml || '<div class="empty-state">No compliance gates.</div>');
+    logActivity(`Compliance panel loaded — ${cp.gatesSummary.passed}/${cp.gatesSummary.total} gates passed, drift: ${cp.driftEnforcementLabel}`, clean ? 'ok' : 'warn');
+  }
+
+  async function loadSovereignSurface() {
+    const btn = document.getElementById('loadBtn');
+    btn.textContent = 'Loading…';
+    btn.disabled = true;
+    logActivity('Requesting sovereign state from /api/v1/sovereign/status…', 'pending');
+
+    try {
+      const apiKey = new URLSearchParams(window.location.search).get('apiKey') || '';
+      const headers = { 'Content-Type': 'application/json' };
+      if (apiKey) headers['x-api-key'] = apiKey;
+
+      const res = await fetch('/api/v1/sovereign/status', { headers });
+      const data = await res.json();
+
+      if (!res.ok) {
+        logActivity(`Sovereign state load failed: ${data.error || res.status}`, 'blocked');
+        btn.textContent = 'Retry';
+        btn.disabled = false;
+        return;
+      }
+
+      logActivity('Sovereign state received — assembling control surface…', 'sovereign');
+
+      // Update sovereign bar
+      document.getElementById('sovereignBar').style.display = 'flex';
+      document.getElementById('sbarSession').textContent = data.sessionId ? data.sessionId.slice(0, 20) + '…' : '—';
+      document.getElementById('sbarStatus').textContent = (data.sessionStatus || '—').toUpperCase();
+      document.getElementById('sbarLedger').textContent = data.ledgerId ? data.ledgerId.slice(0, 18) + '…' : '—';
+      document.getElementById('sbarCommand').textContent = data.command || '—';
+      document.getElementById('sbarPolicy').textContent = data.policyId ? data.policyId.slice(0, 16) + '…' : 'NONE';
+      document.getElementById('sbarSnapshot').textContent = data.snapshotId ? data.snapshotId.slice(0, 16) + '…' : '—';
+
+      // Render panels
+      if (data.providerHealth) renderProviderHealth(data.providerHealth);
+      if (data.driftSummary) renderDrift(data.driftSummary);
+      if (data.evidenceView) renderEvidence(data.evidenceView);
+      if (data.executionTimeline) renderTimeline(data.executionTimeline);
+      renderCompliance(data.compliancePanel);
+
+      logActivity(`Sovereign surface loaded — snapshot ${data.snapshotId}`, 'sovereign');
+
+      btn.textContent = 'Refresh';
+      btn.disabled = false;
+    } catch (err) {
+      logActivity(`Error loading sovereign surface: ${err.message}`, 'blocked');
+      btn.textContent = 'Retry';
+      btn.disabled = false;
+    }
+  }
+
+  // Auto-load on page open
+  window.addEventListener('DOMContentLoaded', () => {
+    loadSovereignSurface();
+  });
+</script>
+
+</body>
+</html>

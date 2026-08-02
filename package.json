@@ -70,6 +70,7 @@
     "check:sovereign-policy": "node scripts/check-sovereign-policy.js",
     "check:sovereign-ledger": "node scripts/check-sovereign-ledger.js",
     "check:sovereign-runtime": "node scripts/check-sovereign-runtime.js",
+    "check:sovereign-surface": "node scripts/check-sovereign-surface.js",
     "db:apply-schema": "node scripts/db-apply-schema.js",
     "db:smoke": "node scripts/db-smoke.js"
   },
