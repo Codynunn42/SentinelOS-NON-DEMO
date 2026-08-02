@@ -4,19 +4,15 @@
 
 ## Current Phase
 
-Code Optimization & Security Hardening (Planning Complete → Execution Ready)
+NEXUS Integration to SentinelOS (Active Build)
 
 ## Summary
 
-SentinelOS NON-DEMO has moved from baseline scaffolding into an authenticated API foundation. The `/command` endpoint is now fail-closed behind `SENTINEL_API_KEY`, and the workspace includes Microsoft Sentinel integration guidance for monitoring command auth and execution events through Azure Container Apps logs.
+SentinelOS NON-DEMO is now the canonical home for NEXUS integration. This repository owns the NEXUS command console face plane and the Executive Desk oversight layer. All NEXUS actions route through the SentinelOS governance core — no direct execution bypass. The Executive Desk holds approval authority over all high-risk NEXUS execution.
 
-The operating direction is now broader than a single protected API. Daily execution is being oriented around turning SentinelOS into a governed operations platform, with the current operating surface becoming the first reusable control-plane layer instead of a one-off app.
+The operating foundation is solid: authenticated API, governance preflight, audit trail, Postgres persistence, live Azure deployment, and a proven OwnerFi surface plane. NEXUS builds on this foundation as the primary governed command console face plane.
 
-The current deployed system now includes a working audit layer, a protected `/v1/audit` retrieval endpoint, and a live Postgres-backed OwnerFi proof path that has been verified end-to-end.
-
-On 2026-04-28, the current shareable proof surface was verified on `ca-nc-dev-sentinel`, not the older `ca-sentinelos-proof` host. The live public proof URL is `https://ca-nc-dev-sentinel.calmhill-388e1d39.eastus2.azurecontainerapps.io/proof`. The current active revision is `ca-nc-dev-sentinel--decision-signing-v1`, running image `acrncdevsentinel.azurecr.io/sentinelos:latest`, healthy, provisioned, and receiving 100 percent traffic.
-
-The next hardening layer is governance preflight: command requests are checked for tenant, command, actor, role, and role-based execution rights before a surface-plane handler can run.
+Phase 1 of NEXUS integration is complete. NEXUS is registered in the surface registry, its docking manifest is live, Executive Desk oversight plane is defined, and policy enforcement rules are wired. Phase 2 (app shell + GaaS policy pack) is ready to execute.
 
 ## Completed
 
@@ -87,32 +83,30 @@ The next hardening layer is governance preflight: command requests are checked f
 
 ## In Progress
 
-- Phase 1 code consolidation (shared validation, telemetry, ID generation modules)
-- All operational plans ready for execution
+- **NEXUS Integration Phase 1 complete** — surface registered, docking manifest live, Executive Desk plane defined, policy enforcement wired
+- NEXUS Phase 2 (app shell + GaaS policy pack) ready to execute
 
 ## Gaps
 
 - no full role-based key model yet
 - live Sentinel analytics rules not yet created
-- no operator-facing control plane yet
-- no formal tenant or scope model yet
-- no reusable integration framework yet
+- NEXUS app shell (`apps/nexus/`) not yet built — Phase 2
+- NEXUS GaaS policy pack not yet built — Phase 2
+- Executive Desk UI surface not yet built — Phase 3
 - no active billing, checkout, payment, or funnel execution path in this repo
-- broader API/audit/database implementation work exists in the worktree but still needs a separate clean release commit
 - `ca-sentinelos-proof` appears to be an older health-only host and should not be used as the current shareable proof URL
 
 ## Next Actions
 
-1. **Execute Phase 1 Consolidation** (3-4 hours): Create shared validation, telemetry, and ID generation modules per CODE_OPTIMIZATION_PLAN
-2. **Execute Phase 2 Restructuring** (2-3 hours): Reorganize command handlers into domain-centric structure per ARCHITECTURE_ALIGNMENT_PLAN
-3. **Execute Phase 3 Hardening** (3-4 hours): Add input validation, error standardization, environment validation per SECURITY_HARDENING_PASS
-4. **Full test suite validation** (1 hour): Run npm run check:* after each phase, smoke test live deployment
-5. **Review optimization outcomes** and impact on deployment health before proceeding to next feature work
+1. **NEXUS Phase 2 — App Shell**: Create `apps/nexus/` with ported sentinel-console; wire intent through `/v1/command` with `tenant: "nexus"`
+2. **NEXUS Phase 2 — GaaS Policy Pack**: Build `apps/sentinel/src/governance/gaas/nexus-policy.js`
+3. **NEXUS Phase 3 — Executive Desk UI**: Build oversight surface at `/executive`; wire approval/reject to Approval Layer
+4. **Code Optimization** (deferred, still valid): Execute Phases 1-3 of CODE_OPTIMIZATION_PLAN as a separate pass after NEXUS Phase 2 stabilizes
 
 ## Risk Level
 
-Low (live proof route, health, revision traffic, authenticated OwnerFi workflow execution verified; code consolidation and hardening are well-planned with testing strategies and risk mitigations; all changes can be validated with existing npm check suite before deployment)
+Low. NEXUS Phase 1 adds surface registration, policy scopes, and manifest only — no changes to existing surfaces or runtime behavior. All existing surfaces (ownerfi, hotelops, customerops, nunncloud) are unaffected.
 
 ## Direction
 
-Execute code consolidation (Phases 1-3) per operational plans with validation gates between phases. Focus on: (1) consolidating shared utilities into reusable modules, (2) aligning code structure with governance architecture for scalability, (3) hardening input validation and error handling for production robustness. After optimization completes, proceed with platform-oriented feature work (tenant model, billing integration, etc.) with cleaner architectural foundation.
+This repository is directed at NEXUS integration to SentinelOS. NEXUS is the governed command console face plane. The Executive Desk is oversight. All NEXUS execution passes through the SentinelOS governance core. See `docs/NEXUS_INTEGRATION_PLAN.md` for full architecture and build order.

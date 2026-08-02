@@ -1,0 +1,57 @@
+{
+  "facePlaneId": "nexus",
+  "tenantId": "nexus",
+  "name": "NEXUS Command Console",
+  "purpose": "Governed command console face plane for SentinelOS. NEXUS converts operator intent into governed system actions. All execution passes through the SentinelOS control plane, governance preflight, and audit trail. High-risk execution requires Executive Desk approval.",
+  "owner": "Nunn Cloud",
+  "gaasPolicyPack": "gaas.nexus.console.v1",
+  "requestedCapabilities": [
+    "FACEPLANE_READ",
+    "FACEPLANE_WRITE",
+    "FACEPLANE_EXECUTE",
+    "GAAS_POLICY_APPLY",
+    "DOCKING_MANIFEST_REGISTER"
+  ],
+  "approvalModel": "executive_approval_before_execute",
+  "telemetryMode": "LIMITED",
+  "dataClasses": [
+    "command_intent",
+    "console_session",
+    "approval_state",
+    "audit_summary",
+    "executive_oversight_event"
+  ],
+  "evidence": [
+    "policy_map",
+    "executive_approval_boundary",
+    "audit_receipt",
+    "docking_decision",
+    "command_envelope_trace"
+  ],
+  "complianceMandates": [
+    "internal_governance",
+    "operator_rbac",
+    "executive_oversight"
+  ],
+  "routes": [
+    "/v1/command",
+    "/approvals",
+    "/v1/audit"
+  ],
+  "controls": [
+    "tenant_scope_required",
+    "operator_role_for_write",
+    "executive_approval_before_execute",
+    "telemetry_export_blocked_by_default",
+    "surface_view_audited",
+    "no_direct_execution_bypass"
+  ],
+  "executionPath": "NEXUS -> Intent -> Control Plane -> Sentinel Core -> Governance -> Executive Approval (high-risk) -> Execution",
+  "oversightModel": {
+    "oversightSurface": "Executive Desk",
+    "reviewCommand": "nexus.executive.review",
+    "approvalRequired": ["nexus.command.execute"],
+    "autoApproved": ["nexus.status.read", "nexus.console.init"],
+    "operatorApproved": ["nexus.intent.emit"]
+  }
+}

@@ -46,7 +46,14 @@ const commandScopes = {
   'policy.evaluate': 'policy:evaluate',
   'cdnlux.token.evaluate': 'platform:admin',
   'cdnlux.contract.evaluate': 'platform:admin',
-  'docking.evaluate': 'platform:admin'
+  'docking.evaluate': 'platform:admin',
+
+  // NEXUS face plane commands
+  'nexus.status.read': 'nexus:read',
+  'nexus.console.init': 'nexus:read',
+  'nexus.intent.emit': 'nexus:write',
+  'nexus.command.execute': 'nexus:execute',
+  'nexus.executive.review': 'nexus:executive'
 };
 
 function blocked(state, riskLevel, reason, details = {}) {
@@ -202,6 +209,26 @@ function evaluatePolicy(input = {}, signals = {}) {
       actor: ctx.actor,
       role: ctx.role,
       approvalRequired: true,
+      statusCode: 403
+    });
+  }
+
+  if (ctx.command === 'nexus.command.execute' && ctx.role !== 'executive' && ctx.role !== 'platform') {
+    return blocked('restricted', 'high', 'EXECUTIVE_APPROVAL_REQUIRED', {
+      requiredRole: 'executive',
+      actor: ctx.actor,
+      role: ctx.role,
+      approvalRequired: true,
+      statusCode: 403
+    });
+  }
+
+  if (ctx.command === 'nexus.executive.review' && ctx.role !== 'executive' && ctx.role !== 'platform') {
+    return blocked('restricted', 'medium', 'EXECUTIVE_ROLE_REQUIRED', {
+      requiredRole: 'executive',
+      actor: ctx.actor,
+      role: ctx.role,
+      approvalRequired: false,
       statusCode: 403
     });
   }

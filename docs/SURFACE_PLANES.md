@@ -46,6 +46,9 @@ Both currently resolve into the same OwnerFi surface plane so existing proof flo
 Today the registry contains:
 - `ownerfi`
 - `hotelops`
+- `customerops`
+- `nunncloud`
+- `nexus` — NEXUS Command Console face plane (Executive Desk oversight; see `docs/NEXUS_INTEGRATION_PLAN.md`)
 
 Future tenants should be added as new surface entries, not as separate apps or command forks.
 
