@@ -53,7 +53,22 @@ const commandScopes = {
   'nexus.console.init': 'nexus:read',
   'nexus.intent.emit': 'nexus:write',
   'nexus.command.execute': 'nexus:execute',
-  'nexus.executive.review': 'nexus:executive'
+  'nexus.executive.review': 'nexus:executive',
+
+  // C4 — TILDA workflow commands
+  'tilda.status.read': 'tilda:read',
+  'tilda.workflow.read': 'tilda:read',
+  'tilda.action.execute': 'tilda:execute',
+
+  // C4 — Microsoft 365 commands
+  'm365.calendar.read': 'm365:read',
+  'm365.mail.read': 'm365:read',
+  'm365.report.generate': 'm365:report',
+
+  // C4 — GitHub commands
+  'github.repo.read': 'github:read',
+  'github.pr.read': 'github:read',
+  'github.action.execute': 'github:execute'
 };
 
 function blocked(state, riskLevel, reason, details = {}) {

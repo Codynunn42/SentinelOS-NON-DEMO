@@ -148,6 +148,19 @@ Key fields:
 - [x] **C3.5** — AI Capability Broker: goal → capability → provider routing (`capabilities/broker.js`)
 - [x] **C3 Close** — `NEXUS_C3_CHECKPOINT_REPORT.md` + STATUS_REPORT.md final update
 
+### Phase 4 — C4 Multi-Provider Capability Adoption
+
+**Mission:** Expand SentinelOS from a single-provider platform into a governed multi-provider operating layer. The Capability Broker grows from registry-based routing into multi-provider selection. TILDA, Microsoft 365, and GitHub are docked and registered using the C3 Dock Manifest Standard. The Executive Desk becomes a cross-provider governance dashboard. All C3 invariants remain in force.
+
+- [x] **C4.0** — Status correction: `STATUS_REPORT.md` and `NEXUS_INTEGRATION_PLAN.md` updated; C4 checkpoint report created
+- [x] **C4.1** — Multi-Provider Capability Selector: `broker.js` upgraded with `selectProvider` and `brokerMultiProvider`; `providerHealth` field added to capabilities
+- [x] **C4.2** — TILDA docked: `tilda-faceplane.json`, `TILDA-READ-001` + `TILDA-EXECUTE-001` registered, surface plane created, policy scopes added
+- [x] **C4.3** — Microsoft 365 docked: `microsoft365-faceplane.json`, `M365-READ-001` + `M365-REPORT-001` registered, surface plane created, policy scopes added
+- [x] **C4.4** — GitHub docked: `github-faceplane.json`, `GITHUB-READ-001` + `GITHUB-EXECUTE-001` registered, surface plane created, policy scopes added
+- [x] **C4.5** — Cross-provider drift monitor: `capabilityDriftMonitor.js` + `GET /api/v1/drift/capabilities`
+- [x] **C4.6** — Cross-provider Executive Desk: Provider Health panel + `loadProviderDashboard()` in `nexus-executive.html`; `crossProviderDashboard: true` in `executive.ts`
+- [x] **C4 Close** — `NEXUS_C4_CHECKPOINT_REPORT.md` + final status update
+
 ---
 
 ## Invariants
@@ -162,4 +175,4 @@ Key fields:
 
 **Owner:** Sentinel AI by Cody Nunn | Nunn Cloud
 **Date:** 2026-08-02
-**Status:** Phase 1 Complete — Phase 2 Complete — Phase 3 (C3 Capability Adoption Layer) Complete — C4 Ready
+**Status:** Phase 1 Complete — Phase 2 Complete — Phase 3 (C3 Capability Adoption Layer) Complete — Phase 4 (C4 Multi-Provider Capability Adoption) Complete — C5 Ready

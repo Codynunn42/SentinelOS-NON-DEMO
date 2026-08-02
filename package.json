@@ -58,6 +58,9 @@
     "check:nexus-gaas": "node scripts/check-nexus-gaas-policy.js",
     "check:nexus-phase2": "node scripts/check-nexus-phase2.js",
     "check:nexus-phase3": "node scripts/check-nexus-phase3.js",
+    "check:c4-broker": "node scripts/check-c4-broker.js",
+    "check:c4-providers": "node scripts/check-c4-providers.js",
+    "check:c4": "node scripts/check-c4-broker.js && node scripts/check-c4-providers.js",
     "db:apply-schema": "node scripts/db-apply-schema.js",
     "db:smoke": "node scripts/db-smoke.js"
   },

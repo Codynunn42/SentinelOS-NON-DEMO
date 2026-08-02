@@ -1,0 +1,76 @@
+{
+  "facePlaneId": "tilda",
+  "tenantId": "tilda",
+  "name": "TILDA Workflow Engine",
+  "purpose": "Governed workflow automation face plane for SentinelOS. TILDA converts structured workflow definitions into governed execution sequences. All TILDA actions route through the SentinelOS command envelope — no direct execution bypass. Execution requires evidence submission.",
+  "owner": "Nunn Cloud",
+  "gaasPolicyPack": "gaas.tilda.workflow.v1",
+  "requestedCapabilities": [
+    "FACEPLANE_READ",
+    "FACEPLANE_EXECUTE",
+    "DOCKING_MANIFEST_REGISTER"
+  ],
+  "approvalModel": "operator_role_for_execute",
+  "telemetryMode": "LIMITED",
+  "dataClasses": [
+    "workflow_intent",
+    "workflow_session",
+    "execution_state",
+    "audit_summary"
+  ],
+  "evidence": [
+    "policy_map",
+    "audit_receipt",
+    "docking_decision",
+    "command_envelope_trace"
+  ],
+  "complianceMandates": [
+    "internal_governance",
+    "operator_rbac",
+    "audit_retention"
+  ],
+  "routes": [
+    "/api/v1/planning",
+    "/api/v1/execution",
+    "/api/v1/evidence",
+    "/v1/audit"
+  ],
+  "controls": [
+    "tenant_scope_required",
+    "operator_role_for_execute",
+    "evidence_required_before_execute",
+    "telemetry_export_blocked_by_default",
+    "surface_view_audited",
+    "no_direct_execution_bypass"
+  ],
+  "executionPath": "TILDA -> Intent -> Control Plane -> Sentinel Core -> Governance -> Execution",
+  "dockManifest": {
+    "system": {
+      "name": "TILDA",
+      "version": "1.0"
+    },
+    "provides": [
+      "Workflow Status Read",
+      "Workflow Execution",
+      "Operational Reporting"
+    ],
+    "apis": [
+      "planning",
+      "execution",
+      "evidence"
+    ],
+    "security": {
+      "authentication": "JWT"
+    },
+    "governance": {
+      "evidence": "required"
+    },
+    "runtime": {
+      "healthEndpoint": "/health"
+    },
+    "lifecycle": {
+      "status": "active",
+      "registeredAt": "2026-08-02T00:00:00.000Z"
+    }
+  }
+}

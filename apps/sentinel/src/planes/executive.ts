@@ -14,6 +14,12 @@
 //   - What evidence is required?
 //   - What modernization opportunities exist?
 //
+// C4.6: The Executive Desk is now a cross-provider governance dashboard.
+//   - Provider Health panel: all registered providers with health, drift, evidence posture
+//   - GET /api/v1/drift/capabilities feeds the Provider Health panel
+//   - buildExecutiveState includes crossProviderDrift for each provider
+//   - crossProviderDashboard: true marks this upgrade
+//
 // All Executive Desk decisions are routed through the Approval Layer
 // and audited under the executive.oversight.* telemetry class.
 //
@@ -52,6 +58,16 @@ export interface CapabilityStatus {
     authority: { minimumRole: string };
     healthEndpoint: string;
     version: string;
+    providerHealth?: string;
+}
+
+export interface ProviderDriftSummary {
+    provider: string;
+    total: number;
+    clean: boolean;
+    driftedCapabilities: number;
+    signals: string[];
+    assessedAt: string;
 }
 
 export interface ExecutiveDesktopState {
@@ -66,6 +82,7 @@ export interface ExecutiveDesktopState {
         registeredProviders: string[];
         evidenceRequired: CapabilityStatus[];
     };
+    crossProviderDrift: ProviderDriftSummary[];
 }
 
 function buildExecutiveState(overrides: Partial<ExecutiveDesktopState> = {}): ExecutiveDesktopState {
@@ -76,6 +93,24 @@ function buildExecutiveState(overrides: Partial<ExecutiveDesktopState> = {}): Ex
     const registeredProviders = Array.from(
         new Set(allCapabilities.map((c: any) => c.provider))
     ) as string[];
+
+    // Build per-provider health summary for the cross-provider dashboard
+    const crossProviderDrift: ProviderDriftSummary[] = registeredProviders.map((provider) => {
+        const providerCaps = allCapabilities.filter((c: any) => c.provider === provider);
+        const degraded = providerCaps.filter((c: any) => c.providerHealth === 'degraded').length;
+        const unknown = providerCaps.filter((c: any) => c.providerHealth === 'unknown').length;
+        const signals: string[] = [];
+        if (degraded > 0) signals.push('health_degraded');
+        if (unknown > 0) signals.push('health_unknown');
+        return {
+            provider,
+            total: providerCaps.length,
+            clean: signals.length === 0,
+            driftedCapabilities: degraded,
+            signals,
+            assessedAt: new Date().toISOString()
+        };
+    });
 
     return {
         surface: 'executive',
@@ -89,6 +124,7 @@ function buildExecutiveState(overrides: Partial<ExecutiveDesktopState> = {}): Ex
             registeredProviders,
             evidenceRequired: evidenceRequired as unknown as CapabilityStatus[]
         },
+        crossProviderDrift,
         ...overrides
     };
 }
@@ -111,9 +147,10 @@ const executiveDeskHandlers = {
 
 export const executiveDeskPlane = {
     name: 'executive',
-    description: 'Executive Desk — oversight-only surface. Approves or rejects governed actions. Queries Capability Registry and Dock Manifests for governance decisions. Cannot initiate execution.',
+    description: 'Executive Desk — oversight-only surface. Approves or rejects governed actions. Queries Capability Registry and Dock Manifests for governance decisions. Cannot initiate execution. Cross-provider governance dashboard active.',
     handlers: executiveDeskHandlers,
     oversightOnly: true,
     telemetryClass: 'executive.oversight',
-    capabilityAware: true
+    capabilityAware: true,
+    crossProviderDashboard: true
 };

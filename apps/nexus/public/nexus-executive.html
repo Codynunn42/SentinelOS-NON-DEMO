@@ -299,6 +299,69 @@
     }
 
     .gov-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--gold); display: inline-block; margin-right: 5px; }
+
+    /* ---- Provider health panel ---- */
+    .provider-card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px 16px;
+      margin-bottom: 10px;
+    }
+
+    .provider-card.clean { border-left: 3px solid var(--green); }
+    .provider-card.drifted { border-left: 3px solid var(--yellow); }
+    .provider-card.degraded { border-left: 3px solid var(--red); }
+
+    .provider-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .provider-name {
+      font-size: 13px;
+      font-weight: 700;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      color: var(--accent);
+    }
+
+    .provider-badge {
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 4px;
+    }
+
+    .provider-badge.clean { background: #0a2218; color: var(--green); }
+    .provider-badge.drifted { background: #2a1f00; color: var(--yellow); }
+    .provider-badge.degraded { background: #2a0a0a; color: var(--red); }
+
+    .provider-meta {
+      font-size: 11px;
+      color: var(--muted);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .provider-meta span strong { color: var(--text); font-weight: 600; }
+
+    .btn-load-secondary {
+      background: var(--surface-2);
+      color: var(--text);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 9px 18px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .btn-load-secondary:hover { border-color: var(--accent); color: var(--accent); }
   </style>
 </head>
 <body>
@@ -330,6 +393,7 @@
     <input id="apiKeyInput" class="auth-input" type="password" placeholder="x-api-key (executive-scoped)" autocomplete="off">
     <button class="btn-load" onclick="loadApprovals()">Load Pending Approvals</button>
     <button class="btn-load" onclick="loadCapabilities()" style="margin-left:8px; background:var(--surface-2);">Load Capabilities</button>
+    <button class="btn-load-secondary" onclick="loadProviderDashboard()" style="margin-left:8px;">Provider Health</button>
   </div>
 
   <!-- Pending approvals -->
@@ -348,6 +412,16 @@
     <div id="capabilityRegistry">
       <div class="empty-state" id="capabilityEmpty">
         Enter your API key and click Load Capabilities to inspect the Capability Registry.
+      </div>
+    </div>
+  </div>
+
+  <!-- Provider Health Panel (C4.6) -->
+  <div class="section">
+    <div class="section-title">Provider Health — Cross-Provider Governance Dashboard</div>
+    <div id="providerHealthPanel">
+      <div class="empty-state" id="providerHealthEmpty">
+        Click <strong>Provider Health</strong> to load the cross-provider drift and governance posture report.
       </div>
     </div>
   </div>
@@ -495,6 +569,71 @@
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;');
+  }
+
+  // C4.6 — Provider Health: cross-provider governance dashboard
+  async function loadProviderDashboard() {
+    const apiKey = document.getElementById('apiKeyInput').value.trim();
+    const headers = { 'Content-Type': 'application/json' };
+    if (apiKey) headers['x-api-key'] = apiKey;
+
+    const container = document.getElementById('providerHealthPanel');
+    logActivity('Loading Provider Health dashboard…', 'pending');
+
+    try {
+      const res = await fetch('/api/v1/drift/capabilities', { headers });
+      const data = await res.json();
+
+      if (!res.ok) {
+        logActivity(`Provider Health load failed: ${data.error || res.status}`, 'blocked');
+        container.innerHTML = `<div class="empty-state">Failed to load provider health: ${escHtml(data.error || res.status)}</div>`;
+        return;
+      }
+
+      const providers = data.providers || [];
+      if (!providers.length) {
+        container.innerHTML = '<div class="empty-state">No providers registered.</div>';
+        logActivity('No providers registered', 'ok');
+        return;
+      }
+
+      const overallBadge = data.clean
+        ? '<span style="color:var(--green);font-weight:700;font-size:12px;">All providers clean ✓</span>'
+        : `<span style="color:var(--yellow);font-weight:700;font-size:12px;">${data.totalDrifted} capability drift signal(s) detected</span>`;
+
+      const summary = `<div style="margin-bottom:14px;padding:10px 14px;background:var(--surface-2);border-radius:6px;font-size:12px;display:flex;gap:20px;flex-wrap:wrap;">
+        <span>Providers: <strong style="color:var(--text)">${data.totalProviders}</strong></span>
+        <span>Capabilities: <strong style="color:var(--text)">${data.totalCapabilities}</strong></span>
+        <span>${overallBadge}</span>
+        <span style="color:var(--muted)">Assessed: ${escHtml(data.assessedAt || '')}</span>
+      </div>`;
+
+      const cards = providers.map((p) => {
+        const state = p.signals && p.signals.includes('health_degraded') ? 'degraded'
+          : (!p.clean ? 'drifted' : 'clean');
+        const badge = state === 'clean' ? 'HEALTHY' : state === 'degraded' ? 'DEGRADED' : 'DRIFT';
+        const signalList = p.signals && p.signals.length
+          ? `<span>Signals: <strong style="color:var(--yellow)">${escHtml(p.signals.join(', '))}</strong></span>`
+          : `<span style="color:var(--green)">No drift signals</span>`;
+        return `<div class="provider-card ${state}">
+          <div class="provider-header">
+            <span class="provider-name">${escHtml(p.provider)}</span>
+            <span class="provider-badge ${state}">${badge}</span>
+          </div>
+          <div class="provider-meta">
+            <span>Capabilities: <strong>${p.total}</strong></span>
+            <span>Drifted: <strong>${p.driftedCapabilities}</strong></span>
+            ${signalList}
+          </div>
+        </div>`;
+      }).join('');
+
+      container.innerHTML = summary + cards;
+      logActivity(`Provider Health loaded — ${providers.length} provider(s), ${data.totalDrifted} drift signal(s)`, data.clean ? 'ok' : 'pending');
+    } catch (err) {
+      logActivity(`Error loading provider health: ${err.message}`, 'blocked');
+      container.innerHTML = `<div class="empty-state">Error: ${escHtml(err.message)}</div>`;
+    }
   }
 
   async function loadCapabilities() {

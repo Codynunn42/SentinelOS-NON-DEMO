@@ -165,6 +165,9 @@ registerCapability({
   governance: { evidenceRequired: false },
   healthEndpoint: '/health',
   version: '1.0',
+  providerHealth: 'healthy',
+  cost: 2,
+  latencyMs: 120,
   commands: ['nexus.status.read', 'nexus.console.init']
 });
 
@@ -178,6 +181,9 @@ registerCapability({
   governance: { evidenceRequired: false },
   healthEndpoint: '/health',
   version: '1.0',
+  providerHealth: 'healthy',
+  cost: 2,
+  latencyMs: 150,
   commands: ['nexus.intent.emit']
 });
 
@@ -191,6 +197,9 @@ registerCapability({
   governance: { evidenceRequired: true },
   healthEndpoint: '/health',
   version: '1.0',
+  providerHealth: 'healthy',
+  cost: 3,
+  latencyMs: 200,
   commands: ['nexus.command.execute']
 });
 
@@ -204,6 +213,9 @@ registerCapability({
   governance: { evidenceRequired: true },
   healthEndpoint: '/health',
   version: '1.0',
+  providerHealth: 'healthy',
+  cost: 2,
+  latencyMs: 120,
   commands: ['nexus.executive.review']
 });
 
@@ -217,7 +229,110 @@ registerCapability({
   governance: { evidenceRequired: true },
   healthEndpoint: '/health',
   version: '1.0',
+  providerHealth: 'healthy',
+  cost: 3,
+  latencyMs: 250,
   commands: ['application.submit', 'application.evaluate', 'deal.submit', 'deal.approve', 'deal.execute']
+});
+
+// -------------------------------------------------------------------------
+// C4 — New capability providers: TILDA, Microsoft 365, GitHub
+// -------------------------------------------------------------------------
+
+registerCapability({
+  capabilityId: 'TILDA-READ-001',
+  provider: 'tilda',
+  type: CAPABILITY_TYPE.READ,
+  interface: INTERFACE.REST,
+  endpoint: '/api/v1/planning',
+  authority: { minimumRole: 'operator' },
+  governance: { evidenceRequired: false },
+  healthEndpoint: '/health',
+  version: '1.0',
+  providerHealth: 'healthy',
+  cost: 2,
+  latencyMs: 100,
+  commands: ['tilda.status.read', 'tilda.workflow.read']
+});
+
+registerCapability({
+  capabilityId: 'TILDA-EXECUTE-001',
+  provider: 'tilda',
+  type: CAPABILITY_TYPE.EXECUTE,
+  interface: INTERFACE.REST,
+  endpoint: '/api/v1/execution',
+  authority: { minimumRole: 'operator' },
+  governance: { evidenceRequired: true },
+  healthEndpoint: '/health',
+  version: '1.0',
+  providerHealth: 'healthy',
+  cost: 4,
+  latencyMs: 300,
+  commands: ['tilda.action.execute']
+});
+
+registerCapability({
+  capabilityId: 'M365-READ-001',
+  provider: 'microsoft365',
+  type: CAPABILITY_TYPE.READ,
+  interface: INTERFACE.REST,
+  endpoint: '/api/v1/planning',
+  authority: { minimumRole: 'operator' },
+  governance: { evidenceRequired: false },
+  healthEndpoint: '/health',
+  version: '1.0',
+  providerHealth: 'healthy',
+  cost: 3,
+  latencyMs: 200,
+  commands: ['m365.calendar.read', 'm365.mail.read']
+});
+
+registerCapability({
+  capabilityId: 'M365-REPORT-001',
+  provider: 'microsoft365',
+  type: CAPABILITY_TYPE.REPORT,
+  interface: INTERFACE.REST,
+  endpoint: '/api/v1/planning',
+  authority: { minimumRole: 'operator' },
+  governance: { evidenceRequired: true },
+  healthEndpoint: '/health',
+  version: '1.0',
+  providerHealth: 'healthy',
+  cost: 3,
+  latencyMs: 350,
+  commands: ['m365.report.generate']
+});
+
+registerCapability({
+  capabilityId: 'GITHUB-READ-001',
+  provider: 'github',
+  type: CAPABILITY_TYPE.READ,
+  interface: INTERFACE.REST,
+  endpoint: '/api/v1/planning',
+  authority: { minimumRole: 'operator' },
+  governance: { evidenceRequired: false },
+  healthEndpoint: '/health',
+  version: '1.0',
+  providerHealth: 'healthy',
+  cost: 2,
+  latencyMs: 150,
+  commands: ['github.repo.read', 'github.pr.read']
+});
+
+registerCapability({
+  capabilityId: 'GITHUB-EXECUTE-001',
+  provider: 'github',
+  type: CAPABILITY_TYPE.EXECUTE,
+  interface: INTERFACE.REST,
+  endpoint: '/api/v1/execution',
+  authority: { minimumRole: 'executive' },
+  governance: { evidenceRequired: true },
+  healthEndpoint: '/health',
+  version: '1.0',
+  providerHealth: 'healthy',
+  cost: 4,
+  latencyMs: 400,
+  commands: ['github.action.execute']
 });
 
 module.exports = {

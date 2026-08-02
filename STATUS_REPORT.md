@@ -4,7 +4,7 @@
 
 ## Current Phase
 
-C3 — Capability Adoption Layer (Active Build)
+C4 — Multi-Provider Capability Adoption (Active Build)
 
 ## Summary
 
@@ -12,9 +12,9 @@ SentinelOS NON-DEMO is the canonical home for the NEXUS integration and the Sent
 
 The Capability Adoption Layer establishes the standardized contract through which any integrated system participates in SentinelOS: discover, dock, register capabilities, govern, orchestrate through the Command Envelope API, and operate through the Executive Desk. Every future system — TILDA, Microsoft 365, GitHub, government systems — follows the same lifecycle.
 
-The operating foundation is solid: authenticated API, governance preflight, audit trail, Postgres persistence, live Azure deployment, Executive Desk oversight surface, and a proven OwnerFi surface plane. C3 builds on this foundation to establish the platform contract.
+The operating foundation is solid: authenticated API, governance preflight, audit trail, Postgres persistence, live Azure deployment, Executive Desk oversight surface, and a proven OwnerFi surface plane. C3 established the platform contract. C4 activates multi-provider capability adoption: TILDA, Microsoft 365, and GitHub are now docked and registered; the Capability Broker selects across multiple providers; the Executive Desk becomes a cross-provider governance dashboard.
 
-NEXUS Phase 1 (surface registration, policy, docking manifest) and Phase 2 (app shell, Executive Desk UI, GaaS policy pack) are complete — C2.3 and C2.4 PASS issued. C3 (Capability Adoption Layer) is now active.
+NEXUS Phase 1 (surface registration, policy, docking manifest) and Phase 2 (app shell, Executive Desk UI, GaaS policy pack) are complete — C2.3 and C2.4 PASS issued. C3 (Capability Adoption Layer) is complete — C3.0 through C3.5 PASS issued. C4 (Multi-Provider Capability Adoption) is now active.
 
 ## Completed
 
@@ -85,7 +85,7 @@ NEXUS Phase 1 (surface registration, policy, docking manifest) and Phase 2 (app 
 
 ## In Progress
 
-- **C4** — Multi-provider AI capability selection; TILDA, Microsoft 365, GitHub, government system docking; cross-provider Executive Desk
+- **C4** — Multi-provider AI capability selection; TILDA, Microsoft 365, GitHub docking; cross-provider Executive Desk
 
 ## Completed (NEXUS Phases 1–2)
 
@@ -99,7 +99,7 @@ NEXUS Phase 1 (surface registration, policy, docking manifest) and Phase 2 (app 
 - no active billing, checkout, payment, or funnel execution path in this repo
 - `ca-sentinelos-proof` appears to be an older health-only host and should not be used as the current shareable proof URL
 
-## C3 Gate Status
+## C3 Gate Status (COMPLETE)
 
 | Gate | Deliverable | Status |
 |------|-------------|--------|
@@ -110,14 +110,26 @@ NEXUS Phase 1 (surface registration, policy, docking manifest) and Phase 2 (app 
 | C3.4 | Executive Desk capability surface | PASS |
 | C3.5 | AI Capability Broker | PASS |
 
+## C4 Gate Status
+
+| Gate | Deliverable | Status |
+|------|-------------|--------|
+| C4.0 | Status correction | PASS |
+| C4.1 | Multi-Provider Capability Selector | PASS |
+| C4.2 | TILDA dock and registration | PASS |
+| C4.3 | Microsoft 365 dock and registration | PASS |
+| C4.4 | GitHub dock and registration | PASS |
+| C4.5 | Cross-provider drift monitor | PASS |
+| C4.6 | Cross-provider Executive Desk | PASS |
+
 ## Next Actions
 
-1. **C4** — Multi-provider AI capability selection; TILDA, Microsoft 365, GitHub docking; cross-provider Executive Desk
+1. **C5** — Government agency system docking; sovereign capability tiers; federated Executive Desk
 
 ## Risk Level
 
-Low. C3 adds new API surface and new modules — no changes to existing surfaces, handlers, or runtime behavior. All existing surfaces (ownerfi, hotelops, customerops, nunncloud, nexus) are unaffected.
+Low. C4 adds new providers, new API surface, and new modules — no changes to existing surfaces, handlers, or runtime behavior. All existing surfaces (ownerfi, hotelops, customerops, nunncloud, nexus) are unaffected. All C3 invariants remain in force.
 
 ## Direction
 
-This repository is directed at the SentinelOS Capability Adoption Layer. NEXUS is the first governed capability provider. Every future system docks through the same lifecycle: discover, dock, register, govern, orchestrate, operate. The Command Envelope API is the canonical execution contract. The Executive Desk is the governance oversight surface. See `docs/NEXUS_INTEGRATION_PLAN.md` for full architecture and build order.
+This repository is directed at the SentinelOS Capability Adoption Layer. NEXUS is the first governed capability provider. TILDA, Microsoft 365, and GitHub are the next wave — each docked through the same C3 Dock Manifest Standard and registered in the Capability Registry. Every future system docks through the same lifecycle: discover, dock, register, govern, orchestrate, operate. The Command Envelope API is the canonical execution contract. The Executive Desk is the governance oversight surface. See `docs/NEXUS_INTEGRATION_PLAN.md` for full architecture and build order.

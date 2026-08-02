@@ -3549,6 +3549,23 @@ const server = http.createServer(async (req, res) => {
     });
   }
 
+  // C4.5 — Cross-provider capability drift monitor
+  if (pathname === '/api/v1/drift/capabilities' && req.method === 'GET') {
+    const access = authorizeRoute(req, res, '/api/v1/drift/capabilities', {
+      command: 'audit.read',
+      requiredScope: 'audit:read'
+    });
+    if (!access) return;
+
+    const { runCapabilityDriftMonitor } = require('../sentinel/src/drift/capabilityDriftMonitor');
+    const report = runCapabilityDriftMonitor();
+
+    return sendJson(res, 200, {
+      status: 'ok',
+      ...report
+    });
+  }
+
   // -------------------------------------------------------------------------
   // C3 — Capability Adoption Layer: Command Envelope API
   // -------------------------------------------------------------------------
