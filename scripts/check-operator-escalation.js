@@ -1,12 +1,14 @@
 const assert = require('assert');
 const fs = require('fs');
+const os = require('os');
+const path = require('path');
 const {
   getOperatorCase,
   listOperatorCases,
   submitOperatorDecision
 } = require('../apps/sentinel/src/governance/vendorOnboarding/operatorEscalation');
 
-const ledgerPath = '/private/tmp/sentinel_operator_escalation_check_ledger.jsonl';
+const ledgerPath = path.join(os.tmpdir(), 'sentinel_operator_escalation_check_ledger.jsonl');
 fs.rmSync(ledgerPath, { force: true });
 
 const cases = listOperatorCases();

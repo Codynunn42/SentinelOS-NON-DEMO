@@ -1,11 +1,13 @@
 const fs = require('fs');
+const os = require('os');
+const path = require('path');
 const { createAuditLedger } = require('../apps/sentinel/src/governance/vendorOnboarding/auditLedger');
 const { evaluateVendorOnboarding } = require('../apps/sentinel/src/governance/vendorOnboarding/engine');
 const { deriveLatencyClass } = require('../apps/sentinel/src/governance/vendorOnboarding/latencyGovernor');
 
 const CASE_COUNT = Number(process.argv[2] || 1000);
-const METRICS_PATH = process.argv[3] || '/private/tmp/sentinel_vendor_onboarding_simulation_metrics.json';
-const LEDGER_PATH = process.argv[4] || '/private/tmp/sentinel_vendor_onboarding_simulation_ledger.jsonl';
+const METRICS_PATH = process.argv[3] || path.join(os.tmpdir(), 'sentinel_vendor_onboarding_simulation_metrics.json');
+const LEDGER_PATH = process.argv[4] || path.join(os.tmpdir(), 'sentinel_vendor_onboarding_simulation_ledger.jsonl');
 const LATENCY_SECONDS = {
   standard: 1,
   advisory: 3,

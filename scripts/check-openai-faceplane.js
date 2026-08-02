@@ -1,5 +1,7 @@
 const assert = require('assert');
 const fs = require('fs');
+const os = require('os');
+const path = require('path');
 const {
   getOpenAIFaceplaneConfig,
   getOpenAIFaceplaneStatus,
@@ -19,7 +21,7 @@ const {
 } = require('../apps/sentinel/src/faceplanes/openai/openaiAuditAdapter');
 const { evaluateDrift } = require('../apps/sentinel/src/governance/core/driftMonitor');
 
-const ledgerPath = '/private/tmp/sentinel_openai_faceplane_check_ledger.jsonl';
+const ledgerPath = path.join(os.tmpdir(), 'sentinel_openai_faceplane_check_ledger.jsonl');
 fs.rmSync(ledgerPath, { force: true });
 resetOpenAIEscalations();
 

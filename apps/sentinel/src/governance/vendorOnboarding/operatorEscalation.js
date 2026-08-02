@@ -1,10 +1,12 @@
+const os = require('os');
+const path = require('path');
 const { createAuditLedger, stableStringify } = require('./auditLedger');
 const { evaluateVendorOnboarding } = require('./engine');
 const { deriveLatencyClass } = require('./latencyGovernor');
 const crypto = require('crypto');
 
 const DECISIONS = new Set(['approve', 'require_correction', 'escalate_further', 'refuse', 'confirm_refusal']);
-const DEFAULT_LEDGER_PATH = '/private/tmp/sentinel_vendor_onboarding_operator_ledger.jsonl';
+const DEFAULT_LEDGER_PATH = path.join(os.tmpdir(), 'sentinel_vendor_onboarding_operator_ledger.jsonl');
 const decisionStore = new Map();
 
 function sha256(value) {

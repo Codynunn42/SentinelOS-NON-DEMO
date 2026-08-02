@@ -1,5 +1,6 @@
 const crypto = require('crypto');
 const fs = require('fs');
+const os = require('os');
 const path = require('path');
 const baseline = require('./containmentBaseline_v1.json');
 const { driftConfig } = require('./driftConfig');
@@ -7,7 +8,7 @@ const { DEFAULT_DRIFT_POLICY_LEDGER_PATH, readEntries, stableStringify } = requi
 
 const BASELINE_PATH = path.join(__dirname, 'containmentBaseline_v1.json');
 const EXPECTED_BASELINE_CHECKSUM = 'sha256:0c7a4f1f4b2c03cfbf7c94505d80ce0b20da75733a8b50c1de5b6df597471462';
-const SCHEDULER_HEARTBEAT_PATH = process.env.SENTINEL_SCHEDULER_HEARTBEAT_PATH || '/private/tmp/sentinel_scheduler_heartbeat.json';
+const SCHEDULER_HEARTBEAT_PATH = process.env.SENTINEL_SCHEDULER_HEARTBEAT_PATH || path.join(os.tmpdir(), 'sentinel_scheduler_heartbeat.json');
 
 function sha256(value) {
   return crypto.createHash('sha256').update(value).digest('hex');

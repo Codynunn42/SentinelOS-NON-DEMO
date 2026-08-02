@@ -4,6 +4,7 @@ const { hotelHandlers } = require('./hotelops');
 const { nunncloudHandlers } = require('./nunncloud');
 const { mockHandlers } = require('../commands/mockHandlers');
 const { contractReclamationHandlers } = require('../commands/contractReclamation');
+const { nexusHandlers } = require('./nexus');
 
 const surfaceRegistry = {
   ownerfi: {
@@ -29,6 +30,10 @@ const surfaceRegistry = {
   mock: {
     name: 'Mock Faceplane',
     handlers: mockHandlers
+  },
+  nexus: {
+    name: 'Nexus',
+    handlers: nexusHandlers
   }
 };
 

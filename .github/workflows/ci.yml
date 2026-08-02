@@ -21,8 +21,14 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install deps (none yet)
+      - name: Install deps
         run: npm install || true
+
+      - name: Smoke — tier registry
+        run: node scripts/check-tier-registry.js
+
+      - name: Smoke — governance status
+        run: node scripts/check-governance-status.js
 
       - name: Start API
         env:

@@ -1,6 +1,8 @@
 const assert = require('assert');
 const fs = require('fs');
-const heartbeatPath = '/private/tmp/sentinel_governance_status_check_heartbeat.json';
+const os = require('os');
+const path = require('path');
+const heartbeatPath = path.join(os.tmpdir(), 'sentinel_governance_status_check_heartbeat.json');
 process.env.SENTINEL_SCHEDULER_HEARTBEAT_PATH = heartbeatPath;
 const {
   buildGovernanceStatus,
@@ -10,7 +12,7 @@ const {
 } = require('../apps/sentinel/src/governance/core/governanceStatus');
 const { appendDriftConfigUpdate } = require('../apps/sentinel/src/governance/core/driftPolicyLedger');
 
-const ledgerPath = '/private/tmp/sentinel_governance_status_check_ledger.jsonl';
+const ledgerPath = path.join(os.tmpdir(), 'sentinel_governance_status_check_ledger.jsonl');
 fs.rmSync(heartbeatPath, { force: true });
 fs.rmSync(ledgerPath, { force: true });
 

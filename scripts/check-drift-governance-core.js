@@ -1,5 +1,7 @@
 const assert = require('assert');
 const fs = require('fs');
+const os = require('os');
+const path = require('path');
 const baseline = require('../apps/sentinel/src/governance/core/containmentBaseline_v1.json');
 const { driftConfig } = require('../apps/sentinel/src/governance/core/driftConfig');
 const {
@@ -79,7 +81,7 @@ const sustainedCritical = evaluateDrift({
 }, { sustainedCount: 3 });
 assert.strictEqual(sustainedCritical.severity, 'CRITICAL');
 
-const ledgerPath = '/private/tmp/sentinel_drift_governance_core_check.jsonl';
+const ledgerPath = path.join(os.tmpdir(), 'sentinel_drift_governance_core_check.jsonl');
 fs.rmSync(ledgerPath, { force: true });
 const firstUpdate = appendDriftConfigUpdate({
   oldConfigVersion: '1.0.0',

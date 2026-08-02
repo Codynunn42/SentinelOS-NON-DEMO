@@ -1,10 +1,12 @@
 const assert = require('assert');
 const fs = require('fs');
+const os = require('os');
+const path = require('path');
 const { createAuditLedger } = require('../apps/sentinel/src/governance/vendorOnboarding/auditLedger');
 const { evaluateVendorOnboarding } = require('../apps/sentinel/src/governance/vendorOnboarding/engine');
 const { deriveLatencyClass } = require('../apps/sentinel/src/governance/vendorOnboarding/latencyGovernor');
 
-const ledgerPath = '/private/tmp/sentinel_vendor_onboarding_ledger_check.jsonl';
+const ledgerPath = path.join(os.tmpdir(), 'sentinel_vendor_onboarding_ledger_check.jsonl');
 fs.rmSync(ledgerPath, { force: true });
 
 const ledger = createAuditLedger({ ledgerPath });

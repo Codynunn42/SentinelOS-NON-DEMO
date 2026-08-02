@@ -1,6 +1,8 @@
+const os = require('os');
+const path = require('path');
 const { evaluateContainmentDrift } = require('../apps/sentinel/src/governance/vendorOnboarding/driftMonitor');
 
-const metricsPath = process.argv[2] || '/private/tmp/sentinel_vendor_onboarding_simulation_metrics.json';
+const metricsPath = process.argv[2] || path.join(os.tmpdir(), 'sentinel_vendor_onboarding_simulation_metrics.json');
 const summary = evaluateContainmentDrift(metricsPath);
 
 console.log(JSON.stringify({

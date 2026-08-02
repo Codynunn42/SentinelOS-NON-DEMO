@@ -1,4 +1,6 @@
 const fs = require('fs');
+const os = require('os');
+const path = require('path');
 const { createAuditLedger, stableStringify } = require('./auditLedger');
 const { RULE_SET_VERSION } = require('./nvopConfig');
 const {
@@ -8,7 +10,7 @@ const {
 } = require('./driftConfig');
 const crypto = require('crypto');
 
-const DEFAULT_THRESHOLD_LEDGER_PATH = '/private/tmp/sentinel_threshold_change_ledger.jsonl';
+const DEFAULT_THRESHOLD_LEDGER_PATH = path.join(os.tmpdir(), 'sentinel_threshold_change_ledger.jsonl');
 
 function sha256(value) {
   return crypto.createHash('sha256').update(value).digest('hex');

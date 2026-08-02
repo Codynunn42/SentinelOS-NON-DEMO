@@ -1,9 +1,10 @@
 const crypto = require('crypto');
 const fs = require('fs');
+const os = require('os');
 const path = require('path');
 const { hasText } = require('../../shared/validation');
 
-const DEFAULT_DRIFT_POLICY_LEDGER_PATH = '/private/tmp/sentinel_drift_policy_ledger.jsonl';
+const DEFAULT_DRIFT_POLICY_LEDGER_PATH = path.join(os.tmpdir(), 'sentinel_drift_policy_ledger.jsonl');
 
 function stableStringify(value) {
   if (Array.isArray(value)) {

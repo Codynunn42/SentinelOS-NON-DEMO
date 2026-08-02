@@ -1,5 +1,6 @@
 const crypto = require('crypto');
 const fs = require('fs');
+const os = require('os');
 const path = require('path');
 
 const REQUIRED_FIELDS = [
@@ -75,7 +76,7 @@ function buildLedgerEntry(entry, previousHash = null) {
   });
 }
 
-function createAuditLedger({ ledgerPath = '/private/tmp/sentinel_vendor_onboarding_audit_ledger.jsonl' } = {}) {
+function createAuditLedger({ ledgerPath = path.join(os.tmpdir(), 'sentinel_vendor_onboarding_audit_ledger.jsonl') } = {}) {
   ensureLedgerDir(ledgerPath);
 
   return Object.freeze({

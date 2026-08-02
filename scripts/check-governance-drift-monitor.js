@@ -1,5 +1,7 @@
 const assert = require('assert');
 const fs = require('fs');
+const os = require('os');
+const path = require('path');
 const {
   DEFAULT_BASELINE,
   evaluateContainmentDrift,
@@ -106,7 +108,7 @@ const auditFailure = evaluateContainmentDrift({
 assert.strictEqual(auditFailure.posture, 'audit_integrity_failure');
 assert.strictEqual(auditFailure.severity, 'CRITICAL');
 
-const ledgerPath = '/private/tmp/sentinel_threshold_change_check_ledger.jsonl';
+const ledgerPath = path.join(os.tmpdir(), 'sentinel_threshold_change_check_ledger.jsonl');
 fs.rmSync(ledgerPath, { force: true });
 const first = logThresholdChange({
   actor: 'governance@example.com',
