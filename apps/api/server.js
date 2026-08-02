@@ -83,6 +83,8 @@ const STRIPE_CHECKOUT_JS_PATH = path.join(__dirname, 'public', 'stripe-checkout.
 const STRIPE_COMPLETE_JS_PATH = path.join(__dirname, 'public', 'stripe-complete.js');
 const STRIPE_CHECKOUT_CSS_PATH = path.join(__dirname, 'public', 'stripe-checkout.css');
 const STRIPE_COMPLETE_CSS_PATH = path.join(__dirname, 'public', 'stripe-complete.css');
+const NEXUS_CONSOLE_PATH = path.join(__dirname, '..', '..', 'nexus', 'public', 'nexus-console.html');
+const NEXUS_EXECUTIVE_PATH = path.join(__dirname, '..', '..', 'nexus', 'public', 'nexus-executive.html');
 const RATE_LIMIT_WINDOW_MS = 60 * 1000;
 const RATE_LIMIT_MAX_REQUESTS = 30;
 const commandRateLimits = new Map();
@@ -1393,6 +1395,16 @@ const server = http.createServer(async (req, res) => {
   if (pathname === '/mission-control' && req.method === 'GET') {
     auditSurfaceView(req, requestUrl, pathname, 'mission-control');
     return sendHtmlFile(res, MISSION_CONTROL_PATH);
+  }
+
+  if (pathname === '/nexus' && req.method === 'GET') {
+    auditSurfaceView(req, requestUrl, pathname, 'nexus');
+    return sendHtmlFile(res, NEXUS_CONSOLE_PATH);
+  }
+
+  if (pathname === '/nexus/executive' && req.method === 'GET') {
+    auditSurfaceView(req, requestUrl, pathname, 'nexus-executive');
+    return sendHtmlFile(res, NEXUS_EXECUTIVE_PATH);
   }
 
   if (pathname === '/operator-escalations' && req.method === 'GET') {

@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Executive Desk — SentinelOS Oversight</title>
+  <style>
+    :root {
+      --bg: #080b0f;
+      --surface: #0d1219;
+      --surface-2: #121a24;
+      --line: #1a2636;
+      --text: #e8f1fa;
+      --muted: #6e8599;
+      --accent: #4f9cf9;
+      --green: #56d49a;
+      --yellow: #f5c842;
+      --red: #f07070;
+      --gold: #e8b84a;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+      font-size: 14px;
+    }
+
+    /* ---- Header ---- */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 28px;
+      border-bottom: 1px solid var(--line);
+      background: var(--surface);
+    }
+
+    .header-left { display: flex; align-items: center; gap: 12px; }
+
+    .desk-logo {
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      color: var(--gold);
+    }
+
+    .desk-sub {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+    }
+
+    .oversight-badge {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      background: #1a1200;
+      border: 1px solid var(--gold);
+      border-radius: 4px;
+      padding: 3px 9px;
+      color: var(--gold);
+    }
+
+    .back-link {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--accent);
+      text-decoration: none;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 6px 12px;
+    }
+
+    /* ---- Page layout ---- */
+    .page {
+      max-width: 1020px;
+      margin: 0 auto;
+      padding: 28px 24px;
+    }
+
+    .page-title {
+      font-size: 22px;
+      font-weight: 800;
+      margin-bottom: 6px;
+    }
+
+    .page-subtitle {
+      font-size: 14px;
+      color: var(--muted);
+      margin-bottom: 28px;
+    }
+
+    /* ---- Invariant banner ---- */
+    .invariant-banner {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: #0d1a0d;
+      border: 1px solid #1d3a1d;
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin-bottom: 28px;
+      font-size: 13px;
+      color: var(--green);
+    }
+
+    .invariant-icon { font-size: 18px; }
+
+    /* ---- Section ---- */
+    .section { margin-bottom: 32px; }
+
+    .section-title {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 14px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    /* ---- Action card ---- */
+    .action-card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 18px;
+      margin-bottom: 12px;
+    }
+
+    .action-card.pending { border-left: 3px solid var(--yellow); }
+    .action-card.approved { border-left: 3px solid var(--green); }
+    .action-card.rejected { border-left: 3px solid var(--red); }
+
+    .action-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .action-command {
+      font-size: 14px;
+      font-weight: 700;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      color: var(--accent);
+    }
+
+    .action-status {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 3px 9px;
+      border-radius: 4px;
+      flex-shrink: 0;
+    }
+
+    .action-status.pending { background: #2a1f00; color: var(--yellow); }
+    .action-status.approved { background: #0a2218; color: var(--green); }
+    .action-status.rejected { background: #2a0a0a; color: var(--red); }
+
+    .action-meta {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+    }
+
+    .action-meta span strong { color: var(--text); font-weight: 600; }
+
+    .action-controls {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn-approve {
+      background: var(--green);
+      color: #051a10;
+      border: none;
+      border-radius: 6px;
+      padding: 9px 20px;
+      font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .btn-approve:hover { opacity: 0.85; }
+
+    .btn-reject {
+      background: transparent;
+      color: var(--red);
+      border: 1px solid var(--red);
+      border-radius: 6px;
+      padding: 9px 20px;
+      font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .btn-reject:hover { background: #2a0a0a; }
+
+    /* ---- Auth bar ---- */
+    .auth-bar {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px 18px;
+      margin-bottom: 28px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .auth-label { font-size: 12px; color: var(--muted); white-space: nowrap; }
+
+    .auth-input {
+      flex: 1;
+      min-width: 200px;
+      background: var(--surface-2);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      color: var(--text);
+      font-size: 13px;
+      padding: 8px 12px;
+      outline: none;
+    }
+
+    .auth-input:focus { border-color: var(--gold); }
+
+    .btn-load {
+      background: var(--gold);
+      color: #0a0800;
+      border: none;
+      border-radius: 6px;
+      padding: 9px 18px;
+      font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    /* ---- Empty state ---- */
+    .empty-state {
+      text-align: center;
+      padding: 48px 0;
+      color: var(--muted);
+      font-size: 15px;
+      border: 1px dashed var(--line);
+      border-radius: 8px;
+    }
+
+    /* ---- Activity log ---- */
+    .log-entry {
+      font-size: 12px;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      color: var(--muted);
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--line);
+      line-height: 1.6;
+    }
+
+    .log-entry:last-child { border-bottom: none; }
+    .log-entry .ok { color: var(--green); }
+    .log-entry .blocked { color: var(--red); }
+    .log-entry .pending { color: var(--yellow); }
+
+    .log-container {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      max-height: 260px;
+      overflow-y: auto;
+    }
+
+    /* ---- Governance footer ---- */
+    .gov-footer {
+      padding: 12px 28px;
+      border-top: 1px solid var(--line);
+      background: var(--surface);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 11px;
+      color: var(--muted);
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+    }
+
+    .gov-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--gold); display: inline-block; margin-right: 5px; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <span class="desk-logo">Executive Desk</span>
+    <span class="oversight-badge">Oversight</span>
+  </div>
+  <div style="display:flex; align-items:center; gap:12px;">
+    <span class="desk-sub">SentinelOS — NEXUS Governance</span>
+    <a class="back-link" href="/nexus">← NEXUS Console</a>
+  </div>
+</header>
+
+<div class="page" style="padding-bottom: 70px;">
+  <div class="page-title">Executive Desk</div>
+  <div class="page-subtitle">Oversight-only surface. Review, approve, or reject pending NEXUS execution requests. This surface cannot initiate execution.</div>
+
+  <!-- Invariant reminder -->
+  <div class="invariant-banner">
+    <span class="invariant-icon">🔒</span>
+    <span>Governance Invariant: The Executive Desk approves or rejects. It does not initiate. All decisions are audited under <strong>executive.oversight.*</strong></span>
+  </div>
+
+  <!-- Auth bar -->
+  <div class="auth-bar">
+    <span class="auth-label">API Key:</span>
+    <input id="apiKeyInput" class="auth-input" type="password" placeholder="x-api-key (executive-scoped)" autocomplete="off">
+    <button class="btn-load" onclick="loadApprovals()">Load Pending Approvals</button>
+  </div>
+
+  <!-- Pending approvals -->
+  <div class="section">
+    <div class="section-title">Pending Approval Requests</div>
+    <div id="pendingList">
+      <div class="empty-state" id="pendingEmpty">
+        No pending approvals loaded. Enter your API key and click Load.
+      </div>
+    </div>
+  </div>
+
+  <!-- Activity log -->
+  <div class="section">
+    <div class="section-title">Executive Activity Log (this session)</div>
+    <div class="log-container" id="activityLog">
+      <div class="log-entry" style="color:var(--muted)">Session started — {timestamp}</div>
+    </div>
+  </div>
+</div>
+
+<div class="gov-footer">
+  <span><span class="gov-dot"></span>Oversight: Active</span>
+  <span>|</span>
+  <span>Surface: <strong style="color:var(--text)">Executive Desk</strong></span>
+  <span>|</span>
+  <span>Telemetry: <strong style="color:var(--text)">executive.oversight.*</strong></span>
+  <span>|</span>
+  <span>Audit: <strong style="color:var(--text)">Enabled</strong></span>
+</div>
+
+<script>
+  // Replace {timestamp} in initial log entry
+  document.querySelector('#activityLog .log-entry').textContent =
+    `Session started — ${new Date().toISOString()}`;
+
+  async function loadApprovals() {
+    const apiKey = document.getElementById('apiKeyInput').value.trim();
+    const headers = { 'Content-Type': 'application/json' };
+    if (apiKey) headers['x-api-key'] = apiKey;
+
+    logActivity('Loading pending approvals…', 'pending');
+
+    try {
+      const res = await fetch('/approvals', { headers });
+      const data = await res.json();
+
+      if (!res.ok) {
+        logActivity(`Load failed: ${data.error || res.status}`, 'blocked');
+        return;
+      }
+
+      const approvals = Array.isArray(data) ? data : (data.approvals || data.data || []);
+      // Filter to NEXUS tenant only
+      const nexusApprovals = approvals.filter(a =>
+        !a.context || !a.context.tenant || a.context.tenant === 'nexus'
+      );
+
+      renderApprovals(nexusApprovals);
+      logActivity(`Loaded ${nexusApprovals.length} pending approval(s)`, 'ok');
+    } catch (err) {
+      logActivity(`Error: ${err.message}`, 'blocked');
+    }
+  }
+
+  function renderApprovals(list) {
+    const container = document.getElementById('pendingList');
+    if (!list || list.length === 0) {
+      container.innerHTML = '<div class="empty-state">No pending NEXUS approvals.</div>';
+      return;
+    }
+
+    container.innerHTML = '';
+    list.forEach(item => {
+      const status = item.status || 'pending';
+      const el = document.createElement('div');
+      el.className = `action-card ${status}`;
+      const command = (item.decision && item.decision.command) ||
+        (item.context && item.context.command) || 'nexus.command.execute';
+      const actor = (item.context && item.context.actor) || item.actor || '—';
+      const tenant = (item.context && item.context.tenant) || item.tenant || 'nexus';
+      const created = item.createdAt || item.created_at || '';
+
+      el.innerHTML = `
+        <div class="action-header">
+          <span class="action-command">${escHtml(command)}</span>
+          <span class="action-status ${status}">${status.toUpperCase()}</span>
+        </div>
+        <div class="action-meta">
+          <span>ID: <strong>${escHtml(item.id || item.approvalId || '—')}</strong></span>
+          <span>Actor: <strong>${escHtml(actor)}</strong></span>
+          <span>Tenant: <strong>${escHtml(tenant)}</strong></span>
+          ${created ? `<span>Submitted: <strong>${escHtml(created)}</strong></span>` : ''}
+        </div>
+        ${status === 'pending' ? `
+        <div class="action-controls">
+          <button class="btn-approve" onclick="act('${escHtml(item.id || '')}', 'approve')">Approve</button>
+          <button class="btn-reject" onclick="act('${escHtml(item.id || '')}', 'reject')">Reject</button>
+        </div>` : ''}`;
+
+      container.appendChild(el);
+    });
+  }
+
+  async function act(approvalId, action) {
+    if (!approvalId) {
+      logActivity(`Cannot ${action}: no approval ID`, 'blocked');
+      return;
+    }
+
+    const apiKey = document.getElementById('apiKeyInput').value.trim();
+    const headers = { 'Content-Type': 'application/json' };
+    if (apiKey) headers['x-api-key'] = apiKey;
+
+    logActivity(`Submitting ${action.toUpperCase()} for ${approvalId}…`, 'pending');
+
+    try {
+      const res = await fetch(`/approvals/${approvalId}/${action}`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          actor: 'executive-desk',
+          role: 'executive',
+          scopes: ['nexus:executive'],
+          tenant: 'nexus'
+        })
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        logActivity(`${action.toUpperCase()} recorded — ${approvalId}`, 'ok');
+        await loadApprovals();
+      } else {
+        logActivity(`${action.toUpperCase()} failed: ${data.error || res.status}`, 'blocked');
+      }
+    } catch (err) {
+      logActivity(`Error: ${err.message}`, 'blocked');
+    }
+  }
+
+  function logActivity(message, type = '') {
+    const log = document.getElementById('activityLog');
+    const el = document.createElement('div');
+    el.className = 'log-entry';
+    el.innerHTML = `<span class="${escHtml(type)}">[${new Date().toISOString()}]</span> ${escHtml(message)}`;
+    log.prepend(el);
+  }
+
+  function escHtml(str) {
+    return String(str || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+</script>
+
+</body>
+</html>
