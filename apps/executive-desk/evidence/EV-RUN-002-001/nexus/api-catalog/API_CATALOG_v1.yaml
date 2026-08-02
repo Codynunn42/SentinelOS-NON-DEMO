@@ -1,0 +1,40 @@
+metadata:
+  system: NEXUS
+  owner: "Cody Nunn (Interim, role: Executive Desk)"
+  version: "v1"
+  lastUpdated: "2026-08-01"
+apis:
+  - apiId: NEXUS-API-001
+    name: Nexus Health & Readiness
+    protocol: REST
+    baseUrl: "https://api.nunncorporation.com"
+    auth:
+      method: "Bearer"
+      scopes: ["nexus.read", "nexus.ops"]
+    rateLimits:
+      requestsPerMinute: 120
+    versioning:
+      strategy: "path-versioned"
+      current: "v1"
+    errorContract:
+      format: "json"
+      retryableCodes: [429, 500, 502, 503, 504]
+    endpoints:
+      - id: NEXUS-EP-HEALTH
+        method: GET
+        path: /health
+        purpose: Liveness verification
+        requestSchemaRef: "none"
+        responseSchemaRef: "health-v1"
+        owner: "NEXUS Platform"
+        sla: "P95 < 500ms"
+        evidenceRef: "EV-RUN-002-001"
+      - id: NEXUS-EP-READY
+        method: GET
+        path: /ready
+        purpose: Dependency readiness verification
+        requestSchemaRef: "none"
+        responseSchemaRef: "ready-v1"
+        owner: "NEXUS Platform"
+        sla: "P95 < 800ms"
+        evidenceRef: "EV-RUN-002-001"
