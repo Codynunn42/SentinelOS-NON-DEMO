@@ -24,7 +24,7 @@
 
 'use strict';
 
-const { execSync } = require('child_process');
+const { execFileSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 const assert = require('assert');
@@ -124,7 +124,7 @@ function recordEvidence(type, ref, payload) {
 
 function runSuiteScript(scriptPath) {
   try {
-    const output = execSync(`node ${scriptPath}`, {
+    const output = execFileSync(process.execPath, [scriptPath], {
       env: { ...process.env, SENTINEL_HMAC_SECRET: SIGNING_KEY },
       stdio: 'pipe',
       timeout: 30000

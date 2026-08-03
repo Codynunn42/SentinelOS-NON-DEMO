@@ -115,35 +115,35 @@ Evidence produced: 7/7 failure scenarios
 
 | Type | Reference | Timestamp |
 |---|---|---|
-| policy | SPE-15C05F4C92EA | 2026-08-03T13:54:46.136Z |
-| gate | GATE-ORD-001 | 2026-08-03T13:54:46.136Z |
-| policy-eval | SPE-15C05F4C92EA | 2026-08-03T13:54:46.136Z |
-| policy-eval-block | SPE-88DB893A4300 | 2026-08-03T13:54:46.136Z |
-| drift-enforcement | SPE-0FB899D436E2 | 2026-08-03T13:54:46.136Z |
-| ledger-append | SEL-248E9D92EF46 | 2026-08-03T13:54:46.136Z |
-| ledger-seal | SEL-248E9D92EF46 | 2026-08-03T13:54:46.136Z |
-| ledger-integrity | SEL-248E9D92EF46 | 2026-08-03T13:54:46.136Z |
-| ser-session | SER-AB8F82A75CFC | 2026-08-03T13:54:46.136Z |
-| suite | Capability Registry suite | 2026-08-03T13:54:46.136Z |
-| suite | Docking Protocol suite | 2026-08-03T13:54:46.136Z |
-| suite | C4 Broker suite | 2026-08-03T13:54:46.136Z |
-| suite | C4 Providers suite | 2026-08-03T13:54:46.136Z |
-| suite | Federation Envelope (FEM) | 2026-08-03T13:54:46.136Z |
-| suite | Cross-Provider Routing (CPRM) | 2026-08-03T13:54:46.136Z |
-| suite | Policy Merge Rules (FPMR) | 2026-08-03T13:54:46.136Z |
-| suite | Fallback & Failover (PFFL) | 2026-08-03T13:54:46.136Z |
-| suite | Evidence Chain (FECS) | 2026-08-03T13:54:46.136Z |
-| federation-chain | CHAIN-2B8F47B6F2EDDFA9 | 2026-08-03T13:54:46.136Z |
-| failure-block | FAILURE-1 | 2026-08-03T13:54:46.136Z |
-| failure-defer | FAILURE-2 | 2026-08-03T13:54:46.136Z |
-| failure-tamper | FAILURE-3 | 2026-08-03T13:54:46.136Z |
-| failure-drift | FAILURE-4 | 2026-08-03T13:54:46.136Z |
-| failure-sealed | FAILURE-5 | 2026-08-03T13:54:46.136Z |
-| failure-missing-command | FAILURE-6 | 2026-08-03T13:54:46.136Z |
-| failure-failover | FAILURE-7 | 2026-08-03T13:54:46.136Z |
-| suite | SNCS surface | 2026-08-03T13:54:46.136Z |
-| sncs-snapshot | SNCS-2ADE3F48EAD4 | 2026-08-03T13:54:46.136Z |
-| sncs-health | provider-health | 2026-08-03T13:54:46.136Z |
+| policy | SPE-886316407E96 | 2026-08-03T13:56:35.566Z |
+| gate | GATE-ORD-001 | 2026-08-03T13:56:35.566Z |
+| policy-eval | SPE-886316407E96 | 2026-08-03T13:56:35.566Z |
+| policy-eval-block | SPE-2A484E2330D6 | 2026-08-03T13:56:35.566Z |
+| drift-enforcement | SPE-143100553BA1 | 2026-08-03T13:56:35.566Z |
+| ledger-append | SEL-B447E7E676F0 | 2026-08-03T13:56:35.566Z |
+| ledger-seal | SEL-B447E7E676F0 | 2026-08-03T13:56:35.566Z |
+| ledger-integrity | SEL-B447E7E676F0 | 2026-08-03T13:56:35.566Z |
+| ser-session | SER-F31024F20081 | 2026-08-03T13:56:35.566Z |
+| suite | Capability Registry suite | 2026-08-03T13:56:35.566Z |
+| suite | Docking Protocol suite | 2026-08-03T13:56:35.566Z |
+| suite | C4 Broker suite | 2026-08-03T13:56:35.566Z |
+| suite | C4 Providers suite | 2026-08-03T13:56:35.566Z |
+| suite | Federation Envelope (FEM) | 2026-08-03T13:56:35.566Z |
+| suite | Cross-Provider Routing (CPRM) | 2026-08-03T13:56:35.566Z |
+| suite | Policy Merge Rules (FPMR) | 2026-08-03T13:56:35.566Z |
+| suite | Fallback & Failover (PFFL) | 2026-08-03T13:56:35.566Z |
+| suite | Evidence Chain (FECS) | 2026-08-03T13:56:35.566Z |
+| federation-chain | CHAIN-CC853042730F37CA | 2026-08-03T13:56:35.566Z |
+| failure-block | FAILURE-1 | 2026-08-03T13:56:35.566Z |
+| failure-defer | FAILURE-2 | 2026-08-03T13:56:35.566Z |
+| failure-tamper | FAILURE-3 | 2026-08-03T13:56:35.566Z |
+| failure-drift | FAILURE-4 | 2026-08-03T13:56:35.566Z |
+| failure-sealed | FAILURE-5 | 2026-08-03T13:56:35.566Z |
+| failure-missing-command | FAILURE-6 | 2026-08-03T13:56:35.566Z |
+| failure-failover | FAILURE-7 | 2026-08-03T13:56:35.566Z |
+| suite | SNCS surface | 2026-08-03T13:56:35.566Z |
+| sncs-snapshot | SNCS-10FA73446525 | 2026-08-03T13:56:35.566Z |
+| sncs-health | provider-health | 2026-08-03T13:56:35.566Z |
 
 ---
 
