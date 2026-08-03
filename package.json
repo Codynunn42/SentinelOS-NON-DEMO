@@ -71,6 +71,7 @@
     "check:sovereign-ledger": "node scripts/check-sovereign-ledger.js",
     "check:sovereign-runtime": "node scripts/check-sovereign-runtime.js",
     "check:sovereign-surface": "node scripts/check-sovereign-surface.js",
+    "check:operational-readiness": "node scripts/run-operational-readiness.js",
     "db:apply-schema": "node scripts/db-apply-schema.js",
     "db:smoke": "node scripts/db-smoke.js"
   },
