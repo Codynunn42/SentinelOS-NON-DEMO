@@ -218,6 +218,84 @@ function validateAgainstManifest(manifest, runtimes, secrets, git) {
   return mismatches;
 }
 
+// ── operational confidence ───────────────────────────────────────────────────
+//
+// Confidence is a 0–100 score computed from weighted checks.  Each check
+// contributes a maximum number of points; the final score is the ratio of
+// earned points to total possible points, expressed as a percentage.
+//
+// Weight table (tune as the Operations Module matures):
+//
+//   Required secrets readable        30 pts   (critical path)
+//   Health endpoint reachable         25 pts   (API up)
+//   Health status = healthy           10 pts   (not degraded)
+//   No manifest mismatches (errors)   20 pts   (env declared correctly)
+//   No manifest mismatches (warnings)  5 pts   (minor drift)
+//   Full clone (not shallow)           5 pts   (history available)
+//   No uncommitted changes             5 pts   (workspace clean)
+//
+// Total possible: 100 pts
+
+const CONFIDENCE_WEIGHTS = {
+  requiredSecretsReadable: 30,
+  healthReachable: 25,
+  healthStatusOk: 10,
+  noManifestErrors: 20,
+  noManifestWarnings: 5,
+  fullClone: 5,
+  cleanWorkspace: 5,
+};
+
+function computeConfidence(report) {
+  let earned = 0;
+  const breakdown = {};
+
+  // required secrets
+  const missingRequired = report.secrets.filter((s) => s.required && !s.readable);
+  const secretScore = missingRequired.length === 0 ? CONFIDENCE_WEIGHTS.requiredSecretsReadable : 0;
+  earned += secretScore;
+  breakdown.requiredSecretsReadable = { score: secretScore, max: CONFIDENCE_WEIGHTS.requiredSecretsReadable, detail: missingRequired.length === 0 ? 'all present' : `${missingRequired.length} missing` };
+
+  // health reachable
+  const reachableScore = report.health.reachable ? CONFIDENCE_WEIGHTS.healthReachable : 0;
+  earned += reachableScore;
+  breakdown.healthReachable = { score: reachableScore, max: CONFIDENCE_WEIGHTS.healthReachable, detail: report.health.reachable ? 'reachable' : `unreachable (${report.health.error})` };
+
+  // health status ok
+  const statusValue = report.health.body && report.health.body.status;
+  const healthOk = report.health.reachable && report.health.statusCode === 200 && statusValue !== 'degraded' && statusValue !== 'unhealthy';
+  const healthScore = healthOk ? CONFIDENCE_WEIGHTS.healthStatusOk : 0;
+  earned += healthScore;
+  breakdown.healthStatusOk = { score: healthScore, max: CONFIDENCE_WEIGHTS.healthStatusOk, detail: healthOk ? 'healthy' : (statusValue || 'not ok') };
+
+  // no manifest errors
+  const errorMismatches = report.manifestMismatches.filter((m) => !m.severity || m.severity === 'error');
+  const noErrorScore = errorMismatches.length === 0 ? CONFIDENCE_WEIGHTS.noManifestErrors : 0;
+  earned += noErrorScore;
+  breakdown.noManifestErrors = { score: noErrorScore, max: CONFIDENCE_WEIGHTS.noManifestErrors, detail: errorMismatches.length === 0 ? 'none' : `${errorMismatches.length} mismatch(es)` };
+
+  // no manifest warnings
+  const warnMismatches = report.manifestMismatches.filter((m) => m.severity === 'warning');
+  const noWarnScore = warnMismatches.length === 0 ? CONFIDENCE_WEIGHTS.noManifestWarnings : 0;
+  earned += noWarnScore;
+  breakdown.noManifestWarnings = { score: noWarnScore, max: CONFIDENCE_WEIGHTS.noManifestWarnings, detail: warnMismatches.length === 0 ? 'none' : `${warnMismatches.length} warning(s)` };
+
+  // full clone
+  const cloneScore = !report.git.isShallow ? CONFIDENCE_WEIGHTS.fullClone : 0;
+  earned += cloneScore;
+  breakdown.fullClone = { score: cloneScore, max: CONFIDENCE_WEIGHTS.fullClone, detail: report.git.isShallow ? 'shallow' : 'full' };
+
+  // clean workspace
+  const cleanScore = (report.git.uncommittedChanges === 0 || report.git.uncommittedChanges === null) ? CONFIDENCE_WEIGHTS.cleanWorkspace : 0;
+  earned += cleanScore;
+  breakdown.cleanWorkspace = { score: cleanScore, max: CONFIDENCE_WEIGHTS.cleanWorkspace, detail: report.git.uncommittedChanges === 0 ? 'clean' : `${report.git.uncommittedChanges} file(s)` };
+
+  const total = Object.values(CONFIDENCE_WEIGHTS).reduce((a, b) => a + b, 0);
+  const pct = Math.round((earned / total) * 1000) / 10;
+
+  return { score: pct, earned, total, breakdown };
+}
+
 // ── output helpers ───────────────────────────────────────────────────────────
 
 function label(text) {
@@ -315,6 +393,19 @@ function printSummary(report) {
     console.log('');
   }
 
+  // operational confidence
+  const conf = report.operationalConfidence;
+  if (conf) {
+    const bar = (() => {
+      const filled = Math.round(conf.score / 5);
+      return '█'.repeat(filled) + '░'.repeat(20 - filled);
+    })();
+    const confColor = conf.score >= 90 ? '\x1b[32m' : conf.score >= 70 ? '\x1b[33m' : '\x1b[31m';
+    console.log(label('Operational Confidence'));
+    console.log(`    ${confColor}${bar}\x1b[0m  ${confColor}${conf.score}%\x1b[0m  (${conf.earned}/${conf.total} pts)`);
+    console.log('');
+  }
+
   // overall
   console.log(label('Overall'));
   const hasCritical = report.manifestMismatches.some((m) => !m.severity || m.severity === 'error') ||
@@ -357,8 +448,11 @@ async function main() {
     quirks,
     applicableQuirks,
     manifestMismatches,
+    operationalConfidence: null,
     evidencePath: null,
   };
+
+  report.operationalConfidence = computeConfidence(report);
 
   // write evidence
   try {
