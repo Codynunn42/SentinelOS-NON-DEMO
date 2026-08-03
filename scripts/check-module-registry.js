@@ -383,4 +383,95 @@ const constitution = fs.readFileSync(constitutionPath, 'utf8');
 
 console.log('  - SENTINELOS_CONSTITUTION.md present with all 12 principles ✓');
 
+// ---------------------------------------------------------------------------
+// C5.2 — Systematic Module Registry cross-validation
+//
+// Rules enforced:
+//   1. Every capability referenced by a module exists in the Capability
+//      Registry (technical caps) or the Model Registry (AI caps).
+//   2. Every provider referenced by a module exists in the Provider Registry.
+//   3. No capability is assigned to more than one module (no duplicate
+//      capability assignments across modules).
+//   4. healthAggregation values are valid ('all' | 'any').
+//   5. All modules carry governance.minimumRole.
+// ---------------------------------------------------------------------------
+
+const { listCapabilities: listAllCaps } = require('../apps/sentinel/src/capabilities/registry');
+const { listModels: listAllModels } = require('../apps/sentinel/src/modules/ai-operations/modelRegistry');
+const { getProvider, listProviders } = require('../apps/sentinel/src/providers/registry');
+
+const knownCapabilityIds = new Set(listAllCaps().map((c) => c.capabilityId));
+const knownModelIds = new Set(listAllModels().map((m) => m.modelId));
+const allKnownIds = new Set([...knownCapabilityIds, ...knownModelIds]);
+
+const VALID_HEALTH_AGGREGATIONS = new Set(['all', 'any']);
+
+const allRegisteredModules = listModules();
+const capabilityAssignments = new Map(); // capabilityId -> moduleId (first seen)
+
+let c52Errors = 0;
+
+allRegisteredModules.forEach((mod) => {
+  // Rule 4: healthAggregation is valid
+  assert(
+    VALID_HEALTH_AGGREGATIONS.has(mod.healthAggregation),
+    `Module '${mod.moduleId}' has invalid healthAggregation: '${mod.healthAggregation}'`
+  );
+
+  // Rule 5: governance.minimumRole is present
+  assert(
+    mod.governance && mod.governance.minimumRole,
+    `Module '${mod.moduleId}' missing governance.minimumRole`
+  );
+
+  // Rule 1: every capability ID exists in capability or model registry
+  mod.capabilities.forEach((capId) => {
+    if (!allKnownIds.has(capId)) {
+      console.error(`  ❌ Module '${mod.moduleId}': unknown capabilityId '${capId}'`);
+      c52Errors++;
+    }
+
+    // Rule 3: no duplicate capability assignment across modules
+    if (capabilityAssignments.has(capId)) {
+      console.error(
+        `  ❌ Duplicate capability '${capId}' — assigned to both '${capabilityAssignments.get(capId)}' and '${mod.moduleId}'`
+      );
+      c52Errors++;
+    } else {
+      capabilityAssignments.set(capId, mod.moduleId);
+    }
+  });
+
+  // Rule 2: every provider ID exists in the Provider Registry
+  mod.providers.forEach((providerId) => {
+    const p = getProvider(providerId);
+    if (!p) {
+      console.error(`  ❌ Module '${mod.moduleId}': unknown providerId '${providerId}'`);
+      c52Errors++;
+    }
+  });
+});
+
+assert.strictEqual(c52Errors, 0, `C5.2 systematic validation failed with ${c52Errors} error(s) — see output above`);
+
+console.log(`  - C5.2: all module capability IDs exist in Capability or Model Registry ✓`);
+console.log(`  - C5.2: all module provider IDs exist in Provider Registry ✓`);
+console.log(`  - C5.2: no duplicate capability assignments across modules ✓`);
+console.log(`  - C5.2: all modules have valid healthAggregation and governance.minimumRole ✓`);
+
+// Verify Provider Registry itself
+const registeredProviders = listProviders();
+assert(registeredProviders.length >= 7, `Provider Registry should have at least 7 providers`);
+
+const EXPECTED_PROVIDERS = ['nexus', 'tilda', 'microsoft365', 'github', 'ownerfi', 'azure-openai', 'openai'];
+EXPECTED_PROVIDERS.forEach((pid) => {
+  const p = getProvider(pid);
+  assert(p, `Provider '${pid}' not found in Provider Registry`);
+  assert(p.displayName, `Provider '${pid}' missing displayName`);
+  assert(p.type, `Provider '${pid}' missing type`);
+  assert(p.lifecycleStatus, `Provider '${pid}' missing lifecycleStatus`);
+});
+
+console.log(`  - C5.2: Provider Registry has all ${EXPECTED_PROVIDERS.length} canonical providers ✓`);
+
 console.log('\nALL C5 INSTITUTIONAL MODULE LAYER CHECKS PASSED ✓');
