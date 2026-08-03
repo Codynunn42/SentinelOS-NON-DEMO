@@ -3573,6 +3573,24 @@ const server = http.createServer(async (req, res) => {
     });
   }
 
+  // C5.4 — Institutional Modules: module registry view for the Executive Desk
+  if (pathname === '/api/v1/modules' && req.method === 'GET') {
+    const access = authorizeRoute(req, res, '/api/v1/modules', {
+      command: 'audit.read',
+      requiredScope: 'audit:read'
+    });
+    if (!access) return;
+
+    const { listModuleSummaries } = require('../sentinel/src/modules/resolver');
+    const modules = listModuleSummaries();
+
+    return sendJson(res, 200, {
+      status: 'ok',
+      totalModules: modules.length,
+      modules
+    });
+  }
+
   // -------------------------------------------------------------------------
   // C3 — Capability Adoption Layer: Command Envelope API
   // -------------------------------------------------------------------------

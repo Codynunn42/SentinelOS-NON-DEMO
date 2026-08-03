@@ -107,43 +107,64 @@ Evidence produced: 7/7 failure scenarios
   ✓ SNCS: evidenceView.entries is an array
   ✓ SNCS: getSovereignProviderHealth returns provider data from session
 
+### ✅ Campaign 6 — Module Layer (ORV-2)
+
+**29 passed, 0 failed**
+
+  ✓ Module Registry suite — 22 checks
+  ✓ MODULE: NEXUS-READ-001 resolves to executive-operations
+  ✓ MODULE: TILDA-EXECUTE-001 resolves to workflow-orchestration
+  ✓ MODULE: listModuleSummaries does not expose provider names
+  ✓ MODULE: all modules have aggregated health
+  ✓ AI-OPS: brokerAICapability routes planning/internal to azure-openai
+  ✓ AI-OPS: confidential data blocked by classification policy
+  ✓ AI-OPS: all routing decisions include governance advice
+
 ---
 
 ## Evidence Log
 
-29 evidence records produced during this run:
+37 evidence records produced during this run:
 
 | Type | Reference | Timestamp |
 |---|---|---|
-| policy | SPE-886316407E96 | 2026-08-03T13:56:35.566Z |
-| gate | GATE-ORD-001 | 2026-08-03T13:56:35.566Z |
-| policy-eval | SPE-886316407E96 | 2026-08-03T13:56:35.566Z |
-| policy-eval-block | SPE-2A484E2330D6 | 2026-08-03T13:56:35.566Z |
-| drift-enforcement | SPE-143100553BA1 | 2026-08-03T13:56:35.566Z |
-| ledger-append | SEL-B447E7E676F0 | 2026-08-03T13:56:35.566Z |
-| ledger-seal | SEL-B447E7E676F0 | 2026-08-03T13:56:35.566Z |
-| ledger-integrity | SEL-B447E7E676F0 | 2026-08-03T13:56:35.566Z |
-| ser-session | SER-F31024F20081 | 2026-08-03T13:56:35.566Z |
-| suite | Capability Registry suite | 2026-08-03T13:56:35.566Z |
-| suite | Docking Protocol suite | 2026-08-03T13:56:35.566Z |
-| suite | C4 Broker suite | 2026-08-03T13:56:35.566Z |
-| suite | C4 Providers suite | 2026-08-03T13:56:35.566Z |
-| suite | Federation Envelope (FEM) | 2026-08-03T13:56:35.566Z |
-| suite | Cross-Provider Routing (CPRM) | 2026-08-03T13:56:35.566Z |
-| suite | Policy Merge Rules (FPMR) | 2026-08-03T13:56:35.566Z |
-| suite | Fallback & Failover (PFFL) | 2026-08-03T13:56:35.566Z |
-| suite | Evidence Chain (FECS) | 2026-08-03T13:56:35.566Z |
-| federation-chain | CHAIN-CC853042730F37CA | 2026-08-03T13:56:35.566Z |
-| failure-block | FAILURE-1 | 2026-08-03T13:56:35.566Z |
-| failure-defer | FAILURE-2 | 2026-08-03T13:56:35.566Z |
-| failure-tamper | FAILURE-3 | 2026-08-03T13:56:35.566Z |
-| failure-drift | FAILURE-4 | 2026-08-03T13:56:35.566Z |
-| failure-sealed | FAILURE-5 | 2026-08-03T13:56:35.566Z |
-| failure-missing-command | FAILURE-6 | 2026-08-03T13:56:35.566Z |
-| failure-failover | FAILURE-7 | 2026-08-03T13:56:35.566Z |
-| suite | SNCS surface | 2026-08-03T13:56:35.566Z |
-| sncs-snapshot | SNCS-10FA73446525 | 2026-08-03T13:56:35.566Z |
-| sncs-health | provider-health | 2026-08-03T13:56:35.566Z |
+| policy | SPE-3816363D33A4 | 2026-08-03T15:28:27.715Z |
+| gate | GATE-ORD-001 | 2026-08-03T15:28:27.715Z |
+| policy-eval | SPE-3816363D33A4 | 2026-08-03T15:28:27.715Z |
+| policy-eval-block | SPE-6B603AB51274 | 2026-08-03T15:28:27.715Z |
+| drift-enforcement | SPE-A03914FC0DD3 | 2026-08-03T15:28:27.715Z |
+| ledger-append | SEL-BE1476D9C209 | 2026-08-03T15:28:27.715Z |
+| ledger-seal | SEL-BE1476D9C209 | 2026-08-03T15:28:27.715Z |
+| ledger-integrity | SEL-BE1476D9C209 | 2026-08-03T15:28:27.715Z |
+| ser-session | SER-95A6D842E118 | 2026-08-03T15:28:27.715Z |
+| suite | Capability Registry suite | 2026-08-03T15:28:27.715Z |
+| suite | Docking Protocol suite | 2026-08-03T15:28:27.715Z |
+| suite | C4 Broker suite | 2026-08-03T15:28:27.715Z |
+| suite | C4 Providers suite | 2026-08-03T15:28:27.715Z |
+| suite | Federation Envelope (FEM) | 2026-08-03T15:28:27.715Z |
+| suite | Cross-Provider Routing (CPRM) | 2026-08-03T15:28:27.715Z |
+| suite | Policy Merge Rules (FPMR) | 2026-08-03T15:28:27.715Z |
+| suite | Fallback & Failover (PFFL) | 2026-08-03T15:28:27.715Z |
+| suite | Evidence Chain (FECS) | 2026-08-03T15:28:27.715Z |
+| federation-chain | CHAIN-A08455D3343C0439 | 2026-08-03T15:28:27.715Z |
+| failure-block | FAILURE-1 | 2026-08-03T15:28:27.715Z |
+| failure-defer | FAILURE-2 | 2026-08-03T15:28:27.715Z |
+| failure-tamper | FAILURE-3 | 2026-08-03T15:28:27.715Z |
+| failure-drift | FAILURE-4 | 2026-08-03T15:28:27.715Z |
+| failure-sealed | FAILURE-5 | 2026-08-03T15:28:27.715Z |
+| failure-missing-command | FAILURE-6 | 2026-08-03T15:28:27.715Z |
+| failure-failover | FAILURE-7 | 2026-08-03T15:28:27.715Z |
+| suite | SNCS surface | 2026-08-03T15:28:27.715Z |
+| sncs-snapshot | SNCS-A2338371139A | 2026-08-03T15:28:27.715Z |
+| sncs-health | provider-health | 2026-08-03T15:28:27.715Z |
+| suite | Module Registry (C5) | 2026-08-03T15:28:27.715Z |
+| module-resolution | NEXUS-READ-001 | 2026-08-03T15:28:27.715Z |
+| module-resolution | TILDA-EXECUTE-001 | 2026-08-03T15:28:27.715Z |
+| module-provider-abstraction | listModuleSummaries | 2026-08-03T15:28:27.715Z |
+| module-health | all-modules | 2026-08-03T15:28:27.715Z |
+| ai-ops-routing | AI-PLAN-001 | 2026-08-03T15:28:27.715Z |
+| ai-ops-policy-deny | confidential-analysis | 2026-08-03T15:28:27.715Z |
+| ai-ops-governance | AI-WRITE-001 | 2026-08-03T15:28:27.715Z |
 
 ---
 
@@ -157,6 +178,7 @@ Evidence produced: 7/7 failure scenarios
 | Campaign 3 — Federation | ✅ Pass |
 | Campaign 4 — Failure Scenarios | ✅ Pass |
 | Campaign 5 — Executive Desk | ✅ Pass |
+| Campaign 6 — Module Layer (ORV-2) | ✅ Pass |
 
 **Overall: 🟢 READY**
 **Confidence: 100/100 — SOVEREIGN**

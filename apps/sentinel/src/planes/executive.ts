@@ -20,6 +20,12 @@
 //   - buildExecutiveState includes crossProviderDrift for each provider
 //   - crossProviderDashboard: true marks this upgrade
 //
+// C5.4: The Executive Desk now presents Institutional Modules as the primary view.
+//   - institutionalModules: array of module summaries (displayName, health, capabilityCount)
+//   - Provider names are NOT exposed in the module view (Constitution Principle II)
+//   - Provider Health panel remains available under the Infrastructure section
+//   - GET /api/v1/modules feeds the Institutional Modules panel
+//
 // All Executive Desk decisions are routed through the Approval Layer
 // and audited under the executive.oversight.* telemetry class.
 //
@@ -32,6 +38,8 @@
 //   -> Policy enforces; execution allowed only when approved
 
 import { getCapabilitySummary, listCapabilities } from '../capabilities/resolver';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { listModuleSummaries } = require('../modules/resolver');
 
 export interface ExecutiveReviewContext {
     tenant?: string;
@@ -70,6 +78,18 @@ export interface ProviderDriftSummary {
     assessedAt: string;
 }
 
+export interface ModuleSummary {
+    moduleId: string;
+    displayName: string;
+    description: string;
+    capabilityCount: number;
+    governance: { minimumRole: string; evidenceRequired: boolean };
+    healthAggregation: string;
+    health: 'healthy' | 'degraded' | 'unknown';
+    lifecycleStatus: string;
+    registeredAt: string;
+}
+
 export interface ExecutiveDesktopState {
     surface: 'executive';
     oversightActive: boolean;
@@ -83,6 +103,7 @@ export interface ExecutiveDesktopState {
         evidenceRequired: CapabilityStatus[];
     };
     crossProviderDrift: ProviderDriftSummary[];
+    institutionalModules: ModuleSummary[];
 }
 
 function buildExecutiveState(overrides: Partial<ExecutiveDesktopState> = {}): ExecutiveDesktopState {
@@ -125,6 +146,7 @@ function buildExecutiveState(overrides: Partial<ExecutiveDesktopState> = {}): Ex
             evidenceRequired: evidenceRequired as unknown as CapabilityStatus[]
         },
         crossProviderDrift,
+        institutionalModules: listModuleSummaries() as ModuleSummary[],
         ...overrides
     };
 }
@@ -147,7 +169,7 @@ const executiveDeskHandlers = {
 
 export const executiveDeskPlane = {
     name: 'executive',
-    description: 'Executive Desk — oversight-only surface. Approves or rejects governed actions. Queries Capability Registry and Dock Manifests for governance decisions. Cannot initiate execution. Cross-provider governance dashboard active.',
+    description: 'Executive Desk — oversight-only surface. Approves or rejects governed actions. Queries Capability Registry and Dock Manifests for governance decisions. Cannot initiate execution. Cross-provider governance dashboard active. C5.4: Institutional Modules view presents modules as primary abstraction.',
     handlers: executiveDeskHandlers,
     oversightOnly: true,
     telemetryClass: 'executive.oversight',

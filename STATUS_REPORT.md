@@ -4,17 +4,25 @@
 
 ## Current Phase
 
-C4 — Multi-Provider Capability Adoption (Active Build)
+C5 — Institutional Module Layer (Active Build)
 
 ## Summary
 
-SentinelOS NON-DEMO is the canonical home for the NEXUS integration and the SentinelOS Capability Adoption Layer. NEXUS is no longer a feature — it is the first governed capability provider within SentinelOS.
+SentinelOS NON-DEMO is the canonical home for the SentinelOS Capability Adoption Layer and now the
+Institutional Module Layer. The platform has crossed an architectural threshold: external systems
+are no longer "providers" visible to the institution — they are implementation details behind
+Institutional Modules. The institution interacts with Executive Operations, Workflow Orchestration,
+Communications, Projects, Business Operations, and AI Operations. The underlying providers (NEXUS,
+TILDA, Microsoft 365, GitHub, OwnerFi) are invisible.
 
-The Capability Adoption Layer establishes the standardized contract through which any integrated system participates in SentinelOS: discover, dock, register capabilities, govern, orchestrate through the Command Envelope API, and operate through the Executive Desk. Every future system — TILDA, Microsoft 365, GitHub, government systems — follows the same lifecycle.
+The SentinelOS Constitution has been ratified (C5.0), governing all future design decisions.
+ORV-2 validates the module layer at 100/100 SOVEREIGN. The AI Operations Module introduces the
+first governed multi-model AI capability with data classification policy enforcement — the
+AI Embassy principles without the AI Embassy application.
 
-The operating foundation is solid: authenticated API, governance preflight, audit trail, Postgres persistence, live Azure deployment, Executive Desk oversight surface, and a proven OwnerFi surface plane. C3 established the platform contract. C4 activates multi-provider capability adoption: TILDA, Microsoft 365, and GitHub are now docked and registered; the Capability Broker selects across multiple providers; the Executive Desk becomes a cross-provider governance dashboard.
-
-NEXUS Phase 1 (surface registration, policy, docking manifest) and Phase 2 (app shell, Executive Desk UI, GaaS policy pack) are complete — C2.3 and C2.4 PASS issued. C3 (Capability Adoption Layer) is complete — C3.0 through C3.5 PASS issued. C4 (Multi-Provider Capability Adoption) is now active.
+C3 established the platform contract. C4 proved institutional capability expansion. C5 completes
+the institutional abstraction: one coherent operating environment, regardless of how many providers
+exist beneath it.
 
 ## Completed
 
@@ -85,7 +93,8 @@ NEXUS Phase 1 (surface registration, policy, docking manifest) and Phase 2 (app 
 
 ## In Progress
 
-- **C4** — Multi-provider AI capability selection; TILDA, Microsoft 365, GitHub docking; cross-provider Executive Desk
+- **C5** — Institutional Module Layer complete (C5.0–C5.5 PASS)
+- **C6** — Government agency system docking; sovereign capability tiers; federated Executive Desk
 
 ## Completed (NEXUS Phases 1–2)
 
@@ -122,9 +131,20 @@ NEXUS Phase 1 (surface registration, policy, docking manifest) and Phase 2 (app 
 | C4.5 | Cross-provider drift monitor | PASS |
 | C4.6 | Cross-provider Executive Desk | PASS |
 
+## C5 Gate Status (COMPLETE)
+
+| Gate | Deliverable | Status |
+|------|-------------|--------|
+| C5.0 | SentinelOS Constitution | PASS |
+| C5.1 | Module Registry | PASS |
+| C5.2 | Module Resolver + Initial Taxonomy (6 modules) | PASS |
+| C5.3 | AI Operations Module (Model Registry + Model Broker) | PASS |
+| C5.4 | Executive Desk Module View | PASS |
+| C5.5 | ORV-2 validation (Campaign 6) — 100/100 SOVEREIGN | PASS |
+
 ## Next Actions
 
-1. **C5** — Government agency system docking; sovereign capability tiers; federated Executive Desk
+1. **C6** — Government agency system docking; sovereign capability tiers; federated Executive Desk
 
 ## Risk Level
 

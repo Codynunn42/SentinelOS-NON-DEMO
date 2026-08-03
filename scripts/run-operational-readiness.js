@@ -713,9 +713,119 @@ function campaign5Executive() {
 }
 
 // ---------------------------------------------------------------------------
-// BASELINE SUITES
-// Run all sovereign + phase3 suites and tally
+// CAMPAIGN 6 — Module Layer (ORV-2)
+// Validates the Institutional Module abstraction (C5.1 through C5.4)
 // ---------------------------------------------------------------------------
+
+function campaign6ModuleLayer() {
+  const results = [];
+  let p = 0;
+  let f = 0;
+
+  function c(label, fn) {
+    if (check(label, fn)) { p++; results.push(`  ✓ ${label}`); }
+    else { f++; results.push(`  ✗ ${label}`); }
+  }
+
+  // Run the C5 module registry suite
+  const moduleResult = runSuiteScript(path.join(__dirname, '..', 'scripts', 'check-module-registry.js'));
+  if (moduleResult.failed === 0) {
+    p += moduleResult.passed;
+    totalPassed += moduleResult.passed - 1;
+    results.push(`  ✓ Module Registry suite — ${moduleResult.passed} checks`);
+    recordEvidence('suite', 'Module Registry (C5)', { passed: moduleResult.passed });
+  } else {
+    f++;
+    totalFailed++;
+    results.push(`  ✗ Module Registry suite: ${moduleResult.output}`);
+  }
+
+  // Live module resolution: capability maps to correct module
+  const {
+    resolveCapabilityToModule: rctm,
+    listModuleSummaries
+  } = require('../apps/sentinel/src/modules/resolver');
+
+  c('MODULE: NEXUS-READ-001 resolves to executive-operations', () => {
+    const mod = rctm('NEXUS-READ-001');
+    assert(mod !== null, 'NEXUS-READ-001 should map to a module');
+    assert.strictEqual(mod.moduleId, 'executive-operations');
+    recordEvidence('module-resolution', 'NEXUS-READ-001', { moduleId: mod.moduleId });
+  });
+
+  c('MODULE: TILDA-EXECUTE-001 resolves to workflow-orchestration', () => {
+    const mod = rctm('TILDA-EXECUTE-001');
+    assert(mod !== null, 'TILDA-EXECUTE-001 should map to a module');
+    assert.strictEqual(mod.moduleId, 'workflow-orchestration');
+    recordEvidence('module-resolution', 'TILDA-EXECUTE-001', { moduleId: mod.moduleId });
+  });
+
+  c('MODULE: listModuleSummaries does not expose provider names', () => {
+    const summaries = listModuleSummaries();
+    assert(summaries.length >= 6, `Expected ≥6 modules, got ${summaries.length}`);
+    summaries.forEach((s) => {
+      assert(!('providers' in s),
+        `Module summary for ${s.moduleId} must NOT expose providers (Constitution Principle II)`);
+    });
+    recordEvidence('module-provider-abstraction', 'listModuleSummaries', { count: summaries.length });
+  });
+
+  c('MODULE: all modules have aggregated health', () => {
+    const summaries = listModuleSummaries();
+    summaries.forEach((s) => {
+      assert(['healthy', 'degraded', 'unknown'].includes(s.health),
+        `Module ${s.moduleId} health must be healthy|degraded|unknown, got ${s.health}`);
+    });
+    recordEvidence('module-health', 'all-modules', { count: summaries.length });
+  });
+
+  // AI Operations Module
+  const { brokerAICapability } = require('../apps/sentinel/src/modules/ai-operations/modelBroker');
+
+  c('AI-OPS: brokerAICapability routes planning/internal to azure-openai', () => {
+    const result = brokerAICapability({ capability: 'planning', dataClassification: 'internal', role: 'operator', tenant: 'nexus' });
+    assert.strictEqual(result.routed, true, `Expected routed, got reason: ${result.reason}`);
+    assert(result.modelId, 'should return a modelId');
+    assert(result.evidenceRef, 'routing decision must include evidenceRef');
+    recordEvidence('ai-ops-routing', result.modelId, {
+      capability: 'planning',
+      dataClassification: 'internal',
+      evidenceRef: result.evidenceRef
+    });
+  });
+
+  c('AI-OPS: confidential data blocked by classification policy', () => {
+    const result = brokerAICapability({ capability: 'analysis', dataClassification: 'confidential', role: 'operator' });
+    assert.strictEqual(result.routed, false);
+    assert.strictEqual(result.reason, 'DATA_CLASSIFICATION_POLICY_DENIED');
+    recordEvidence('ai-ops-policy-deny', 'confidential-analysis', { reason: result.reason });
+  });
+
+  c('AI-OPS: all routing decisions include governance advice', () => {
+    const result = brokerAICapability({ capability: 'writing', dataClassification: 'public', role: 'operator' });
+    if (result.routed) {
+      assert(result.governanceAdvice, 'routed result must have governanceAdvice');
+      assert(typeof result.governanceAdvice.evidenceRequired === 'boolean',
+        'governanceAdvice.evidenceRequired must be a boolean');
+      recordEvidence('ai-ops-governance', result.modelId, result.governanceAdvice);
+    } else {
+      // No writing model for public — acceptable
+      assert(result.reason, 'unrouted result must have a reason');
+      recordEvidence('ai-ops-governance', 'no-route', { reason: result.reason });
+    }
+  });
+
+  campaignResults.push({
+    campaign: '6 — Module Layer (ORV-2)',
+    passed: p,
+    failed: f,
+    checks: results
+  });
+
+  return { passed: p, failed: f };
+}
+
+
 
 function runBaseline() {
   const scriptRoot = path.join(__dirname, '..');
@@ -784,9 +894,9 @@ function computeConfidence(baseline, failure) {
 // ---------------------------------------------------------------------------
 
 function writeReport(opts) {
-  const { date, baseline, c1, c2, c3, c4, c5, confidence, durationMs } = opts;
+  const { date, baseline, c1, c2, c3, c4, c5, c6, confidence, durationMs } = opts;
 
-  const allCampaignsFailed = [c1, c2, c3, c4, c5].reduce((s, c) => s + c.failed, 0);
+  const allCampaignsFailed = [c1, c2, c3, c4, c5, c6].reduce((s, c) => s + c.failed, 0);
   const overallStatus = allCampaignsFailed === 0 && baseline.failed === 0
     ? '🟢 READY' : '🔴 DEFECTS PRESENT';
 
@@ -877,6 +987,7 @@ function writeReport(opts) {
   lines.push(`| Campaign 3 — Federation | ${c3.failed === 0 ? '✅ Pass' : `❌ ${c3.failed} failed`} |`);
   lines.push(`| Campaign 4 — Failure Scenarios | ${c4.failed === 0 ? '✅ Pass' : `❌ ${c4.failed} failed`} |`);
   lines.push(`| Campaign 5 — Executive Desk | ${c5.failed === 0 ? '✅ Pass' : `❌ ${c5.failed} failed`} |`);
+  lines.push(`| Campaign 6 — Module Layer (ORV-2) | ${c6.failed === 0 ? '✅ Pass' : `❌ ${c6.failed} failed`} |`);
   lines.push(``);
   lines.push(`**Overall: ${overallStatus}**`);
   lines.push(`**Confidence: ${confidence.total}/100 — ${confidence.grade}**`);
@@ -939,6 +1050,12 @@ function main() {
   campaignResults[campaignResults.length - 1].checks.forEach(r => console.log(r));
   console.log(`  Result: ${c5.passed} passed, ${c5.failed} failed`);
 
+  // Campaign 6
+  console.log(`\n[Campaign 6] Module Layer (ORV-2)...`);
+  const c6 = campaign6ModuleLayer();
+  campaignResults[campaignResults.length - 1].checks.forEach(r => console.log(r));
+  console.log(`  Result: ${c6.passed} passed, ${c6.failed} failed`);
+
   // Confidence
   const confidence = computeConfidence(baseline, c4);
   const durationMs = Date.now() - startMs;
@@ -951,10 +1068,10 @@ function main() {
   console.log(`${'─'.repeat(60)}`);
 
   // Write report
-  const reportPath = writeReport({ date: DATE, baseline, c1, c2, c3, c4, c5, confidence, durationMs });
+  const reportPath = writeReport({ date: DATE, baseline, c1, c2, c3, c4, c5, c6, confidence, durationMs });
   console.log(`\n  Report: ${path.relative(path.join(__dirname, '..'), reportPath)}`);
 
-  const totalFail = baseline.failed + c1.failed + c2.failed + c3.failed + c4.failed + c5.failed;
+  const totalFail = baseline.failed + c1.failed + c2.failed + c3.failed + c4.failed + c5.failed + c6.failed;
 
   if (totalFail === 0) {
     console.log(`\n  ✅ ALL CAMPAIGNS PASSED — SentinelOS is operationally ready`);

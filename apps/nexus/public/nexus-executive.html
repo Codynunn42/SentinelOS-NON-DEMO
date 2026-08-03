@@ -300,6 +300,62 @@
 
     .gov-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--gold); display: inline-block; margin-right: 5px; }
 
+    /* ---- Module card (C5.4) ---- */
+    .module-card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px 16px;
+      margin-bottom: 10px;
+    }
+
+    .module-card.healthy { border-left: 3px solid var(--green); }
+    .module-card.degraded { border-left: 3px solid var(--red); }
+    .module-card.unknown  { border-left: 3px solid var(--muted); }
+
+    .module-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .module-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .module-badge {
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 4px;
+    }
+
+    .module-badge.healthy  { background: #0a2218; color: var(--green); }
+    .module-badge.degraded { background: #2a0a0a; color: var(--red); }
+    .module-badge.unknown  { background: #1a1a1a; color: var(--muted); }
+
+    .module-desc {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 8px;
+      line-height: 1.5;
+    }
+
+    .module-meta {
+      font-size: 11px;
+      color: var(--muted);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .module-meta span strong { color: var(--text); font-weight: 600; }
+
     /* ---- Provider health panel ---- */
     .provider-card {
       background: var(--surface);
@@ -429,8 +485,19 @@
     <input id="apiKeyInput" class="auth-input" type="password" placeholder="x-api-key (executive-scoped)" autocomplete="off">
     <button class="btn-load" onclick="loadApprovals()">Load Pending Approvals</button>
     <button class="btn-load" onclick="loadCapabilities()" style="margin-left:8px; background:var(--surface-2);">Load Capabilities</button>
+    <button class="btn-load-secondary" onclick="loadModules()" style="margin-left:8px;background:var(--accent);color:#040c18;font-weight:800;">Institutional Modules</button>
     <button class="btn-load-secondary" onclick="loadProviderDashboard()" style="margin-left:8px;">Provider Health</button>
     <button class="btn-load-secondary" onclick="loadFederationPanel()" style="margin-left:8px;background:var(--surface-3,#1e2a1a);color:var(--accent);">Federation</button>
+  </div>
+
+  <!-- C5.4 — Institutional Modules Panel (primary view) -->
+  <div class="section">
+    <div class="section-title">Institutional Modules — Platform Capabilities</div>
+    <div id="institutionalModulesPanel">
+      <div class="empty-state" id="modulesEmpty">
+        Click <strong>Institutional Modules</strong> to view all platform capabilities organized by institutional purpose.
+      </div>
+    </div>
   </div>
 
   <!-- Pending approvals -->
@@ -453,9 +520,9 @@
     </div>
   </div>
 
-  <!-- Provider Health Panel (C4.6) -->
+  <!-- Provider Health Panel — Infrastructure section (C4.6, now under Infrastructure) -->
   <div class="section">
-    <div class="section-title">Provider Health — Cross-Provider Governance Dashboard</div>
+    <div class="section-title">Infrastructure — Provider Health &amp; Drift</div>
     <div id="providerHealthPanel">
       <div class="empty-state" id="providerHealthEmpty">
         Click <strong>Provider Health</strong> to load the cross-provider drift and governance posture report.
@@ -618,7 +685,78 @@
       .replace(/"/g, '&quot;');
   }
 
-  // C4.6 — Provider Health: cross-provider governance dashboard
+  // C5.4 — Institutional Modules: primary Executive Desk view
+  async function loadModules() {
+    const apiKey = document.getElementById('apiKeyInput').value.trim();
+    const headers = { 'Content-Type': 'application/json' };
+    if (apiKey) headers['x-api-key'] = apiKey;
+
+    const container = document.getElementById('institutionalModulesPanel');
+    logActivity('Loading Institutional Modules…', 'pending');
+
+    try {
+      const res = await fetch('/api/v1/modules', { headers });
+      const data = await res.json();
+
+      if (!res.ok) {
+        logActivity(`Modules load failed: ${data.error || res.status}`, 'blocked');
+        container.innerHTML = `<div class="empty-state">Failed to load modules: ${escHtml(data.error || res.status)}</div>`;
+        return;
+      }
+
+      const modules = data.modules || [];
+      if (!modules.length) {
+        container.innerHTML = '<div class="empty-state">No institutional modules registered.</div>';
+        logActivity('No modules registered', 'ok');
+        return;
+      }
+
+      const healthCounts = { healthy: 0, degraded: 0, unknown: 0 };
+      modules.forEach((m) => { if (healthCounts[m.health] !== undefined) healthCounts[m.health]++; });
+
+      const overallBadge = healthCounts.degraded === 0
+        ? '<span style="color:var(--green);font-weight:700;font-size:12px;">All modules operational ✓</span>'
+        : `<span style="color:var(--red);font-weight:700;font-size:12px;">${healthCounts.degraded} module(s) degraded</span>`;
+
+      const summary = `<div style="margin-bottom:14px;padding:10px 14px;background:var(--surface-2);border-radius:6px;font-size:12px;display:flex;gap:20px;flex-wrap:wrap;">
+        <span>Modules: <strong style="color:var(--text)">${data.totalModules}</strong></span>
+        <span>Operational: <strong style="color:var(--green)">${healthCounts.healthy}</strong></span>
+        ${healthCounts.degraded > 0 ? `<span>Degraded: <strong style="color:var(--red)">${healthCounts.degraded}</strong></span>` : ''}
+        <span>${overallBadge}</span>
+      </div>`;
+
+      const cards = modules.map((m) => {
+        const health = m.health || 'unknown';
+        const badgeLabel = health === 'healthy' ? 'OPERATIONAL' : health === 'degraded' ? 'DEGRADED' : 'UNKNOWN';
+        const evidenceBadge = m.governance && m.governance.evidenceRequired
+          ? '<span style="color:var(--yellow);font-size:10px;font-weight:700;margin-left:6px;">EVIDENCE REQUIRED</span>'
+          : '';
+        const aggregationLabel = m.healthAggregation === 'any'
+          ? '<span style="color:var(--accent);font-size:10px;">HA: ANY</span>'
+          : '';
+        return `<div class="module-card ${health}">
+          <div class="module-header">
+            <span class="module-name">${escHtml(m.displayName)}${evidenceBadge}</span>
+            <div style="display:flex;gap:6px;align-items:center;">${aggregationLabel}<span class="module-badge ${health}">${badgeLabel}</span></div>
+          </div>
+          <div class="module-desc">${escHtml(m.description)}</div>
+          <div class="module-meta">
+            <span>Capabilities: <strong>${m.capabilityCount}</strong></span>
+            <span>Min Role: <strong>${escHtml((m.governance || {}).minimumRole || '—')}</strong></span>
+            <span>Lifecycle: <strong>${escHtml(m.lifecycleStatus || '—')}</strong></span>
+          </div>
+        </div>`;
+      }).join('');
+
+      container.innerHTML = summary + cards;
+      logActivity(`Institutional Modules loaded — ${modules.length} module(s), ${healthCounts.degraded} degraded`, healthCounts.degraded === 0 ? 'ok' : 'pending');
+    } catch (err) {
+      logActivity(`Error loading modules: ${err.message}`, 'blocked');
+      container.innerHTML = `<div class="empty-state">Error: ${escHtml(err.message)}</div>`;
+    }
+  }
+
+
   async function loadProviderDashboard() {
     const apiKey = document.getElementById('apiKeyInput').value.trim();
     const headers = { 'Content-Type': 'application/json' };
