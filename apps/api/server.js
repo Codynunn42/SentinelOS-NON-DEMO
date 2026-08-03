@@ -87,11 +87,18 @@ const STRIPE_CHECKOUT_CSS_PATH = path.join(__dirname, 'public', 'stripe-checkout
 const STRIPE_COMPLETE_CSS_PATH = path.join(__dirname, 'public', 'stripe-complete.css');
 const RATE_LIMIT_WINDOW_MS = 60 * 1000;
 const RATE_LIMIT_MAX_REQUESTS = 30;
+const MAX_REQUEST_BODY_BYTES = 1024 * 256; // 256 KB
 const commandRateLimits = new Map();
 const commandIdempotencyCache = new Map();
 
+const SECURITY_HEADERS = {
+  'X-Content-Type-Options': 'nosniff',
+  'X-Frame-Options': 'DENY',
+  'X-XSS-Protection': '1; mode=block'
+};
+
 function sendJson(res, statusCode, payload) {
-  res.writeHead(statusCode, { 'Content-Type': 'application/json' });
+  res.writeHead(statusCode, { 'Content-Type': 'application/json', ...SECURITY_HEADERS });
   res.end(JSON.stringify(payload));
 }
 
@@ -127,7 +134,7 @@ function sendSse(res, event) {
 function sendHtmlFile(res, filePath) {
   try {
     const html = fs.readFileSync(filePath, 'utf8');
-    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', ...SECURITY_HEADERS });
     res.end(html);
   } catch (error) {
     sendJson(res, 500, {
@@ -140,7 +147,7 @@ function sendHtmlFile(res, filePath) {
 function sendStaticFile(res, filePath, contentType) {
   try {
     const content = fs.readFileSync(filePath);
-    res.writeHead(200, { 'Content-Type': contentType });
+    res.writeHead(200, { 'Content-Type': contentType, ...SECURITY_HEADERS });
     res.end(content);
   } catch (error) {
     sendJson(res, 500, {
@@ -164,12 +171,21 @@ function emitSecurityEvent(eventType, details) {
 
 function readJsonBody(req, callback) {
   let body = '';
+  let byteLength = 0;
+  let aborted = false;
 
   req.on('data', chunk => {
+    if (aborted) return;
+    byteLength += Buffer.byteLength(chunk);
+    if (byteLength > MAX_REQUEST_BODY_BYTES) {
+      aborted = true;
+      return callback(new Error('REQUEST_BODY_TOO_LARGE'));
+    }
     body += chunk;
   });
 
   req.on('end', () => {
+    if (aborted) return;
     if (!body) {
       return callback(null, {});
     }
@@ -1008,9 +1024,7 @@ function getRequestApiKey(req, requestUrl) {
 
   return (
     req.headers['x-api-key'] ||
-    bearerToken ||
-    requestUrl.searchParams.get('apiKey') ||
-    requestUrl.searchParams.get('key')
+    bearerToken
   );
 }
 
@@ -2167,12 +2181,12 @@ const server = http.createServer(async (req, res) => {
       const payload = {
         faceplane: typeof body.faceplane === 'string' ? body.faceplane.trim() : undefined,
         faceplanes: Array.isArray(body.faceplanes) ? body.faceplanes : typeof body.faceplanes === 'string' ? body.faceplanes.split(',').map((item) => item.trim()).filter(Boolean) : undefined,
-        commandsPerRun: body.commandsPerRun,
-        approvalRate: body.approvalRate,
-        blockRate: body.blockRate,
-        telemetryState: body.telemetryState,
-        telemetryActivityCount: body.telemetryActivityCount,
-        scenario: body.scenario || body.driftScenario
+        commandsPerRun: typeof body.commandsPerRun === 'number' && Number.isFinite(body.commandsPerRun) && body.commandsPerRun >= 0 ? Math.floor(body.commandsPerRun) : undefined,
+        approvalRate: typeof body.approvalRate === 'number' && body.approvalRate >= 0 && body.approvalRate <= 1 ? body.approvalRate : undefined,
+        blockRate: typeof body.blockRate === 'number' && body.blockRate >= 0 && body.blockRate <= 1 ? body.blockRate : undefined,
+        telemetryState: typeof body.telemetryState === 'string' ? body.telemetryState.trim() : undefined,
+        telemetryActivityCount: typeof body.telemetryActivityCount === 'number' && Number.isFinite(body.telemetryActivityCount) && body.telemetryActivityCount >= 0 ? Math.floor(body.telemetryActivityCount) : undefined,
+        scenario: typeof body.scenario === 'string' ? body.scenario.trim() : typeof body.driftScenario === 'string' ? body.driftScenario.trim() : undefined
       };
 
       let requestBody = {
@@ -2824,7 +2838,7 @@ const server = http.createServer(async (req, res) => {
       }
 
       const access = authorizeRoute(req, res, '/faceplane/openai/execute', {
-        tenant: body.tenantId,
+        tenant: typeof body.tenantId === 'string' ? body.tenantId : undefined,
         command: 'openai.faceplane.execute',
         requiredScope: 'openai:execute'
       });
@@ -3369,7 +3383,7 @@ const server = http.createServer(async (req, res) => {
         scopes: Array.isArray(body.scopes) ? body.scopes : [],
         reason: typeof body.reason === 'string' ? body.reason : null,
         source: typeof body.source === 'string' ? body.source : 'manual',
-        raw: body.payload || {}
+        raw: body.payload && typeof body.payload === 'object' && !Array.isArray(body.payload) ? body.payload : {}
       };
 
       await auditLogger.log({
@@ -3514,11 +3528,11 @@ const server = http.createServer(async (req, res) => {
       await auditLogger.log({
         tenant: typeof body.tenant === 'string' ? body.tenant : null,
         command: `system.${eventType}`,
-        payload: body.payload || {},
+        payload: body.payload && typeof body.payload === 'object' && !Array.isArray(body.payload) ? body.payload : {},
         result: {
           success: body.status !== 'failed',
           source: 'learning-events',
-          status: body.status || 'recorded'
+          status: typeof body.status === 'string' ? body.status : 'recorded'
         },
         actor,
         timestamp: new Date().toISOString()
