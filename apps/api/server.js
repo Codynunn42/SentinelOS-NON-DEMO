@@ -71,6 +71,7 @@ const { createTrace, recordStage, completeTrace, getTrace, listTraces } = requir
 const { enforceSovereignBoot } = require('../sentinel/src/sovereign/sovereignBoot');
 const { resolveTier, classifyOperation } = require('../sentinel/src/tiers/tierResolver');
 const { TIERS } = require('../sentinel/src/tiers/tierRegistry');
+const { listModules } = require('../sentinel/src/modules/resolver');
 
 const PORT = process.env.PORT || 3000;
 const LANDING_PAGE_PATH = path.join(__dirname, 'public', 'index.html');
@@ -1930,6 +1931,15 @@ const server = http.createServer(async (req, res) => {
     return sendJson(res, 200, {
       ...getAuthorityStatus(),
       status: 'ok'
+    });
+  }
+
+  if (pathname === '/api/v1/modules' && req.method === 'GET') {
+    const modules = listModules();
+    return sendJson(res, 200, {
+      status: 'ok',
+      modules,
+      timestamp: new Date().toISOString()
     });
   }
 

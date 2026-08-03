@@ -34,6 +34,7 @@ The Institutional Modules are the executable functions of the operating environm
 | Executive snapshot alignment | `scripts/command-executive-snapshot-alignment.js` |
 | Fork steering roadmap | `scripts/command-fork-steering-roadmap.js` |
 | Drift issue classification | `scripts/command-classify-drift-issues.js` |
+| Institutional module check | `scripts/check-institutional-modules.js` |
 
 **Growth direction:** Outcome briefings that embed an Operational Context header (environment, revision, confidence, known quirks) sourced from the Operations Module.
 

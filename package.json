@@ -10,6 +10,7 @@
     "start": "node apps/api/server.js",
     "doctor": "node scripts/sentinel-doctor.js",
     "healthcheck": "node scripts/healthcheck.js",
+    "check:modules": "node scripts/check-institutional-modules.js",
     "check:cdnlux": "node scripts/check-cdnlux-integration.js",
     "check:control-plane": "node scripts/check-control-plane.js",
     "check:customerops": "node scripts/check-customerops-command-routing.js",

@@ -648,6 +648,60 @@
       background: rgba(22, 32, 43, 0.42);
     }
 
+    .section-heading {
+      margin: 0 0 12px;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .module-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 10px;
+    }
+
+    .module-card {
+      border: 1px solid var(--line);
+      background: var(--surface-2);
+      border-radius: 6px;
+      padding: 12px;
+    }
+
+    .module-card h3 {
+      margin: 0 0 8px;
+      font-size: 13px;
+      overflow-wrap: anywhere;
+    }
+
+    .module-card .module-status {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 5px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      background: var(--muted);
+    }
+
+    .status-dot.healthy { background: var(--green); }
+    .status-dot.degraded { background: var(--yellow); }
+    .status-dot.unknown { background: var(--muted); }
+
+    .module-card .module-caps {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
     @media (max-width: 920px) {
       .topbar {
         display: grid;
@@ -1087,6 +1141,48 @@
           <button id="loadTracesButton" class="secondary" type="button">Load Traces</button>
         </div>
         <div id="traceList" style="max-height:320px;overflow:auto;"><p class="empty">No traces loaded.</p></div>
+      </article>
+
+      <article class="panel span-12">
+        <div class="panel-head">
+          <h2>Institutional Modules</h2>
+          <span id="modulesChip" class="chip">not loaded</span>
+        </div>
+        <div class="actions" style="margin-bottom:12px;">
+          <button id="loadModulesButton" class="secondary" type="button">Load Modules</button>
+        </div>
+        <div id="modulesList" class="module-grid">
+          <p class="empty">No modules loaded.</p>
+        </div>
+      </article>
+
+      <article class="panel span-12">
+        <div class="panel-head">
+          <h2>Infrastructure</h2>
+          <span class="chip">provider health</span>
+        </div>
+        <p class="analysis-section-label" style="margin-bottom:10px;">AI provider status is managed through the AI Operations module above.</p>
+        <div class="metric-grid">
+          <div class="metric">
+            <span>OpenAI Faceplane</span>
+            <strong id="infraProviderStatus">-</strong>
+          </div>
+          <div class="metric">
+            <span>Drift Tracking</span>
+            <strong id="infraDriftTracking">-</strong>
+          </div>
+          <div class="metric">
+            <span>Audit Logging</span>
+            <strong id="infraAuditLogging">-</strong>
+          </div>
+          <div class="metric">
+            <span>RBAC Enforced</span>
+            <strong id="infraRbac">-</strong>
+          </div>
+        </div>
+        <div class="actions" style="margin-top:12px">
+          <button id="loadProviderHealthButton" class="secondary" type="button">Load Provider Health</button>
+        </div>
       </article>
 
       <article class="panel span-12">
@@ -2097,6 +2193,64 @@
     }));
     el.connectSignalsStreamButton.addEventListener('click', connectSignalsStream);
     el.connectAuditStreamButton.addEventListener('click', connectAuditStream);
+    async function loadInstitutionalModules() {
+      setChip(document.getElementById('modulesChip'), 'loading', 'warn');
+      const payload = await fetch('/api/v1/modules').then((r) => r.json());
+      const container = document.getElementById('modulesList');
+      container.innerHTML = '';
+
+      if (!payload.modules || !payload.modules.length) {
+        container.innerHTML = '<p class="empty">No modules returned.</p>';
+        setChip(document.getElementById('modulesChip'), 'empty', 'warn');
+        return payload;
+      }
+
+      payload.modules.forEach((m) => {
+        const card = document.createElement('div');
+        card.className = 'module-card';
+        const statusLabel = escapeHtml(m.healthStatus || 'unknown');
+        const dotClass = ['healthy', 'degraded', 'unknown'].includes(m.healthStatus) ? m.healthStatus : 'unknown';
+        card.innerHTML = `
+          <h3>${escapeHtml(m.displayName)}</h3>
+          <div class="module-status">
+            <span class="status-dot ${dotClass}"></span>
+            <span>${statusLabel}</span>
+          </div>
+          <div class="module-caps">${escapeHtml(String(m.capabilityCount))} capabilities</div>
+        `;
+        container.appendChild(card);
+      });
+
+      const healthy = payload.modules.filter((m) => m.healthStatus === 'healthy').length;
+      const total = payload.modules.length;
+      const tone = healthy === total ? 'good' : healthy > 0 ? 'warn' : 'bad';
+      setChip(document.getElementById('modulesChip'), `${healthy}/${total} healthy`, tone);
+      return payload;
+    }
+
+    async function loadProviderHealth() {
+      const faceplane = await fetch('/api/v1/modules').then((r) => r.json()).then((d) => {
+        const aiOps = d.modules && d.modules.find((m) => m.moduleId === 'ai-operations');
+        return aiOps || null;
+      });
+
+      document.getElementById('infraProviderStatus').textContent =
+        faceplane ? faceplane.healthStatus : 'unknown';
+      document.getElementById('infraDriftTracking').textContent = faceplane && faceplane.healthStatus === 'healthy' ? 'enabled' : '-';
+      document.getElementById('infraAuditLogging').textContent = faceplane && faceplane.healthStatus === 'healthy' ? 'enabled' : '-';
+      document.getElementById('infraRbac').textContent = faceplane ? 'enforced' : '-';
+    }
+
+    document.getElementById('loadModulesButton').addEventListener('click', () =>
+      loadInstitutionalModules().catch((e) => {
+        setChip(document.getElementById('modulesChip'), 'error', 'bad');
+        el.errorText.textContent = e.message;
+      })
+    );
+    document.getElementById('loadProviderHealthButton').addEventListener('click', () =>
+      loadProviderHealth().catch((e) => { el.errorText.textContent = e.message; })
+    );
+
     document.getElementById('loadDriftButton').addEventListener('click', () => loadDriftRecommendations().then((p) => writeCommandOutput({ drift: p.summary })).catch((e) => { el.errorText.textContent = e.message; }));
     document.getElementById('runDriftButton').addEventListener('click', () => runDriftAnalysis().then((p) => writeCommandOutput({ driftAnalysis: p.summary })).catch((e) => { el.errorText.textContent = e.message; }));
     document.getElementById('loadTracesButton').addEventListener('click', () => loadTraces().then((p) => writeCommandOutput({ traces: p.count })).catch((e) => { el.errorText.textContent = e.message; }));
