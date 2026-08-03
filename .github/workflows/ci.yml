@@ -24,6 +24,9 @@ jobs:
       - name: Install deps
         run: npm install || true
 
+      - name: Environment fingerprint
+        run: node scripts/sentinel-doctor.js
+
       - name: Smoke — tier registry
         run: node scripts/check-tier-registry.js
 

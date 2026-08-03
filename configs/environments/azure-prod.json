@@ -1,0 +1,27 @@
+{
+  "environment": "azure-prod",
+  "description": "Azure Container Apps production deployment",
+  "runtime": {
+    "githubActions": false,
+    "azure": true,
+    "docker": true,
+    "wsl2": false
+  },
+  "services": ["api"],
+  "secrets": [
+    { "name": "SENTINEL_HMAC_SECRET", "required": true },
+    { "name": "SENTINEL_API_KEY", "required": true },
+    { "name": "DATABASE_URL", "required": true }
+  ],
+  "clone": {
+    "shallowAllowed": false
+  },
+  "expectedHealth": {
+    "endpoint": "https://ca-nc-dev-sentinel.calmhill-388e1d39.eastus2.azurecontainerapps.io/health",
+    "status": "healthy"
+  },
+  "audit": {
+    "signingRequired": true
+  },
+  "knownQuirks": []
+}

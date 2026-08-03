@@ -8,6 +8,7 @@
   },
   "scripts": {
     "start": "node apps/api/server.js",
+    "doctor": "node scripts/sentinel-doctor.js",
     "healthcheck": "node scripts/healthcheck.js",
     "check:cdnlux": "node scripts/check-cdnlux-integration.js",
     "check:control-plane": "node scripts/check-control-plane.js",

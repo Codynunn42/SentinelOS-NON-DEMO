@@ -1,0 +1,133 @@
+{
+  "sentinel": "doctor",
+  "timestamp": "2026-08-03T18:07:04.439Z",
+  "git": {
+    "repo": "http://localhost:26831/Codynunn42/SentinelOS-NON-DEMO.git",
+    "branch": "feature/sentinel-cli-scaffold-2026-06-26",
+    "commit": "9a0ce510f27b2ee543d8783c5ee2b1c2b0e418b0",
+    "shortCommit": "9a0ce51",
+    "isShallow": true,
+    "uncommittedChanges": 5
+  },
+  "runtimes": [
+    "GitHub Actions"
+  ],
+  "environmentName": "github-actions",
+  "manifest": {
+    "environment": "github-actions",
+    "description": "GitHub Actions CI runner (ephemeral, shallow clone by default)",
+    "runtime": {
+      "githubActions": true,
+      "azure": false,
+      "docker": false,
+      "wsl2": false
+    },
+    "services": [
+      "api"
+    ],
+    "secrets": [
+      {
+        "name": "SENTINEL_HMAC_SECRET",
+        "required": true
+      },
+      {
+        "name": "SENTINEL_API_KEY",
+        "required": false
+      },
+      {
+        "name": "DATABASE_URL",
+        "required": false
+      }
+    ],
+    "clone": {
+      "shallowAllowed": true
+    },
+    "expectedHealth": {
+      "endpoint": "http://localhost:3000/health",
+      "status": "healthy"
+    },
+    "audit": {
+      "signingRequired": false
+    },
+    "knownQuirks": [
+      "ENV-002",
+      "ENV-003"
+    ]
+  },
+  "secrets": [
+    {
+      "name": "SENTINEL_HMAC_SECRET",
+      "required": true,
+      "present": true,
+      "readable": true,
+      "status": "ok"
+    },
+    {
+      "name": "SENTINEL_API_KEY",
+      "required": false,
+      "present": false,
+      "readable": false,
+      "status": "absent"
+    },
+    {
+      "name": "DATABASE_URL",
+      "required": false,
+      "present": false,
+      "readable": false,
+      "status": "absent"
+    }
+  ],
+  "healthUrl": "http://localhost:3000/health",
+  "health": {
+    "reachable": false,
+    "error": ""
+  },
+  "quirks": [
+    {
+      "id": "ENV-001",
+      "platform": "WSL2/9p",
+      "description": "Secret mounts via the 9p filesystem may appear unreadable even when the path exists. This is a WSL2 filesystem interaction, not an application bug.",
+      "status": "known",
+      "mitigation": "Copy the secret value into the process environment directly rather than relying on file-based mounts under WSL2."
+    },
+    {
+      "id": "ENV-002",
+      "platform": "GitHub Actions",
+      "description": "Checkout action produces a shallow clone by default. Full git history is unavailable unless --unshallow is explicitly requested.",
+      "status": "known",
+      "mitigation": "Add `fetch-depth: 0` to the checkout step, or run `git fetch --unshallow origin` before any history-dependent command."
+    },
+    {
+      "id": "ENV-003",
+      "platform": "GitHub Actions",
+      "description": "The GitHub Actions workspace is ephemeral. Any uncommitted work, locally running containers, or in-memory state from a previous job will not persist.",
+      "status": "known",
+      "mitigation": "Treat each job as a fresh environment. Persist artefacts via actions/upload-artifact or external storage."
+    },
+    {
+      "id": "ENV-004",
+      "platform": "Azure Container Apps",
+      "description": "Azure Container Apps may serve an older revision while a new deployment is in-flight. Health probe results may reflect the previous revision.",
+      "status": "known",
+      "mitigation": "Query the active revision list and confirm trafficWeight=100 for the expected revision before running post-deploy checks."
+    }
+  ],
+  "applicableQuirks": [
+    {
+      "id": "ENV-002",
+      "platform": "GitHub Actions",
+      "description": "Checkout action produces a shallow clone by default. Full git history is unavailable unless --unshallow is explicitly requested.",
+      "status": "known",
+      "mitigation": "Add `fetch-depth: 0` to the checkout step, or run `git fetch --unshallow origin` before any history-dependent command."
+    },
+    {
+      "id": "ENV-003",
+      "platform": "GitHub Actions",
+      "description": "The GitHub Actions workspace is ephemeral. Any uncommitted work, locally running containers, or in-memory state from a previous job will not persist.",
+      "status": "known",
+      "mitigation": "Treat each job as a fresh environment. Persist artefacts via actions/upload-artifact or external storage."
+    }
+  ],
+  "manifestMismatches": [],
+  "evidencePath": null
+}

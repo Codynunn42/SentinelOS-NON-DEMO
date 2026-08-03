@@ -1,0 +1,30 @@
+{
+  "environment": "github-actions",
+  "description": "GitHub Actions CI runner (ephemeral, shallow clone by default)",
+  "runtime": {
+    "githubActions": true,
+    "azure": false,
+    "docker": false,
+    "wsl2": false
+  },
+  "services": ["api"],
+  "secrets": [
+    { "name": "SENTINEL_HMAC_SECRET", "required": true },
+    { "name": "SENTINEL_API_KEY", "required": false },
+    { "name": "DATABASE_URL", "required": false }
+  ],
+  "clone": {
+    "shallowAllowed": true
+  },
+  "expectedHealth": {
+    "endpoint": "http://localhost:3000/health",
+    "status": "healthy"
+  },
+  "audit": {
+    "signingRequired": false
+  },
+  "knownQuirks": [
+    "ENV-002",
+    "ENV-003"
+  ]
+}
