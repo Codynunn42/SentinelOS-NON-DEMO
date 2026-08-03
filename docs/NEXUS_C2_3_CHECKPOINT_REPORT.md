@@ -8,6 +8,35 @@
 
 ---
 
+> **⚠ SUPERSESSION NOTICE — Read before acting on this document**
+>
+> This report accurately describes the system at the moment C2.3 was issued. It is **immutable historical evidence** and must not be modified.
+>
+> However, this report **does not represent the current system state**. Per the SentinelOS Constitution Article XIII (Principle of Checkpoint Chronology), the latest successfully validated checkpoint supersedes prior checkpoint status.
+>
+> Completed checkpoint chain since this report was written:
+>
+> | Checkpoint | Deliverable | Status |
+> |---|---|---|
+> | C2.3 | Phase 1 — Foundation | PASS |
+> | C2.4 | Phase 2 — App Shell (NEXUS Console UI, Executive Desk UI, GaaS policy pack, API routes) | PASS |
+> | C3 | Capability Adoption Layer (Command Envelope API, Capability Registry, Dock Manifest Standard, AI Broker) | PASS |
+> | C4 | Multi-Provider Capability Adoption (TILDA, M365, GitHub docked; cross-provider drift monitor; cross-provider Executive Desk) | PASS |
+> | C5 | Institutional Module Layer (SentinelOS Constitution ratified; 6 modules; AI Operations; ORV-2 100/100 SOVEREIGN) | PASS |
+>
+> **Do not reopen or rebuild Phase 2 based solely on this report.** Phase 2 was completed and validated; `NEXUS_C2_4_CHECKPOINT_REPORT.md` is the authoritative close record for that phase.
+>
+> To understand the current system state, consult in order:
+> 1. `STATUS_REPORT.md` — authoritative current phase and gate table
+> 2. `docs/NEXUS_INTEGRATION_PLAN.md` — full build order with current completion status
+> 3. `docs/NEXUS_C2_4_CHECKPOINT_REPORT.md`, `docs/NEXUS_C3_CHECKPOINT_REPORT.md`, `docs/NEXUS_C4_CHECKPOINT_REPORT.md` — subsequent checkpoint evidence
+>
+> The next action against the current system is **status reconciliation and operational testing**, not a new Phase 2 execution plan.
+
+---
+
+---
+
 ## Checkpoint Purpose
 
 C2.3 is the formal gate between Phase 1 (Foundation) and Phase 2 (App Shell) of the NEXUS integration to SentinelOS. This report documents what has been implemented, validates the evidence, and presents the next gate command block for auditor PASS/FAIL issuance.

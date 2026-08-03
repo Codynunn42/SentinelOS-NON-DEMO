@@ -251,6 +251,40 @@ Always.
 
 ---
 
+## XIII. Principle of Checkpoint Chronology
+
+> **The latest successfully validated checkpoint supersedes prior checkpoint status, while prior reports remain immutable historical evidence.**
+
+Checkpoint reports are accurate point-in-time records of the system at the moment they were issued.
+They must never be modified after issuance. They are permanent historical evidence.
+
+However, a checkpoint report describes the system **at the moment it was written**, not the current
+state of the system. Reading an earlier checkpoint in isolation — without consulting subsequent
+checkpoints and the current `STATUS_REPORT.md` — will produce a stale picture.
+
+**Rules:**
+
+1. The latest PASS checkpoint is the authoritative description of completed work. Earlier checkpoints
+   are historical context, not the current contract.
+2. An agent or operator must not reopen, rebuild, or re-execute work that is already closed by a
+   later PASS checkpoint solely because an earlier checkpoint report makes that work appear pending.
+3. Before proposing any remediation, build phase, or execution plan, an agent must verify:
+   - `STATUS_REPORT.md` — current phase and gate table
+   - `docs/NEXUS_INTEGRATION_PLAN.md` — full build order with current completion status
+   - All checkpoint reports in ascending order — to establish the completed evidence chain
+4. If stale status language is found in an earlier report, the correct action is **status
+   reconciliation** against the completed evidence — not re-execution of the described work.
+5. Immutability of prior reports and supersession by later reports are not in conflict. Both are true
+   simultaneously: the earlier report is an accurate historical record; the later report governs
+   current state.
+
+**Checkpoint resolution order:**
+
+When the current state of a deliverable is ambiguous, resolve it by reading checkpoint reports in
+descending order (most recent first) until a PASS or FAIL is found. That verdict is authoritative.
+
+---
+
 ## Ratification
 
 This Constitution is adopted as the governing document of SentinelOS and shall be referenced for all
@@ -268,3 +302,4 @@ future architectural, governance, and institutional decisions.
 | AI Operations is an Institutional Module, not a special runtime | C5.3 | VI | Model Broker follows same pattern as Capability Broker |
 | Executive Desk primary view is Modules, not Providers | C5.4 | II, VIII | Provider Health moves to Infrastructure section |
 | ORV-2 validates module layer before C6 entry | C5.5 | IX | Same 5-campaign pattern as ORV-1 |
+| Checkpoint Chronology rule added as Article XIII; C2.3 report supersession notice added | C5-C6 | XIII | Prevents agents from reading earlier checkpoint in isolation and reopening closed work |
