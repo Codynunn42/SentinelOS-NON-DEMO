@@ -25,6 +25,9 @@ const {
   MODEL_LIFECYCLE
 } = require('./modelRegistry');
 
+const { getProviderHealth } = require('../../providers/health');
+const { emitEvidence } = require('../../evidence/emit');
+
 // Provider health scoring — same scale as Capability Broker
 const HEALTH_SCORE = { healthy: 2, unknown: 1, degraded: 0 };
 
@@ -170,8 +173,122 @@ function listApprovedModels(options = {}) {
   }));
 }
 
+/**
+ * C5.3 — Governed AI routing with explicit evidence emission.
+ *
+ * This is the sovereign-compliant routing path that:
+ *   1. Filters models by capability (canonical 'ai-' prefixed names)
+ *   2. Filters by data classification policy
+ *   3. Filters by live provider health (via providers/health.js)
+ *   4. Scores and ranks remaining candidates
+ *   5. Emits a governed evidence record (via evidence/emit.js)
+ *   6. Returns the routing decision with evidenceId for SEL ledger tracing
+ *
+ * Per the SentinelOS Constitution, Principle VI:
+ *   Every AI routing decision must produce traceable evidence.
+ *   No AI model is invoked without a prior routing decision record.
+ *
+ * @param {{ capabilityId: string, dataClassification: string, sessionId: string, role?: string }} req
+ * @returns {{ routed: boolean, modelId?: string, provider?: string, reason?: string, evidenceId?: string }}
+ */
+function routeModel(req) {
+  const { capabilityId, dataClassification, sessionId, role } = req || {};
+
+  if (!capabilityId) {
+    return { routed: false, reason: 'AI_CAPABILITY_REQUIRED' };
+  }
+  if (!dataClassification) {
+    return { routed: false, reason: 'DATA_CLASSIFICATION_REQUIRED' };
+  }
+  if (!sessionId) {
+    return { routed: false, reason: 'SESSION_ID_REQUIRED' };
+  }
+
+  // Step 1: filter by capability
+  const allActive = listModels({ lifecycleStatus: MODEL_LIFECYCLE.ACTIVE });
+  const capabilityMatch = allActive.filter((m) => m.capabilities.includes(capabilityId));
+
+  if (capabilityMatch.length === 0) {
+    return { routed: false, reason: 'MODEL_NO_CAPABILITY_REGISTERED', capabilityId };
+  }
+
+  // Step 2: filter by data classification policy
+  const classificationPassed = capabilityMatch.filter((m) =>
+    m.approvedDataClassifications.includes(dataClassification)
+  );
+
+  if (classificationPassed.length === 0) {
+    return {
+      routed: false,
+      reason: 'DATA_CLASSIFICATION_POLICY_DENIED',
+      capabilityId,
+      dataClassification
+    };
+  }
+
+  // Step 3: filter by role gate
+  const rolePassed = classificationPassed.filter((m) => {
+    const minimumRole = m.governance && m.governance.minimumRole;
+    if (minimumRole === 'executive') {
+      return role === 'executive' || role === 'platform';
+    }
+    return true;
+  });
+
+  if (rolePassed.length === 0) {
+    return {
+      routed: false,
+      reason: 'INSUFFICIENT_ROLE',
+      capabilityId,
+      requiredRole: 'executive',
+      providedRole: role || null
+    };
+  }
+
+  // Step 4: filter by live provider health (dynamic — called at routing time)
+  const healthyProviders = rolePassed.filter(
+    (m) => getProviderHealth(m.provider) === 'healthy'
+  );
+
+  if (healthyProviders.length === 0) {
+    return {
+      routed: false,
+      reason: 'NO_HEALTHY_PROVIDER',
+      capabilityId,
+      dataClassification
+    };
+  }
+
+  // Step 5: score and rank
+  const scored = healthyProviders
+    .map((m) => ({ ...m, score: scoreModelCandidate(m) }))
+    .sort((a, b) => b.score - a.score);
+
+  const selected = scored[0];
+
+  // Step 6: emit evidence — every routing decision is recorded
+  const { evidenceId } = emitEvidence({
+    sessionId,
+    type: 'ai-routing',
+    capabilityId,
+    modelId: selected.modelId,
+    provider: selected.provider,
+    dataClassification,
+    timestamp: new Date().toISOString()
+  });
+
+  return {
+    routed: true,
+    modelId: selected.modelId,
+    provider: selected.provider,
+    reason: 'Matched capability, policy, classification, and provider health',
+    evidenceId
+  };
+}
+
 module.exports = {
   scoreModelCandidate,
   brokerAICapability,
-  listApprovedModels
+  listApprovedModels,
+  routeModel
 };

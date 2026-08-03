@@ -33,7 +33,11 @@ const MODEL_DATA_CLASSIFICATION = {
   PUBLIC: 'public',
   INTERNAL: 'internal',
   CONFIDENTIAL: 'confidential',
-  GOVERNMENT: 'government'
+  GOVERNMENT: 'government',
+  // C5.3 — extended classifications for local and agency-cleared models
+  FINANCIAL: 'financial',
+  RESTRICTED: 'restricted',
+  CLASSIFIED: 'classified'
 };
 
 const MODEL_LIFECYCLE = {
@@ -50,7 +54,12 @@ const MODEL_CAPABILITY = {
   CODING: 'coding',
   LEGAL: 'legal',
   VISION: 'vision',
-  SPEECH: 'speech'
+  SPEECH: 'speech',
+  // C5.3 — canonical AI capability names (ai- prefixed) for governed routing
+  AI_PLANNING: 'ai-planning',
+  AI_RESEARCH: 'ai-research',
+  AI_ANALYSIS: 'ai-analysis',
+  AI_WRITING: 'ai-writing'
 };
 
 /**
@@ -209,6 +218,135 @@ registerModel({
   providerHealth: 'healthy',
   cost: 2,
   latencyMs: 220,
+  lifecycleStatus: MODEL_LIFECYCLE.ACTIVE
+});
+
+// ---------------------------------------------------------------------------
+// C5.3 — Extended AI Operations models
+//
+// These models use canonical 'ai-' prefixed capability names and extend the
+// approved data classification set to include financial, restricted, and
+// classified tiers. Used by the routeModel() governed routing path.
+// ---------------------------------------------------------------------------
+
+registerModel({
+  modelId: 'azure-gpt-4o',
+  provider: 'azure-openai',
+  modelName: 'gpt-4o',
+  capabilities: [
+    MODEL_CAPABILITY.AI_PLANNING,
+    MODEL_CAPABILITY.AI_RESEARCH,
+    MODEL_CAPABILITY.AI_ANALYSIS,
+    MODEL_CAPABILITY.AI_WRITING
+  ],
+  approvedDataClassifications: [
+    MODEL_DATA_CLASSIFICATION.PUBLIC,
+    MODEL_DATA_CLASSIFICATION.INTERNAL
+  ],
+  governance: { evidenceRequired: true, minimumRole: 'operator' },
+  providerHealth: 'healthy',
+  cost: 4,
+  latencyMs: 300,
+  lifecycleStatus: MODEL_LIFECYCLE.ACTIVE
+});
+
+registerModel({
+  modelId: 'azure-gpt-4o-mini',
+  provider: 'azure-openai',
+  modelName: 'gpt-4o-mini',
+  capabilities: [
+    MODEL_CAPABILITY.AI_PLANNING,
+    MODEL_CAPABILITY.AI_RESEARCH,
+    MODEL_CAPABILITY.AI_ANALYSIS,
+    MODEL_CAPABILITY.AI_WRITING
+  ],
+  approvedDataClassifications: [
+    MODEL_DATA_CLASSIFICATION.PUBLIC,
+    MODEL_DATA_CLASSIFICATION.INTERNAL
+  ],
+  governance: { evidenceRequired: true, minimumRole: 'operator' },
+  providerHealth: 'healthy',
+  cost: 2,
+  latencyMs: 150,
+  lifecycleStatus: MODEL_LIFECYCLE.ACTIVE
+});
+
+registerModel({
+  modelId: 'openai-gpt-4o',
+  provider: 'openai',
+  modelName: 'gpt-4o',
+  capabilities: [
+    MODEL_CAPABILITY.AI_PLANNING,
+    MODEL_CAPABILITY.AI_RESEARCH,
+    MODEL_CAPABILITY.AI_ANALYSIS,
+    MODEL_CAPABILITY.AI_WRITING
+  ],
+  approvedDataClassifications: [
+    MODEL_DATA_CLASSIFICATION.PUBLIC
+  ],
+  governance: { evidenceRequired: true, minimumRole: 'operator' },
+  providerHealth: 'healthy',
+  cost: 4,
+  latencyMs: 280,
+  lifecycleStatus: MODEL_LIFECYCLE.ACTIVE
+});
+
+registerModel({
+  modelId: 'openai-gpt-4o-mini',
+  provider: 'openai',
+  modelName: 'gpt-4o-mini',
+  capabilities: [
+    MODEL_CAPABILITY.AI_PLANNING,
+    MODEL_CAPABILITY.AI_RESEARCH,
+    MODEL_CAPABILITY.AI_ANALYSIS,
+    MODEL_CAPABILITY.AI_WRITING
+  ],
+  approvedDataClassifications: [
+    MODEL_DATA_CLASSIFICATION.PUBLIC
+  ],
+  governance: { evidenceRequired: true, minimumRole: 'operator' },
+  providerHealth: 'healthy',
+  cost: 2,
+  latencyMs: 150,
+  lifecycleStatus: MODEL_LIFECYCLE.ACTIVE
+});
+
+// local-embassy — private hosted model; approved for financial and restricted data
+registerModel({
+  modelId: 'local-embassy',
+  provider: 'local',
+  modelName: 'local-embassy-v1',
+  capabilities: [
+    MODEL_CAPABILITY.AI_ANALYSIS,
+    MODEL_CAPABILITY.AI_WRITING
+  ],
+  approvedDataClassifications: [
+    MODEL_DATA_CLASSIFICATION.FINANCIAL,
+    MODEL_DATA_CLASSIFICATION.RESTRICTED
+  ],
+  governance: { evidenceRequired: true, minimumRole: 'operator' },
+  providerHealth: 'healthy',
+  cost: 1,
+  latencyMs: 80,
+  lifecycleStatus: MODEL_LIFECYCLE.ACTIVE
+});
+
+// agency-cleared — agency-approved model; approved for classified data only
+registerModel({
+  modelId: 'agency-cleared',
+  provider: 'agency-approved',
+  modelName: 'agency-cleared-v1',
+  capabilities: [
+    MODEL_CAPABILITY.AI_PLANNING,
+    MODEL_CAPABILITY.AI_ANALYSIS
+  ],
+  approvedDataClassifications: [
+    MODEL_DATA_CLASSIFICATION.CLASSIFIED
+  ],
+  governance: { evidenceRequired: true, minimumRole: 'executive' },
+  providerHealth: 'healthy',
+  cost: 3,
+  latencyMs: 400,
   lifecycleStatus: MODEL_LIFECYCLE.ACTIVE
 });
 

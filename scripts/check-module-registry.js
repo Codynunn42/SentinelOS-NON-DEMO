@@ -474,4 +474,158 @@ EXPECTED_PROVIDERS.forEach((pid) => {
 
 console.log(`  - C5.2: Provider Registry has all ${EXPECTED_PROVIDERS.length} canonical providers ✓`);
 
+// ---------------------------------------------------------------------------
+// C5.3 — AI Operations Module extension validation
+//
+// Validates:
+//   1. Extended data classifications (financial, restricted, classified) exist
+//   2. New C5.3 models registered (azure-gpt-4o, openai-gpt-4o, local-embassy, agency-cleared)
+//   3. C5.3 providers registered (local, agency-approved)
+//   4. providers/health.js exports getProviderHealth and returns correct values
+//   5. evidence/emit.js exports emitEvidence, getEvidenceLog, getEvidenceCount
+//   6. modelBroker exports routeModel
+//   7. routeModel gates: missing capabilityId → AI_CAPABILITY_REQUIRED
+//   8. routeModel gates: missing dataClassification → DATA_CLASSIFICATION_REQUIRED
+//   9. routeModel gates: missing sessionId → SESSION_ID_REQUIRED
+//  10. routeModel routes ai-planning/public with evidence emission
+//  11. routeModel blocks financial data from public-only models
+//  12. routeModel selects local-embassy for financial classification
+//  13. routeModel selects agency-cleared for classified data
+// ---------------------------------------------------------------------------
+
+const { MODEL_DATA_CLASSIFICATION: MDC } = require('../apps/sentinel/src/modules/ai-operations/modelRegistry');
+
+// 1. Extended data classifications
+['financial', 'restricted', 'classified'].forEach((cls) => {
+  const key = cls.toUpperCase();
+  assert(
+    Object.values(MDC).includes(cls),
+    `MODEL_DATA_CLASSIFICATION missing '${cls}' value`
+  );
+});
+console.log('  - C5.3: MODEL_DATA_CLASSIFICATION includes financial, restricted, classified ✓');
+
+// 2. New C5.3 models registered
+const C53_MODELS = ['azure-gpt-4o', 'azure-gpt-4o-mini', 'openai-gpt-4o', 'openai-gpt-4o-mini', 'local-embassy', 'agency-cleared'];
+C53_MODELS.forEach((modelId) => {
+  const m = getModel(modelId);
+  assert(m, `C5.3 model '${modelId}' not registered`);
+  assert(m.provider, `C5.3 model '${modelId}' missing provider`);
+  assert(Array.isArray(m.capabilities) && m.capabilities.length > 0, `C5.3 model '${modelId}' missing capabilities`);
+  assert(Array.isArray(m.approvedDataClassifications) && m.approvedDataClassifications.length > 0,
+    `C5.3 model '${modelId}' missing approvedDataClassifications`);
+  assert(m.governance && m.governance.evidenceRequired === true, `C5.3 model '${modelId}' must have evidenceRequired: true`);
+});
+console.log(`  - C5.3: all ${C53_MODELS.length} C5.3 models registered ✓`);
+
+// local-embassy: financial + restricted only
+const localEmbassy = getModel('local-embassy');
+assert(localEmbassy.approvedDataClassifications.includes('financial'), 'local-embassy must be approved for financial');
+assert(localEmbassy.approvedDataClassifications.includes('restricted'), 'local-embassy must be approved for restricted');
+assert(!localEmbassy.approvedDataClassifications.includes('public'), 'local-embassy must NOT be approved for public');
+console.log('  - C5.3: local-embassy approved for financial + restricted only ✓');
+
+// agency-cleared: classified only
+const agencyCleared = getModel('agency-cleared');
+assert(agencyCleared.approvedDataClassifications.includes('classified'), 'agency-cleared must be approved for classified');
+assert(!agencyCleared.approvedDataClassifications.includes('public'), 'agency-cleared must NOT be approved for public');
+console.log('  - C5.3: agency-cleared approved for classified only ✓');
+
+// 3. C5.3 providers in Provider Registry
+['local', 'agency-approved'].forEach((pid) => {
+  const p = getProvider(pid);
+  assert(p, `C5.3 provider '${pid}' not found in Provider Registry`);
+  assert(p.type === 'ai', `C5.3 provider '${pid}' must be type 'ai'`);
+});
+console.log('  - C5.3: local and agency-approved in Provider Registry ✓');
+
+// 4. providers/health.js — getProviderHealth
+const { getProviderHealth } = require('../apps/sentinel/src/providers/health');
+assert(typeof getProviderHealth === 'function', 'providers/health.js must export getProviderHealth');
+
+const nexusHealth = getProviderHealth('nexus');
+assert(['healthy', 'degraded', 'unknown'].includes(nexusHealth),
+  `getProviderHealth('nexus') returned invalid value: ${nexusHealth}`);
+
+const azureHealth = getProviderHealth('azure-openai');
+assert(['healthy', 'degraded', 'unknown'].includes(azureHealth),
+  `getProviderHealth('azure-openai') returned invalid value: ${azureHealth}`);
+
+const unknownProviderHealth = getProviderHealth('no-such-provider-xyz');
+assert.strictEqual(unknownProviderHealth, 'unknown', 'unknown provider must return unknown');
+console.log('  - C5.3: providers/health.js getProviderHealth returns correct values ✓');
+
+// 5. evidence/emit.js exports
+const { emitEvidence, getEvidenceLog, getEvidenceCount } = require('../apps/sentinel/src/evidence/emit');
+assert(typeof emitEvidence === 'function', 'evidence/emit.js must export emitEvidence');
+assert(typeof getEvidenceLog === 'function', 'evidence/emit.js must export getEvidenceLog');
+assert(typeof getEvidenceCount === 'function', 'evidence/emit.js must export getEvidenceCount');
+
+const testEvidence = emitEvidence({
+  sessionId: 'test-session-001',
+  capabilityId: 'ai-planning',
+  modelId: 'azure-gpt-4o',
+  provider: 'azure-openai',
+  dataClassification: 'public',
+  timestamp: new Date().toISOString()
+});
+assert(testEvidence.evidenceId, 'emitEvidence must return evidenceId');
+assert(testEvidence.evidenceId.startsWith('ai-ev/'), `evidenceId must start with 'ai-ev/', got: ${testEvidence.evidenceId}`);
+assert(getEvidenceCount() >= 1, 'evidence log must have at least 1 entry after emit');
+assert(Array.isArray(getEvidenceLog()), 'getEvidenceLog must return array');
+console.log('  - C5.3: evidence/emit.js exports verified and emitEvidence works ✓');
+
+// 6. routeModel exported
+const { routeModel } = require('../apps/sentinel/src/modules/ai-operations/modelBroker');
+assert(typeof routeModel === 'function', 'modelBroker must export routeModel');
+console.log('  - C5.3: routeModel exported from modelBroker ✓');
+
+// 7. routeModel gate: missing capabilityId
+const rmMissingCap = routeModel({ capabilityId: '', dataClassification: 'public', sessionId: 'sess-001' });
+assert.strictEqual(rmMissingCap.routed, false);
+assert.strictEqual(rmMissingCap.reason, 'AI_CAPABILITY_REQUIRED');
+console.log('  - C5.3: routeModel returns AI_CAPABILITY_REQUIRED for empty capabilityId ✓');
+
+// 8. routeModel gate: missing dataClassification
+const rmMissingClass = routeModel({ capabilityId: 'ai-planning', dataClassification: '', sessionId: 'sess-001' });
+assert.strictEqual(rmMissingClass.routed, false);
+assert.strictEqual(rmMissingClass.reason, 'DATA_CLASSIFICATION_REQUIRED');
+console.log('  - C5.3: routeModel returns DATA_CLASSIFICATION_REQUIRED for empty classification ✓');
+
+// 9. routeModel gate: missing sessionId
+const rmMissingSession = routeModel({ capabilityId: 'ai-planning', dataClassification: 'public', sessionId: '' });
+assert.strictEqual(rmMissingSession.routed, false);
+assert.strictEqual(rmMissingSession.reason, 'SESSION_ID_REQUIRED');
+console.log('  - C5.3: routeModel returns SESSION_ID_REQUIRED for empty sessionId ✓');
+
+// 10. routeModel routes ai-planning/public with evidence emission
+const countBefore = getEvidenceCount();
+const rmPlanPublic = routeModel({ capabilityId: 'ai-planning', dataClassification: 'public', sessionId: 'sess-c53-001', role: 'operator' });
+assert.strictEqual(rmPlanPublic.routed, true, `ai-planning/public should route; got reason: ${rmPlanPublic.reason}`);
+assert(rmPlanPublic.modelId, 'routeModel must return modelId');
+assert(rmPlanPublic.provider, 'routeModel must return provider');
+assert(rmPlanPublic.evidenceId, 'routeModel must return evidenceId');
+assert(rmPlanPublic.evidenceId.startsWith('ai-ev/'), 'evidenceId must start with ai-ev/');
+assert(getEvidenceCount() > countBefore, 'evidence log must grow after routeModel call');
+console.log('  - C5.3: routeModel routes ai-planning/public and emits evidence ✓');
+
+// 11. routeModel blocks financial data from public-only models
+const rmFinancialPublic = routeModel({ capabilityId: 'ai-analysis', dataClassification: 'financial', sessionId: 'sess-c53-002', role: 'operator' });
+// Should succeed via local-embassy which is approved for financial
+assert.strictEqual(rmFinancialPublic.routed, true, `ai-analysis/financial should route to local-embassy; got reason: ${rmFinancialPublic.reason}`);
+assert.strictEqual(rmFinancialPublic.modelId, 'local-embassy', `Expected local-embassy, got ${rmFinancialPublic.modelId}`);
+console.log('  - C5.3: routeModel routes ai-analysis/financial to local-embassy ✓');
+
+// 12. routeModel selects agency-cleared for classified data (executive role required)
+const rmClassified = routeModel({ capabilityId: 'ai-planning', dataClassification: 'classified', sessionId: 'sess-c53-003', role: 'executive' });
+assert.strictEqual(rmClassified.routed, true, `ai-planning/classified should route to agency-cleared; got reason: ${rmClassified.reason}`);
+assert.strictEqual(rmClassified.modelId, 'agency-cleared', `Expected agency-cleared, got ${rmClassified.modelId}`);
+console.log('  - C5.3: routeModel routes ai-planning/classified to agency-cleared ✓');
+
+// 13. routeModel blocks classified without executive role
+const rmClassifiedNoRole = routeModel({ capabilityId: 'ai-planning', dataClassification: 'classified', sessionId: 'sess-c53-004', role: 'operator' });
+assert.strictEqual(rmClassifiedNoRole.routed, false);
+assert.strictEqual(rmClassifiedNoRole.reason, 'INSUFFICIENT_ROLE', `Expected INSUFFICIENT_ROLE, got ${rmClassifiedNoRole.reason}`);
+console.log('  - C5.3: routeModel blocks classified data without executive role ✓');
+
 console.log('\nALL C5 INSTITUTIONAL MODULE LAYER CHECKS PASSED ✓');

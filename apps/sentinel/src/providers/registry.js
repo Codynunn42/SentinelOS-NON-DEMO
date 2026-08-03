@@ -151,6 +151,23 @@ registerProvider({
   lifecycleStatus: PROVIDER_LIFECYCLE.ACTIVE
 });
 
+// C5.3 — Extended AI providers for local and agency-cleared models
+registerProvider({
+  providerId: 'local',
+  displayName: 'Local Embassy',
+  type: PROVIDER_TYPE.AI,
+  healthEndpoint: '/health',
+  lifecycleStatus: PROVIDER_LIFECYCLE.ACTIVE
+});
+
+registerProvider({
+  providerId: 'agency-approved',
+  displayName: 'Agency-Approved',
+  type: PROVIDER_TYPE.AI,
+  healthEndpoint: '/health',
+  lifecycleStatus: PROVIDER_LIFECYCLE.ACTIVE
+});
+
 module.exports = {
   PROVIDER_LIFECYCLE,
   PROVIDER_TYPE,
