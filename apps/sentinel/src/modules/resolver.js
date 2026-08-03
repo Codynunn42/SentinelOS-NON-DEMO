@@ -103,6 +103,40 @@ const MODULE_DEFINITIONS = [
     ]
   },
   {
+    moduleId: 'workflow-orchestration',
+    displayName: 'Workflow Orchestration',
+    components: [
+      'apps/sentinel/src/orchestration/taskTemplates.js',
+      'apps/sentinel/src/controlPlane/index.js'
+    ],
+    capabilities: [
+      'workflow-init',
+      'workflow-execute',
+      'workflow-retry',
+      'task-scheduling'
+    ]
+  },
+  {
+    moduleId: 'projects',
+    displayName: 'Projects',
+    components: [],
+    capabilities: []
+  },
+  {
+    moduleId: 'business-operations',
+    displayName: 'Business Operations',
+    components: [
+      'scripts/check-vendor-onboarding-ledger.js',
+      'scripts/check-vendor-onboarding-rules.js'
+    ],
+    capabilities: [
+      'vendor-onboarding',
+      'contract-reclamation',
+      'billing-controls',
+      'receipt-lookup'
+    ]
+  },
+  {
     moduleId: 'ai-operations',
     displayName: 'AI Operations',
     components: [
@@ -197,4 +231,31 @@ function listModules() {
   }));
 }
 
-module.exports = { listModules };
+/**
+ * Resolves a named capability to the module that owns it.
+ * @param {string} capability
+ * @returns {{ moduleId: string, displayName: string } | null}
+ */
+function resolveCapabilityToModule(capability) {
+  for (const def of MODULE_DEFINITIONS) {
+    if (def.capabilities.includes(capability)) {
+      return { moduleId: def.moduleId, displayName: def.displayName };
+    }
+  }
+  return null;
+}
+
+/**
+ * Computes the aggregate health status for a module given an array of
+ * provider health objects.  A single degraded provider degrades the module.
+ * @param {{ status: 'healthy' | 'degraded' | 'unknown' }[]} providers
+ * @returns {'healthy' | 'degraded' | 'unknown'}
+ */
+function healthAggregation(providers) {
+  if (!providers || providers.length === 0) return 'unknown';
+  if (providers.some((p) => p.status === 'degraded')) return 'degraded';
+  if (providers.every((p) => p.status === 'healthy')) return 'healthy';
+  return 'unknown';
+}
+
+module.exports = { listModules, resolveCapabilityToModule, healthAggregation };
