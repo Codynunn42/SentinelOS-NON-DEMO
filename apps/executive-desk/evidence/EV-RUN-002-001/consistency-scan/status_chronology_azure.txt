@@ -1,0 +1,7 @@
+64:- [x] `GET /health` returned HTTP 200.
+65:- [x] `GET /ready` returned HTTP 200 with `ready: true` and no failed checks.
+66:- [x] `GET /system/status` returned HTTP 200 and `platformConnected: true`.
+81:- `GET /health`: HTTP 200
+105:- [ ] `/health` returned Cloudflare HTTP 530 / error 1033.
+106:- [ ] `/ready` returned Cloudflare HTTP 530 / error 1033.
+107:- [ ] GPT Action OpenAPI returned Cloudflare HTTP 530 / error 1033.

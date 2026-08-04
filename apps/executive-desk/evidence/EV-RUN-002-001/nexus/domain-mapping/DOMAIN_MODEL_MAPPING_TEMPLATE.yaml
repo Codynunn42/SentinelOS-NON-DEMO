@@ -1,0 +1,25 @@
+metadata:
+  model: "NEXUS-to-SentinelOS Canonical Mapping"
+  owner: "Cody Nunn (Interim, role: Executive Desk)"
+entities:
+  - sourceEntity: "NEXUS.User"
+    canonicalEntity: "SentinelOS.Principal"
+    keyMapping:
+      sourceKey: ""
+      canonicalKey: ""
+    fieldMappings:
+      - source: ""
+        target: ""
+        transform: ""
+    lifecycleMapping:
+      sourceStates: []
+      canonicalStates: []
+  - sourceEntity: "NEXUS.Evidence"
+    canonicalEntity: "SentinelOS.EvidenceRecord"
+    keyMapping:
+      sourceKey: ""
+      canonicalKey: ""
+    fieldMappings: []
+    lifecycleMapping:
+      sourceStates: []
+      canonicalStates: []
