@@ -1,4 +1,4 @@
-cd /Users/codynunn/SentinelOS/SentinelOS-NON-DEMO/SentinelOS-NON-DEMO
+cd /path/to/SentinelOS-NON-DEMO/SentinelOS-NON-DEMO
 mkdir -p apps/executive-desk/evidence/EV-RUN-002-001/incident
 
 REPORT="apps/executive-desk/evidence/EV-RUN-002-001/incident/SENTINELAI_TOOLING_INCIDENT_$(date +%Y-%m-%d_%H%M%S).log"
