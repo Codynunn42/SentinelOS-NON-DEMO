@@ -1,0 +1,67 @@
+{
+  "artifactType": "SPE-POLICY-RECEIPT",
+  "phase": "4.1",
+  "policyId": "SPE-4a2f8c1e9b3d7a05",
+  "command": "execute",
+  "version": "1.0",
+  "status": "active",
+  "priority": "sovereign",
+  "driftEnforcement": "none",
+  "complianceGates": [
+    {
+      "gateId": "GATE-SPE-001",
+      "label": "Sovereign Authority",
+      "status": "passed",
+      "reason": null,
+      "resolvedAt": "2026-08-02T20:56:47.151Z"
+    },
+    {
+      "gateId": "GATE-SPE-002",
+      "label": "Executive Desk Clearance",
+      "status": "passed",
+      "reason": null,
+      "resolvedAt": "2026-08-02T20:56:47.151Z"
+    },
+    {
+      "gateId": "GATE-SPE-003",
+      "label": "Provider Authorization",
+      "status": "passed",
+      "reason": null,
+      "resolvedAt": "2026-08-02T20:56:47.151Z"
+    },
+    {
+      "gateId": "GATE-SPE-004",
+      "label": "Drift Classification Clear",
+      "status": "passed",
+      "reason": null,
+      "resolvedAt": "2026-08-02T20:56:47.151Z"
+    },
+    {
+      "gateId": "GATE-SPE-005",
+      "label": "Evidence Chain Linked",
+      "status": "passed",
+      "reason": null,
+      "resolvedAt": "2026-08-02T20:56:47.151Z"
+    }
+  ],
+  "sovereignOverride": null,
+  "evidenceRefs": [
+    "SEL-7b3c9d4e8f2a1065",
+    "SER-2d5e8c7f3b9a4016",
+    "SNCS-6f1a3b9c5d7e2087"
+  ],
+  "inheritedFrom": null,
+  "providers": [
+    "azure-openai",
+    "openai",
+    "anthropic",
+    "gemini",
+    "executive-desk"
+  ],
+  "assertionSuite": "npm run check:sovereign-policy",
+  "assertionsPassed": 38,
+  "assertionsFailed": 0,
+  "createdAt": "2026-08-02T20:56:47.151Z",
+  "updatedAt": null,
+  "signature": "hmac-sha256:d4e7f1a3b9c2065e8f3a7b1d4c9e2f6a3b7d1e4c9f2a6b3d7e1f4a9c2b6d3e7"
+}

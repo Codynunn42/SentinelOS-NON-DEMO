@@ -1,0 +1,85 @@
+{
+  "facePlaneId": "github",
+  "tenantId": "github",
+  "name": "GitHub Integration",
+  "purpose": "Governed GitHub read and actions face plane for SentinelOS. Provides repository and pull request read surfaces, plus executive-gated Actions execution through the Command Envelope API. All GitHub actions route through the SentinelOS governance layer. Repository execution requires Executive Desk approval.",
+  "owner": "Nunn Cloud",
+  "gaasPolicyPack": "gaas.github.integration.v1",
+  "requestedCapabilities": [
+    "FACEPLANE_READ",
+    "FACEPLANE_EXECUTE",
+    "DOCKING_MANIFEST_REGISTER"
+  ],
+  "approvalModel": "executive_approval_before_action_execute",
+  "telemetryMode": "LIMITED",
+  "dataClasses": [
+    "repo_read",
+    "pr_read",
+    "action_execution_state",
+    "approval_state",
+    "audit_summary"
+  ],
+  "evidence": [
+    "policy_map",
+    "executive_approval_boundary",
+    "audit_receipt",
+    "docking_decision",
+    "command_envelope_trace"
+  ],
+  "complianceMandates": [
+    "internal_governance",
+    "operator_rbac",
+    "executive_oversight",
+    "audit_retention"
+  ],
+  "routes": [
+    "/api/v1/planning",
+    "/api/v1/execution",
+    "/api/v1/evidence",
+    "/approvals",
+    "/v1/audit"
+  ],
+  "controls": [
+    "tenant_scope_required",
+    "operator_role_for_read",
+    "executive_approval_before_action_execute",
+    "telemetry_export_blocked_by_default",
+    "surface_view_audited",
+    "no_direct_execution_bypass"
+  ],
+  "executionPath": "GitHub -> Intent -> Control Plane -> Sentinel Core -> Governance -> Executive Approval (actions) -> Execution",
+  "oversightModel": {
+    "oversightSurface": "Executive Desk",
+    "approvalRequired": ["github.action.execute"],
+    "autoApproved": ["github.repo.read", "github.pr.read"]
+  },
+  "dockManifest": {
+    "system": {
+      "name": "GitHub",
+      "version": "1.0"
+    },
+    "provides": [
+      "Repository Read",
+      "Pull Request Read",
+      "GitHub Actions Execution"
+    ],
+    "apis": [
+      "planning",
+      "execution",
+      "evidence"
+    ],
+    "security": {
+      "authentication": "JWT"
+    },
+    "governance": {
+      "evidence": "required"
+    },
+    "runtime": {
+      "healthEndpoint": "/health"
+    },
+    "lifecycle": {
+      "status": "active",
+      "registeredAt": "2026-08-02T00:00:00.000Z"
+    }
+  }
+}

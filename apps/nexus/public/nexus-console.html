@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NEXUS — Command Console</title>
+  <style>
+    :root {
+      --bg: #090d12;
+      --surface: #0f1620;
+      --surface-2: #141e2a;
+      --line: #1e2d3d;
+      --text: #e8f1fa;
+      --muted: #7a94ad;
+      --accent: #4f9cf9;
+      --green: #56d49a;
+      --yellow: #f5c842;
+      --red: #f07070;
+      --tag-bg: #0d1e30;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+      font-size: 14px;
+    }
+
+    /* ---- Header ---- */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 24px;
+      border-bottom: 1px solid var(--line);
+      background: var(--surface);
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .nexus-logo {
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      color: var(--accent);
+    }
+
+    .os-badge {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      background: var(--tag-bg);
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      padding: 3px 8px;
+      color: var(--muted);
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .role-badge {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 4px;
+      background: var(--tag-bg);
+      border: 1px solid var(--line);
+      color: var(--accent);
+    }
+
+    .executive-link {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--yellow);
+      text-decoration: none;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 6px 12px;
+    }
+
+    .executive-link:hover { border-color: var(--yellow); }
+
+    /* ---- Layout ---- */
+    .layout {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      height: calc(100vh - 57px);
+    }
+
+    /* ---- Sidebar ---- */
+    .sidebar {
+      border-right: 1px solid var(--line);
+      background: var(--surface);
+      padding: 20px 16px;
+      overflow-y: auto;
+    }
+
+    .sidebar-section {
+      margin-bottom: 24px;
+    }
+
+    .sidebar-label {
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .cmd-button {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 6px;
+      padding: 9px 12px;
+      color: var(--text);
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 3px;
+      transition: background 0.1s, border-color 0.1s;
+    }
+
+    .cmd-button:hover {
+      background: var(--surface-2);
+      border-color: var(--line);
+    }
+
+    .cmd-button.active {
+      background: var(--surface-2);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .cmd-button .cmd-label {
+      display: block;
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 400;
+      margin-top: 2px;
+    }
+
+    .cmd-button.locked {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    /* ---- Main ---- */
+    .main {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ---- Command Palette ---- */
+    .palette {
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--line);
+      background: var(--surface);
+    }
+
+    .palette-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .palette-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .palette-input {
+      flex: 1;
+      background: var(--surface-2);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      color: var(--text);
+      font-size: 14px;
+      padding: 9px 14px;
+      outline: none;
+    }
+
+    .palette-input:focus { border-color: var(--accent); }
+
+    .palette-btn {
+      background: var(--accent);
+      color: #05111e;
+      border: none;
+      border-radius: 6px;
+      padding: 9px 18px;
+      font-size: 14px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .palette-btn:hover { opacity: 0.88; }
+
+    /* ---- Output ---- */
+    .output-area {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px 24px;
+    }
+
+    .output-empty {
+      color: var(--muted);
+      text-align: center;
+      margin-top: 60px;
+      font-size: 15px;
+    }
+
+    .result-card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 14px;
+    }
+
+    .result-card.ok { border-left: 3px solid var(--green); }
+    .result-card.blocked { border-left: 3px solid var(--red); }
+    .result-card.pending { border-left: 3px solid var(--yellow); }
+
+    .result-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .result-command {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--accent);
+      font-family: 'SF Mono', 'Fira Code', monospace;
+    }
+
+    .result-status {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 4px;
+    }
+
+    .result-status.ok { background: #0e2a1c; color: var(--green); }
+    .result-status.blocked { background: #2a0e0e; color: var(--red); }
+    .result-status.pending { background: #2a200a; color: var(--yellow); }
+
+    .result-body {
+      font-size: 12px;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      color: var(--muted);
+      white-space: pre-wrap;
+      word-break: break-word;
+      line-height: 1.6;
+    }
+
+    .result-meta {
+      margin-top: 10px;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    /* ---- Loader ---- */
+    .spinner {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid var(--line);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      vertical-align: middle;
+      margin-right: 6px;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ---- Governance bar ---- */
+    .gov-bar {
+      padding: 10px 24px;
+      border-top: 1px solid var(--line);
+      background: var(--surface);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .gov-bar-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--green);
+      display: inline-block;
+      margin-right: 5px;
+    }
+
+    @media (max-width: 700px) {
+      .layout { grid-template-columns: 1fr; }
+      .sidebar { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <span class="nexus-logo">NEXUS</span>
+    <span class="os-badge">SentinelOS</span>
+  </div>
+  <div class="header-right">
+    <span class="role-badge" id="roleBadge">operator</span>
+    <a class="executive-link" href="/nexus/executive">Executive Desk ↗</a>
+  </div>
+</header>
+
+<div class="layout">
+  <!-- Sidebar: preset commands -->
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Read</div>
+      <button class="cmd-button" onclick="loadPreset('nexus.status.read', {})">
+        nexus.status.read
+        <span class="cmd-label">Surface status check</span>
+      </button>
+      <button class="cmd-button" onclick="loadPreset('nexus.console.init', {})">
+        nexus.console.init
+        <span class="cmd-label">Initialize console session</span>
+      </button>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Write</div>
+      <button class="cmd-button" onclick="loadPreset('nexus.intent.emit', { intent: 'deal.trigger', entity: 'deal', action: 'trigger', commandContext: {} })">
+        nexus.intent.emit
+        <span class="cmd-label">Emit governed intent</span>
+      </button>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Execute — Executive Required</div>
+      <button class="cmd-button locked" onclick="loadPreset('nexus.command.execute', { command: '' })" title="Executive role required">
+        nexus.command.execute
+        <span class="cmd-label">Requires Executive Desk approval</span>
+      </button>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Oversight</div>
+      <button class="cmd-button" onclick="loadPreset('nexus.executive.review', {})">
+        nexus.executive.review
+        <span class="cmd-label">View pending oversight actions</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main area -->
+  <div class="main">
+    <div class="palette">
+      <div class="palette-label">Command Palette — tenant: nexus</div>
+      <div class="palette-row">
+        <input
+          id="commandInput"
+          class="palette-input"
+          type="text"
+          placeholder="nexus.status.read"
+          autocomplete="off"
+          spellcheck="false"
+        >
+        <button class="palette-btn" onclick="executeCommand()">Execute</button>
+      </div>
+      <div style="margin-top:8px; display:flex; gap:12px; align-items:center;">
+        <label style="font-size:12px; color:var(--muted);">Payload JSON:</label>
+        <input
+          id="payloadInput"
+          class="palette-input"
+          type="text"
+          placeholder="{}"
+          autocomplete="off"
+          spellcheck="false"
+          style="font-family:monospace; font-size:12px;"
+        >
+        <label style="font-size:12px; color:var(--muted); white-space:nowrap;">API Key:</label>
+        <input
+          id="apiKeyInput"
+          class="palette-input"
+          type="password"
+          placeholder="x-api-key"
+          autocomplete="off"
+          style="max-width:180px;"
+        >
+      </div>
+    </div>
+
+    <div class="output-area" id="outputArea">
+      <div class="output-empty" id="emptyState">
+        Ready. Select a command or type in the palette above.<br>
+        <span style="font-size:12px; margin-top:8px; display:block;">All commands route through SentinelOS governance.</span>
+      </div>
+    </div>
+
+    <div class="gov-bar">
+      <span><span class="gov-bar-dot"></span>Governance: Active</span>
+      <span>|</span>
+      <span>Tenant: <strong style="color:var(--text)">nexus</strong></span>
+      <span>|</span>
+      <span>Audit: <strong style="color:var(--text)">Enabled</strong></span>
+      <span>|</span>
+      <span>Execution Gate: <strong style="color:var(--yellow)">Executive Approval Required</strong></span>
+    </div>
+  </div>
+</div>
+
+<script>
+  const API_BASE = '';
+
+  function loadPreset(command, payload) {
+    document.getElementById('commandInput').value = command;
+    document.getElementById('payloadInput').value = JSON.stringify(payload);
+    document.getElementById('commandInput').focus();
+  }
+
+  async function executeCommand() {
+    const command = document.getElementById('commandInput').value.trim();
+    const apiKey = document.getElementById('apiKeyInput').value.trim();
+    let payload = {};
+
+    try {
+      const raw = document.getElementById('payloadInput').value.trim();
+      if (raw) payload = JSON.parse(raw);
+    } catch {
+      appendResult(command, 'blocked', { error: 'Invalid payload JSON' }, Date.now());
+      return;
+    }
+
+    if (!command) return;
+
+    const emptyState = document.getElementById('emptyState');
+    if (emptyState) emptyState.remove();
+
+    const startTime = Date.now();
+    const loaderId = appendLoader(command);
+
+    const envelope = {
+      tenant: 'nexus',
+      command,
+      payload,
+      metadata: {
+        actor: 'nexus-console',
+        role: document.getElementById('roleBadge').textContent.trim(),
+        scopes: getScopesForCommand(command)
+      }
+    };
+
+    try {
+      const headers = { 'Content-Type': 'application/json' };
+      if (apiKey) headers['x-api-key'] = apiKey;
+
+      const res = await fetch(`${API_BASE}/v1/command`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(envelope)
+      });
+
+      const data = await res.json();
+      const elapsed = Date.now() - startTime;
+
+      removeLoader(loaderId);
+
+      const statusClass = res.ok ? 'ok' : (data.error === 'EXECUTIVE_APPROVAL_REQUIRED' ? 'pending' : 'blocked');
+      appendResult(command, statusClass, data, elapsed);
+    } catch (err) {
+      removeLoader(loaderId);
+      appendResult(command, 'blocked', { error: err.message }, Date.now() - startTime);
+    }
+  }
+
+  function getScopesForCommand(command) {
+    const scopeMap = {
+      'nexus.status.read': ['nexus:read'],
+      'nexus.console.init': ['nexus:read'],
+      'nexus.intent.emit': ['nexus:write'],
+      'nexus.command.execute': ['nexus:execute'],
+      'nexus.executive.review': ['nexus:executive']
+    };
+    return scopeMap[command] || ['nexus:read'];
+  }
+
+  let loaderCounter = 0;
+  function appendLoader(command) {
+    const id = 'loader-' + (++loaderCounter);
+    const el = document.createElement('div');
+    el.id = id;
+    el.className = 'result-card';
+    el.innerHTML = `
+      <div class="result-header">
+        <span class="result-command">${escHtml(command)}</span>
+        <span><span class="spinner"></span> sending…</span>
+      </div>`;
+    document.getElementById('outputArea').prepend(el);
+    return id;
+  }
+
+  function removeLoader(id) {
+    const el = document.getElementById(id);
+    if (el) el.remove();
+  }
+
+  function appendResult(command, statusClass, data, elapsed) {
+    const el = document.createElement('div');
+    el.className = `result-card ${statusClass}`;
+    const statusLabel = statusClass === 'ok' ? 'EXECUTED' : statusClass === 'pending' ? 'PENDING APPROVAL' : 'BLOCKED';
+    el.innerHTML = `
+      <div class="result-header">
+        <span class="result-command">${escHtml(command)}</span>
+        <span class="result-status ${statusClass}">${statusLabel}</span>
+      </div>
+      <div class="result-body">${escHtml(JSON.stringify(data, null, 2))}</div>
+      <div class="result-meta">${new Date().toISOString()} &nbsp;·&nbsp; ${elapsed}ms</div>`;
+    document.getElementById('outputArea').prepend(el);
+  }
+
+  function escHtml(str) {
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  // Keyboard shortcut: Ctrl+K focuses the palette
+  document.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+      e.preventDefault();
+      document.getElementById('commandInput').focus();
+      document.getElementById('commandInput').select();
+    }
+    if (e.key === 'Enter' && document.activeElement === document.getElementById('commandInput')) {
+      executeCommand();
+    }
+  });
+</script>
+
+</body>
+</html>

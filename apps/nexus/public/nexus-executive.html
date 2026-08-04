@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Executive Desk — SentinelOS Oversight</title>
+  <style>
+    :root {
+      --bg: #080b0f;
+      --surface: #0d1219;
+      --surface-2: #121a24;
+      --line: #1a2636;
+      --text: #e8f1fa;
+      --muted: #6e8599;
+      --accent: #4f9cf9;
+      --green: #56d49a;
+      --yellow: #f5c842;
+      --red: #f07070;
+      --gold: #e8b84a;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+      font-size: 14px;
+    }
+
+    /* ---- Header ---- */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 28px;
+      border-bottom: 1px solid var(--line);
+      background: var(--surface);
+    }
+
+    .header-left { display: flex; align-items: center; gap: 12px; }
+
+    .desk-logo {
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      color: var(--gold);
+    }
+
+    .desk-sub {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+    }
+
+    .oversight-badge {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      background: #1a1200;
+      border: 1px solid var(--gold);
+      border-radius: 4px;
+      padding: 3px 9px;
+      color: var(--gold);
+    }
+
+    .back-link {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--accent);
+      text-decoration: none;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 6px 12px;
+    }
+
+    /* ---- Page layout ---- */
+    .page {
+      max-width: 1020px;
+      margin: 0 auto;
+      padding: 28px 24px;
+    }
+
+    .page-title {
+      font-size: 22px;
+      font-weight: 800;
+      margin-bottom: 6px;
+    }
+
+    .page-subtitle {
+      font-size: 14px;
+      color: var(--muted);
+      margin-bottom: 28px;
+    }
+
+    /* ---- Invariant banner ---- */
+    .invariant-banner {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: #0d1a0d;
+      border: 1px solid #1d3a1d;
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin-bottom: 28px;
+      font-size: 13px;
+      color: var(--green);
+    }
+
+    .invariant-icon { font-size: 18px; }
+
+    /* ---- Section ---- */
+    .section { margin-bottom: 32px; }
+
+    .section-title {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 14px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    /* ---- Action card ---- */
+    .action-card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 18px;
+      margin-bottom: 12px;
+    }
+
+    .action-card.pending { border-left: 3px solid var(--yellow); }
+    .action-card.approved { border-left: 3px solid var(--green); }
+    .action-card.rejected { border-left: 3px solid var(--red); }
+
+    .action-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .action-command {
+      font-size: 14px;
+      font-weight: 700;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      color: var(--accent);
+    }
+
+    .action-status {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 3px 9px;
+      border-radius: 4px;
+      flex-shrink: 0;
+    }
+
+    .action-status.pending { background: #2a1f00; color: var(--yellow); }
+    .action-status.approved { background: #0a2218; color: var(--green); }
+    .action-status.rejected { background: #2a0a0a; color: var(--red); }
+
+    .action-meta {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+    }
+
+    .action-meta span strong { color: var(--text); font-weight: 600; }
+
+    .action-controls {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn-approve {
+      background: var(--green);
+      color: #051a10;
+      border: none;
+      border-radius: 6px;
+      padding: 9px 20px;
+      font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .btn-approve:hover { opacity: 0.85; }
+
+    .btn-reject {
+      background: transparent;
+      color: var(--red);
+      border: 1px solid var(--red);
+      border-radius: 6px;
+      padding: 9px 20px;
+      font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .btn-reject:hover { background: #2a0a0a; }
+
+    /* ---- Auth bar ---- */
+    .auth-bar {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px 18px;
+      margin-bottom: 28px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .auth-label { font-size: 12px; color: var(--muted); white-space: nowrap; }
+
+    .auth-input {
+      flex: 1;
+      min-width: 200px;
+      background: var(--surface-2);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      color: var(--text);
+      font-size: 13px;
+      padding: 8px 12px;
+      outline: none;
+    }
+
+    .auth-input:focus { border-color: var(--gold); }
+
+    .btn-load {
+      background: var(--gold);
+      color: #0a0800;
+      border: none;
+      border-radius: 6px;
+      padding: 9px 18px;
+      font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    /* ---- Empty state ---- */
+    .empty-state {
+      text-align: center;
+      padding: 48px 0;
+      color: var(--muted);
+      font-size: 15px;
+      border: 1px dashed var(--line);
+      border-radius: 8px;
+    }
+
+    /* ---- Activity log ---- */
+    .log-entry {
+      font-size: 12px;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      color: var(--muted);
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--line);
+      line-height: 1.6;
+    }
+
+    .log-entry:last-child { border-bottom: none; }
+    .log-entry .ok { color: var(--green); }
+    .log-entry .blocked { color: var(--red); }
+    .log-entry .pending { color: var(--yellow); }
+
+    .log-container {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      max-height: 260px;
+      overflow-y: auto;
+    }
+
+    /* ---- Governance footer ---- */
+    .gov-footer {
+      padding: 12px 28px;
+      border-top: 1px solid var(--line);
+      background: var(--surface);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 11px;
+      color: var(--muted);
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+    }
+
+    .gov-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--gold); display: inline-block; margin-right: 5px; }
+
+    /* ---- Module card (C5.4) ---- */
+    .module-card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px 16px;
+      margin-bottom: 10px;
+    }
+
+    .module-card.healthy { border-left: 3px solid var(--green); }
+    .module-card.degraded { border-left: 3px solid var(--red); }
+    .module-card.unknown  { border-left: 3px solid var(--muted); }
+
+    .module-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .module-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .module-badge {
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 4px;
+    }
+
+    .module-badge.healthy  { background: #0a2218; color: var(--green); }
+    .module-badge.degraded { background: #2a0a0a; color: var(--red); }
+    .module-badge.unknown  { background: #1a1a1a; color: var(--muted); }
+
+    .module-desc {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 8px;
+      line-height: 1.5;
+    }
+
+    .module-meta {
+      font-size: 11px;
+      color: var(--muted);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .module-meta span strong { color: var(--text); font-weight: 600; }
+
+    /* ---- Provider health panel ---- */
+    .provider-card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px 16px;
+      margin-bottom: 10px;
+    }
+
+    .provider-card.clean { border-left: 3px solid var(--green); }
+    .provider-card.drifted { border-left: 3px solid var(--yellow); }
+    .provider-card.degraded { border-left: 3px solid var(--red); }
+
+    .provider-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .provider-name {
+      font-size: 13px;
+      font-weight: 700;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      color: var(--accent);
+    }
+
+    .provider-badge {
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 4px;
+    }
+
+    .provider-badge.clean { background: #0a2218; color: var(--green); }
+    .provider-badge.drifted { background: #2a1f00; color: var(--yellow); }
+    .provider-badge.degraded { background: #2a0a0a; color: var(--red); }
+
+    .provider-meta {
+      font-size: 11px;
+      color: var(--muted);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .provider-meta span strong { color: var(--text); font-weight: 600; }
+
+    /* ---- Federation panel (Phase 3 — NFR) ---- */
+    .fed-timeline { display: flex; flex-direction: column; gap: 8px; margin-bottom: 18px; }
+    .fed-step { display: flex; align-items: flex-start; gap: 12px; padding: 10px 14px; background: var(--surface-2); border-radius: 6px; border-left: 3px solid var(--line); }
+    .fed-step.primary { border-left-color: var(--accent); }
+    .fed-step.fallback { border-left-color: var(--yellow); }
+    .fed-step.failed { border-left-color: var(--red); }
+    .fed-step.complete { border-left-color: var(--green); }
+    .fed-step-idx { font-size: 11px; font-weight: 700; color: var(--muted); min-width: 22px; }
+    .fed-step-body { flex: 1; }
+    .fed-step-provider { font-size: 13px; font-weight: 700; color: var(--text); }
+    .fed-step-meta { font-size: 11px; color: var(--muted); margin-top: 3px; display: flex; gap: 14px; flex-wrap: wrap; }
+    .fed-step-meta .drift-warn { color: var(--yellow); font-weight: 700; }
+    .fed-step-meta .drift-crit { color: var(--red); font-weight: 700; }
+    .fed-step-meta .health-deg { color: var(--red); font-weight: 700; }
+    .fed-drift-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 8px; margin-bottom: 18px; }
+    .fed-drift-card { padding: 10px 12px; background: var(--surface-2); border-radius: 6px; border-left: 3px solid var(--line); }
+    .fed-drift-card.NONE { border-left-color: var(--green); }
+    .fed-drift-card.INFO { border-left-color: var(--accent); }
+    .fed-drift-card.WARNING { border-left-color: var(--yellow); }
+    .fed-drift-card.CRITICAL { border-left-color: var(--red); }
+    .fed-drift-name { font-size: 12px; font-weight: 700; color: var(--text); }
+    .fed-drift-sev { font-size: 11px; margin-top: 3px; }
+    .fed-evidence-list { display: flex; flex-direction: column; gap: 6px; }
+    .fed-ev-row { display: flex; gap: 10px; align-items: center; padding: 8px 12px; background: var(--surface-2); border-radius: 5px; font-size: 11px; }
+    .fed-ev-provider { font-weight: 700; color: var(--accent); min-width: 80px; }
+    .fed-ev-status { font-weight: 700; min-width: 70px; }
+    .fed-ev-status.collected { color: var(--green); }
+    .fed-ev-status.pending { color: var(--muted); }
+    .fed-ev-status.failed { color: var(--red); }
+    .fed-ev-ref { color: var(--muted); word-break: break-all; }
+    .fed-failover-list { display: flex; flex-direction: column; gap: 6px; }
+    .fed-fo-row { padding: 8px 12px; background: var(--surface-2); border-radius: 5px; border-left: 3px solid var(--yellow); font-size: 11px; }
+    .fed-fo-row.inactive { border-left-color: var(--line); }
+    .fed-fo-provider { font-weight: 700; color: var(--text); margin-bottom: 3px; }
+    .fed-fo-meta { color: var(--muted); display: flex; gap: 12px; flex-wrap: wrap; }
+
+    .btn-load-secondary {
+      background: var(--surface-2);
+      color: var(--text);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 9px 18px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .btn-load-secondary:hover { border-color: var(--accent); color: var(--accent); }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <span class="desk-logo">Executive Desk</span>
+    <span class="oversight-badge">Oversight</span>
+  </div>
+  <div style="display:flex; align-items:center; gap:12px;">
+    <span class="desk-sub">SentinelOS — NEXUS Governance</span>
+    <a class="back-link" href="/nexus">← NEXUS Console</a>
+  </div>
+</header>
+
+<div class="page" style="padding-bottom: 70px;">
+  <div class="page-title">Executive Desk</div>
+  <div class="page-subtitle">Oversight-only surface. Review, approve, or reject pending NEXUS execution requests. This surface cannot initiate execution.</div>
+
+  <!-- Invariant reminder -->
+  <div class="invariant-banner">
+    <span class="invariant-icon">🔒</span>
+    <span>Governance Invariant: The Executive Desk approves or rejects. It does not initiate. All decisions are audited under <strong>executive.oversight.*</strong></span>
+  </div>
+
+  <!-- Auth bar -->
+  <div class="auth-bar">
+    <span class="auth-label">API Key:</span>
+    <input id="apiKeyInput" class="auth-input" type="password" placeholder="x-api-key (executive-scoped)" autocomplete="off">
+    <button class="btn-load" onclick="loadApprovals()">Load Pending Approvals</button>
+    <button class="btn-load" onclick="loadCapabilities()" style="margin-left:8px; background:var(--surface-2);">Load Capabilities</button>
+    <button class="btn-load-secondary" onclick="loadModules()" style="margin-left:8px;background:var(--accent);color:#040c18;font-weight:800;">Institutional Modules</button>
+    <button class="btn-load-secondary" onclick="loadProviderDashboard()" style="margin-left:8px;">Provider Health</button>
+    <button class="btn-load-secondary" onclick="loadFederationPanel()" style="margin-left:8px;background:var(--surface-3,#1e2a1a);color:var(--accent);">Federation</button>
+  </div>
+
+  <!-- C5.4 — Institutional Modules Panel (primary view) -->
+  <div class="section">
+    <div class="section-title">Institutional Modules — Platform Capabilities</div>
+    <div id="institutionalModulesPanel">
+      <div class="empty-state" id="modulesEmpty">
+        Click <strong>Institutional Modules</strong> to view all platform capabilities organized by institutional purpose.
+      </div>
+    </div>
+  </div>
+
+  <!-- Pending approvals -->
+  <div class="section">
+    <div class="section-title">Pending Approval Requests</div>
+    <div id="pendingList">
+      <div class="empty-state" id="pendingEmpty">
+        No pending approvals loaded. Enter your API key and click Load.
+      </div>
+    </div>
+  </div>
+
+  <!-- Capability Registry Panel -->
+  <div class="section">
+    <div class="section-title">Registered Capabilities</div>
+    <div id="capabilityRegistry">
+      <div class="empty-state" id="capabilityEmpty">
+        Enter your API key and click Load Capabilities to inspect the Capability Registry.
+      </div>
+    </div>
+  </div>
+
+  <!-- Provider Health Panel — Infrastructure section (C4.6, now under Infrastructure) -->
+  <div class="section">
+    <div class="section-title">Infrastructure — Provider Health &amp; Drift</div>
+    <div id="providerHealthPanel">
+      <div class="empty-state" id="providerHealthEmpty">
+        Click <strong>Provider Health</strong> to load the cross-provider drift and governance posture report.
+      </div>
+    </div>
+  </div>
+
+  <!-- Federation Panel (Phase 3 — NFR) -->
+  <div class="section" id="federationSection">
+    <div class="section-title">Federation — Multi-Provider Execution View</div>
+    <div id="federationPanel">
+      <div class="empty-state" id="federationEmpty">
+        Click <strong>Federation</strong> to load the federation execution timeline, drift classification, failover status, and evidence chain.
+      </div>
+    </div>
+  </div>
+
+  <!-- Activity log -->
+  <div class="section">
+    <div class="section-title">Executive Activity Log (this session)</div>
+    <div class="log-container" id="activityLog">
+      <div class="log-entry" style="color:var(--muted)">Session started — {timestamp}</div>
+    </div>
+  </div>
+</div>
+
+<div class="gov-footer">
+  <span><span class="gov-dot"></span>Oversight: Active</span>
+  <span>|</span>
+  <span>Surface: <strong style="color:var(--text)">Executive Desk</strong></span>
+  <span>|</span>
+  <span>Telemetry: <strong style="color:var(--text)">executive.oversight.*</strong></span>
+  <span>|</span>
+  <span>Audit: <strong style="color:var(--text)">Enabled</strong></span>
+</div>
+
+<script>
+  // Replace {timestamp} in initial log entry
+  document.querySelector('#activityLog .log-entry').textContent =
+    `Session started — ${new Date().toISOString()}`;
+
+  async function loadApprovals() {
+    const apiKey = document.getElementById('apiKeyInput').value.trim();
+    const headers = { 'Content-Type': 'application/json' };
+    if (apiKey) headers['x-api-key'] = apiKey;
+
+    logActivity('Loading pending approvals…', 'pending');
+
+    try {
+      const res = await fetch('/approvals', { headers });
+      const data = await res.json();
+
+      if (!res.ok) {
+        logActivity(`Load failed: ${data.error || res.status}`, 'blocked');
+        return;
+      }
+
+      const approvals = Array.isArray(data) ? data : (data.approvals || data.data || []);
+      // Filter to NEXUS tenant only
+      const nexusApprovals = approvals.filter(a =>
+        !a.context || !a.context.tenant || a.context.tenant === 'nexus'
+      );
+
+      renderApprovals(nexusApprovals);
+      logActivity(`Loaded ${nexusApprovals.length} pending approval(s)`, 'ok');
+    } catch (err) {
+      logActivity(`Error: ${err.message}`, 'blocked');
+    }
+  }
+
+  function renderApprovals(list) {
+    const container = document.getElementById('pendingList');
+    if (!list || list.length === 0) {
+      container.innerHTML = '<div class="empty-state">No pending NEXUS approvals.</div>';
+      return;
+    }
+
+    container.innerHTML = '';
+    list.forEach(item => {
+      const status = item.status || 'pending';
+      const el = document.createElement('div');
+      el.className = `action-card ${status}`;
+      const command = (item.decision && item.decision.command) ||
+        (item.context && item.context.command) || 'nexus.command.execute';
+      const actor = (item.context && item.context.actor) || item.actor || '—';
+      const tenant = (item.context && item.context.tenant) || item.tenant || 'nexus';
+      const created = item.createdAt || item.created_at || '';
+
+      el.innerHTML = `
+        <div class="action-header">
+          <span class="action-command">${escHtml(command)}</span>
+          <span class="action-status ${status}">${status.toUpperCase()}</span>
+        </div>
+        <div class="action-meta">
+          <span>ID: <strong>${escHtml(item.id || item.approvalId || '—')}</strong></span>
+          <span>Actor: <strong>${escHtml(actor)}</strong></span>
+          <span>Tenant: <strong>${escHtml(tenant)}</strong></span>
+          ${created ? `<span>Submitted: <strong>${escHtml(created)}</strong></span>` : ''}
+        </div>
+        ${status === 'pending' ? `
+        <div class="action-controls">
+          <button class="btn-approve" onclick="act('${escHtml(item.id || '')}', 'approve')">Approve</button>
+          <button class="btn-reject" onclick="act('${escHtml(item.id || '')}', 'reject')">Reject</button>
+        </div>` : ''}`;
+
+      container.appendChild(el);
+    });
+  }
+
+  async function act(approvalId, action) {
+    if (!approvalId) {
+      logActivity(`Cannot ${action}: no approval ID`, 'blocked');
+      return;
+    }
+
+    const apiKey = document.getElementById('apiKeyInput').value.trim();
+    const headers = { 'Content-Type': 'application/json' };
+    if (apiKey) headers['x-api-key'] = apiKey;
+
+    logActivity(`Submitting ${action.toUpperCase()} for ${approvalId}…`, 'pending');
+
+    try {
+      const res = await fetch(`/approvals/${approvalId}/${action}`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          actor: 'executive-desk',
+          role: 'executive',
+          scopes: ['nexus:executive'],
+          tenant: 'nexus'
+        })
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        logActivity(`${action.toUpperCase()} recorded — ${approvalId}`, 'ok');
+        await loadApprovals();
+      } else {
+        logActivity(`${action.toUpperCase()} failed: ${data.error || res.status}`, 'blocked');
+      }
+    } catch (err) {
+      logActivity(`Error: ${err.message}`, 'blocked');
+    }
+  }
+
+  function logActivity(message, type = '') {
+    const log = document.getElementById('activityLog');
+    const el = document.createElement('div');
+    el.className = 'log-entry';
+    el.innerHTML = `<span class="${escHtml(type)}">[${new Date().toISOString()}]</span> ${escHtml(message)}`;
+    log.prepend(el);
+  }
+
+  function escHtml(str) {
+    return String(str || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  // C5.4 — Institutional Modules: primary Executive Desk view
+  async function loadModules() {
+    const apiKey = document.getElementById('apiKeyInput').value.trim();
+    const headers = { 'Content-Type': 'application/json' };
+    if (apiKey) headers['x-api-key'] = apiKey;
+
+    const container = document.getElementById('institutionalModulesPanel');
+    logActivity('Loading Institutional Modules…', 'pending');
+
+    try {
+      const res = await fetch('/api/v1/modules', { headers });
+      const data = await res.json();
+
+      if (!res.ok) {
+        logActivity(`Modules load failed: ${data.error || res.status}`, 'blocked');
+        container.innerHTML = `<div class="empty-state">Failed to load modules: ${escHtml(data.error || res.status)}</div>`;
+        return;
+      }
+
+      const modules = data.modules || [];
+      if (!modules.length) {
+        container.innerHTML = '<div class="empty-state">No institutional modules registered.</div>';
+        logActivity('No modules registered', 'ok');
+        return;
+      }
+
+      const healthCounts = { healthy: 0, degraded: 0, unknown: 0 };
+      modules.forEach((m) => { if (healthCounts[m.health] !== undefined) healthCounts[m.health]++; });
+
+      const overallBadge = healthCounts.degraded === 0
+        ? '<span style="color:var(--green);font-weight:700;font-size:12px;">All modules operational ✓</span>'
+        : `<span style="color:var(--red);font-weight:700;font-size:12px;">${healthCounts.degraded} module(s) degraded</span>`;
+
+      const summary = `<div style="margin-bottom:14px;padding:10px 14px;background:var(--surface-2);border-radius:6px;font-size:12px;display:flex;gap:20px;flex-wrap:wrap;">
+        <span>Modules: <strong style="color:var(--text)">${data.totalModules}</strong></span>
+        <span>Operational: <strong style="color:var(--green)">${healthCounts.healthy}</strong></span>
+        ${healthCounts.degraded > 0 ? `<span>Degraded: <strong style="color:var(--red)">${healthCounts.degraded}</strong></span>` : ''}
+        <span>${overallBadge}</span>
+      </div>`;
+
+      const cards = modules.map((m) => {
+        const health = m.health || 'unknown';
+        const badgeLabel = health === 'healthy' ? 'OPERATIONAL' : health === 'degraded' ? 'DEGRADED' : 'UNKNOWN';
+        const evidenceBadge = m.governance && m.governance.evidenceRequired
+          ? '<span style="color:var(--yellow);font-size:10px;font-weight:700;margin-left:6px;">EVIDENCE REQUIRED</span>'
+          : '';
+        const aggregationLabel = m.healthAggregation === 'any'
+          ? '<span style="color:var(--accent);font-size:10px;">HA: ANY</span>'
+          : '';
+        return `<div class="module-card ${health}">
+          <div class="module-header">
+            <span class="module-name">${escHtml(m.displayName)}${evidenceBadge}</span>
+            <div style="display:flex;gap:6px;align-items:center;">${aggregationLabel}<span class="module-badge ${health}">${badgeLabel}</span></div>
+          </div>
+          <div class="module-desc">${escHtml(m.description)}</div>
+          <div class="module-meta">
+            <span>Capabilities: <strong>${m.capabilityCount}</strong></span>
+            <span>Min Role: <strong>${escHtml((m.governance || {}).minimumRole || '—')}</strong></span>
+            <span>Lifecycle: <strong>${escHtml(m.lifecycleStatus || '—')}</strong></span>
+          </div>
+        </div>`;
+      }).join('');
+
+      container.innerHTML = summary + cards;
+      logActivity(`Institutional Modules loaded — ${modules.length} module(s), ${healthCounts.degraded} degraded`, healthCounts.degraded === 0 ? 'ok' : 'pending');
+    } catch (err) {
+      logActivity(`Error loading modules: ${err.message}`, 'blocked');
+      container.innerHTML = `<div class="empty-state">Error: ${escHtml(err.message)}</div>`;
+    }
+  }
+
+
+  async function loadProviderDashboard() {
+    const apiKey = document.getElementById('apiKeyInput').value.trim();
+    const headers = { 'Content-Type': 'application/json' };
+    if (apiKey) headers['x-api-key'] = apiKey;
+
+    const container = document.getElementById('providerHealthPanel');
+    logActivity('Loading Provider Health dashboard…', 'pending');
+
+    try {
+      const res = await fetch('/api/v1/drift/capabilities', { headers });
+      const data = await res.json();
+
+      if (!res.ok) {
+        logActivity(`Provider Health load failed: ${data.error || res.status}`, 'blocked');
+        container.innerHTML = `<div class="empty-state">Failed to load provider health: ${escHtml(data.error || res.status)}</div>`;
+        return;
+      }
+
+      const providers = data.providers || [];
+      if (!providers.length) {
+        container.innerHTML = '<div class="empty-state">No providers registered.</div>';
+        logActivity('No providers registered', 'ok');
+        return;
+      }
+
+      const overallBadge = data.clean
+        ? '<span style="color:var(--green);font-weight:700;font-size:12px;">All providers clean ✓</span>'
+        : `<span style="color:var(--yellow);font-weight:700;font-size:12px;">${data.totalDrifted} capability drift signal(s) detected</span>`;
+
+      const summary = `<div style="margin-bottom:14px;padding:10px 14px;background:var(--surface-2);border-radius:6px;font-size:12px;display:flex;gap:20px;flex-wrap:wrap;">
+        <span>Providers: <strong style="color:var(--text)">${data.totalProviders}</strong></span>
+        <span>Capabilities: <strong style="color:var(--text)">${data.totalCapabilities}</strong></span>
+        <span>${overallBadge}</span>
+        <span style="color:var(--muted)">Assessed: ${escHtml(data.assessedAt || '')}</span>
+      </div>`;
+
+      const cards = providers.map((p) => {
+        const state = p.signals && p.signals.includes('health_degraded') ? 'degraded'
+          : (!p.clean ? 'drifted' : 'clean');
+        const badge = state === 'clean' ? 'HEALTHY' : state === 'degraded' ? 'DEGRADED' : 'DRIFT';
+        const signalList = p.signals && p.signals.length
+          ? `<span>Signals: <strong style="color:var(--yellow)">${escHtml(p.signals.join(', '))}</strong></span>`
+          : `<span style="color:var(--green)">No drift signals</span>`;
+        return `<div class="provider-card ${state}">
+          <div class="provider-header">
+            <span class="provider-name">${escHtml(p.provider)}</span>
+            <span class="provider-badge ${state}">${badge}</span>
+          </div>
+          <div class="provider-meta">
+            <span>Capabilities: <strong>${p.total}</strong></span>
+            <span>Drifted: <strong>${p.driftedCapabilities}</strong></span>
+            ${signalList}
+          </div>
+        </div>`;
+      }).join('');
+
+      container.innerHTML = summary + cards;
+      logActivity(`Provider Health loaded — ${providers.length} provider(s), ${data.totalDrifted} drift signal(s)`, data.clean ? 'ok' : 'pending');
+    } catch (err) {
+      logActivity(`Error loading provider health: ${err.message}`, 'blocked');
+      container.innerHTML = `<div class="empty-state">Error: ${escHtml(err.message)}</div>`;
+    }
+  }
+
+  async function loadCapabilities() {
+    const apiKey = document.getElementById('apiKeyInput').value.trim();
+    const headers = { 'Content-Type': 'application/json' };
+    if (apiKey) headers['x-api-key'] = apiKey;
+
+    const container = document.getElementById('capabilityRegistry');
+    logActivity('Loading Capability Registry…', 'pending');
+
+    try {
+      const res = await fetch('/api/v1/capabilities', { headers });
+      const data = await res.json();
+
+      if (!res.ok) {
+        logActivity(`Capability Registry load failed: ${data.error || res.status}`, 'blocked');
+        container.innerHTML = `<div class="empty-state">Failed to load capabilities: ${escHtml(data.error || res.status)}</div>`;
+        return;
+      }
+
+      const capabilities = data.capabilities || [];
+      if (!capabilities.length) {
+        container.innerHTML = '<div class="empty-state">No capabilities registered.</div>';
+        logActivity('No capabilities registered', 'ok');
+        return;
+      }
+
+      container.innerHTML = capabilities.map((cap) => {
+        const evidenceBadge = cap.governance && cap.governance.evidenceRequired
+          ? '<span style="color:var(--yellow);font-size:10px;font-weight:700;margin-left:6px;">EVIDENCE REQUIRED</span>'
+          : '';
+        const lifecycleBadge = cap.lifecycle && cap.lifecycle.status === 'active'
+          ? '<span style="color:var(--green);font-size:10px;font-weight:700;margin-left:6px;">ACTIVE</span>'
+          : `<span style="color:var(--muted);font-size:10px;font-weight:700;margin-left:6px;">${escHtml((cap.lifecycle || {}).status || 'UNKNOWN').toUpperCase()}</span>`;
+        return `<div class="approval-card" style="margin-bottom:10px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <span style="font-size:12px;font-weight:700;color:var(--accent);">${escHtml(cap.capabilityId)}</span>
+            ${lifecycleBadge}${evidenceBadge}
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px;font-size:11px;color:var(--muted);">
+            <span>Provider: <strong style="color:var(--text)">${escHtml(cap.provider)}</strong></span>
+            <span>Type: <strong style="color:var(--text)">${escHtml(cap.type)}</strong></span>
+            <span>Endpoint: <strong style="color:var(--text)">${escHtml(cap.endpoint)}</strong></span>
+            <span>Min Role: <strong style="color:var(--text)">${escHtml((cap.authority || {}).minimumRole || '—')}</strong></span>
+            <span>Health: <strong style="color:var(--text)">${escHtml(cap.healthEndpoint || '—')}</strong></span>
+            <span>Version: <strong style="color:var(--text)">${escHtml(cap.version || '—')}</strong></span>
+          </div>
+        </div>`;
+      }).join('');
+
+      logActivity(`Loaded ${capabilities.length} registered capability(ies)`, 'ok');
+    } catch (err) {
+      logActivity(`Error loading capabilities: ${err.message}`, 'blocked');
+      container.innerHTML = `<div class="empty-state">Error: ${escHtml(err.message)}</div>`;
+    }
+  }
+  // Phase 3 — NFR: Federation Panel
+  // Displays multi-provider execution timeline, drift classification,
+  // failover visualization, and federated evidence chain.
+  async function loadFederationPanel() {
+    const apiKey = document.getElementById('apiKeyInput').value.trim();
+    const headers = { 'Content-Type': 'application/json' };
+    if (apiKey) headers['x-api-key'] = apiKey;
+
+    const container = document.getElementById('federationPanel');
+    logActivity('Loading Federation panel…', 'pending');
+
+    try {
+      // Load drift/capability data for federation state
+      const res = await fetch('/api/v1/drift/capabilities', { headers });
+      const data = await res.json();
+
+      if (!res.ok) {
+        logActivity(`Federation panel load failed: ${data.error || res.status}`, 'blocked');
+        container.innerHTML = `<div class="empty-state">Failed to load federation state: ${escHtml(data.error || res.status)}</div>`;
+        return;
+      }
+
+      const providers = data.providers || [];
+
+      // --- Execution Timeline ---
+      const timelineHtml = providers.length
+        ? `<div class="fed-timeline">${providers.map((p, i) => {
+            const health = p.signals && p.signals.includes('health_degraded') ? 'degraded' : 'healthy';
+            const drift = !p.clean ? (p.signals && p.signals.some(s => s.includes('critical')) ? 'CRITICAL' : 'WARNING') : 'NONE';
+            const stepClass = i === 0 ? 'primary' : health === 'degraded' ? 'failed' : drift === 'NONE' ? 'complete' : 'fallback';
+            const isPrimary = i === 0 ? '<span style="color:var(--accent);font-weight:700;font-size:10px;margin-left:6px;">PRIMARY</span>' : '';
+            const driftLabel = drift === 'CRITICAL'
+              ? `<span class="drift-crit">DRIFT: CRITICAL</span>`
+              : drift === 'WARNING'
+                ? `<span class="drift-warn">DRIFT: WARNING</span>`
+                : `<span style="color:var(--green)">DRIFT: NONE</span>`;
+            const healthLabel = health === 'degraded'
+              ? `<span class="health-deg">HEALTH: DEGRADED</span>`
+              : `<span style="color:var(--green)">HEALTH: OK</span>`;
+            return `<div class="fed-step ${stepClass}">
+              <div class="fed-step-idx">#${i + 1}</div>
+              <div class="fed-step-body">
+                <div class="fed-step-provider">${escHtml(p.provider)}${isPrimary}</div>
+                <div class="fed-step-meta">
+                  <span>Capabilities: <strong style="color:var(--text)">${p.total}</strong></span>
+                  ${healthLabel}
+                  ${driftLabel}
+                  ${p.signals && p.signals.length ? `<span>Signals: ${escHtml(p.signals.join(', '))}</span>` : ''}
+                </div>
+              </div>
+            </div>`;
+          }).join('')}</div>`
+        : '<div class="empty-state">No providers in federation.</div>';
+
+      // --- Drift Classification Grid ---
+      const driftHtml = providers.length
+        ? `<div class="fed-drift-grid">${providers.map((p) => {
+            const drift = !p.clean ? (p.signals && p.signals.some(s => s.includes('critical')) ? 'CRITICAL' : 'WARNING') : 'NONE';
+            const driftColor = drift === 'CRITICAL' ? 'var(--red)' : drift === 'WARNING' ? 'var(--yellow)' : 'var(--green)';
+            return `<div class="fed-drift-card ${drift}">
+              <div class="fed-drift-name">${escHtml(p.provider)}</div>
+              <div class="fed-drift-sev" style="color:${driftColor};font-weight:700;">${drift}</div>
+              <div style="font-size:10px;color:var(--muted);margin-top:2px;">${p.driftedCapabilities || 0} drifted cap(s)</div>
+            </div>`;
+          }).join('')}</div>`
+        : '<div class="empty-state">No drift data.</div>';
+
+      // --- Failover Visualization ---
+      const failoverHtml = providers.length > 1
+        ? `<div class="fed-failover-list">${providers.slice(1).map((p) => {
+            const health = p.signals && p.signals.includes('health_degraded') ? 'degraded' : 'healthy';
+            const isActive = health === 'degraded' || !p.clean;
+            return `<div class="fed-fo-row ${isActive ? '' : 'inactive'}">
+              <div class="fed-fo-provider">${escHtml(p.provider)} ${isActive ? '<span style="color:var(--yellow)">← FALLBACK ELIGIBLE</span>' : ''}</div>
+              <div class="fed-fo-meta">
+                <span>Trigger: <strong style="color:var(--text)">HEALTH_BELOW_THRESHOLD</strong></span>
+                <span>Action: <strong style="color:var(--text)">REROUTE</strong></span>
+                <span>Health: <strong style="color:${health === 'healthy' ? 'var(--green)' : 'var(--red)'}">${health.toUpperCase()}</strong></span>
+              </div>
+            </div>`;
+          }).join('')}</div>`
+        : '<div class="empty-state">No fallback providers in federation path.</div>';
+
+      // --- Federated Evidence Stubs ---
+      const evidenceHtml = `<div class="fed-evidence-list">${providers.map((p) => {
+        return `<div class="fed-ev-row">
+          <span class="fed-ev-provider">${escHtml(p.provider)}</span>
+          <span class="fed-ev-status pending">PENDING</span>
+          <span class="fed-ev-ref">evidence/provider/${escHtml(p.provider)}/ — awaiting execution run</span>
+        </div>`;
+      }).join('')}
+      <div class="fed-ev-row" style="border-top:1px solid var(--line);margin-top:4px;padding-top:8px;">
+        <span class="fed-ev-provider" style="color:var(--muted)">federation</span>
+        <span class="fed-ev-status pending">PENDING</span>
+        <span class="fed-ev-ref">evidence/federation/chain.json — awaiting finalized chain</span>
+      </div></div>`;
+
+      container.innerHTML = `
+        <div style="margin-bottom:18px;padding:10px 14px;background:var(--surface-2);border-radius:6px;font-size:12px;display:flex;gap:20px;flex-wrap:wrap;">
+          <span>Providers: <strong style="color:var(--text)">${providers.length}</strong></span>
+          <span>Primary: <strong style="color:var(--accent)">${providers.length ? escHtml(providers[0].provider) : '—'}</strong></span>
+          <span>Fallback path: <strong style="color:var(--text)">${Math.max(0, providers.length - 1)} provider(s)</strong></span>
+          <span style="color:var(--muted)">Assessed: ${escHtml(data.assessedAt || new Date().toISOString())}</span>
+        </div>
+
+        <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Execution Timeline</div>
+        ${timelineHtml}
+
+        <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;margin-top:18px;">Drift Classification</div>
+        ${driftHtml}
+
+        <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;margin-top:18px;">Failover Path</div>
+        ${failoverHtml}
+
+        <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;margin-top:18px;">Federated Evidence Chain</div>
+        ${evidenceHtml}
+      `;
+
+      logActivity(`Federation panel loaded — ${providers.length} provider(s) in fabric`, data.clean ? 'ok' : 'pending');
+    } catch (err) {
+      logActivity(`Error loading federation panel: ${err.message}`, 'blocked');
+      container.innerHTML = `<div class="empty-state">Error: ${escHtml(err.message)}</div>`;
+    }
+  }
+
+</script>
+
+</body>
+</html>

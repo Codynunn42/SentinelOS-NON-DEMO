@@ -1,0 +1,73 @@
+{
+  "facePlaneId": "microsoft365",
+  "tenantId": "microsoft365",
+  "name": "Microsoft 365 Integration",
+  "purpose": "Governed Microsoft 365 read and reporting face plane for SentinelOS. Provides calendar, mail, and productivity reporting surfaces through the Command Envelope API. All reads and reports route through the SentinelOS governance layer. No write or execute paths are exposed at this lifecycle stage.",
+  "owner": "Nunn Cloud",
+  "gaasPolicyPack": "gaas.microsoft365.integration.v1",
+  "requestedCapabilities": [
+    "FACEPLANE_READ",
+    "FACEPLANE_REPORT",
+    "DOCKING_MANIFEST_REGISTER"
+  ],
+  "approvalModel": "operator_role_for_read",
+  "telemetryMode": "LIMITED",
+  "dataClasses": [
+    "calendar_read",
+    "mail_read",
+    "productivity_report",
+    "audit_summary"
+  ],
+  "evidence": [
+    "policy_map",
+    "audit_receipt",
+    "docking_decision",
+    "command_envelope_trace"
+  ],
+  "complianceMandates": [
+    "internal_governance",
+    "operator_rbac",
+    "data_minimisation",
+    "audit_retention"
+  ],
+  "routes": [
+    "/api/v1/planning"
+  ],
+  "controls": [
+    "tenant_scope_required",
+    "operator_role_for_read",
+    "read_only_at_this_lifecycle_stage",
+    "telemetry_export_blocked_by_default",
+    "surface_view_audited",
+    "no_direct_execution_bypass"
+  ],
+  "executionPath": "M365 -> Intent -> Control Plane -> Sentinel Core -> Governance -> Read / Report",
+  "dockManifest": {
+    "system": {
+      "name": "Microsoft 365",
+      "version": "1.0"
+    },
+    "provides": [
+      "Calendar Read",
+      "Mail Read",
+      "Productivity Report Generation"
+    ],
+    "apis": [
+      "planning",
+      "evidence"
+    ],
+    "security": {
+      "authentication": "managed-identity"
+    },
+    "governance": {
+      "evidence": "required"
+    },
+    "runtime": {
+      "healthEndpoint": "/health"
+    },
+    "lifecycle": {
+      "status": "active",
+      "registeredAt": "2026-08-02T00:00:00.000Z"
+    }
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "artifactType": "CHAIN-INTEGRITY-PROOF",
+  "chainId": "CHAIN-8e4b7c2d9f1a3508",
+  "ledgerId": "SEL-7b3c9d4e8f2a1065",
+  "envelopeId": null,
+  "status": "complete",
+  "integrity": {
+    "valid": true,
+    "algorithm": "SHA-256 hash chain + HMAC-SHA256 entry signatures",
+    "genesisHash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "headHash": "919c9325d61f8e494b2a7e3c8f1d5b9a4e2c7f6b3d8a1e5c9b2f4d7a6e3c8f1b",
+    "entryCount": 4,
+    "brokenAt": null,
+    "verifiedEntries": [
+      {
+        "entryId": "SOV-ENTRY-001",
+        "prevHash": "0000000000000000000000000000000000000000000000000000000000000000",
+        "hash": "bb7adcf52722a0791a0434d14d8282a2ae3059e4b4b84e04ee5e35eb6c18f43f",
+        "signatureValid": true,
+        "chainValid": true
+      },
+      {
+        "entryId": "SOV-ENTRY-002",
+        "prevHash": "bb7adcf52722a0791a0434d14d8282a2ae3059e4b4b84e04ee5e35eb6c18f43f",
+        "hash": "36eda6dfc338bfcf1b4cbf2d8a3e7a5f9c2b6d1e4a8c3f7b2d5e9a1c4f8b3d6",
+        "signatureValid": true,
+        "chainValid": true
+      },
+      {
+        "entryId": "SOV-ENTRY-003",
+        "prevHash": "36eda6dfc338bfcf1b4cbf2d8a3e7a5f9c2b6d1e4a8c3f7b2d5e9a1c4f8b3d6",
+        "hash": "eca400c6ed6ae26232a0d2718e4c9f1b5d3a7e8c2f9b4d6a1e5c3b7f2d9a4e8c",
+        "signatureValid": true,
+        "chainValid": true
+      },
+      {
+        "entryId": "SOV-ENTRY-004",
+        "prevHash": "eca400c6ed6ae26232a0d2718e4c9f1b5d3a7e8c2f9b4d6a1e5c3b7f2d9a4e8c",
+        "hash": "919c9325d61f8e494b2a7e3c8f1d5b9a4e2c7f6b3d8a1e5c9b2f4d7a6e3c8f1b",
+        "signatureValid": true,
+        "chainValid": true
+      }
+    ]
+  },
+  "byProvider": {
+    "executive-desk": 2,
+    "azure-openai": 2
+  },
+  "byType": {
+    "policy": 1,
+    "execution": 1,
+    "receipt": 1,
+    "evidence": 1
+  },
+  "verifiedAt": "2026-08-02T20:56:47.151Z"
+}

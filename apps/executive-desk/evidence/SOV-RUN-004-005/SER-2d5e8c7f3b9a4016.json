@@ -1,0 +1,57 @@
+{
+  "artifactType": "SER-EXECUTION-RECEIPTS",
+  "phase": "4.3",
+  "sessionId": "SER-2d5e8c7f3b9a4016",
+  "command": "execute",
+  "status": "complete",
+  "policyId": "SPE-4a2f8c1e9b3d7a05",
+  "ledgerId": "SEL-7b3c9d4e8f2a1065",
+  "driftClass": "none",
+  "providers": [
+    "azure-openai",
+    "openai",
+    "anthropic",
+    "gemini",
+    "executive-desk"
+  ],
+  "attempts": 1,
+  "receipts": [
+    {
+      "receiptId": "SER-RECEIPT-c3d7e9a2",
+      "sessionId": "SER-2d5e8c7f3b9a4016",
+      "envelopeId": null,
+      "provider": "azure-openai",
+      "command": "execute",
+      "policyId": "SPE-4a2f8c1e9b3d7a05",
+      "ledgerId": "SEL-7b3c9d4e8f2a1065",
+      "ledgerEntryId": "SOV-ENTRY-003",
+      "decision": "allow",
+      "outcome": "success",
+      "driftClass": "none",
+      "attempt": 1,
+      "retryOf": null,
+      "failoverFrom": null,
+      "issuedAt": "2026-08-02T20:56:47.151Z"
+    }
+  ],
+  "routingDecision": {
+    "sessionId": "SER-2d5e8c7f3b9a4016",
+    "decision": "allow",
+    "allowed": true,
+    "reason": null,
+    "policyId": "SPE-4a2f8c1e9b3d7a05",
+    "driftClass": "none",
+    "gateResults": [
+      { "gateId": "GATE-SPE-001", "status": "passed" },
+      { "gateId": "GATE-SPE-002", "status": "passed" },
+      { "gateId": "GATE-SPE-003", "status": "passed" },
+      { "gateId": "GATE-SPE-004", "status": "passed" },
+      { "gateId": "GATE-SPE-005", "status": "passed" }
+    ]
+  },
+  "assertionSuite": "npm run check:sovereign-runtime",
+  "assertionsPassed": 78,
+  "assertionsFailed": 0,
+  "startedAt": "2026-08-02T20:56:47.151Z",
+  "completedAt": "2026-08-02T20:56:47.151Z"
+}

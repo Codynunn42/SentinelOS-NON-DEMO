@@ -4,19 +4,25 @@
 
 ## Current Phase
 
-Code Optimization & Security Hardening (Planning Complete → Execution Ready)
+C5 — Institutional Module Layer (Active Build)
 
 ## Summary
 
-SentinelOS NON-DEMO has moved from baseline scaffolding into an authenticated API foundation. The `/command` endpoint is now fail-closed behind `SENTINEL_API_KEY`, and the workspace includes Microsoft Sentinel integration guidance for monitoring command auth and execution events through Azure Container Apps logs.
+SentinelOS NON-DEMO is the canonical home for the SentinelOS Capability Adoption Layer and now the
+Institutional Module Layer. The platform has crossed an architectural threshold: external systems
+are no longer "providers" visible to the institution — they are implementation details behind
+Institutional Modules. The institution interacts with Executive Operations, Workflow Orchestration,
+Communications, Projects, Business Operations, and AI Operations. The underlying providers (NEXUS,
+TILDA, Microsoft 365, GitHub, OwnerFi) are invisible.
 
-The operating direction is now broader than a single protected API. Daily execution is being oriented around turning SentinelOS into a governed operations platform, with the current operating surface becoming the first reusable control-plane layer instead of a one-off app.
+The SentinelOS Constitution has been ratified (C5.0), governing all future design decisions.
+ORV-2 validates the module layer at 100/100 SOVEREIGN. The AI Operations Module introduces the
+first governed multi-model AI capability with data classification policy enforcement — the
+AI Embassy principles without the AI Embassy application.
 
-The current deployed system now includes a working audit layer, a protected `/v1/audit` retrieval endpoint, and a live Postgres-backed OwnerFi proof path that has been verified end-to-end.
-
-On 2026-04-28, the current shareable proof surface was verified on `ca-nc-dev-sentinel`, not the older `ca-sentinelos-proof` host. The live public proof URL is `https://ca-nc-dev-sentinel.calmhill-388e1d39.eastus2.azurecontainerapps.io/proof`. The current active revision is `ca-nc-dev-sentinel--decision-signing-v1`, running image `acrncdevsentinel.azurecr.io/sentinelos:latest`, healthy, provisioned, and receiving 100 percent traffic.
-
-The next hardening layer is governance preflight: command requests are checked for tenant, command, actor, role, and role-based execution rights before a surface-plane handler can run.
+C3 established the platform contract. C4 proved institutional capability expansion. C5 completes
+the institutional abstraction: one coherent operating environment, regardless of how many providers
+exist beneath it.
 
 ## Completed
 
@@ -87,32 +93,63 @@ The next hardening layer is governance preflight: command requests are checked f
 
 ## In Progress
 
-- Phase 1 code consolidation (shared validation, telemetry, ID generation modules)
-- All operational plans ready for execution
+- **C5** — Institutional Module Layer complete (C5.0–C5.5 PASS)
+- **C6** — Government agency system docking; sovereign capability tiers; federated Executive Desk
+
+## Completed (NEXUS Phases 1–2)
+
+- NEXUS surface registered, docking manifest live, Executive Desk plane defined, policy enforcement wired — C2.3 PASS
+- NEXUS app shell (`apps/nexus/`) built, NEXUS GaaS policy pack built, Executive Desk UI built, API routes registered — C2.4 PASS
 
 ## Gaps
 
 - no full role-based key model yet
 - live Sentinel analytics rules not yet created
-- no operator-facing control plane yet
-- no formal tenant or scope model yet
-- no reusable integration framework yet
 - no active billing, checkout, payment, or funnel execution path in this repo
-- broader API/audit/database implementation work exists in the worktree but still needs a separate clean release commit
 - `ca-sentinelos-proof` appears to be an older health-only host and should not be used as the current shareable proof URL
+
+## C3 Gate Status (COMPLETE)
+
+| Gate | Deliverable | Status |
+|------|-------------|--------|
+| C3.0 | Status correction | PASS |
+| C3.1 | Command Envelope API | PASS |
+| C3.2 | Capability Registry | PASS |
+| C3.3 | Dock Manifest Standard | PASS |
+| C3.4 | Executive Desk capability surface | PASS |
+| C3.5 | AI Capability Broker | PASS |
+
+## C4 Gate Status
+
+| Gate | Deliverable | Status |
+|------|-------------|--------|
+| C4.0 | Status correction | PASS |
+| C4.1 | Multi-Provider Capability Selector | PASS |
+| C4.2 | TILDA dock and registration | PASS |
+| C4.3 | Microsoft 365 dock and registration | PASS |
+| C4.4 | GitHub dock and registration | PASS |
+| C4.5 | Cross-provider drift monitor | PASS |
+| C4.6 | Cross-provider Executive Desk | PASS |
+
+## C5 Gate Status (COMPLETE)
+
+| Gate | Deliverable | Status |
+|------|-------------|--------|
+| C5.0 | SentinelOS Constitution | PASS |
+| C5.1 | Module Registry | PASS |
+| C5.2 | Module Resolver + Initial Taxonomy (6 modules) | PASS |
+| C5.3 | AI Operations Module (Model Registry + Model Broker) | PASS |
+| C5.4 | Executive Desk Module View | PASS |
+| C5.5 | ORV-2 validation (Campaign 6) — 100/100 SOVEREIGN | PASS |
 
 ## Next Actions
 
-1. **Execute Phase 1 Consolidation** (3-4 hours): Create shared validation, telemetry, and ID generation modules per CODE_OPTIMIZATION_PLAN
-2. **Execute Phase 2 Restructuring** (2-3 hours): Reorganize command handlers into domain-centric structure per ARCHITECTURE_ALIGNMENT_PLAN
-3. **Execute Phase 3 Hardening** (3-4 hours): Add input validation, error standardization, environment validation per SECURITY_HARDENING_PASS
-4. **Full test suite validation** (1 hour): Run npm run check:* after each phase, smoke test live deployment
-5. **Review optimization outcomes** and impact on deployment health before proceeding to next feature work
+1. **C6** — Government agency system docking; sovereign capability tiers; federated Executive Desk
 
 ## Risk Level
 
-Low (live proof route, health, revision traffic, authenticated OwnerFi workflow execution verified; code consolidation and hardening are well-planned with testing strategies and risk mitigations; all changes can be validated with existing npm check suite before deployment)
+Low. C4 adds new providers, new API surface, and new modules — no changes to existing surfaces, handlers, or runtime behavior. All existing surfaces (ownerfi, hotelops, customerops, nunncloud, nexus) are unaffected. All C3 invariants remain in force.
 
 ## Direction
 
-Execute code consolidation (Phases 1-3) per operational plans with validation gates between phases. Focus on: (1) consolidating shared utilities into reusable modules, (2) aligning code structure with governance architecture for scalability, (3) hardening input validation and error handling for production robustness. After optimization completes, proceed with platform-oriented feature work (tenant model, billing integration, etc.) with cleaner architectural foundation.
+This repository is directed at the SentinelOS Capability Adoption Layer. NEXUS is the first governed capability provider. TILDA, Microsoft 365, and GitHub are the next wave — each docked through the same C3 Dock Manifest Standard and registered in the Capability Registry. Every future system docks through the same lifecycle: discover, dock, register, govern, orchestrate, operate. The Command Envelope API is the canonical execution contract. The Executive Desk is the governance oversight surface. See `docs/NEXUS_INTEGRATION_PLAN.md` for full architecture and build order.

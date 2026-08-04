@@ -1,0 +1,70 @@
+{
+  "artifactType": "SNCS-SURFACE-SNAPSHOT",
+  "phase": "4.4",
+  "snapshotId": "SNCS-6f1a3b9c5d7e2087",
+  "version": "1.0",
+  "sessionId": "SER-2d5e8c7f3b9a4016",
+  "ledgerId": "SEL-7b3c9d4e8f2a1065",
+  "policyId": "SPE-4a2f8c1e9b3d7a05",
+  "providerHealth": {
+    "providers": [
+      { "provider": "azure-openai",    "status": "healthy",  "driftClass": "none", "authority": "operator"  },
+      { "provider": "openai",          "status": "healthy",  "driftClass": "none", "authority": "operator"  },
+      { "provider": "anthropic",       "status": "healthy",  "driftClass": "none", "authority": "operator"  },
+      { "provider": "gemini",          "status": "healthy",  "driftClass": "none", "authority": "executive" },
+      { "provider": "executive-desk",  "status": "healthy",  "driftClass": "none", "authority": "sovereign" }
+    ]
+  },
+  "driftSummary": {
+    "highestClass": "none",
+    "providers": [
+      { "provider": "azure-openai",   "driftClass": "none" },
+      { "provider": "openai",         "driftClass": "none" },
+      { "provider": "anthropic",      "driftClass": "none" },
+      { "provider": "gemini",         "driftClass": "none" },
+      { "provider": "executive-desk", "driftClass": "none" }
+    ]
+  },
+  "evidenceView": {
+    "ledgerId": "SEL-7b3c9d4e8f2a1065",
+    "status": "sealed",
+    "totalEntries": 4,
+    "headHash": "919c9325d61f8e494b2a7e3c8f1d5b9a4e2c7f6b3d8a1e5c9b2f4d7a6e3c8f1b",
+    "entries": [
+      { "entryId": "SOV-ENTRY-001", "type": "policy",    "provider": "executive-desk", "driftClass": "none" },
+      { "entryId": "SOV-ENTRY-002", "type": "execution", "provider": "azure-openai",   "driftClass": "none" },
+      { "entryId": "SOV-ENTRY-003", "type": "receipt",   "provider": "azure-openai",   "driftClass": "none" },
+      { "entryId": "SOV-ENTRY-004", "type": "evidence",  "provider": "executive-desk", "driftClass": "none" }
+    ]
+  },
+  "executionTimeline": {
+    "sessionId": "SER-2d5e8c7f3b9a4016",
+    "attempts": 1,
+    "receipts": [
+      {
+        "receiptId": "SER-RECEIPT-c3d7e9a2",
+        "provider": "azure-openai",
+        "decision": "allow",
+        "outcome": "success",
+        "driftClass": "none",
+        "attempt": 1,
+        "issuedAt": "2026-08-02T20:56:47.151Z"
+      }
+    ]
+  },
+  "compliancePanel": {
+    "policyId": "SPE-4a2f8c1e9b3d7a05",
+    "gatesClean": true,
+    "gates": [
+      { "gateId": "GATE-SPE-001", "label": "Sovereign Authority",        "status": "passed" },
+      { "gateId": "GATE-SPE-002", "label": "Executive Desk Clearance",   "status": "passed" },
+      { "gateId": "GATE-SPE-003", "label": "Provider Authorization",     "status": "passed" },
+      { "gateId": "GATE-SPE-004", "label": "Drift Classification Clear", "status": "passed" },
+      { "gateId": "GATE-SPE-005", "label": "Evidence Chain Linked",      "status": "passed" }
+    ]
+  },
+  "assertionSuite": "npm run check:sovereign-surface",
+  "assertionsPassed": 81,
+  "assertionsFailed": 0,
+  "assembledAt": "2026-08-02T20:56:47.151Z"
+}

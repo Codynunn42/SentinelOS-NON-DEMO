@@ -1,0 +1,92 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://sentinelos.nunncorp.io/schemas/dock-manifest.v1.schema.json",
+  "title": "SentinelOS Dock Manifest",
+  "description": "Institutional contract between SentinelOS and an integrated system. Every docked system publishes one manifest.",
+  "type": "object",
+  "required": ["system", "provides", "apis", "security", "governance", "runtime"],
+  "additionalProperties": false,
+  "properties": {
+    "system": {
+      "type": "object",
+      "required": ["name", "version"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Human-readable system name (e.g., NEXUS, TILDA, Microsoft 365)"
+        },
+        "version": {
+          "type": "string",
+          "description": "System version string (semver recommended)"
+        }
+      }
+    },
+    "provides": {
+      "type": "array",
+      "description": "Human-readable list of capabilities this system provides",
+      "minItems": 1,
+      "items": { "type": "string" }
+    },
+    "apis": {
+      "type": "array",
+      "description": "Command Envelope API paths this system satisfies",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "enum": ["planning", "execution", "evidence", "command-envelope"]
+      }
+    },
+    "security": {
+      "type": "object",
+      "required": ["authentication"],
+      "additionalProperties": false,
+      "properties": {
+        "authentication": {
+          "type": "string",
+          "enum": ["JWT", "api-key", "managed-identity", "mtls"],
+          "description": "Authentication mechanism used by this system"
+        }
+      }
+    },
+    "governance": {
+      "type": "object",
+      "required": ["evidence"],
+      "additionalProperties": false,
+      "properties": {
+        "evidence": {
+          "type": "string",
+          "enum": ["required", "optional", "none"],
+          "description": "Whether evidence submission is required, optional, or not applicable"
+        }
+      }
+    },
+    "runtime": {
+      "type": "object",
+      "required": ["healthEndpoint"],
+      "additionalProperties": false,
+      "properties": {
+        "healthEndpoint": {
+          "type": "string",
+          "description": "Relative path for health verification (e.g., /health)"
+        }
+      }
+    },
+    "lifecycle": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["active", "pending", "deprecated"],
+          "default": "pending"
+        },
+        "registeredAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 timestamp set by SentinelOS on registration"
+        }
+      }
+    }
+  }
+}

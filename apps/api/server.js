@@ -70,6 +70,7 @@ const { analyzeDrift } = require('../sentinel/src/drift/driftAnalyzer');
 const { list: listDriftRecommendations, getSummary: getDriftSummary } = require('../sentinel/src/drift/driftStore');
 const { createTrace, recordStage, completeTrace, getTrace, listTraces } = require('../sentinel/src/audit/executionTrace');
 const { enforceSovereignBoot } = require('../sentinel/src/sovereign/sovereignBoot');
+const { createDemoSurface } = require('../sentinel/src/sovereign/controlSurface');
 const { resolveTier, classifyOperation } = require('../sentinel/src/tiers/tierResolver');
 const { TIERS } = require('../sentinel/src/tiers/tierRegistry');
 
@@ -84,6 +85,9 @@ const STRIPE_CHECKOUT_JS_PATH = path.join(__dirname, 'public', 'stripe-checkout.
 const STRIPE_COMPLETE_JS_PATH = path.join(__dirname, 'public', 'stripe-complete.js');
 const STRIPE_CHECKOUT_CSS_PATH = path.join(__dirname, 'public', 'stripe-checkout.css');
 const STRIPE_COMPLETE_CSS_PATH = path.join(__dirname, 'public', 'stripe-complete.css');
+const NEXUS_CONSOLE_PATH = path.join(__dirname, '..', '..', 'nexus', 'public', 'nexus-console.html');
+const NEXUS_EXECUTIVE_PATH = path.join(__dirname, '..', '..', 'nexus', 'public', 'nexus-executive.html');
+const NEXUS_SOVEREIGN_PATH = path.join(__dirname, '..', '..', 'nexus', 'public', 'nexus-sovereign.html');
 const RATE_LIMIT_WINDOW_MS = 60 * 1000;
 const RATE_LIMIT_MAX_REQUESTS = 30;
 const commandRateLimits = new Map();
@@ -1394,6 +1398,21 @@ const server = http.createServer(async (req, res) => {
   if (pathname === '/mission-control' && req.method === 'GET') {
     auditSurfaceView(req, requestUrl, pathname, 'mission-control');
     return sendHtmlFile(res, MISSION_CONTROL_PATH);
+  }
+
+  if (pathname === '/nexus' && req.method === 'GET') {
+    auditSurfaceView(req, requestUrl, pathname, 'nexus');
+    return sendHtmlFile(res, NEXUS_CONSOLE_PATH);
+  }
+
+  if (pathname === '/nexus/executive' && req.method === 'GET') {
+    auditSurfaceView(req, requestUrl, pathname, 'nexus-executive');
+    return sendHtmlFile(res, NEXUS_EXECUTIVE_PATH);
+  }
+
+  if (pathname === '/nexus/sovereign' && req.method === 'GET') {
+    auditSurfaceView(req, requestUrl, pathname, 'nexus-sovereign');
+    return sendHtmlFile(res, NEXUS_SOVEREIGN_PATH);
   }
 
   if (pathname === '/operator-escalations' && req.method === 'GET') {
@@ -3561,6 +3580,443 @@ const server = http.createServer(async (req, res) => {
     }
 
     return sendJson(res, 200, { status: 'ok', trace });
+  }
+
+  if (pathname === '/api/v1/capabilities' && req.method === 'GET') {
+    const access = authorizeRoute(req, res, '/api/v1/capabilities', {
+      command: 'audit.read',
+      requiredScope: 'audit:read'
+    });
+    if (!access) return;
+
+    const { getCapabilitySummary } = require('../sentinel/src/capabilities/resolver');
+    const provider = requestUrl.searchParams.get('provider') || undefined;
+    const summary = getCapabilitySummary(provider);
+
+    return sendJson(res, 200, {
+      status: 'ok',
+      ...summary
+    });
+  }
+
+  // C4.5 — Cross-provider capability drift monitor
+  if (pathname === '/api/v1/drift/capabilities' && req.method === 'GET') {
+    const access = authorizeRoute(req, res, '/api/v1/drift/capabilities', {
+      command: 'audit.read',
+      requiredScope: 'audit:read'
+    });
+    if (!access) return;
+
+    const { runCapabilityDriftMonitor } = require('../sentinel/src/drift/capabilityDriftMonitor');
+    const report = runCapabilityDriftMonitor();
+
+    return sendJson(res, 200, {
+      status: 'ok',
+      ...report
+    });
+  }
+
+  // C5.4 — Institutional Modules: module registry view for the Executive Desk
+  if (pathname === '/api/v1/modules' && req.method === 'GET') {
+    const access = authorizeRoute(req, res, '/api/v1/modules', {
+      command: 'audit.read',
+      requiredScope: 'audit:read'
+    });
+    if (!access) return;
+
+    const { listModuleSummaries } = require('../sentinel/src/modules/resolver');
+    const modules = listModuleSummaries();
+
+    return sendJson(res, 200, {
+      status: 'ok',
+      totalModules: modules.length,
+      modules
+    });
+  }
+
+  // -------------------------------------------------------------------------
+  // C3 — Capability Adoption Layer: Command Envelope API
+  // -------------------------------------------------------------------------
+
+  // Phase 4.4 — Sovereign Nexus Control Surface: sovereign status endpoint
+  if (pathname === '/api/v1/sovereign/status' && req.method === 'GET') {
+    const access = authorizeRoute(req, res, '/api/v1/sovereign/status', {
+      command: 'audit.read',
+      requiredScope: 'audit:read'
+    });
+    if (!access) return;
+
+    try {
+      const snapshot = createDemoSurface();
+      return sendJson(res, 200, {
+        status: 'ok',
+        ...snapshot
+      });
+    } catch (sncsErr) {
+      return sendJson(res, 500, {
+        status: 'error',
+        error: 'SNCS_SURFACE_ERROR',
+        reason: sncsErr.message
+      });
+    }
+  }
+
+  if (pathname === '/api/v1/command-envelope' && req.method === 'POST') {
+    const principal = authenticateCommand(req, '/api/v1/command-envelope', res);
+    if (!principal) return;
+
+    if (!enforceRateLimit(req, '/api/v1/command-envelope', res, principal)) return;
+
+    return readJsonBody(req, async (error, body) => {
+      if (error) {
+        emitSecurityEvent('command_envelope.request.invalid_json', { route: '/api/v1/command-envelope' });
+        return sendJson(res, 400, { status: 'error', error: 'Invalid JSON body' });
+      }
+
+      const missing = [];
+      if (!body.commandId) missing.push('commandId');
+      if (!body.tenant) missing.push('tenant');
+      if (!body.command) missing.push('command');
+      if (!body.metadata || !body.metadata.actor) missing.push('metadata.actor');
+      if (!body.metadata || !body.metadata.role) missing.push('metadata.role');
+      if (!body.metadata || !Array.isArray(body.metadata.scopes)) missing.push('metadata.scopes');
+      if (!body.executionPolicy) missing.push('executionPolicy');
+
+      if (missing.length) {
+        return sendJson(res, 400, {
+          status: 'blocked',
+          error: 'ENVELOPE_INCOMPLETE',
+          missingFields: missing
+        });
+      }
+
+      let envelope;
+      try {
+        envelope = signExecutionPassport({
+          ...body,
+          source: 'sentinel-capability-layer',
+          metadata: {
+            ...body.metadata,
+            actor: principal.actor,
+            role: principal.role,
+            keyId: principal.keyId,
+            scopes: principal.scopes
+          }
+        });
+      } catch (passportError) {
+        return sendJson(res, 500, {
+          status: 'blocked',
+          error: 'PASSPORT_SIGNING_FAILED',
+          reason: 'missing_execution_passport_secret'
+        });
+      }
+
+      const idempotency = checkIdempotency(normalizeCommandEnvelope(envelope), principal);
+      if (idempotency.conflict) {
+        return sendJson(res, 409, { status: 'blocked', error: 'IDEMPOTENCY_CONFLICT', idempotencyKey: idempotency.idempotencyKey });
+      }
+      if (idempotency.duplicate) {
+        return sendJson(res, idempotency.existing.result.statusCode || 200, {
+          status: idempotency.existing.result.success ? 'accepted' : 'blocked',
+          idempotentReplay: true,
+          idempotencyKey: idempotency.idempotencyKey,
+          ...(idempotency.existing.result.data || {})
+        });
+      }
+
+      const preflight = governanceCheck(normalizeCommandEnvelope(envelope), {}, principal);
+      if (!preflight.allowed) {
+        return sendJson(res, preflight.statusCode || 403, {
+          status: 'blocked',
+          error: preflight.error,
+          details: preflight.details
+        });
+      }
+
+      const receiptId = `rcpt_env_${crypto.randomUUID()}`;
+      const result = {
+        success: true,
+        statusCode: 202,
+        data: {
+          envelopeId: envelope.commandId,
+          receiptId,
+          tenant: envelope.tenant,
+          command: envelope.command,
+          executionPolicy: body.executionPolicy,
+          stage: 'accepted',
+          acceptedAt: new Date().toISOString()
+        }
+      };
+      rememberIdempotency(idempotency, result);
+
+      await auditLogger.log({
+        tenant: envelope.tenant,
+        command: 'command_envelope.accepted',
+        payload: { envelopeId: envelope.commandId, command: envelope.command, executionPolicy: body.executionPolicy },
+        result: { success: true, receiptId },
+        actor: principal.actor,
+        timestamp: new Date().toISOString()
+      });
+
+      return sendJson(res, 202, { status: 'accepted', ...result.data });
+    });
+  }
+
+  if (pathname === '/api/v1/planning' && req.method === 'POST') {
+    const principal = authenticateCommand(req, '/api/v1/planning', res);
+    if (!principal) return;
+
+    if (!enforceRateLimit(req, '/api/v1/planning', res, principal)) return;
+
+    return readJsonBody(req, async (error, body) => {
+      if (error) {
+        emitSecurityEvent('planning.request.invalid_json', { route: '/api/v1/planning' });
+        return sendJson(res, 400, { status: 'error', error: 'Invalid JSON body' });
+      }
+
+      const missing = [];
+      if (!body.commandId) missing.push('commandId');
+      if (!body.tenant) missing.push('tenant');
+      if (!body.intent) missing.push('intent');
+      if (!body.metadata || !body.metadata.actor) missing.push('metadata.actor');
+      if (!body.metadata || !body.metadata.role) missing.push('metadata.role');
+      if (!body.metadata || !Array.isArray(body.metadata.scopes)) missing.push('metadata.scopes');
+
+      if (missing.length) {
+        return sendJson(res, 400, {
+          status: 'blocked',
+          error: 'PLANNING_ENVELOPE_INCOMPLETE',
+          missingFields: missing
+        });
+      }
+
+      const syntheticEnvelope = normalizeCommandEnvelope({
+        commandId: body.commandId,
+        tenant: body.tenant,
+        command: body.intent.command || 'planning.evaluate',
+        payload: body.intent.payload || {},
+        metadata: {
+          ...body.metadata,
+          actor: principal.actor,
+          role: principal.role,
+          scopes: principal.scopes
+        }
+      });
+
+      const preflight = governanceCheck(syntheticEnvelope, {}, principal);
+
+      const planReceiptId = `rcpt_plan_${crypto.randomUUID()}`;
+
+      await auditLogger.log({
+        tenant: body.tenant,
+        command: 'planning.evaluated',
+        payload: { commandId: body.commandId, intent: body.intent },
+        result: { success: true, allowed: preflight.allowed, receiptId: planReceiptId },
+        actor: principal.actor,
+        timestamp: new Date().toISOString()
+      });
+
+      return sendJson(res, 200, {
+        status: 'evaluated',
+        planReceiptId,
+        commandId: body.commandId,
+        tenant: body.tenant,
+        intent: body.intent,
+        governancePreflight: {
+          allowed: preflight.allowed,
+          error: preflight.allowed ? undefined : preflight.error,
+          details: preflight.allowed ? undefined : preflight.details
+        },
+        proposedExecution: preflight.allowed ? (() => {
+          const { brokerPlanningRequest } = require('../sentinel/src/capabilities/broker');
+          const brokered = brokerPlanningRequest({
+            intent: body.intent,
+            tenant: body.tenant,
+            role: principal.role
+          });
+          return {
+            command: syntheticEnvelope.command,
+            executionPolicy: body.executionPolicy || 'standard',
+            evidenceRequired: brokered.routed
+              ? brokered.brokerDecision.evidenceRequired
+              : Boolean(body.evidenceFields && body.evidenceFields.length),
+            requiresApproval: false,
+            readyToExecute: true,
+            capabilityRouting: brokered.routed ? {
+              capabilityId: brokered.brokerDecision.capabilityId,
+              provider: brokered.brokerDecision.provider,
+              endpoint: brokered.proposedEndpoint
+            } : { routed: false, reason: brokered.brokerDecision.reason }
+          };
+        })() : null,
+        evaluatedAt: new Date().toISOString()
+      });
+    });
+  }
+
+  if (pathname === '/api/v1/execution' && req.method === 'POST') {
+    const principal = authenticateCommand(req, '/api/v1/execution', res);
+    if (!principal) return;
+
+    if (!enforceRateLimit(req, '/api/v1/execution', res, principal)) return;
+
+    return readJsonBody(req, async (error, body) => {
+      if (error) {
+        emitSecurityEvent('execution.request.invalid_json', { route: '/api/v1/execution' });
+        return sendJson(res, 400, { status: 'error', error: 'Invalid JSON body' });
+      }
+
+      const missing = [];
+      if (!body.commandId) missing.push('commandId');
+      if (!body.tenant) missing.push('tenant');
+      if (!body.command) missing.push('command');
+      if (!body.executionPolicy) missing.push('executionPolicy');
+      if (!body.metadata || !body.metadata.actor) missing.push('metadata.actor');
+      if (!body.metadata || !body.metadata.role) missing.push('metadata.role');
+      if (!body.metadata || !Array.isArray(body.metadata.scopes)) missing.push('metadata.scopes');
+
+      if (missing.length) {
+        return sendJson(res, 400, {
+          status: 'blocked',
+          error: 'EXECUTION_ENVELOPE_INCOMPLETE',
+          missingFields: missing
+        });
+      }
+
+      let envelope;
+      try {
+        envelope = signExecutionPassport({
+          ...body,
+          source: 'sentinel-execution-layer',
+          metadata: {
+            ...body.metadata,
+            actor: principal.actor,
+            role: principal.role,
+            keyId: principal.keyId,
+            scopes: principal.scopes
+          }
+        });
+      } catch (passportError) {
+        return sendJson(res, 500, {
+          status: 'blocked',
+          error: 'PASSPORT_SIGNING_FAILED',
+          reason: 'missing_execution_passport_secret'
+        });
+      }
+
+      const normalizedEnvelope = normalizeCommandEnvelope(envelope);
+      const idempotency = checkIdempotency(normalizedEnvelope, principal);
+      if (idempotency.conflict) {
+        return sendJson(res, 409, { status: 'blocked', error: 'IDEMPOTENCY_CONFLICT', idempotencyKey: idempotency.idempotencyKey });
+      }
+      if (idempotency.duplicate) {
+        return sendJson(res, idempotency.existing.result.statusCode || 200, {
+          status: idempotency.existing.result.success ? 'executed' : 'blocked',
+          idempotentReplay: true,
+          idempotencyKey: idempotency.idempotencyKey,
+          ...(idempotency.existing.result.data || {})
+        });
+      }
+
+      const preflight = governanceCheck(normalizedEnvelope, {}, principal);
+      if (!preflight.allowed) {
+        emitSecurityEvent('execution.governance.blocked', {
+          route: '/api/v1/execution',
+          tenant: body.tenant,
+          command: body.command,
+          reason: preflight.error
+        });
+        return sendJson(res, preflight.statusCode || 403, {
+          status: 'blocked',
+          error: preflight.error,
+          details: preflight.details
+        });
+      }
+
+      const result = await dispatchCommand(envelope, {
+        buildReceipt: buildWorkflowReceipt,
+        emitSecurityEvent,
+        principal,
+        route: '/api/v1/execution',
+        source: 'sentinel-capability-layer'
+      });
+      rememberIdempotency(idempotency, result);
+
+      if (!result.success) {
+        return sendJson(res, result.statusCode || 400, {
+          status: 'blocked',
+          error: result.error,
+          ...(result.details || {}),
+          ...(result.data || {})
+        });
+      }
+
+      return sendJson(res, result.statusCode || 200, {
+        status: 'executed',
+        executionPolicy: body.executionPolicy,
+        ...(result.data || {})
+      });
+    });
+  }
+
+  if (pathname === '/api/v1/evidence' && req.method === 'POST') {
+    const principal = authenticateCommand(req, '/api/v1/evidence', res);
+    if (!principal) return;
+
+    return readJsonBody(req, async (error, body) => {
+      if (error) {
+        emitSecurityEvent('evidence.request.invalid_json', { route: '/api/v1/evidence' });
+        return sendJson(res, 400, { status: 'error', error: 'Invalid JSON body' });
+      }
+
+      const missing = [];
+      if (!body.commandId) missing.push('commandId');
+      if (!body.tenant) missing.push('tenant');
+      if (!body.evidenceType) missing.push('evidenceType');
+      if (!body.actor) missing.push('actor');
+      if (!body.timestamp) missing.push('timestamp');
+
+      if (missing.length) {
+        return sendJson(res, 400, {
+          status: 'blocked',
+          error: 'EVIDENCE_ENVELOPE_INCOMPLETE',
+          missingFields: missing
+        });
+      }
+
+      const evidenceReceiptId = `rcpt_ev_${crypto.randomUUID()}`;
+
+      await auditLogger.log({
+        tenant: body.tenant,
+        command: 'evidence.submitted',
+        payload: {
+          commandId: body.commandId,
+          evidenceType: body.evidenceType,
+          fields: body.fields || {}
+        },
+        result: { success: true, receiptId: evidenceReceiptId },
+        actor: body.actor,
+        timestamp: new Date().toISOString()
+      });
+
+      emitSecurityEvent('evidence.submitted', {
+        route: '/api/v1/evidence',
+        tenant: body.tenant,
+        commandId: body.commandId,
+        evidenceType: body.evidenceType,
+        actor: body.actor,
+        receiptId: evidenceReceiptId
+      });
+
+      return sendJson(res, 201, {
+        status: 'recorded',
+        receiptId: evidenceReceiptId,
+        commandId: body.commandId,
+        tenant: body.tenant,
+        evidenceType: body.evidenceType,
+        recordedAt: new Date().toISOString()
+      });
+    });
   }
 
   return sendJson(res, 404, {
