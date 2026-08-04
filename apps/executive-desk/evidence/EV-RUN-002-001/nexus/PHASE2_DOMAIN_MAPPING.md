@@ -53,8 +53,8 @@
 
 | Control | Owner | Gate Verified | Evidence |
 |---------|-------|---------------|----------|
-| fail-closed enforcement | Sentinel API / Executive Desk | C2.3 | `NEXUS_C2_3_CHECKPOINT_REPORT.md` |
-| Idempotency | Sentinel API | C2.3 | `NEXUS_C2_3_CHECKPOINT_REPORT.md` |
+| fail-closed enforcement | Sentinel API / Executive Desk | C2.3 | `C2.3_DECISION_RECORD.md` |
+| Idempotency | Sentinel API | C2.3 | `C2.3_DECISION_RECORD.md` |
 | Auth policy (x-api-key) | Executive Desk | C2.3 | `SERVICE_BRIDGE_SPEC_v1.yaml` |
 | Registry governance linkage | Executive Desk | C2.2, C2.3 | `CAPABILITY_REGISTRY_v1.yaml` |
 | Health/readiness contracts | Sentinel API | C2.3, C2.4 | `API_CATALOG_v1.yaml` |
