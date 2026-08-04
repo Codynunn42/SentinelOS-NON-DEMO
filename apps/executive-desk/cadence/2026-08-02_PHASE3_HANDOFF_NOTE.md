@@ -15,7 +15,7 @@
 | C2.3 Decision Record | nexus/C2.3_DECISION_RECORD.md | PASS — retained |
 | C2.4 Decision Record | nexus/C2.4_DECISION_RECORD.md | PASS — SHA256 anchored |
 | C2.4 Checkpoint Report | nexus/C2.4_CHECKPOINT_REPORT.md | 10/10 controls PASS |
-| C2.3 Checkpoint Report | docs/NEXUS_C2_3_CHECKPOINT_REPORT.md | 5/5 controls PASS |
+| C2.3 Controls (Decision Record) | nexus/C2.3_DECISION_RECORD.md | PASS — retained |
 | Domain Mapping Baseline | nexus/PHASE2_DOMAIN_MAPPING.md | Complete |
 | Security Baseline | nexus/PHASE2_SECURITY.md | Complete |
 | Runtime Baseline | nexus/PHASE2_RUNTIME.md | Complete |
