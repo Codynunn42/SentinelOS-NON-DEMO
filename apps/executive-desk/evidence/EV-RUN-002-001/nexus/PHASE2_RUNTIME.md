@@ -35,8 +35,8 @@
 
 | Control | Implementation | Verified | Evidence |
 |---------|---------------|----------|----------|
-| Fail-closed | Request rejected without valid `x-api-key` | C2.3 | `NEXUS_C2_3_CHECKPOINT_REPORT.md` |
-| Idempotency | Workflow executions stable across repeated calls | C2.3 | `NEXUS_C2_3_CHECKPOINT_REPORT.md` |
+| Fail-closed | Request rejected without valid `x-api-key` | C2.3 | `C2.3_DECISION_RECORD.md` |
+| Idempotency | Workflow executions stable across repeated calls | C2.3 | `C2.3_DECISION_RECORD.md` |
 | Audit logging | `auditLogEnabled: true` in every bridge response | C2.4 | `C2.4_CHECKPOINT_REPORT.md` |
 | Drift tracking | `driftTrackingEnabled: true` in every bridge response | C2.4 | `C2.4_CHECKPOINT_REPORT.md` |
 | Risk indexing | `riskIndex` computed per request; `escalationRequired` flag present | C2.4 | Bridge response |
