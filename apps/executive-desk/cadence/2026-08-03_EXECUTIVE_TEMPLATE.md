@@ -1,6 +1,6 @@
 # Executive Weekly Template
 
-Week of: 2026-07-27 to 2026-08-02
+Week of: 2026-08-03 to 2026-08-09
 Prepared by: Executive Desk
 
 ## Current Status
