@@ -8,15 +8,15 @@ ok() { P=$((P+1)); OUT="$OUT\n| PASS | $1 | $2 |"; }
 fail() { F=$((F+1)); OUT="$OUT\n| FAIL | $1 | $2 |"; }
 
 H=$(curl -sS --max-time 5 http://127.0.0.1:3000/health 2>/dev/null || true)
-echo "$H" | grep -q '"status":"ok"' && ok "API /health" "status:ok" || fail "API /health" "no response"
+echo "$H" | grep -Eq '"status"[[:space:]]*:[[:space:]]*"ok"' && ok "API /health" "status:ok" || fail "API /health" "no response"
 
 source "$REPO_ROOT/.env" 2>/dev/null || true
 B=$(curl -sS --max-time 10 -H "x-api-key: ${SENTINEL_API_KEY:-}" -H "Content-Type: application/json" \
   -d '{"tenantId":"sentinelos","workflowId":"wf_execdesk_revision_builder_id_check_script","prompt":"C2.4 probe","metadata":{"objective":"c2_4"}}' \
   http://127.0.0.1:3000/faceplane/openai/execute 2>/dev/null || true)
 echo "$B" | grep -q '"workflowId"' && ok "Bridge workflowId" "present" || fail "Bridge workflowId" "missing"
-echo "$B" | grep -q '"hash"' && ok "Audit hash" "present" || fail "Audit hash" "missing"
-echo "$B" | grep -q '"driftTrackingEnabled":true' && ok "driftTracking" "true" || fail "driftTracking" "false"
+echo "$B" | grep -Eq '"auditEntry"[[:space:]]*:[[:space:]]*\{[^}]*"hash"[[:space:]]*:' && ok "Audit hash" "present" || fail "Audit hash" "missing"
+echo "$B" | grep -Eq '"driftTrackingEnabled"[[:space:]]*:[[:space:]]*true' && ok "driftTracking" "true" || fail "driftTracking" "false"
 
 SPEC="$NEXUS/bridge-specs/SERVICE_BRIDGE_SPEC_v1.yaml"
 test -f "$SPEC" && grep -q "status: Active" "$SPEC" && ok "BridgeSpec Active" "Active" || fail "BridgeSpec Active" "missing/not Active"
