@@ -48,7 +48,7 @@ User Action
 Say:
 
 ```txt
-We do not replace your system. We control what your system is allowed to do.
+We do not replace your system. We coordinate what your system is allowed to do through policy, approval, and audit.
 
 This action looks like a normal workflow step, but SentinelOS treats it as a governed command.
 ```
@@ -63,7 +63,7 @@ deal.execute = BLOCKED until approval
 Close with:
 
 ```txt
-Most systems log after execution. SentinelOS decides before execution.
+Most systems log after execution. SentinelOS checks authorization before execution.
 ```
 
 ## API Shape

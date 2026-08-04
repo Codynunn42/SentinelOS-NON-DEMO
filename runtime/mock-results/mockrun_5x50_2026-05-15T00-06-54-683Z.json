@@ -1,0 +1,174 @@
+{
+  "runId": "mockrun_5x50_2026-05-15T00-06-54-683Z",
+  "timestamp": "2026-05-15T00:06:54.706Z",
+  "iterations": 5,
+  "config": {
+    "commandsPerRun": 50,
+    "approvalRate": 0.35,
+    "blockRate": 0.15,
+    "telemetryState": "LIMITED",
+    "telemetryActivityCount": 12
+  },
+  "aggregateSummary": {
+    "totalCommands": 750,
+    "totalApprovals": 268,
+    "totalBlocks": 89,
+    "avgApprovalRatio": 0.357,
+    "avgBlockRatio": 0.119,
+    "avgTraceCompleteness": 0.04,
+    "totalDriftRecommendations": 0,
+    "durationMs": 10.74
+  },
+  "results": [
+    {
+      "iteration": 1,
+      "durationMs": 3.99,
+      "success": true,
+      "statusCode": 200,
+      "blocked": false,
+      "summary": {
+        "faceplanes": [
+          "ownerfi",
+          "hotelops",
+          "itad"
+        ],
+        "runId": "mock_run_all_1778803614696",
+        "commandCount": 150,
+        "approvalCount": 55,
+        "blockedCount": 21
+      },
+      "iterationSummary": {
+        "commandCount": 150,
+        "approvalCount": 55,
+        "blockedCount": 21,
+        "approvalRatio": 0.367,
+        "blockRatio": 0.14,
+        "driftRecommendationsGenerated": 0,
+        "traceCompleteness": 0.04,
+        "timestamp": "2026-05-15T00:06:54.698Z",
+        "correlationId": "4ea29b1e-6ade-4662-b21c-8396f35d8553"
+      },
+      "error": null
+    },
+    {
+      "iteration": 2,
+      "durationMs": 1.89,
+      "success": true,
+      "statusCode": 200,
+      "blocked": false,
+      "summary": {
+        "faceplanes": [
+          "ownerfi",
+          "hotelops",
+          "itad"
+        ],
+        "runId": "mock_run_all_1778803614699",
+        "commandCount": 150,
+        "approvalCount": 53,
+        "blockedCount": 14
+      },
+      "iterationSummary": {
+        "commandCount": 150,
+        "approvalCount": 53,
+        "blockedCount": 14,
+        "approvalRatio": 0.353,
+        "blockRatio": 0.093,
+        "driftRecommendationsGenerated": 0,
+        "traceCompleteness": 0.04,
+        "timestamp": "2026-05-15T00:06:54.700Z",
+        "correlationId": "8da10e5f-497c-46a6-af4b-96afa3497671"
+      },
+      "error": null
+    },
+    {
+      "iteration": 3,
+      "durationMs": 1.47,
+      "success": true,
+      "statusCode": 200,
+      "blocked": false,
+      "summary": {
+        "faceplanes": [
+          "ownerfi",
+          "hotelops",
+          "itad"
+        ],
+        "runId": "mock_run_all_1778803614701",
+        "commandCount": 150,
+        "approvalCount": 58,
+        "blockedCount": 22
+      },
+      "iterationSummary": {
+        "commandCount": 150,
+        "approvalCount": 58,
+        "blockedCount": 22,
+        "approvalRatio": 0.387,
+        "blockRatio": 0.147,
+        "driftRecommendationsGenerated": 0,
+        "traceCompleteness": 0.04,
+        "timestamp": "2026-05-15T00:06:54.702Z",
+        "correlationId": "59b5675e-5fa8-4003-b9ed-7e1bfb0abd15"
+      },
+      "error": null
+    },
+    {
+      "iteration": 4,
+      "durationMs": 1.59,
+      "success": true,
+      "statusCode": 200,
+      "blocked": false,
+      "summary": {
+        "faceplanes": [
+          "ownerfi",
+          "hotelops",
+          "itad"
+        ],
+        "runId": "mock_run_all_1778803614702",
+        "commandCount": 150,
+        "approvalCount": 53,
+        "blockedCount": 16
+      },
+      "iterationSummary": {
+        "commandCount": 150,
+        "approvalCount": 53,
+        "blockedCount": 16,
+        "approvalRatio": 0.353,
+        "blockRatio": 0.107,
+        "driftRecommendationsGenerated": 0,
+        "traceCompleteness": 0.04,
+        "timestamp": "2026-05-15T00:06:54.703Z",
+        "correlationId": "8a92badf-9397-4b0d-ad7e-d259814194c6"
+      },
+      "error": null
+    },
+    {
+      "iteration": 5,
+      "durationMs": 1.8,
+      "success": true,
+      "statusCode": 200,
+      "blocked": false,
+      "summary": {
+        "faceplanes": [
+          "ownerfi",
+          "hotelops",
+          "itad"
+        ],
+        "runId": "mock_run_all_1778803614704",
+        "commandCount": 150,
+        "approvalCount": 49,
+        "blockedCount": 16
+      },
+      "iterationSummary": {
+        "commandCount": 150,
+        "approvalCount": 49,
+        "blockedCount": 16,
+        "approvalRatio": 0.327,
+        "blockRatio": 0.107,
+        "driftRecommendationsGenerated": 0,
+        "traceCompleteness": 0.04,
+        "timestamp": "2026-05-15T00:06:54.705Z",
+        "correlationId": "9d2ca1cc-cf31-44d2-88ee-1df2a00cb80f"
+      },
+      "error": null
+    }
+  ]
+}

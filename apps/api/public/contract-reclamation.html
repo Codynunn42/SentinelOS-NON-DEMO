@@ -1,0 +1,432 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Contract Reclamation | SentinelOS</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #101214;
+      --panel: #171b1f;
+      --panel-2: #1f252a;
+      --line: #33404a;
+      --text: #eef3f5;
+      --muted: #a8b3ba;
+      --accent: #8bc7bd;
+      --warn: #f0c36b;
+      --danger: #f08a7f;
+      --ok: #9fd27c;
+      --shadow: 0 18px 50px rgba(0, 0, 0, 0.25);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    main {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 28px 0 42px;
+    }
+
+    header {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 20px;
+      align-items: end;
+      margin-bottom: 18px;
+    }
+
+    h1,
+    h2,
+    h3,
+    p {
+      margin: 0;
+    }
+
+    h1 {
+      font-size: 34px;
+      line-height: 1.05;
+      font-weight: 760;
+      letter-spacing: 0;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      max-width: 760px;
+      margin-top: 10px;
+      line-height: 1.45;
+    }
+
+    .command {
+      display: inline-flex;
+      align-items: center;
+      min-height: 38px;
+      padding: 0 12px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: var(--panel);
+      color: var(--accent);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .boundary {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 10px;
+      margin: 20px 0 18px;
+    }
+
+    .boundary-item,
+    .panel,
+    .phase,
+    .record-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+    }
+
+    .boundary-item {
+      padding: 12px;
+      min-height: 82px;
+    }
+
+    .boundary-item strong {
+      display: block;
+      font-size: 13px;
+      margin-bottom: 7px;
+    }
+
+    .boundary-item span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 310px minmax(0, 1fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .panel {
+      padding: 16px;
+    }
+
+    .panel h2 {
+      font-size: 16px;
+      line-height: 1.2;
+      margin-bottom: 12px;
+    }
+
+    .phase-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .phase {
+      width: 100%;
+      padding: 12px;
+      color: var(--text);
+      text-align: left;
+      cursor: pointer;
+      background: var(--panel-2);
+      border-color: transparent;
+    }
+
+    .phase.active {
+      border-color: var(--accent);
+      background: #20302f;
+    }
+
+    .phase small {
+      display: block;
+      color: var(--muted);
+      margin-top: 5px;
+      line-height: 1.3;
+    }
+
+    .content {
+      min-height: 610px;
+    }
+
+    .content-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      align-items: start;
+      margin-bottom: 16px;
+    }
+
+    .content-header h2 {
+      font-size: 24px;
+      margin-bottom: 6px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      padding: 0 10px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--warn);
+      background: #282315;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .record-card {
+      padding: 14px;
+      background: var(--panel-2);
+      box-shadow: none;
+    }
+
+    .record-card strong {
+      display: block;
+      margin-bottom: 7px;
+      line-height: 1.25;
+    }
+
+    .record-card p,
+    .record-card li {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.42;
+    }
+
+    .record-card ul {
+      margin: 8px 0 0;
+      padding-left: 18px;
+    }
+
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .pill {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 5px 8px;
+      color: var(--muted);
+      font-size: 12px;
+      background: #15191d;
+    }
+
+    .ok {
+      color: var(--ok);
+    }
+
+    .warn {
+      color: var(--warn);
+    }
+
+    .danger {
+      color: var(--danger);
+    }
+
+    @media (max-width: 900px) {
+      header,
+      .layout,
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .boundary {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 560px) {
+      main {
+        width: min(100% - 20px, 1180px);
+      }
+
+      h1 {
+        font-size: 28px;
+      }
+
+      .boundary {
+        grid-template-columns: 1fr;
+      }
+
+      .content-header {
+        display: grid;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div>
+        <h1>Contract Reclamation</h1>
+        <p class="subtitle">Governed contract-state reconstruction: organizing contracts, timelines, obligations, authority, amendments, and execution readiness into a reviewable operational record.</p>
+      </div>
+      <div class="command">contract.reclamation.assess</div>
+    </header>
+
+    <section class="boundary" aria-label="Review boundary">
+      <div class="boundary-item"><strong>Prototype Review</strong><span>Assessment lane only. No production activation is implied.</span></div>
+      <div class="boundary-item"><strong>No Legal Advice</strong><span>Evidence organization only. Legal review remains separate.</span></div>
+      <div class="boundary-item"><strong>No Legal Certainty</strong><span>Signals are confidence-bound, not legal conclusions.</span></div>
+      <div class="boundary-item"><strong>Trace Required</strong><span>Every record depends on evidence references and governance trace.</span></div>
+      <div class="boundary-item"><strong>Execution Blocked</strong><span>No execution can occur without explicit approval.</span></div>
+    </section>
+
+    <section class="layout">
+      <aside class="panel">
+        <h2>Faceplanes</h2>
+        <div class="phase-list" id="phaseList"></div>
+      </aside>
+
+      <section class="panel content">
+        <div class="content-header">
+          <div>
+            <h2 id="phaseTitle">Evidence Timeline</h2>
+            <p class="subtitle" id="phaseSubtitle">Chronologically organize contract artifacts, approvals, amendments, communications, and execution events.</p>
+          </div>
+          <span class="badge">review only</span>
+        </div>
+        <div class="grid" id="phaseContent"></div>
+      </section>
+    </section>
+  </main>
+
+  <script>
+    const phases = [
+      {
+        key: 'evidence-timeline',
+        title: 'Evidence Timeline',
+        subtitle: 'Chronologically organize contract artifacts, approvals, amendments, communications, and execution events.',
+        cards: [
+          ['Initial Terms', 'Initial operational proof terms identified for the contract lane.', ['Source: proposal_record', 'Confidence: medium']],
+          ['Runtime Evidence', 'Live proof route and health endpoint evidence is attached as state evidence.', ['Source: deployment_log', 'Confidence: high']],
+          ['Governance Hold', 'Execution remains blocked while review and stabilization lanes continue.', ['Source: doctrine_index', 'Authority: hold_execution']]
+        ]
+      },
+      {
+        key: 'contract-intake',
+        title: 'Contract Intake',
+        subtitle: 'Identify contract family, parties, documents, dates, versions, and source confidence.',
+        cards: [
+          ['Contract Set', 'OwnerFi master services record assembled for review.', ['Documents: 4', 'Versions: 2']],
+          ['Parties', 'OwnerFi and Nunn Corporation are recorded as the working parties.', ['Source confidence: review_ready']],
+          ['Unresolved Inputs', 'Final signed exhibit list and renewal notice recipient still require confirmation.', ['State: review_required']]
+        ]
+      },
+      {
+        key: 'obligation-mapper',
+        title: 'Obligation Mapper',
+        subtitle: 'Map obligations without converting them into legal conclusions.',
+        cards: [
+          ['Proof Access', 'Maintain reviewable proof surface for controlled evaluation.', ['State: evidenced']],
+          ['Governance Trace', 'Preserve audit and governance trace for review-scoped activity.', ['State: evidenced']],
+          ['Renewal Notice', 'Confirm renewal window and notice recipient before any renewal action.', ['State: review_required']]
+        ]
+      },
+      {
+        key: 'authority-reconstruction',
+        title: 'Authority Reconstruction',
+        subtitle: 'Assemble approval and signing evidence without asserting legal validity.',
+        cards: [
+          ['Operator Review', 'Review authority is present for assessment only.', ['No execution authority created']],
+          ['Approval Chain', 'Signer and approval evidence must remain trace-linked.', ['Boundary: evidence_only']],
+          ['Open Gap', 'Executed exhibit list still requires operator confirmation.', ['State: unresolved']]
+        ]
+      },
+      {
+        key: 'amendment-diff',
+        title: 'Amendment Diff',
+        subtitle: 'Track contract-state changes across amendments and versions.',
+        cards: [
+          ['Governance Language', 'Review-scoped proof and audit visibility were clarified.', ['Impact: reduces authority ambiguity']],
+          ['Version Boundary', 'Current reconstructed record is compared against latest review record.', ['No legal conclusion']],
+          ['Open Diff', 'Exhibit changes remain unresolved until source record is confirmed.', ['State: review_required']]
+        ]
+      },
+      {
+        key: 'renewal-risk',
+        title: 'Renewal Risk',
+        subtitle: 'Flag timing and notice issues for controlled review.',
+        cards: [
+          ['Notice Window', 'Renewal notice window cannot be confirmed from current reconstructed record.', ['Severity: medium']],
+          ['Recipient Confirmation', 'Notice recipient requires executed agreement confirmation.', ['Next: operator review']],
+          ['Blocked Action', 'No renewal action may be taken from this assessment alone.', ['Execution: blocked']]
+        ]
+      },
+      {
+        key: 'execution-status',
+        title: 'Execution Status',
+        subtitle: 'Summarize contract-state readiness without authorizing execution.',
+        cards: [
+          ['Contract State', 'Review required. Evidence exists, but unresolved inputs remain.', ['State: review_required']],
+          ['Blocked Actions', 'Legal advice, legal certainty, autonomous interpretation, and execution remain blocked.', ['Authority created: false']],
+          ['Next Controlled Action', 'Validate evidence timeline, obligations, authority signals, amendment changes, and renewal gaps.', ['Mode: review']]
+        ]
+      }
+    ];
+
+    const phaseList = document.getElementById('phaseList');
+    const phaseTitle = document.getElementById('phaseTitle');
+    const phaseSubtitle = document.getElementById('phaseSubtitle');
+    const phaseContent = document.getElementById('phaseContent');
+
+    function renderCards(phase) {
+      phaseContent.innerHTML = phase.cards.map(([title, body, meta]) => `
+        <article class="record-card">
+          <strong>${title}</strong>
+          <p>${body}</p>
+          <div class="meta">
+            ${meta.map((item) => `<span class="pill">${item}</span>`).join('')}
+          </div>
+        </article>
+      `).join('');
+    }
+
+    function activate(index) {
+      const phase = phases[index];
+      phaseTitle.textContent = phase.title;
+      phaseSubtitle.textContent = phase.subtitle;
+      Array.from(phaseList.children).forEach((button, buttonIndex) => {
+        button.classList.toggle('active', buttonIndex === index);
+      });
+      renderCards(phase);
+    }
+
+    phases.forEach((phase, index) => {
+      const button = document.createElement('button');
+      button.className = `phase${index === 0 ? ' active' : ''}`;
+      button.type = 'button';
+      button.innerHTML = `<strong>${index + 1}. ${phase.title}</strong><small>${phase.key}</small>`;
+      button.addEventListener('click', () => activate(index));
+      phaseList.appendChild(button);
+    });
+
+    renderCards(phases[0]);
+  </script>
+</body>
+</html>

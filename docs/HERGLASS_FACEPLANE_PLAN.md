@@ -14,14 +14,14 @@ It is reserved as a Phase 2 Perception Face Plane after the first pilot or stron
 
 ## Purpose
 
-HERGLASS should convert real-world input into governed system actions.
+HERGLASS should convert real-world input into governed system intent.
 
 Product language:
 
 ```txt
-Type -> Execute
-Click -> Execute
-Scan -> Execute
+Type -> Intent -> Governance -> Execution
+Click -> Intent -> Approval -> Execution
+Scan -> Intake -> Review -> Governed Action
 ```
 
 ## Architecture
@@ -76,7 +76,7 @@ Do not lead with:
 Lead with:
 
 ```txt
-Scan real-world inputs to trigger governed system actions.
+Scan real-world inputs to prepare governed system actions.
 ```
 
 ## Example Intent

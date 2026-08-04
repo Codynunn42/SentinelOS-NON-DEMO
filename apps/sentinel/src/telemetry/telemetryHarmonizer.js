@@ -1,6 +1,12 @@
 const crypto = require('crypto');
 const { buildPolicyContext, evaluatePolicy } = require('../governance/policyEngine');
-const { TELEMETRY_STATUSES, createTelemetryResponse } = require('./telemetrySchema');
+const {
+  TELEMETRY_ACTION_MAP,
+  TELEMETRY_STATUSES,
+  createTelemetryResponse,
+  normalizeTelemetryFindingSeverity,
+  summarizeSeverity
+} = require('./telemetrySchema');
 const { hasText } = require('../shared/validation');
 
 function stableStringify(value) {
@@ -21,8 +27,6 @@ function stableStringify(value) {
 function hashObject(value) {
   return crypto.createHash('sha256').update(stableStringify(value)).digest('hex');
 }
-
-const TELEMETRY_ACTION_MAP = {};
 
 function normalizeActivity(item = {}, index = 0) {
   const type = hasText(item.type)
@@ -89,9 +93,16 @@ function classifyActivity(activity, context = {}) {
 
   if (activity.forceBlock) {
     const timestamp = new Date().toISOString();
+    const severity = normalizeTelemetryFindingSeverity({
+      status: TELEMETRY_STATUSES.blocked,
+      riskLevel: activity.riskLevel,
+      forceBlock: true,
+      policy
+    });
     return {
       type: 'BLOCKED',
       status: TELEMETRY_STATUSES.blocked,
+      severity,
       item: activity.type,
       action: activity.action,
       reason: activity.reason,
@@ -107,9 +118,16 @@ function classifyActivity(activity, context = {}) {
 
   if (activity.approvalRequired || policy.approvalRequired) {
     const timestamp = new Date().toISOString();
+    const severity = normalizeTelemetryFindingSeverity({
+      status: TELEMETRY_STATUSES.approval,
+      riskLevel: activity.riskLevel,
+      approvalRequired: true,
+      policy
+    });
     return {
       type: 'APPROVAL_REQUIRED',
       status: TELEMETRY_STATUSES.approval,
+      severity,
       item: activity.type,
       action: activity.action,
       reason: activity.reason || policy.reason || 'Requires approval',
@@ -121,9 +139,15 @@ function classifyActivity(activity, context = {}) {
 
   if (policy.allowed) {
     const timestamp = new Date().toISOString();
+    const severity = normalizeTelemetryFindingSeverity({
+      status: TELEMETRY_STATUSES.safe,
+      riskLevel: activity.riskLevel,
+      policy
+    });
     return {
       type: 'SAFE_TO_SEND',
       status: TELEMETRY_STATUSES.safe,
+      severity,
       item: activity.type,
       action: activity.action,
       reason: activity.reason || 'allowed',
@@ -134,9 +158,15 @@ function classifyActivity(activity, context = {}) {
   }
 
   const timestamp = new Date().toISOString();
+  const severity = normalizeTelemetryFindingSeverity({
+    status: TELEMETRY_STATUSES.blocked,
+    riskLevel: activity.riskLevel,
+    policy
+  });
   return {
     type: 'BLOCKED',
     status: TELEMETRY_STATUSES.blocked,
+    severity,
     item: activity.type,
     action: activity.action,
     reason: policy.reason || activity.reason || 'policy violation',
@@ -163,6 +193,7 @@ function runTelemetryHarmonizer(context = {}) {
   const normalized = activities.map(normalizeActivity);
   const details = normalized.map((activity) => classifyActivity(activity, context));
   const summary = summarize(details);
+  const severitySummary = summarizeSeverity(details);
   const telemetryState = context.telemetryState || 'LIMITED';
   const safeToSend = details.filter((finding) => finding.type === 'SAFE_TO_SEND');
   const requiresApproval = details.filter((finding) => finding.type === 'APPROVAL_REQUIRED');
@@ -173,10 +204,12 @@ function runTelemetryHarmonizer(context = {}) {
     actor: context.principal && context.principal.actor ? context.principal.actor : context.actor || 'sentinel.telemetry@nunn.local',
     tenant: context.tenant || (context.principal && context.principal.tenant) || null,
     summary,
+    severitySummary,
     decisions: details.map((detail) => ({
       action: detail.action,
       item: detail.item,
       status: detail.status,
+      severity: detail.severity,
       reason: detail.reason || null,
       timestamp: detail.timestamp
     })),
@@ -189,6 +222,7 @@ function runTelemetryHarmonizer(context = {}) {
     mode: 'GUARDED_VISIBILITY',
     telemetryState,
     summary,
+    severitySummary,
     details,
     safeToSend,
     requiresApproval,

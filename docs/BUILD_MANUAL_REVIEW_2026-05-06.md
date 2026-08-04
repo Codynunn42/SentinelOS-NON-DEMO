@@ -63,10 +63,10 @@ SentinelOS Core
 V2 shorthand:
 
 ```txt
-SentinelOS = Execution OS
+SentinelOS = Governed Execution Operating Framework
 Face Planes = Interaction Layer
 GaaS = Policy Layer
-Docking = Enforcement Boundary
+Docking = Governance Boundary
 ```
 
 This matches the product doctrine:
