@@ -19,8 +19,8 @@ health -> command -> block -> audit
 ## Opening Line
 
 ```txt
-SentinelOS is a governed execution OS. It sits between user intent and system action.
-We do not replace your system. We control what your system is allowed to do.
+SentinelOS is a governed execution operating framework. It sits between user intent and system action.
+We do not replace your system. We coordinate what your system is allowed to do through policy, approval, and audit.
 ```
 
 ## Flow
@@ -62,7 +62,7 @@ Pause for two seconds.
 Say:
 
 ```txt
-That is the product. SentinelOS decides before execution.
+That is the product. SentinelOS checks authorization before execution.
 ```
 
 5. Show audit.
@@ -78,15 +78,15 @@ The decision is preserved in audit. The proof is not a screenshot. It is system 
 Say:
 
 ```txt
-SentinelOS is the execution OS. Face planes adapt it. GaaS maps the rules. Docking enforces the boundary.
+SentinelOS is the governed execution operating framework. Face planes adapt it. GaaS maps the rules. Docking preserves the boundary.
 ```
 
 ## Two-Minute Narration
 
 ```txt
-SentinelOS is a governed execution OS.
+SentinelOS is a governed execution operating framework.
 
-We do not replace your system. We control what your system is allowed to do.
+We do not replace your system. We coordinate what your system is allowed to do through policy, approval, and audit.
 
 Here is a simple workflow. An application can be submitted, but deal execution is approval-gated.
 
@@ -120,5 +120,5 @@ This is for organizations that need governed execution across existing systems, 
 Answer:
 
 ```txt
-Yes, through a face plane and a GaaS policy pack. SentinelOS remains the execution OS; the face plane and policy pack adapt the system to the mandate.
+Yes, through a face plane and a GaaS policy pack. SentinelOS remains the governed execution operating framework; the face plane and policy pack adapt the system to the mandate.
 ```

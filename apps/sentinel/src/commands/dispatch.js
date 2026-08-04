@@ -6,15 +6,83 @@ const { auditLogger } = require('../audit/auditLogger');
 const { enforceSentinelExecution } = require('../governance/executionGuard');
 const { governanceCheck } = require('../governance/preflight');
 const { buildCommandTrustInput, buildTrustScoreResult } = require('../trustScore');
-const { verifyDecision } = require('../security/signing');
+const { getDecisionSigningKey, verifyDecision } = require('../security/signing');
 const { buildBlockedPathEvent } = require('../shared/telemetryEventBuilder');
 const { createApprovalRequest, getApproval } = require('../approval/approval');
 const crypto = require('crypto');
 
-const SIGNING_KEY = process.env.SENTINEL_SIGNING_KEY || '';
-
 function generateCorrelationId() {
   return `corr_${crypto.randomUUID()}`;
+}
+
+function buildRetryGuidance(reason, details = {}) {
+  if (reason === 'approval_required' || details.approvalRequired) {
+    return {
+      retryable: true,
+      retryWhen: 'approval_approved',
+      concept: 'approval_continuity',
+      nextAction: 'wait_for_approval_then_resubmit_with_approval_id'
+    };
+  }
+
+  if (reason === 'signature_verification_failed') {
+    return {
+      retryable: false,
+      retryWhen: 'never',
+      concept: 'execution_integrity',
+      nextAction: 'regenerate_signed_decision_before_execution'
+    };
+  }
+
+  if (reason === 'execution_guard_block') {
+    return {
+      retryable: false,
+      retryWhen: 'never',
+      concept: 'execution_authority',
+      nextAction: 'route_through_signed_sentinel_command_path'
+    };
+  }
+
+  if (reason === 'policy_blocked' || reason === 'governance_preflight_block') {
+    return {
+      retryable: false,
+      retryWhen: 'policy_context_changes',
+      concept: 'policy_boundary',
+      nextAction: 'correct_scope_role_tenant_or_command_before_retry'
+    };
+  }
+
+  if (reason === 'unknown_route') {
+    return {
+      retryable: false,
+      retryWhen: 'command_registered',
+      concept: 'surface_registry',
+      nextAction: 'register_or_correct_tenant_command_mapping'
+    };
+  }
+
+  return {
+    retryable: false,
+    retryWhen: 'operator_review',
+    concept: 'workflow_control',
+    nextAction: 'review_blocked_path_before_retry'
+  };
+}
+
+function attachRetryGuidance(response, reason, details = {}) {
+  const retry = buildRetryGuidance(reason, details);
+
+  return {
+    ...response,
+    details: {
+      ...(response.details || {}),
+      retry
+    },
+    data: {
+      ...(response.data || {}),
+      retry
+    }
+  };
 }
 
 function emitBlockedPathEvent(envelope, reason, details = {}) {
@@ -52,6 +120,9 @@ async function auditPolicyAllow(envelope, policy, policyContext) {
     },
     result: {
       success: true,
+      signature: policyContext && policyContext.decision ? policyContext.decision.signature : null,
+      signatureVersion: policyContext && policyContext.decision ? policyContext.decision.signatureVersion : null,
+      signedAt: policyContext && policyContext.decision ? policyContext.decision.signedAt : null,
       decision: policy.decision,
       state: policy.state,
       riskLevel: policy.riskLevel,
@@ -142,7 +213,7 @@ async function dispatchCommand(body, context) {
   const executionGuard = enforceSentinelExecution(envelope, context);
 
   if (!executionGuard.allowed) {
-    const failure = {
+    const failure = attachRetryGuidance({
       success: false,
       statusCode: executionGuard.statusCode,
       error: executionGuard.error,
@@ -151,10 +222,11 @@ async function dispatchCommand(body, context) {
         trustScore: 0,
         reasons: ['execution_guard_block']
       }
-    };
+    }, 'execution_guard_block');
 
     emitBlockedPathEvent(envelope, 'execution_guard_block', {
       trustScore: 0,
+      retry: failure.data.retry,
       executionPath: executionGuard.details && executionGuard.details.executionPath
     });
 
@@ -167,24 +239,26 @@ async function dispatchCommand(body, context) {
 
   const governance = governanceCheck(envelope, context && context.signals ? context.signals : {}, context ? context.principal : null);
 
-  // ENV-003: verify decision signature if present
-  if (governance.decision && governance.decision.signature !== undefined) {
-    if (SIGNING_KEY && !verifyDecision(governance.decision, SIGNING_KEY)) {
-      const sigFailure = {
-        success: false,
-        statusCode: 403,
-        error: 'SIGNATURE_VERIFICATION_FAILED',
-        details: { reason: 'tampered_or_unsigned_decision', correlationId }
-      };
-      emitBlockedPathEvent(envelope, 'signature_verification_failed', {
-        trustScore: 0,
-        correlationId,
-        severity: 'critical'
-      });
-      await auditGovernanceBlock(envelope, sigFailure, { trustScore: 0, reasons: ['signature_verification_failed'] });
-      return sigFailure;
-    }
+  const signingKey = getDecisionSigningKey();
+  const decisionVerified = signingKey && governance.decision && verifyDecision(governance.decision, signingKey);
+
+  if (!decisionVerified) {
+    const sigFailure = attachRetryGuidance({
+      success: false,
+      statusCode: 403,
+      error: 'SIGNATURE_VERIFICATION_FAILED',
+      details: { reason: 'tampered_or_unsigned_decision', correlationId }
+    }, 'signature_verification_failed');
+    emitBlockedPathEvent(envelope, 'signature_verification_failed', {
+      trustScore: 0,
+      correlationId,
+      retry: sigFailure.data.retry,
+      severity: 'critical'
+    });
+    await auditGovernanceBlock(envelope, sigFailure, { trustScore: 0, reasons: ['signature_verification_failed'] });
+    return sigFailure;
   }
+
   if (!governance.allowed) {
     const blockedPolicy = governance.policy || (governance.details && governance.details.policy) || {};
     const blockedPolicyContext = governance.policyContext || (governance.details && governance.details.policyContext) || {};
@@ -206,7 +280,7 @@ async function dispatchCommand(body, context) {
         governance.policyContext = blockedPolicyContext;
       } else {
         const approval = approvalUnlock.approval || await createCommandApproval(envelope, blockedPolicy, blockedPolicyContext);
-        const failure = {
+        const failure = attachRetryGuidance({
           success: false,
           statusCode: 423,
           error: 'APPROVAL_REQUIRED',
@@ -227,11 +301,12 @@ async function dispatchCommand(body, context) {
             trustScore: 0,
             reasons: ['approval_required']
           }
-        };
+        }, 'approval_required', { approvalRequired: true });
 
         emitBlockedPathEvent(envelope, blockedPolicy.reason || 'approval_required', {
           approvalId: approval.id,
           approvalStatus: approval.status,
+          retry: failure.data.retry,
           blockingPolicy: blockedPolicy
         });
 
@@ -254,7 +329,7 @@ async function dispatchCommand(body, context) {
       latencyMs: Date.now() - startTime,
       result: { success: false }
     }));
-    const failure = {
+    const failure = attachRetryGuidance({
       success: false,
       statusCode: governance.statusCode,
       error: governance.error,
@@ -263,11 +338,12 @@ async function dispatchCommand(body, context) {
         trustScore: trust.trustScore,
         reasons: trust.reasons
       }
-    };
+    }, 'policy_blocked');
 
     emitBlockedPathEvent(envelope, governance.policy ? governance.policy.reason : 'governance_preflight_block', {
       trustScore: trust.trustScore,
       blockingPolicy: blockedPolicy,
+      retry: failure.data.retry,
       reasons: trust.reasons
     });
 
@@ -294,11 +370,11 @@ async function dispatchCommand(body, context) {
     const mockHandler = mockHandlers[envelope.command];
 
     if (!mockHandler) {
-      return {
+      return attachRetryGuidance({
         success: false,
         statusCode: 400,
         error: `Unknown command: ${envelope.command}`
-      };
+      }, 'unknown_route');
     }
 
     return executeHandler({
@@ -316,20 +392,20 @@ async function dispatchCommand(body, context) {
   const surfaceRegistry = getSurfaceRegistry();
   const surface = surfaceRegistry[envelope.tenant];
   if (!surface) {
-    return {
+    return attachRetryGuidance({
       success: false,
       statusCode: 400,
       error: `Unknown tenant: ${envelope.tenant}`
-    };
+    }, 'unknown_route');
   }
 
   const handler = surface.handlers[envelope.command];
   if (!handler) {
-    return {
+    return attachRetryGuidance({
       success: false,
       statusCode: 400,
       error: `Unknown command: ${envelope.command}`
-    };
+    }, 'unknown_route');
   }
 
   return executeHandler({

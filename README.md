@@ -1,123 +1,101 @@
-# SentinelOS NON-DEMO
+# SentinelOS
 
 **COMM:** Sentinel AI by Cody Nunn | Nunn Cloud
 
-**Client operating repository for the post-demo SentinelOS system.**
+SentinelOS is presented here as a governed operational runtime model focused on directional integrity, bounded execution, legitimacy sequencing, constitutional operational cadence, trust-preserving governance, and proof-based operational continuity.
 
----
+This repository is a public-facing proof and explanation surface. It is meant to show how SentinelOS is framed, governed, and verified without exposing sensitive runtime internals, privileged orchestration flows, sealed memory mechanics, tenant-private details, or internal authority packets.
 
-## Overview
-SentinelOS NON-DEMO is the client-facing operational repository for the system after demo validation. This repository is intended to mature into the governed, production-direction environment where clients, operators, and stakeholders access SentinelOS capabilities beyond the demo lane.
+This public surface remains review-held. It does not imply runtime activation, broad public launch readiness, deployment authority, or expanded externalization authority.
 
-This repository is not intended to be a temporary proof shell. It is the starting point for the real operating surface that clients will use once the platform transitions from demonstration into structured deployment.
+## What SentinelOS Is
 
-## Mission
-SentinelOS is designed to support command-driven execution with governance, accountability, and verification. The NON-DEMO repository exists to carry that model into a client-ready environment.
+SentinelOS is designed to help operational workflows move through visible governance before execution-sensitive actions occur.
 
-Core intent:
-- provide a trustworthy client entry point
-- support governed operational workflows
-- maintain clear deployment and security posture
-- document readiness, controls, and change direction
-- establish a stable foundation for production buildout
+Core principles:
 
-## Client Use Direction
-This is the repository that should back the next stage of system use after demo adoption.
+- Directional integrity before expansion
+- Governance before execution
+- Proof freshness before external claims
+- Bounded execution instead of uncontrolled automation
+- Human-legible audit and receipt posture
+- Reconciliation after meaningful external exposure
 
-Target outcomes:
-- clients access the real operating surface
-- workflows move from demo proof to controlled execution
-- documentation supports stakeholder trust
-- repo discipline reflects enterprise expectations
-- deployment, governance, and security posture remain visible
+## What This Public Surface Shows
 
-## Current State
-The repository is in bootstrap mode.
+This public surface is intentionally curated.
 
-Current condition:
-- repository initialized and active
-- baseline documentation established
-- non-demo positioning defined
-- status reporting path introduced
-- security baseline introduced
+It explains:
 
-## Immediate Priorities
-1. Define runtime and deployment architecture
-2. Add CI/CD workflow coverage
-3. Establish authentication and authorization model
-4. Add health, readiness, and rollback posture
-5. Create implementation backlog for client operating path
-6. Connect release controls and operational reporting
+- The governance philosophy behind SentinelOS
+- The directional integrity model
+- The bounded execution model
+- The proof surface and freshness discipline
+- The constitutional operational cadence
+- The high-level architecture
 
-## Phase Direction
+Start here:
 
-Phase 1 stays focused on the SentinelOS Deal Execution Engine:
+- [Public governance overview](docs/public-governance-overview.md)
+- [Directional integrity](docs/directional-integrity.md)
+- [Bounded execution model](docs/bounded-execution-model.md)
+- [Proof surface explanation](docs/proof-surface-explanation.md)
+- [Constitutional operational cadence](docs/constitutional-operational-cadence.md)
+- [Public architecture](docs/public-architecture.md)
+- [Proof notes](proof/README.md)
 
-- Deal Plane buttons
-- XE Command Plane
-- Control Plane
-- governed `/v1/command`
-- audit, signals, score, and approvals
+## Current Proof Posture
 
-Phase 2 should incorporate HERGLASS as a Perception Face Plane only after the first pilot or strong demo feedback confirms the core governed execution loop.
+SentinelOS has a recorded OwnerFi proof surface and a repeatable verification routine for checking runtime truth before external use.
 
-Reference:
+Any live proof claim must be refreshed before a meeting, share, publication, or buyer-facing statement. A historical proof result is not treated as permanent externalization authority.
 
-- `docs/HERGLASS_FACEPLANE_PLAN.md`
+Required proof threshold before external use:
 
-Phase 2 framing:
-
-```text
-Type -> Execute
-Click -> Execute
-Scan -> Execute
+```yaml
+health_200: required
+proof_200: required
+no_key_audit_401: required
+clean_no_key_proof_rehearsal: required
+buyer_safe_language_confirmed: required
+publication_share_approval: required
 ```
 
-HERGLASS must remain a Face Plane:
+These checks confirm a bounded proof posture only. They do not create runtime activation, merge authority, publication authority, or broader external claims.
 
-```text
-HERGLASS -> Intent -> Control Plane -> Sentinel Core
-```
+## What Is Not Being Claimed
 
-## Suggested Repository Shape
-```text
-.github/
-apps/
-services/
-docs/
-infrastructure/
-security/
-README.md
-SECURITY.md
-STATUS_REPORT.md
-```
+This repository does not claim:
 
-## Governance Direction
-This repository should remain aligned with Sentinel operating principles:
-- secure by default
-- auditable execution
-- production-first discipline
-- role-aware access control
-- visible operational trust signals
-- controlled change management
+- Unbounded autonomous AI
+- Unrestricted memory runtime activation
+- Active billing or funnel automation
+- Fully automated execution without governance
+- Production memory activation
+- Legal certainty, recovery, or litigation outcomes
+- Broad public launch readiness
 
-## Production Readiness Standard
-Before broad client onboarding, this repository should contain:
-- deployment and runtime documentation
-- CI/CD automation
-- security reporting path
-- environment definitions
-- health and readiness checks
-- access model documentation
-- release and rollback guidance
-- incident response references
+## Public / Internal Boundary
 
-## Next Actions
-- add baseline workflow automation
-- define application and service structure
-- document runtime and environment requirements
-- create bootstrap issue backlog
-- begin non-demo client path implementation
+Public:
+
+- Governance philosophy
+- Bounded execution concepts
+- Directional integrity framing
+- Proof freshness discipline
+- High-level architecture
+- Operator-facing cadence
+
+Held internal:
+
+- Memory runtime internals
+- Sealed memory mechanics
+- Privileged orchestration flows
+- Internal authority mappings
+- Sensitive tenant topology
+- Internal review-only packets
+- Experimental runtime logic
 
 ## Status
-SentinelOS NON-DEMO is now established as the **post-demo client repository baseline** and is ready for structured buildout.
+
+SentinelOS is being externalized through bounded, proof-aware publication surfaces. Public material is limited to legitimacy, governance, proof, and high-level architecture until additional operator approval expands the scope.

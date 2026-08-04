@@ -115,7 +115,7 @@ SentinelOS now provides:
 SentinelOS is now operating as:
 
 ```txt
-A governed execution OS that enforces, measures, and proves system behavior.
+A governed execution operating framework that measures, verifies, and preserves system behavior.
 ```
 
 ## Next

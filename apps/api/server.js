@@ -75,6 +75,7 @@ const { TIERS } = require('../sentinel/src/tiers/tierRegistry');
 const PORT = process.env.PORT || 3000;
 const LANDING_PAGE_PATH = path.join(__dirname, 'public', 'index.html');
 const PROOF_PAGE_PATH = path.join(__dirname, 'public', 'proof.html');
+const CONTRACT_RECLAMATION_PAGE_PATH = path.join(__dirname, 'public', 'contract-reclamation.html');
 const MISSION_CONTROL_PATH = path.join(__dirname, 'public', 'mission-control.html');
 const OPERATOR_ESCALATIONS_PATH = path.join(__dirname, 'public', 'operator-escalations.html');
 const STRIPE_CHECKOUT_PAGE_PATH = path.join(__dirname, 'public', 'stripe-checkout.html');
@@ -1390,6 +1391,11 @@ const server = http.createServer(async (req, res) => {
     return sendHtmlFile(res, PROOF_PAGE_PATH);
   }
 
+  if ((pathname === '/contract-reclamation' || pathname === '/contract-reclamation.html') && req.method === 'GET') {
+    auditSurfaceView(req, requestUrl, pathname, 'contract-reclamation');
+    return sendHtmlFile(res, CONTRACT_RECLAMATION_PAGE_PATH);
+  }
+
   if (pathname === '/mission-control' && req.method === 'GET') {
     auditSurfaceView(req, requestUrl, pathname, 'mission-control');
     return sendHtmlFile(res, MISSION_CONTROL_PATH);
@@ -1398,6 +1404,68 @@ const server = http.createServer(async (req, res) => {
   if (pathname === '/operator-escalations' && req.method === 'GET') {
     auditSurfaceView(req, requestUrl, pathname, 'operator-escalations');
     return sendHtmlFile(res, OPERATOR_ESCALATIONS_PATH);
+  }
+
+  if (pathname === '/lead' && req.method === 'POST') {
+    return readJsonBody(req, (error, body) => {
+      if (error) {
+        return sendJson(res, 400, {
+          status: 'error',
+          error: 'invalid_json',
+          message: 'Unable to parse lead submission payload.'
+        });
+      }
+
+      const name = body && typeof body.name === 'string' ? body.name.trim() : '';
+      const email = body && typeof body.email === 'string' ? body.email.trim() : '';
+      const message = body && typeof body.message === 'string' ? body.message.trim() : '';
+
+      if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+        return sendJson(res, 400, {
+          status: 'error',
+          error: 'invalid_email',
+          message: 'A valid email address is required.'
+        });
+      }
+
+      const leadPayload = {
+        name: name || 'anonymous',
+        email,
+        message: message || 'No message provided',
+        route: pathname,
+        source: 'public_landing'
+      };
+
+      emitSecurityEvent('lead.submitted', {
+        route: pathname,
+        source: 'public_landing',
+        emailHash: crypto.createHash('sha256').update(email.toLowerCase()).digest('hex').slice(0, 16),
+        messageLength: message.length
+      });
+
+      auditLogger.log({
+        tenant: getSurfaceTenant(requestUrl, 'ownerfi'),
+        command: 'lead.submitted',
+        payload: leadPayload,
+        result: {
+          success: true,
+          received: true
+        },
+        actor: email,
+        timestamp: new Date().toISOString()
+      }).catch((logError) => {
+        emitSecurityEvent('lead.audit_failed', {
+          error: logError instanceof Error ? logError.message : 'Unknown lead audit failure',
+          route: pathname,
+          source: 'public_landing'
+        });
+      });
+
+      return sendJson(res, 200, {
+        status: 'ok',
+        message: 'Lead captured successfully.'
+      });
+    });
   }
 
   if ((pathname === '/billing/checkout' || pathname === '/billing/checkout.html') && req.method === 'GET') {
