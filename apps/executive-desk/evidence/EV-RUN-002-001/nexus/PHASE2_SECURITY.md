@@ -44,7 +44,7 @@
 | Auth policy enforcement | Bridge response with `auditEntry.hash` | `nexus/` decision records | Each C-gate run |
 | Key rotation | `.env` change log or secret manager rotation record | Outside NEXUS scope — flag for ops | Quarterly or on breach |
 | Audit chain integrity | `previousHash` value in consecutive bridge calls | Bridge response logs | On drift alert |
-| Fail-closed verification | C2.3 checkpoint report | `docs/NEXUS_C2_3_CHECKPOINT_REPORT.md` | Each C2.3 run |
+| Fail-closed verification | C2.3 decision record | `nexus/C2.3_DECISION_RECORD.md` | Each C2.3 run |
 | Threat boundary review | This document + change record | `PHASE2_SECURITY.md` | On scope change |
 
 ---
