@@ -71,6 +71,7 @@ const { createTrace, recordStage, completeTrace, getTrace, listTraces } = requir
 const { enforceSovereignBoot } = require('../sentinel/src/sovereign/sovereignBoot');
 const { resolveTier, classifyOperation } = require('../sentinel/src/tiers/tierResolver');
 const { TIERS } = require('../sentinel/src/tiers/tierRegistry');
+const { buildExecutivePlane } = require('../sentinel/src/planes/executive');
 
 const PORT = process.env.PORT || 3000;
 const LANDING_PAGE_PATH = path.join(__dirname, 'public', 'index.html');
@@ -1483,6 +1484,10 @@ const server = http.createServer(async (req, res) => {
     });
   }
 
+  if (pathname === '/api/v1/executive' && req.method === 'GET') {
+    return sendJson(res, 200, buildExecutivePlane());
+  }
+
   if (pathname === '/ready' && req.method === 'GET') {
     const governanceStatus = buildGovernanceStatus({
       databaseStatus: getDatabaseStatus(),
@@ -2730,9 +2735,15 @@ const server = http.createServer(async (req, res) => {
       }
     }
 
+    const faceplaneStatus = getOpenAIFaceplaneStatus({ tenantId: effectiveTenantId || undefined });
+    const runtimeStatus = faceplaneStatus && faceplaneStatus.runtime ? faceplaneStatus.runtime : null;
+
     return sendJson(res, 200, {
       status: 'ok',
-      faceplane: getOpenAIFaceplaneStatus({ tenantId: effectiveTenantId || undefined })
+      faceplane: faceplaneStatus,
+      openAIKeyFormatValid: runtimeStatus && typeof runtimeStatus.openAIKeyFormatValid === 'boolean'
+        ? runtimeStatus.openAIKeyFormatValid
+        : null
     });
   }
 
@@ -2755,12 +2766,14 @@ const server = http.createServer(async (req, res) => {
         return;
       }
 
-      const result = executeOpenAIWorkflow(body, access.principal);
+      const result = await executeOpenAIWorkflow(body, access.principal);
 
       if (!result.ok) {
         return sendJson(res, result.statusCode || 400, {
           status: 'blocked',
           error: result.error,
+          ...(result.provider ? { provider: result.provider } : {}),
+          ...(result.detail ? { detail: result.detail } : {}),
           ...(result.tokenEstimate ? { tokenEstimate: result.tokenEstimate } : {}),
           ...(result.maxTokenLimit ? { maxTokenLimit: result.maxTokenLimit } : {})
         });
@@ -2793,6 +2806,7 @@ const server = http.createServer(async (req, res) => {
         faceplane: result.faceplane,
         gaasTier: result.gaasTier,
         modelVersion: result.modelVersion,
+        executionMode: result.executionMode,
         risk: result.risk,
         escalationCase: result.escalationCase,
         response: result.response,

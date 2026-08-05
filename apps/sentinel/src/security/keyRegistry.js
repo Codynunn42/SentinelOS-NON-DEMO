@@ -70,12 +70,27 @@ function buildLegacyKeyRecord() {
 
 function getKeyRecords() {
   const configured = parseKeyRegistry();
-  if (configured.length > 0) {
-    return configured;
+  const records = Array.isArray(configured) ? configured.slice() : [];
+  const legacy = buildLegacyKeyRecord();
+
+  if (!legacy) {
+    return records;
   }
 
-  const legacy = buildLegacyKeyRecord();
-  return legacy ? [legacy] : [];
+  const hasMatchingRecord = records.some((record) => {
+    if (!record || typeof record !== 'object') {
+      return false;
+    }
+
+    return (record.secret && record.secret === legacy.secret)
+      || (record.keyId && record.keyId === legacy.keyId);
+  });
+
+  if (!hasMatchingRecord) {
+    records.push(legacy);
+  }
+
+  return records;
 }
 
 function isExpired(record, now = new Date()) {

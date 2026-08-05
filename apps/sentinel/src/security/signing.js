@@ -62,7 +62,11 @@ function verifyDecision(decision, key) {
     .update(payload)
     .digest('hex');
 
-  return crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(decision.signature));
+  try {
+    return crypto.timingSafeEqual(Buffer.from(expected, 'hex'), Buffer.from(decision.signature, 'hex'));
+  } catch (error) {
+    return false;
+  }
 }
 
 module.exports = {

@@ -1,4 +1,5 @@
 const { buildPolicyContext, evaluatePolicy } = require('./policyEngine');
+const { signDecision } = require('../security/signing');
 
 function blocked(statusCode, error, details = {}) {
   return {
@@ -31,30 +32,47 @@ function governanceCheck(envelope, signals = {}, principal = null, options = {})
     signals
   });
   const policy = evaluatePolicy(policyContext);
+  const decision = buildGovernanceDecision(policy, policyContext);
 
   if (!policy.allowed) {
-    return blocked(policy.statusCode || 400, getLegacyError(policy), {
-      ...policy.details,
-      policy,
-      policyContext: {
-        tenant: policyContext.tenant,
-        actor: policyContext.actor,
-        role: policyContext.role,
-        command: policyContext.command,
-        requiredScope: policyContext.requiredScope
-      }
-    });
+    return {
+      ...blocked(policy.statusCode || 400, getLegacyError(policy), {
+        ...policy.details,
+        policy,
+        policyContext: {
+          tenant: policyContext.tenant,
+          actor: policyContext.actor,
+          role: policyContext.role,
+          command: policyContext.command,
+          requiredScope: policyContext.requiredScope
+        }
+      }),
+      decision
+    };
   }
 
   return {
     allowed: true,
     policy,
-    policyContext
+    policyContext,
+    decision
   };
+}
+
+function buildGovernanceDecision(policy, policyContext, key = process.env.SENTINEL_SIGNING_KEY) {
+  const decision = {
+    type: 'governance.decision',
+    policy,
+    policyContext,
+    decision: policy && policy.decision ? policy.decision : 'allow'
+  };
+
+  return signDecision(decision, key);
 }
 
 module.exports = {
   buildPolicyContext,
+  buildGovernanceDecision,
   governanceCheck,
   evaluatePolicy
 };

@@ -9,9 +9,14 @@ const { buildCommandTrustInput, buildTrustScoreResult } = require('../trustScore
 const { verifyDecision } = require('../security/signing');
 const { buildBlockedPathEvent } = require('../shared/telemetryEventBuilder');
 const { createApprovalRequest, getApproval } = require('../approval/approval');
+const { emitSNCSEvidence } = require('../evidence/sncs');
+const { emitAIRoutingEvidence } = require('../evidence/ai');
+const { routeAIRequest } = require('../modules/ai-operations/modelBroker');
 const crypto = require('crypto');
 
-const SIGNING_KEY = process.env.SENTINEL_SIGNING_KEY || '';
+function getSigningKey() {
+  return process.env.SENTINEL_SIGNING_KEY || '';
+}
 
 function generateCorrelationId() {
   return `corr_${crypto.randomUUID()}`;
@@ -41,7 +46,7 @@ async function auditGovernanceBlock(envelope, result, trust = null) {
   });
 }
 
-async function auditPolicyAllow(envelope, policy, policyContext) {
+async function auditPolicyAllow(envelope, policy, policyContext, signedDecision = null) {
   await auditLogger.log({
     correlationId: envelope.correlationId || null,
     tenant: envelope.tenant || null,
@@ -56,7 +61,14 @@ async function auditPolicyAllow(envelope, policy, policyContext) {
       state: policy.state,
       riskLevel: policy.riskLevel,
       approvalRequired: policy.approvalRequired,
-      receiptRequired: policy.receiptRequired
+      receiptRequired: policy.receiptRequired,
+      ...(signedDecision
+        ? {
+            signatureVersion: signedDecision.signatureVersion,
+            signature: signedDecision.signature,
+            signedAt: signedDecision.signedAt
+          }
+        : {})
     },
     actor: policyContext && policyContext.actor ? policyContext.actor : undefined,
     timestamp: new Date().toISOString()
@@ -169,7 +181,8 @@ async function dispatchCommand(body, context) {
 
   // ENV-003: verify decision signature if present
   if (governance.decision && governance.decision.signature !== undefined) {
-    if (SIGNING_KEY && !verifyDecision(governance.decision, SIGNING_KEY)) {
+    const signingKey = getSigningKey();
+    if (signingKey && !verifyDecision(governance.decision, signingKey)) {
       const sigFailure = {
         success: false,
         statusCode: 403,
@@ -275,7 +288,7 @@ async function dispatchCommand(body, context) {
     return failure;
   }
 
-  await auditPolicyAllow(envelope, governance.policy, governance.policyContext);
+  await auditPolicyAllow(envelope, governance.policy, governance.policyContext, governance.decision);
 
   if (envelope.command && envelope.command.startsWith('support.')) {
     return executeHandler({
@@ -358,12 +371,63 @@ async function executeHandler({ envelope, context, governance, startTime, handle
       latencyMs: Date.now() - startTime,
       result
     }));
+    const payloadMetadata = (result && result.data && result.data.result && typeof result.data.result === 'object') ? result.data.result : null;
+    const capabilityId = envelope.payload && typeof envelope.payload.capabilityId === 'string'
+      ? envelope.payload.capabilityId
+      : envelope.metadata && typeof envelope.metadata.capabilityId === 'string'
+        ? envelope.metadata.capabilityId
+        : envelope.command || 'unknown-capability';
+    const providerId = envelope.payload && typeof envelope.payload.providerId === 'string'
+      ? envelope.payload.providerId
+      : envelope.metadata && typeof envelope.metadata.providerId === 'string'
+        ? envelope.metadata.providerId
+        : envelope.tenant || 'local';
+    const moduleEvidence = {
+      type: 'module-evidence',
+      moduleId: envelope.tenant || 'sentinel-runtime',
+      capabilityId,
+      evidenceType: 'cross-provider',
+      status: 'verified'
+    };
+    const evidence = emitSNCSEvidence(context || {}, {
+      sessionId: envelope.correlationId || `session_${crypto.randomUUID()}`,
+      capabilityId,
+      provider: providerId,
+      evidenceType: 'cross-provider',
+      status: 'verified',
+      moduleEvidence,
+      data: {
+        command: envelope.command,
+        tenant: envelope.tenant,
+        trustScore: trust.trustScore,
+        reasons: trust.reasons,
+        payloadMetadata
+      }
+    });
+
+    if (providerId === 'ai-operations' || envelope.command === 'ai-planning') {
+      const routing = routeAIRequest({
+        capabilityId,
+        sessionId: envelope.correlationId || `session_${crypto.randomUUID()}`,
+        dataClassification: envelope.payload && envelope.payload.dataClassification ? envelope.payload.dataClassification : 'internal'
+      });
+
+      emitAIRoutingEvidence({
+        type: 'ai-routing',
+        capabilityId,
+        sessionId: envelope.correlationId || `session_${crypto.randomUUID()}`,
+        modelId: routing.model && routing.model.modelId,
+        providerId: routing.provider && routing.provider.providerId,
+        dataClassification: envelope.payload && envelope.payload.dataClassification ? envelope.payload.dataClassification : 'internal'
+      });
+    }
     const enrichedResult = {
       ...result,
       data: {
         ...(result && result.data && typeof result.data === 'object' ? result.data : {}),
         trustScore: trust.trustScore,
-        reasons: trust.reasons
+        reasons: trust.reasons,
+        evidence
       }
     };
 
