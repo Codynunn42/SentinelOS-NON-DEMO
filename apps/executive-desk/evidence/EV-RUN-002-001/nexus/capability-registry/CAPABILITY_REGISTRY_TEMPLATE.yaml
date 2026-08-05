@@ -1,0 +1,18 @@
+metadata:
+  registryId: "SENTINELOS-NEXUS-CAP-REGISTRY"
+  owner: "Cody Nunn (Interim, role: Executive Desk)"
+  version: "v1"
+capabilities:
+  - id: "NEXUS-WORKFLOW-001"
+    name: "Workflow Engine"
+    sourceSystem: "NEXUS"
+    interface: "REST"
+    lifecycle: "Active"
+    securityClass: "Internal"
+    owningTeam: ""
+    operationalOwner: ""
+    dependencies: []
+    inputContracts: []
+    outputContracts: []
+    policyBindings: []
+    evidenceRefs: []

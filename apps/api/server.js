@@ -48,6 +48,7 @@ const {
   getOpenAIConfigForTenant,
   getOpenAIFaceplaneStatus
 } = require('../sentinel/src/faceplanes/openai/openaiRoutes');
+const { buildSentinelGPTActionOpenAPI } = require('../sentinel/src/faceplanes/openai/gptActionManifest');
 const {
   buildBoundaryOutput,
   executeTaskStep,
@@ -2678,6 +2679,48 @@ const server = http.createServer(async (req, res) => {
       });
 
       return sendJson(res, 200, result);
+    });
+  }
+
+  if (pathname === '/faceplane/openai/gpt-actions/openapi.json' && req.method === 'GET') {
+    return sendJson(res, 200, buildSentinelGPTActionOpenAPI({
+      baseUrl: getPublicBaseUrl(req)
+    }));
+  }
+
+  if (pathname === '/faceplane/openai/gpt-actions/connection' && req.method === 'GET') {
+    const tenantId = requestUrl.searchParams.get('tenantId');
+    const access = authorizeRoute(req, res, '/faceplane/openai/gpt-actions/connection', {
+      tenant: tenantId || undefined,
+      command: 'openai.faceplane.read',
+      requiredScope: 'openai:read'
+    });
+
+    if (!access) {
+      return;
+    }
+
+    const effectiveTenantId = access.principal.tenant === 'platform'
+      ? tenantId
+      : (tenantId || access.principal.tenant);
+    const governanceStatus = buildGovernanceStatus({
+      databaseStatus: getDatabaseStatus(),
+      surfaceRegistry: getSurfaceRegistry(),
+      activeFaceplanes: getActiveFaceplaneSummary()
+    });
+
+    return sendJson(res, governanceStatus.ready ? 200 : 503, {
+      status: governanceStatus.ready ? 'connected' : 'degraded',
+      gptAction: 'connected',
+      sentinel: {
+        service: 'sentinel-api',
+        mode: 'non-demo',
+        ready: governanceStatus.ready,
+        failedChecks: governanceStatus.failedChecks,
+        authority: getAuthorityStatus()
+      },
+      faceplane: getOpenAIFaceplaneStatus({ tenantId: effectiveTenantId || undefined }),
+      timestamp: governanceStatus.timestamp
     });
   }
 

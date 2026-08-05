@@ -1,0 +1,28 @@
+metadata:
+  bridgeId: NEXUS-BRIDGE-001
+  owner: "Cody Nunn (Interim, role: Executive Desk)"
+  status: Active
+service:
+  sourceSystem: SentinelOS
+  targetSystem: NEXUS
+  capabilityId: NEXUS-OPS-001
+contract:
+  requestSchemaRef: none
+  responseSchemaRef: health-v1
+  authPolicyRef: sentinel-to-nexus-bearer-policy
+  timeoutMs: 30000
+  retry:
+    enabled: true
+    maxAttempts: 3
+    backoff: exponential
+  idempotency:
+    required: true
+    keyHeader: Idempotency-Key
+operations:
+  - operationId: SENTINEL-CHECK-NEXUS-HEALTH
+    trigger: Gate2B-B2.12 health verification
+    preconditions: ["valid runtime route", "auth token present"]
+    postconditions: ["health status recorded", "evidence updated"]
+    failureHandling:
+      failMode: fail-closed
+      escalationPath: ["Executive Desk", "Platform Ops"]

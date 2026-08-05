@@ -1,0 +1,28 @@
+metadata:
+  bridgeId: "NEXUS-BRIDGE-001"
+  owner: "Cody Nunn (Interim, role: Executive Desk)"
+  status: "Draft"
+service:
+  sourceSystem: "SentinelOS"
+  targetSystem: "NEXUS"
+  capabilityId: ""
+contract:
+  requestSchemaRef: ""
+  responseSchemaRef: ""
+  authPolicyRef: ""
+  timeoutMs: 30000
+  retry:
+    enabled: true
+    maxAttempts: 3
+    backoff: "exponential"
+  idempotency:
+    required: true
+    keyHeader: "Idempotency-Key"
+operations:
+  - operationId: ""
+    trigger: ""
+    preconditions: []
+    postconditions: []
+    failureHandling:
+      failMode: "fail-closed"
+      escalationPath: []

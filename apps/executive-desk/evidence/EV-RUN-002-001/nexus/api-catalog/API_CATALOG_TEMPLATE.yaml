@@ -1,0 +1,31 @@
+metadata:
+  system: NEXUS
+  owner: "Cody Nunn (Interim, role: Executive Desk)"
+  version: "v1"
+  lastUpdated: "2026-08-01"
+apis:
+  - apiId: NEXUS-API-001
+    name: ""
+    protocol: "REST"
+    baseUrl: ""
+    auth:
+      method: ""
+      scopes: []
+    rateLimits:
+      requestsPerMinute: null
+    versioning:
+      strategy: ""
+      current: ""
+    errorContract:
+      format: ""
+      retryableCodes: []
+    endpoints:
+      - id: ""
+        method: GET
+        path: ""
+        purpose: ""
+        requestSchemaRef: ""
+        responseSchemaRef: ""
+        owner: ""
+        sla: ""
+        evidenceRef: ""

@@ -1,0 +1,19 @@
+=== SentinelAI Tooling Incident Recovery ===
+timestamp_utc: 2026-08-02T11:31:43Z
+
+--- Shell sanity ---
+shell: /bin/zsh
+pwd: /Users/codynunn/SentinelOS/SentinelOS-NON-DEMO/SentinelOS-NON-DEMO
+tip: if prompt is >...., press Ctrl+C once
+
+--- Env checks ---
+SENTINEL_API_KEY=present
+
+--- Port/process checks ---
+
+--- Health probe ---
+health probe failed
+
+--- Bridge probe ---
+bridge probe failed
+
