@@ -1,8 +1,9 @@
 const { computeEvidenceStatus } = require('../evidence/status');
 const { getModuleEvidenceFor } = require('../evidence/module');
 const { getAIRoutingEvidenceFor } = require('../evidence/ai');
+const { buildAutonomousOutcomeBriefing } = require('./autonomousBriefing');
 
-function buildExecutivePlane() {
+function buildExecutivePlane(options = {}) {
   const capabilities = [
     'application.submit',
     'repo-read',
@@ -14,7 +15,7 @@ function buildExecutivePlane() {
     'ai-planning'
   ];
 
-  return {
+  const plane = {
     institutionalModules: [
       {
         moduleId: 'ai-operations',
@@ -30,6 +31,12 @@ function buildExecutivePlane() {
       }
     ]
   };
+
+  if (options.autonomyMode) {
+    plane.autonomousBriefing = buildAutonomousOutcomeBriefing();
+  }
+
+  return plane;
 }
 
 module.exports = {

@@ -1486,7 +1486,8 @@ const server = http.createServer(async (req, res) => {
   }
 
   if (pathname === '/api/v1/executive' && req.method === 'GET') {
-    return sendJson(res, 200, buildExecutivePlane());
+    const autonomyMode = (req.url || '').includes('autonomy=true');
+    return sendJson(res, 200, buildExecutivePlane({ autonomyMode }));
   }
 
   if (pathname === '/ready' && req.method === 'GET') {

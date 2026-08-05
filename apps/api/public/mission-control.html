@@ -1094,7 +1094,18 @@
         <div id="traceList" style="max-height:320px;overflow:auto;"><p class="empty">No traces loaded.</p></div>
       </article>
 
-      <article class="panel span-12">
+      <article class="panel span-6">
+        <div class="panel-head">
+          <h2>Autonomous Briefing</h2>
+          <span id="autonomyChip" class="chip">not loaded</span>
+        </div>
+        <div class="actions" style="margin-bottom:10px;">
+          <button id="loadAutonomyButton" class="secondary" type="button">Load Briefing</button>
+        </div>
+        <div id="autonomousBriefing" style="display:grid;gap:10px;"></div>
+      </article>
+
+      <article class="panel span-6">
         <div class="panel-head">
           <h2>Evidence</h2>
           <span id="windowChip" class="chip">window unknown</span>
@@ -1233,7 +1244,10 @@
       liveAuditFeed: document.getElementById('liveAuditFeed'),
       evidenceFeed: document.getElementById('evidenceFeed'),
       windowChip: document.getElementById('windowChip'),
-      errorText: document.getElementById('errorText')
+      errorText: document.getElementById('errorText'),
+      autonomyChip: document.getElementById('autonomyChip'),
+      loadAutonomyButton: document.getElementById('loadAutonomyButton'),
+      autonomousBriefing: document.getElementById('autonomousBriefing')
     };
 
     el.apiKeyInput.value = state.apiKey;
@@ -1340,6 +1354,44 @@
 
     async function loadApprovals() {
       return api('/approvals');
+    }
+
+    async function loadAutonomousBriefing() {
+      const payload = await api('/api/v1/executive?autonomy=true');
+      const briefing = payload.autonomousBriefing;
+      if (!briefing) {
+        throw new Error('No autonomous briefing available');
+      }
+
+      setChip(el.autonomyChip, briefing.readiness === 'ready-for-declaration' ? 'autonomy ready' : 'autonomy pending', briefing.readiness === 'ready-for-declaration' ? 'good' : 'warn');
+      el.autonomousBriefing.innerHTML = `
+        <div class="metric">
+          <span>Title</span>
+          <strong>${escapeHtml(briefing.title || 'Autonomous Outcome Briefing')}</strong>
+        </div>
+        <div class="metric">
+          <span>Readiness</span>
+          <strong>${escapeHtml(briefing.readiness || 'not-ready')}</strong>
+        </div>
+        <div class="metric">
+          <span>ORV-5 Score</span>
+          <strong>${escapeHtml(String(briefing.orv5 && briefing.orv5.finalScore !== undefined ? briefing.orv5.finalScore : '-'))}</strong>
+        </div>
+        <div class="metric">
+          <span>Latency</span>
+          <strong>${escapeHtml(String(briefing.performance && briefing.performance.generationMs !== undefined ? `${briefing.performance.generationMs}ms` : '-'))}</strong>
+        </div>
+        <div class="metric">
+          <span>Declaration</span>
+          <strong>${escapeHtml(briefing.declaration || 'Pending')}</strong>
+        </div>
+        <div class="signal-list">
+          <div class="signal"><strong>Identity</strong>${escapeHtml(briefing.sections && briefing.sections.identity ? briefing.sections.identity.summary : 'Unavailable')}</div>
+          <div class="signal"><strong>Routing</strong>${escapeHtml(briefing.sections && briefing.sections.routing ? briefing.sections.routing.summary : 'Unavailable')}</div>
+          <div class="signal"><strong>Governance</strong>${escapeHtml(briefing.sections && briefing.sections.governance ? briefing.sections.governance.summary : 'Unavailable')}</div>
+        </div>
+      `;
+      return briefing;
     }
 
     function renderState(payload) {
@@ -2152,6 +2204,10 @@
       el.errorText.textContent = error.message;
     }));
     el.connectSignalsStreamButton.addEventListener('click', connectSignalsStream);
+    el.loadAutonomyButton.addEventListener('click', () => loadAutonomousBriefing().catch((error) => {
+      setChip(el.autonomyChip, 'error', 'bad');
+      el.errorText.textContent = error.message;
+    }));
     el.connectAuditStreamButton.addEventListener('click', connectAuditStream);
     document.getElementById('loadDriftButton').addEventListener('click', () => loadDriftRecommendations().then((p) => writeCommandOutput({ drift: p.summary })).catch((e) => { el.errorText.textContent = e.message; }));
     document.getElementById('runDriftButton').addEventListener('click', () => runDriftAnalysis().then((p) => writeCommandOutput({ driftAnalysis: p.summary })).catch((e) => { el.errorText.textContent = e.message; }));
