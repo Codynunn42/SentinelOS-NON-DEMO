@@ -48,6 +48,7 @@ const {
   getOpenAIConfigForTenant,
   getOpenAIFaceplaneStatus
 } = require('../sentinel/src/faceplanes/openai/openaiRoutes');
+const { buildSentinelGPTActionOpenAPI } = require('../sentinel/src/faceplanes/openai/gptActionManifest');
 const {
   buildBoundaryOutput,
   buildXeChangePacket,
@@ -74,6 +75,7 @@ const { createTrace, recordStage, completeTrace, getTrace, listTraces } = requir
 const { enforceSovereignBoot } = require('../sentinel/src/sovereign/sovereignBoot');
 const { resolveTier, classifyOperation } = require('../sentinel/src/tiers/tierResolver');
 const { TIERS } = require('../sentinel/src/tiers/tierRegistry');
+const { buildExecutivePlane } = require('../sentinel/src/planes/executive');
 
 const PORT = process.env.PORT || 80;
 const LANDING_PAGE_PATH = path.join(__dirname, 'public', 'index.html');
@@ -1572,6 +1574,11 @@ const server = http.createServer(async (req, res) => {
       database: getDatabaseStatus(),
       timestamp: new Date().toISOString()
     });
+  }
+
+  if (pathname === '/api/v1/executive' && req.method === 'GET') {
+    const autonomyMode = (req.url || '').includes('autonomy=true');
+    return sendJson(res, 200, buildExecutivePlane({ autonomyMode }));
   }
 
   if (pathname === '/ready' && req.method === 'GET') {
@@ -3156,6 +3163,48 @@ const server = http.createServer(async (req, res) => {
     });
   }
 
+  if (pathname === '/faceplane/openai/gpt-actions/openapi.json' && req.method === 'GET') {
+    return sendJson(res, 200, buildSentinelGPTActionOpenAPI({
+      baseUrl: getPublicBaseUrl(req)
+    }));
+  }
+
+  if (pathname === '/faceplane/openai/gpt-actions/connection' && req.method === 'GET') {
+    const tenantId = requestUrl.searchParams.get('tenantId');
+    const access = authorizeRoute(req, res, '/faceplane/openai/gpt-actions/connection', {
+      tenant: tenantId || undefined,
+      command: 'openai.faceplane.read',
+      requiredScope: 'openai:read'
+    });
+
+    if (!access) {
+      return;
+    }
+
+    const effectiveTenantId = access.principal.tenant === 'platform'
+      ? tenantId
+      : (tenantId || access.principal.tenant);
+    const governanceStatus = buildGovernanceStatus({
+      databaseStatus: getDatabaseStatus(),
+      surfaceRegistry: getSurfaceRegistry(),
+      activeFaceplanes: getActiveFaceplaneSummary()
+    });
+
+    return sendJson(res, governanceStatus.ready ? 200 : 503, {
+      status: governanceStatus.ready ? 'connected' : 'degraded',
+      gptAction: 'connected',
+      sentinel: {
+        service: 'sentinel-api',
+        mode: 'non-demo',
+        ready: governanceStatus.ready,
+        failedChecks: governanceStatus.failedChecks,
+        authority: getAuthorityStatus()
+      },
+      faceplane: getOpenAIFaceplaneStatus({ tenantId: effectiveTenantId || undefined }),
+      timestamp: governanceStatus.timestamp
+    });
+  }
+
   if (pathname === '/faceplane/openai/config' && req.method === 'GET') {
     const tenantId = requestUrl.searchParams.get('tenantId');
     const access = authorizeRoute(req, res, '/faceplane/openai/config', {
@@ -3210,9 +3259,15 @@ const server = http.createServer(async (req, res) => {
       }
     }
 
+    const faceplaneStatus = getOpenAIFaceplaneStatus({ tenantId: effectiveTenantId || undefined });
+    const runtimeStatus = faceplaneStatus && faceplaneStatus.runtime ? faceplaneStatus.runtime : null;
+
     return sendJson(res, 200, {
       status: 'ok',
-      faceplane: getOpenAIFaceplaneStatus({ tenantId: effectiveTenantId || undefined })
+      faceplane: faceplaneStatus,
+      openAIKeyFormatValid: runtimeStatus && typeof runtimeStatus.openAIKeyFormatValid === 'boolean'
+        ? runtimeStatus.openAIKeyFormatValid
+        : null
     });
   }
 
@@ -3235,12 +3290,14 @@ const server = http.createServer(async (req, res) => {
         return;
       }
 
-      const result = executeOpenAIWorkflow(body, access.principal);
+      const result = await executeOpenAIWorkflow(body, access.principal);
 
       if (!result.ok) {
         return sendJson(res, result.statusCode || 400, {
           status: 'blocked',
           error: result.error,
+          ...(result.provider ? { provider: result.provider } : {}),
+          ...(result.detail ? { detail: result.detail } : {}),
           ...(result.tokenEstimate ? { tokenEstimate: result.tokenEstimate } : {}),
           ...(result.maxTokenLimit ? { maxTokenLimit: result.maxTokenLimit } : {})
         });
@@ -3273,6 +3330,7 @@ const server = http.createServer(async (req, res) => {
         faceplane: result.faceplane,
         gaasTier: result.gaasTier,
         modelVersion: result.modelVersion,
+        executionMode: result.executionMode,
         risk: result.risk,
         escalationCase: result.escalationCase,
         response: result.response,

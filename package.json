@@ -32,8 +32,11 @@
     "check:demo-assets-v2": "node scripts/check-demo-assets-v2.js",
     "check:faceplane-sdk": "node scripts/check-faceplane-sdk.js",
     "check:openai-faceplane": "node scripts/check-openai-faceplane.js",
-    "check:operational-upgrade": "node scripts/check-operational-upgrade-routing.js",
+    "check:openai-connection-readiness": "node scripts/check-openai-connection-readiness.js",
+    "check:openai-live-smoke": "node scripts/check-openai-live-smoke.js",
+    "check:openai-live-smoke:high-risk": "node scripts/check-openai-live-smoke.js --high-risk",
     "check:operator-escalation": "node scripts/check-operator-escalation.js",
+    "check:execution-integrity": "node scripts/check-execution-integrity.js",
     "check:ownerfi-pilot-api": "node scripts/check-ownerfi-pilot-api.js",
     "check:ownerfi-pilot-api:live": "node scripts/check-ownerfi-pilot-api-live.js",
     "check:ownerfi-proof-health": "node scripts/check-ownerfi-proof-health-receipt.js",
@@ -93,9 +96,7 @@
     "simulate:stress-mock-faceplanes": "node scripts/stress-mock-faceplanes.js",
     "db:apply-schema": "node scripts/db-apply-schema.js",
     "db:smoke": "node scripts/db-smoke.js",
-    "verify:executive-desk:fast": "node scripts/sentinel-ai-package.js --fast",
-    "verify:executive-desk:full": "node scripts/sentinel-ai-package.js",
-    "sentinel:package": "pnpm run verify:executive-desk:full"
+    "check:gpt-action-connector": "node scripts/check-gpt-action-connector.js"
   },
   "engines": {
     "node": ">=20"

@@ -9,6 +9,9 @@ on:
 jobs:
   sentinel-api:
     runs-on: ubuntu-latest
+    env:
+      PORT: 3000
+      SENTINEL_HMAC_SECRET: ci-test-hmac-secret
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -18,19 +21,22 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install deps (none yet)
-        run: npm install || true
+      - name: Install deps
+        run: npm ci || npm install
 
       - name: Start API
         env:
-          PORT: 3000
-          SENTINEL_HMAC_SECRET: ci-test-secret
+          SENTINEL_HMAC_SECRET: ci-healthcheck-only
         run: |
-          node apps/api/server.js &
+          nohup node apps/api/server.js > /tmp/sentinel-api.log 2>&1 &
           sleep 2
 
       - name: Run healthcheck
         run: node scripts/healthcheck.js
+
+      - name: Dump API log on failure
+        if: failure()
+        run: tail -n 200 /tmp/sentinel-api.log || true
 
       - name: Done
         run: echo "Sentinel API health validated"

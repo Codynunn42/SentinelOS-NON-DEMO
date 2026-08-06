@@ -1,0 +1,62 @@
+{
+  "envelopeId": "ENV-2026-05-17-001-SNAPSHOT-REMEDIATION-SOLUTIONING",
+  "operation": "snapshot.remediation.solutionize",
+  "title": "Executive Snapshot Remediation Solutioning",
+  "priority": "critical",
+  "posture": "hardening_and_consolidation",
+  "objective": "Ingest docs/EXECUTIVE_SNAPSHOT_2026-05-16.md and produce approval-ready remediation solutions for open issues while explicitly analyzing mutation class, approval requirements, sequencing, and no-bypass controls.",
+  "sourceArtifacts": [
+    "docs/EXECUTIVE_SNAPSHOT_2026-05-16.md",
+    "docs/INFRASTRUCTURE_TRUTH_RECONCILIATION_2026-05-15.md",
+    "docs/REPO_INTEGRITY_STABILIZATION_2026-05-15.md",
+    "docs/PUBLIC_SURFACE_ALIGNMENT_2026-05-16.md",
+    "docs/governance/SENTINELOS_CONSTITUTION.md",
+    "docs/governance/SENTINEL_RUNTIME_EXECUTION_BOUNDARY_SPECIFICATION.md",
+    "docs/governance/TOOL_ACCESS_GOVERNANCE_STANDARD.md",
+    "docs/governance/AUDIT_TRACEABILITY_STANDARD.md"
+  ],
+  "scope": [
+    "Secret configuration risk",
+    "Active worktree continuity",
+    "nunncorp-global-mono repo degradation",
+    "Public surface alignment",
+    "Deploy-authoritative IaC",
+    "Deployment docs revision/image drift",
+    "Buyer-facing pilot kit",
+    "Architecture diagram bundle",
+    "Held governance standards review"
+  ],
+  "tasks": [
+    "Ingest the May 16 executive snapshot as the current attention board.",
+    "Classify each open issue by priority, risk, dependency, mutation class, approval requirement, and safe next action.",
+    "Analyze whether proposed remediation requires no mutation, repo documentation mutation, repo code/IaC mutation, git mutation, runtime/security mutation, destructive cleanup, network/filesystem mutation, or external publication.",
+    "Produce solution options that can be approved individually by the operator.",
+    "Separate approval-ready actions from actions that require additional verification first.",
+    "Preserve fail-closed posture, governance inheritance, runtime truth alignment, and no-bypass execution.",
+    "Do not execute remediation, rotate secrets, modify runtime, clean Git internals, publish externally, or activate held governance standards."
+  ],
+  "rules": [
+    "Classification and solutioning only.",
+    "No runtime mutation.",
+    "No deployment mutation.",
+    "No secret disclosure.",
+    "No destructive cleanup.",
+    "No public publication.",
+    "No tool grants or permission expansion.",
+    "No held governance artifact promotion.",
+    "Treat live runtime as authoritative unless refreshed evidence proves otherwise.",
+    "Any mutation must be returned as an approval request with scope, risk, evidence, rollback or containment posture, and verification plan."
+  ],
+  "mutationAnalysisRequired": true,
+  "approvalMode": "operator_approval_required_before_execution",
+  "outputs": [
+    "docs/SNAPSHOT_REMEDIATION_APPROVAL_PACKET_2026-05-17.md"
+  ],
+  "status": "prepared_for_approval",
+  "preparedAt": "2026-05-17",
+  "validation": [
+    "sed -n '1,220p' docs/EXECUTIVE_SNAPSHOT_2026-05-16.md",
+    "sed -n '220,520p' docs/EXECUTIVE_SNAPSHOT_2026-05-16.md",
+    "git diff --check"
+  ]
+}

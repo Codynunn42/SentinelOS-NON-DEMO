@@ -1,0 +1,31 @@
+metadata:
+  registryId: SENTINELOS-NEXUS-CAP-REGISTRY
+  owner: "Cody Nunn (Interim, role: Executive Desk)"
+  version: "v1"
+capabilities:
+  - id: NEXUS-OPS-001
+    name: Runtime Health Intelligence
+    sourceSystem: NEXUS
+    interface: REST
+    lifecycle: Active
+    securityClass: Internal
+    owningTeam: NEXUS Platform
+    operationalOwner: SentinelOS Executive Desk
+    dependencies: ["NEXUS-API-001"]
+    inputContracts: ["none"]
+    outputContracts: ["health-v1", "ready-v1"]
+    policyBindings: ["fail-closed-on-untrusted-runtime"]
+    evidenceRefs: ["EV-RUN-002-001"]
+  - id: NEXUS-GOV-001
+    name: Evidence Traceability Service
+    sourceSystem: NEXUS
+    interface: REST
+    lifecycle: Active
+    securityClass: Internal
+    owningTeam: NEXUS Governance
+    operationalOwner: SentinelOS Executive Desk
+    dependencies: ["NEXUS-API-001"]
+    inputContracts: ["evidence-record-v1"]
+    outputContracts: ["lineage-record-v1"]
+    policyBindings: ["immutable-evidence-linkage"]
+    evidenceRefs: ["EV-RUN-002-001"]

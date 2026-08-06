@@ -739,8 +739,13 @@
         API Key
         <input id="apiKeyInput" type="password" placeholder="Required for operator endpoints" autocomplete="off">
       </label>
+      <label style="display:flex;align-items:center;gap:8px;white-space:nowrap;margin-top:22px;">
+        <input id="rememberApiKeyInput" type="checkbox">
+        Remember API key on this device
+      </label>
       <button id="refreshButton" type="button">Refresh</button>
       <button id="pollButton" class="secondary" type="button">Start Polling</button>
+      <span id="keyPersistChip" class="chip">Key session-only</span>
     </section>
 
     <section id="pipelineSection" class="panel pipeline-section">
@@ -1117,7 +1122,18 @@
         </div>
       </article>
 
-      <article class="panel span-12">
+      <article class="panel span-6">
+        <div class="panel-head">
+          <h2>Autonomous Briefing</h2>
+          <span id="autonomyChip" class="chip">not loaded</span>
+        </div>
+        <div class="actions" style="margin-bottom:10px;">
+          <button id="loadAutonomyButton" class="secondary" type="button">Load Briefing</button>
+        </div>
+        <div id="autonomousBriefing" style="display:grid;gap:10px;"></div>
+      </article>
+
+      <article class="panel span-6">
         <div class="panel-head">
           <h2>Evidence</h2>
           <span id="windowChip" class="chip">window unknown</span>
@@ -1164,9 +1180,13 @@
 
     renderPipeline(-1);
 
+    const rememberApiKey = localStorage.getItem('sentinelMissionControlRememberKey') === 'true';
     const state = {
-      apiKey: sessionStorage.getItem('sentinelMissionControlKey') || '',
-      tenant: sessionStorage.getItem('sentinelMissionControlTenant') || 'ownerfi',
+      apiKey: rememberApiKey
+        ? (localStorage.getItem('sentinelMissionControlKey') || sessionStorage.getItem('sentinelMissionControlKey') || '')
+        : (sessionStorage.getItem('sentinelMissionControlKey') || ''),
+      tenant: localStorage.getItem('sentinelMissionControlTenant') || sessionStorage.getItem('sentinelMissionControlTenant') || 'ownerfi',
+      rememberApiKey,
       polling: false,
       pollHandle: null,
       busyApproval: null,
@@ -1178,6 +1198,7 @@
 
     const el = {
       apiKeyInput: document.getElementById('apiKeyInput'),
+      rememberApiKeyInput: document.getElementById('rememberApiKeyInput'),
       tenantInput: document.getElementById('tenantInput'),
       refreshButton: document.getElementById('refreshButton'),
       pollButton: document.getElementById('pollButton'),
@@ -1250,15 +1271,52 @@
       connectSignalsStreamButton: document.getElementById('connectSignalsStreamButton'),
       governanceSignals: document.getElementById('governanceSignals'),
       auditStreamChip: document.getElementById('auditStreamChip'),
+      keyPersistChip: document.getElementById('keyPersistChip'),
       connectAuditStreamButton: document.getElementById('connectAuditStreamButton'),
       liveAuditFeed: document.getElementById('liveAuditFeed'),
       evidenceFeed: document.getElementById('evidenceFeed'),
       windowChip: document.getElementById('windowChip'),
-      errorText: document.getElementById('errorText')
+      errorText: document.getElementById('errorText'),
+      autonomyChip: document.getElementById('autonomyChip'),
+      loadAutonomyButton: document.getElementById('loadAutonomyButton'),
+      autonomousBriefing: document.getElementById('autonomousBriefing')
     };
 
     el.apiKeyInput.value = state.apiKey;
     el.tenantInput.value = state.tenant;
+    el.rememberApiKeyInput.checked = state.rememberApiKey;
+
+    function persistAuthState() {
+      sessionStorage.setItem('sentinelMissionControlKey', state.apiKey);
+      sessionStorage.setItem('sentinelMissionControlTenant', state.tenant);
+
+      if (state.rememberApiKey) {
+        localStorage.setItem('sentinelMissionControlRememberKey', 'true');
+        localStorage.setItem('sentinelMissionControlKey', state.apiKey);
+      } else {
+        localStorage.removeItem('sentinelMissionControlRememberKey');
+        localStorage.removeItem('sentinelMissionControlKey');
+      }
+
+      // Tenant preference is non-secret and may be persisted.
+      localStorage.setItem('sentinelMissionControlTenant', state.tenant);
+    }
+
+    function updateKeyPersistChip() {
+      const hasKey = Boolean((state.apiKey || '').trim());
+      if (!state.rememberApiKey) {
+        setChip(el.keyPersistChip, 'Key session-only', 'warn');
+        return;
+      }
+
+      if (hasKey) {
+        setChip(el.keyPersistChip, 'Key saved locally', 'good');
+      } else {
+        setChip(el.keyPersistChip, 'Remember enabled (no key)', 'warn');
+      }
+    }
+
+    updateKeyPersistChip();
 
     function classify(value) {
       if (['stable', 'allow', 'auto', 'low', 'ok', 'connected', 'approved', 'executed'].includes(value)) return 'good';
@@ -1328,6 +1386,44 @@
 
     async function loadApprovals() {
       return api('/approvals');
+    }
+
+    async function loadAutonomousBriefing() {
+      const payload = await api('/api/v1/executive?autonomy=true');
+      const briefing = payload.autonomousBriefing;
+      if (!briefing) {
+        throw new Error('No autonomous briefing available');
+      }
+
+      setChip(el.autonomyChip, briefing.readiness === 'ready-for-declaration' ? 'autonomy ready' : 'autonomy pending', briefing.readiness === 'ready-for-declaration' ? 'good' : 'warn');
+      el.autonomousBriefing.innerHTML = `
+        <div class="metric">
+          <span>Title</span>
+          <strong>${escapeHtml(briefing.title || 'Autonomous Outcome Briefing')}</strong>
+        </div>
+        <div class="metric">
+          <span>Readiness</span>
+          <strong>${escapeHtml(briefing.readiness || 'not-ready')}</strong>
+        </div>
+        <div class="metric">
+          <span>ORV-5 Score</span>
+          <strong>${escapeHtml(String(briefing.orv5 && briefing.orv5.finalScore !== undefined ? briefing.orv5.finalScore : '-'))}</strong>
+        </div>
+        <div class="metric">
+          <span>Latency</span>
+          <strong>${escapeHtml(String(briefing.performance && briefing.performance.generationMs !== undefined ? `${briefing.performance.generationMs}ms` : '-'))}</strong>
+        </div>
+        <div class="metric">
+          <span>Declaration</span>
+          <strong>${escapeHtml(briefing.declaration || 'Pending')}</strong>
+        </div>
+        <div class="signal-list">
+          <div class="signal"><strong>Identity</strong>${escapeHtml(briefing.sections && briefing.sections.identity ? briefing.sections.identity.summary : 'Unavailable')}</div>
+          <div class="signal"><strong>Routing</strong>${escapeHtml(briefing.sections && briefing.sections.routing ? briefing.sections.routing.summary : 'Unavailable')}</div>
+          <div class="signal"><strong>Governance</strong>${escapeHtml(briefing.sections && briefing.sections.governance ? briefing.sections.governance.summary : 'Unavailable')}</div>
+        </div>
+      `;
+      return briefing;
     }
 
     function renderState(payload) {
@@ -2013,8 +2109,9 @@
     async function refresh() {
       state.apiKey = el.apiKeyInput.value.trim();
       state.tenant = el.tenantInput.value.trim() || 'ownerfi';
-      sessionStorage.setItem('sentinelMissionControlKey', state.apiKey);
-      sessionStorage.setItem('sentinelMissionControlTenant', state.tenant);
+      state.rememberApiKey = Boolean(el.rememberApiKeyInput.checked);
+      persistAuthState();
+      updateKeyPersistChip();
       el.errorText.textContent = '';
 
       if (!state.apiKey) {
@@ -2131,6 +2228,17 @@
 
     el.refreshButton.addEventListener('click', refresh);
     el.pollButton.addEventListener('click', togglePolling);
+    el.rememberApiKeyInput.addEventListener('change', () => {
+      state.rememberApiKey = Boolean(el.rememberApiKeyInput.checked);
+      state.apiKey = el.apiKeyInput.value.trim();
+      state.tenant = el.tenantInput.value.trim() || 'ownerfi';
+      persistAuthState();
+      updateKeyPersistChip();
+    });
+    el.apiKeyInput.addEventListener('input', () => {
+      state.apiKey = el.apiKeyInput.value.trim();
+      updateKeyPersistChip();
+    });
     el.runWorkflowButton.addEventListener('click', () => initializeWorkflowFromConsole().catch((error) => {
       setChip(el.commandChip, 'error', 'bad');
       el.errorText.textContent = error.message;
@@ -2190,6 +2298,10 @@
       el.errorText.textContent = error.message;
     }));
     el.connectSignalsStreamButton.addEventListener('click', connectSignalsStream);
+    el.loadAutonomyButton.addEventListener('click', () => loadAutonomousBriefing().catch((error) => {
+      setChip(el.autonomyChip, 'error', 'bad');
+      el.errorText.textContent = error.message;
+    }));
     el.connectAuditStreamButton.addEventListener('click', connectAuditStream);
     document.getElementById('loadDriftButton').addEventListener('click', () => loadDriftRecommendations().then((p) => writeCommandOutput({ drift: p.summary })).catch((e) => { el.errorText.textContent = e.message; }));
     document.getElementById('runDriftButton').addEventListener('click', () => runDriftAnalysis().then((p) => writeCommandOutput({ driftAnalysis: p.summary })).catch((e) => { el.errorText.textContent = e.message; }));

@@ -1,0 +1,195 @@
+cadence/2026-07-28_GPT_V2_REVISION_PACKAGE.md:14:- Placeholder scan posture at PASS (0 unresolved placeholders).
+cadence/2026-07-28_GPT_V2_REVISION_PACKAGE.md:15:- Unverified fields explicitly marked for missing GPT Builder revision metadata.
+cadence/2026-07-28_GPT_V2_REVISION_PACKAGE.md:31:- Keep conditional governance language when any evidence field remains Unverified.
+cadence/2026-07-28_GPT_V2_REVISION_PACKAGE.md:37:- Require placeholder scan and Unverified scan replay after each update cycle.
+cadence/2026-07-28_GPT_V2_REVISION_PACKAGE.md:43:- Include personal-message placeholder structure for first-contact outreach.
+cadence/2026-07-28_GPT_V2_REVISION_PACKAGE.md:62:2. Re-run placeholder and Unverified scans.
+cadence/2026-07-28_GPT_V2_REVISION_PACKAGE.md:69:- Replace all Unverified revision fields with exact values.
+cadence/2026-07-28_GPT_V2_REVISION_PACKAGE.md:74:- Keep explicit Unverified values.
+cadence/EV-RUN-002-CLOSURE-STRATEGY.md:30:2. Unavailable Builder fields remain explicitly Unverified.
+cadence/EV-RUN-002-CLOSURE-STRATEGY.md:49:- The field remains explicitly marked as Unverified.
+cadence/EV-RUN-002-CLOSURE-STRATEGY.md:52:- Validation proceeds under conditional posture when governance rules permit.
+cadence/EV-RUN-002-CLOSURE-STRATEGY.md:56:A metadata bridge query may be executed to determine whether required publication metadata is available through approved system pathways.
+cadence/EV-RUN-002-CLOSURE-STRATEGY.md:64:| revision_id | Unverified |
+cadence/EV-RUN-002-CLOSURE-STRATEGY.md:65:| version_label | Unverified (operator capture required) |
+cadence/EV-RUN-002-CLOSURE-STRATEGY.md:66:| revision_timestamp | Unverified (operator capture required) |
+cadence/EV-RUN-002-CLOSURE-STRATEGY.md:105:- unavailable fields are explicitly marked Unverified,
+cadence/EV-RUN-002-CLOSURE-STRATEGY.md:118:Builder revision_id remains Unverified due to metadata-boundary non-exposure in Builder UI. This is a source-visibility limitation, not a workflow control failure.
+cadence/EV-RUN-002-001-V2-EVIDENCE-RECONCILIATION.md:70:1. Keep revision_id fields explicit as Unverified until Builder exposes a value.
+cadence/EV-RUN-002-001-V2-EVIDENCE-RECORD.md:9:This record reconciles V2 evidence across artifact, publication, and runtime layers while preserving explicit Unverified handling for unavailable Builder revision metadata.
+cadence/EV-RUN-002-001-V2-EVIDENCE-RECORD.md:36:- revision_id: Unverified (not exposed in current Builder UI workflow).
+cadence/EV-RUN-002-001-V2-EVIDENCE-RECORD.md:44:- Placeholder posture: PASS (0 unresolved placeholders)
+cadence/EV-RUN-002-001-V2-EVIDENCE-RECORD.md:45:- Unverified posture: explicit markers retained for Builder revision metadata
+cadence/EV-RUN-002-001-V2-EVIDENCE-RECORD.md:55:- metadataEvidence.posture: conditional
+cadence/EV-RUN-002-001-V2-EVIDENCE-RECORD.md:64:| revision_id | Unverified - Builder not exposed |
+cadence/2026-07-29_AZURE_SENTINEL_CLOUD_POSTURE_RUNDOWN.md:169:6. [ ] Restore or replace the failed Cloudflare tunnel with the approved stable public gateway path.
+cadence/2026-07-27_SUPPORT_TRIAGE_BLOCK_DAILY_RESPONSE.md:23:1. Issue: Final reviewer disposition remains pending for EV-RUN-002-001.
+cadence/2026-07-27_SUPPORT_TRIAGE_BLOCK_DAILY_RESPONSE.md:42:  - If source capture is still unavailable at Wednesday readiness check, escalate to conditional approval language with documented carry-forward task.
+cadence/2026-07-27_SUPPORT_TRIAGE_BLOCK_DAILY_RESPONSE.md:61:- Supports: placeholder PASS with explicit Unverified controls
+cadence/2026-07-30_BOARD_PREREAD_PUBLISH_PACKET_DRAFT.md:11:Executive cadence remains on plan. EV-RUN-002 runtime evidence is complete, placeholder compliance is passed, and governance posture is conditionally ready pending source capture of GPT Builder revision metadata.
+cadence/2026-07-30_BOARD_PREREAD_PUBLISH_PACKET_DRAFT.md:27:- Explicit handling of Unverified evidence states maintained.
+cadence/2026-07-30_BOARD_PREREAD_PUBLISH_PACKET_DRAFT.md:36:1. Approve EV-RUN-002-001 control-cycle closure under conditional governance posture.
+cadence/2026-07-30_BOARD_PREREAD_PUBLISH_PACKET_DRAFT.md:38:- Why now: runtime evidence is complete and placeholder policy is satisfied.
+cadence/2026-07-30_BOARD_PREREAD_PUBLISH_PACKET_DRAFT.md:39:- Condition: GPT Builder revision metadata remains explicitly Unverified until source capture.
+cadence/2026-07-30_BOARD_PREREAD_PUBLISH_PACKET_DRAFT.md:40:- If approved: weekly closeout proceeds on schedule with documented metadata residual.
+cadence/2026-07-30_BOARD_PREREAD_PUBLISH_PACKET_DRAFT.md:46:- If approved: execution continuity remains intact.
+cadence/2026-07-30_BOARD_PREREAD_PUBLISH_PACKET_DRAFT.md:52:- Final placeholder validation: cadence/2026-07-27_FINAL_PLACEHOLDER_VALIDATION_RECORD.md
+cadence/2026-07-30_BOARD_PREREAD_PUBLISH_PACKET_DRAFT.md:59:- Unresolved placeholders: 0
+cadence/2026-07-30_BOARD_PREREAD_PUBLISH_PACKET_DRAFT.md:60:- Unverified markers: 6
+cadence/2026-07-30_BOARD_PREREAD_PUBLISH_PACKET_DRAFT.md:61:- Interpretation: no template markers remain; uncaptured GPT Builder fields are explicitly marked Unverified
+cadence/2026-07-30_BOARD_PREREAD_PUBLISH_PACKET_DRAFT.md:67:- Mitigation: explicit Unverified marking, no inferred values, source-capture follow-up in next governance cycle.
+cadence/2026-07-30_BOARD_PREREAD_PUBLISH_PACKET_DRAFT.md:72:Approve EV-RUN-002-001 weekly gate closure with conditional governance posture, acknowledging explicit Unverified GPT revision metadata pending source capture and confirming that no inferred values were used.
+cadence/2026-07-30_BOARD_PREREAD_PUBLISH_PACKET_DRAFT.md:76:1. Re-run placeholder scan on evidence package and attach output snapshot.
+cadence/2026-07-27_APPROVAL_AND_REVIEW_BLOCK_DAILY_RESPONSE.md:20:  - GPT Builder revision metadata remains explicitly Unverified pending source capture.
+cadence/2026-07-27_APPROVAL_AND_REVIEW_BLOCK_DAILY_RESPONSE.md:46:- Placeholder scan remains PASS (0 unresolved placeholders).
+cadence/2026-07-27_APPROVAL_AND_REVIEW_BLOCK_DAILY_RESPONSE.md:48:- Unverified fields remain explicitly documented with no inferred values.
+cadence/2026-07-27_APPROVAL_AND_REVIEW_BLOCK_DAILY_RESPONSE.md:55:- Supports: placeholder scan PASS, Unverified accounting, conditional governance posture
+cadence/2026-07-27_APPROVAL_AND_REVIEW_BLOCK_DAILY_RESPONSE.md:65:- Supports: reviewer attestation and pending final approval disposition
+cadence/2026-07-27_BOARD_TEMPLATE.md:15:- Variances and rationale: Final approval posting carried into this week pending metadata exact-value lock.
+cadence/2026-07-27_BOARD_TEMPLATE.md:27:- Attestation status: Reviewer attestation completed; final approval disposition pending.
+cadence/2026-07-27_BOARD_TEMPLATE.md:45:   - If approved: Weekly closeout can be signed with no unresolved evidence gating items.
+cadence/2026-07-27_BOARD_TEMPLATE.md:49:   - If approved: Board packet remains in completed standing for identity lock and validation checklist control.
+cadence/2026-07-27_BOARD_TEMPLATE.md:54:- Risk: Metadata placeholders remaining in EV-RUN-002-001 related fields.
+cadence/2026-07-27_BOARD_TEMPLATE.md:65:- Readiness confidence: High pending final disposition closure.
+cadence/2026-07-27_FINAL_PLACEHOLDER_VALIDATION_RECORD.md:9:- No unresolved placeholders or template markers in EV-RUN-002-001 evidence package.
+cadence/2026-07-27_FINAL_PLACEHOLDER_VALIDATION_RECORD.md:13:- rg -n "<EXACT|placeholder|TODO|TBD|REPLACE" evidence/EV-RUN-002-001
+cadence/2026-07-27_FINAL_PLACEHOLDER_VALIDATION_RECORD.md:19:Unresolved placeholders:
+cadence/2026-07-27_FINAL_PLACEHOLDER_VALIDATION_RECORD.md:23:## Unverified Disposition Scan
+cadence/2026-07-27_FINAL_PLACEHOLDER_VALIDATION_RECORD.md:27:- rg -n "\bUnverified\b|UNVERIFIED" evidence/EV-RUN-002-001
+cadence/2026-07-27_FINAL_PLACEHOLDER_VALIDATION_RECORD.md:31:- 6 explicit Unverified markers found.
+cadence/2026-07-27_FINAL_PLACEHOLDER_VALIDATION_RECORD.md:35:- Unverified evidence fields: 5
+cadence/2026-07-27_FINAL_PLACEHOLDER_VALIDATION_RECORD.md:41:- Unverified status marker: 1
+cadence/2026-07-27_FINAL_PLACEHOLDER_VALIDATION_RECORD.md:46:- Requirement: placeholder-like values must be explicitly reported as Unverified rather than silently accepted.
+cadence/2026-07-27_FINAL_PLACEHOLDER_VALIDATION_RECORD.md:47:- Assessment: Passed. All placeholder tokens were removed without inferred values.
+cadence/2026-07-27_FINAL_PLACEHOLDER_VALIDATION_RECORD.md:52:- Runtime execution evidence is complete and placeholder-free.
+cadence/2026-07-27_FINAL_PLACEHOLDER_VALIDATION_RECORD.md:53:- GPT Builder revision metadata remains explicitly Unverified pending source capture from GPT Builder Version/Revision History.
+cadence/2026-07-27_FINAL_PLACEHOLDER_VALIDATION_RECORD.md:65:- Governance status: Explicit Unverified revision fields retained; conditional posture remains active pending source capture.
+cadence/2026-07-27_FINAL_PLACEHOLDER_VALIDATION_RECORD.md:72:- metadataEvidence posture: conditional
+cadence/2026-07-27_FINAL_PLACEHOLDER_VALIDATION_RECORD.md:76:- Governance status: Preserved conditional posture with explicit Unverified handling and no inferred identifiers.
+cadence/2026-07-27_EXECUTIVE_TEMPLATE.md:17:- Runtime deployment status: [PASS / PENDING / FAIL]
+cadence/2026-07-27_EXECUTIVE_TEMPLATE.md:18:- Security validation status: [PASS / PENDING / FAIL]
+cadence/2026-07-27_EXECUTIVE_TEMPLATE.md:20:- Final closure posture: [Approved / Conditional Hold]
+cadence/2026-07-27_EXECUTIVE_TEMPLATE.md:44:  - Verification result: [PASS / FAIL]
+cadence/2026-07-27_EXECUTIVE_TEMPLATE.md:50:- Unverified markers present: [Count]
+cadence/2026-07-27_EXECUTIVE_TEMPLATE.md:51:- Placeholder scan status: [PASS/FAIL]
+cadence/2026-07-27_EXECUTIVE_TEMPLATE.md:66:- Approved now:
+cadence/2026-07-27_TODAY_CLOSEOUT_AND_TUESDAY_HANDOFF.md:14:- Metadata canonicalization and placeholder remediation to explicit Unverified values.
+cadence/2026-07-27_TODAY_CLOSEOUT_AND_TUESDAY_HANDOFF.md:15:- Final placeholder validation record with PASS status and Unverified accounting.
+cadence/2026-07-27_TODAY_CLOSEOUT_AND_TUESDAY_HANDOFF.md:24:- Final reviewer disposition remains pending Friday gate.
+cadence/2026-07-27_TODAY_CLOSEOUT_AND_TUESDAY_HANDOFF.md:31:- Replace Unverified revision fields in evidence files.
+cadence/2026-07-27_TODAY_CLOSEOUT_AND_TUESDAY_HANDOFF.md:33:- Re-run placeholder and Unverified scans.
+cadence/2026-07-27_TODAY_CLOSEOUT_AND_TUESDAY_HANDOFF.md:38:- Retain explicit Unverified values.
+cadence/2026-07-27_TODAY_CLOSEOUT_AND_TUESDAY_HANDOFF.md:40:- Keep conditional governance posture.
+cadence/2026-07-27_TODAY_CLOSEOUT_AND_TUESDAY_HANDOFF.md:46:- rg -n "<EXACT|placeholder|TODO|TBD|REPLACE" evidence/EV-RUN-002-001
+cadence/2026-07-27_TODAY_CLOSEOUT_AND_TUESDAY_HANDOFF.md:48:1. Unverified scan:
+cadence/2026-07-27_TODAY_CLOSEOUT_AND_TUESDAY_HANDOFF.md:50:- rg -n "\bUnverified\b|UNVERIFIED" evidence/EV-RUN-002-001
+cadence/2026-07-27_TODAY_CLOSEOUT_AND_TUESDAY_HANDOFF.md:58:Objective: capture the GPT Builder revision values if they are available, or document the capture attempt and keep the explicit Unverified posture if they are not.
+cadence/2026-07-27_TODAY_CLOSEOUT_AND_TUESDAY_HANDOFF.md:66:- Validation: placeholder scan and Unverified scan rerun
+cadence/2026-07-27_TODAY_CLOSEOUT_AND_TUESDAY_HANDOFF.md:74:- Result: explicit Unverified values retained with conditional governance posture
+cadence/2026-07-31_FRIDAY_GATE_CHAIR_SCRIPT.md:13:Purpose: determine whether weekly control-cycle closure is approved based on runtime evidence integrity, governance posture, and documented residual risk.
+cadence/2026-07-31_FRIDAY_GATE_CHAIR_SCRIPT.md:30:- Placeholder scan status: PASS (0 unresolved placeholders).
+cadence/2026-07-31_FRIDAY_GATE_CHAIR_SCRIPT.md:31:- GPT Builder revision metadata remains explicitly marked Unverified pending source capture.
+cadence/2026-07-31_FRIDAY_GATE_CHAIR_SCRIPT.md:43:- Approve EV-RUN-002-001 control-cycle closure under conditional governance posture.
+cadence/2026-07-31_FRIDAY_GATE_CHAIR_SCRIPT.md:46:1. Does the board accept explicit Unverified marking for uncaptured GPT Builder revision metadata?
+cadence/2026-07-31_FRIDAY_GATE_CHAIR_SCRIPT.md:55:- EV-RUN-002-001 is approved for weekly control-cycle closure.
+cadence/2026-07-31_FRIDAY_GATE_CHAIR_SCRIPT.md:56:- Residual metadata gap is accepted under explicit Unverified governance marking.
+cadence/2026-07-31_FRIDAY_GATE_CHAIR_SCRIPT.md:65:- EV-RUN-002-001 is approved with conditions.
+cadence/2026-07-27_DAILY_EXECUTIVE_BRIEF_BLOCK_RESPONSE.md:13:- EV-RUN-002-001 placeholder compliance remains PASS with explicit Unverified governance handling.
+cadence/2026-07-27_DAILY_EXECUTIVE_BRIEF_BLOCK_RESPONSE.md:25:1. Final reviewer disposition remains pending until Friday gate.
+cadence/2026-07-27_DAILY_EXECUTIVE_BRIEF_BLOCK_RESPONSE.md:33:1. Confirm continuation of conditional governance posture until source capture outcome is recorded.
+cadence/2026-07-27_DAILY_EXECUTIVE_BRIEF_BLOCK_RESPONSE.md:38:- Placeholder posture: PASS (0 unresolved placeholders).
+cadence/2026-07-27_DAILY_EXECUTIVE_BRIEF_BLOCK_RESPONSE.md:39:- Unverified posture: 6 explicit Unverified markers, documented and traceable.
+cadence/2026-07-27_DAILY_EXECUTIVE_BRIEF_BLOCK_RESPONSE.md:53:- Supports: placeholder PASS and Unverified accounting
+cadence/2026-07-27_DAILY_EXECUTIVE_BRIEF_BLOCK_RESPONSE.md:97:Outreach template placeholder:
+cadence/2026-07-27_NEXT_STEPS_EXECUTION_PLAN.md:9:Drive an on-time, board-ready Friday gate outcome with evidence integrity preserved and explicit governance handling of Unverified GPT revision metadata.
+cadence/2026-07-27_NEXT_STEPS_EXECUTION_PLAN.md:22:- Replace Unverified values in:
+cadence/2026-07-27_NEXT_STEPS_EXECUTION_PLAN.md:31:- Retain explicit Unverified values.
+cadence/2026-07-27_NEXT_STEPS_EXECUTION_PLAN.md:49:1. Re-run placeholder scan and Unverified scan.
+cadence/2026-07-27_NEXT_STEPS_EXECUTION_PLAN.md:86:- All unavailable fields remain explicitly marked Unverified with rationale.
+cadence/2026-07-28_TUESDAY_CLOSEOUT_AND_WEDNESDAY_HANDOFF.md:21:- metadataEvidence.revision_id: Unverified
+cadence/2026-07-28_TUESDAY_CLOSEOUT_AND_WEDNESDAY_HANDOFF.md:22:- metadataEvidence.version_label: Unverified
+cadence/2026-07-28_TUESDAY_CLOSEOUT_AND_WEDNESDAY_HANDOFF.md:23:- metadataEvidence.revision_timestamp: Unverified
+cadence/2026-07-28_TUESDAY_CLOSEOUT_AND_WEDNESDAY_HANDOFF.md:45:1. Re-run placeholder and Unverified scans for EV-RUN-002-001.
+cadence/2026-07-28_TUESDAY_CLOSEOUT_AND_WEDNESDAY_HANDOFF.md:53:- rg -n "<EXACT|placeholder|TODO|TBD|REPLACE" apps/executive-desk/evidence/EV-RUN-002-001
+cadence/2026-07-28_TUESDAY_CLOSEOUT_AND_WEDNESDAY_HANDOFF.md:54:- rg -n "\\bUnverified\\b|UNVERIFIED" apps/executive-desk/evidence/EV-RUN-002-001
+cadence/2026-07-27_SENTINEL_ORCHESTRATION_DELIVERABLES.ics:23:DESCRIPTION:Replace all placeholder fields with source-verified metadata values.
+cadence/2026-07-27_MONDAY_BLOCK_QUALITY_AND_EVIDENCE_CONTROL.md:27:- Unverified: evidence expected but not captured.
+cadence/2026-07-27_MONDAY_BLOCK_QUALITY_AND_EVIDENCE_CONTROL.md:36:- Artifact review result (pass, conditional, fail)
+cadence/2026-07-27_MONDAY_BLOCK_QUALITY_AND_EVIDENCE_CONTROL.md:88:- Governance posture is stated as conditional when Unverified metadata persists.
+cadence/2026-07-27_EVIDENCE_REQUEST_LOG_CURRENT_TASK.md:122:- metadataEvidence posture: conditional
+cadence/2026-07-30_BOARD_PREREAD_EMAIL_COVER_NOTE.md:15:Current execution remains on plan. Runtime evidence is complete, placeholder compliance is passed, and governance posture is conditionally ready pending source capture of GPT Builder revision metadata.
+cadence/2026-07-30_BOARD_PREREAD_EMAIL_COVER_NOTE.md:19:- Placeholder scan status: PASS (0 unresolved placeholders).
+cadence/2026-07-30_BOARD_PREREAD_EMAIL_COVER_NOTE.md:20:- Unverified markers: 6 total, explicitly documented for uncaptured GPT Builder metadata.
+cadence/2026-07-30_BOARD_PREREAD_EMAIL_COVER_NOTE.md:22:- Decision request: approve EV-RUN-002-001 control-cycle closure under conditional governance posture.
+cadence/2026-07-30_BOARD_PREREAD_EMAIL_COVER_NOTE.md:26:1. Approve EV-RUN-002-001 control-cycle closure under conditional governance posture.
+cadence/2026-07-30_BOARD_PREREAD_EMAIL_COVER_NOTE.md:33:- Unverified fields are explicitly marked and traceable in package artifacts.
+cadence/2026-07-30_BOARD_PREREAD_EMAIL_COVER_NOTE.md:37:Personal communication placeholder for outreach notes:
+cadence/2026-07-27_TODAY_CADENCE_ACTIONS.md:27:- Enumerate all placeholder fields still requiring exact values.
+cadence/2026-07-27_TODAY_CADENCE_ACTIONS.md:128:  - GPT revision placeholders remediated to explicit Unverified values (no inferred data used).
+cadence/2026-07-27_TODAY_CADENCE_ACTIONS.md:135:- Placeholder scan result: PASS (0 unresolved placeholders).
+cadence/2026-07-27_TODAY_CADENCE_ACTIONS.md:136:- Unverified markers: 6 total (5 evidence fields + 1 source-capture status marker).
+cadence/2026-07-27_TODAY_CADENCE_ACTIONS.md:137:- Review standard result: Passed (all placeholder-like values explicitly marked Unverified).
+cadence/2026-07-27_TODAY_CADENCE_ACTIONS.md:138:- Approval posture: Conditional ready for governance review pending future GPT Builder source capture.
+cadence/2026-07-31_EXECUTIVE_WORKING_BLOCK.md:20:- Explicit handling of Unverified evidence states maintained.
+cadence/2026-07-31_EXECUTIVE_WORKING_BLOCK.md:45:- Root cause of misses: Exact-value metadata placeholders and final sign-off timing.
+cadence/2026-07-31_EXECUTIVE_WORKING_BLOCK.md:46:- Approved carry-forward items: EV-RUN-002-001 disposition closure and metadata exact-value normalization.
+cadence/2026-07-31_EXECUTIVE_WORKING_BLOCK.md:88:- Confidence level: High (pending final EV-RUN-002-001 disposition).
+cadence/2026-07-31_EXECUTIVE_WORKING_BLOCK.md:121:   - Output: All placeholder fields replaced with source-verified values.
+cadence/2026-07-31_EXECUTIVE_WORKING_BLOCK.md:164:1. Validate EV-RUN-002-001 metadata placeholders and assign replacement owners today.
+cadence/2026-07-27_EV-RUN-002-001_METADATA_REPLACEMENT_CHECKLIST.md:9:Capture and apply exact GPT Builder revision metadata values so all current Unverified revision fields can be closed without inferred values.
+cadence/2026-07-27_EV-RUN-002-001_METADATA_REPLACEMENT_CHECKLIST.md:21:- Current value: Unverified
+cadence/2026-07-27_EV-RUN-002-001_METADATA_REPLACEMENT_CHECKLIST.md:30:- Current value: Unverified
+cadence/2026-07-27_EV-RUN-002-001_METADATA_REPLACEMENT_CHECKLIST.md:39:- Current value: Unverified
+cadence/2026-07-27_EV-RUN-002-001_METADATA_REPLACEMENT_CHECKLIST.md:40:- Required action: Replace with exact builder timestamp if present in revision history; if no timestamp is exposed, keep explicit Unverified and record capture limitation.
+cadence/2026-07-27_EV-RUN-002-001_METADATA_REPLACEMENT_CHECKLIST.md:57:- Current value: Unverified
+cadence/2026-07-27_EV-RUN-002-001_METADATA_REPLACEMENT_CHECKLIST.md:66:- Current value: Unverified
+cadence/2026-07-27_EV-RUN-002-001_METADATA_REPLACEMENT_CHECKLIST.md:106:  - If timestamp is unavailable in Builder UI, keep revision_timestamp as Unverified and log reason.
+cadence/2026-07-27_EV-RUN-002-001_METADATA_REPLACEMENT_CHECKLIST.md:129:  - rg -n "<EXACT|placeholder|TODO|TBD|REPLACE" evidence/EV-RUN-002-001
+cadence/2026-07-27_EV-RUN-002-001_METADATA_REPLACEMENT_CHECKLIST.md:130:- Unverified scan:
+cadence/2026-07-27_EV-RUN-002-001_METADATA_REPLACEMENT_CHECKLIST.md:131:  - rg -n "\\bUnverified\\b|UNVERIFIED" evidence/EV-RUN-002-001
+cadence/2026-07-27_EV-RUN-002-001_METADATA_REPLACEMENT_CHECKLIST.md:136:- Include: timestamp, owner, fields captured, remaining Unverified fields (if any), manifest regeneration confirmation.
+cadence/2026-07-27_EV-RUN-002-001_METADATA_REPLACEMENT_CHECKLIST.md:152:- gpt_revision_id is no longer Unverified in runtime_metadata.yaml and request_response.json.
+cadence/2026-07-27_EV-RUN-002-001_METADATA_REPLACEMENT_CHECKLIST.md:153:- revision_id and version_label are no longer Unverified in gpt_revision_metadata.yaml.
+cadence/2026-07-27_EV-RUN-002-001_METADATA_REPLACEMENT_CHECKLIST.md:168:- All placeholder tokens replaced or explicitly documented as unavailable with source note.
+cadence/2026-07-27_EV-RUN-002-001_METADATA_REPLACEMENT_CHECKLIST.md:175:- Final placeholder scan result: PASS (0 unresolved placeholders).
+cadence/2026-07-27_EV-RUN-002-001_METADATA_REPLACEMENT_CHECKLIST.md:176:- Remaining metadata gap: GPT Builder revision values remain explicitly Unverified pending source capture.
+cadence/2026-07-29_LAUNCH_SEQUENCE_OWNER_RUNBOOK.md:55:- [ ] Connect Executive Desk to the approved hosted Sentinel AI gateway.
+cadence/2026-07-27_BOARD_PREREAD_SKELETON.md:22:- Explicit handling of Unverified evidence states maintained.
+cadence/2026-07-27_BOARD_PREREAD_SKELETON.md:37:- Placeholder remediation completed with explicit Unverified governance marking for uncaptured GPT Builder revision metadata.
+cadence/2026-07-27_BOARD_PREREAD_SKELETON.md:43:- Placeholder compliance: Pass (0 unresolved placeholders)
+cadence/2026-07-27_BOARD_PREREAD_SKELETON.md:44:- GPT Builder revision completeness: Pending source capture (explicitly Unverified)
+cadence/2026-07-27_BOARD_PREREAD_SKELETON.md:56:1. Decision: Approve EV-RUN-002-001 control-cycle closure under conditional governance posture.
+cadence/2026-07-27_BOARD_PREREAD_SKELETON.md:58:- Why now: Runtime evidence is complete and placeholder policy is satisfied.
+cadence/2026-07-27_BOARD_PREREAD_SKELETON.md:59:- Condition: GPT Builder revision metadata remains explicitly Unverified until captured.
+cadence/2026-07-27_BOARD_PREREAD_SKELETON.md:60:- If approved: Weekly closeout can proceed on schedule with documented residual metadata gap.
+cadence/2026-07-27_BOARD_PREREAD_SKELETON.md:66:- If approved: Execution continuity remains intact.
+cadence/2026-07-27_BOARD_PREREAD_SKELETON.md:73:- Mitigation: Explicit Unverified marking, no inferred values, source-capture action queued.
+cadence/2026-07-27_BOARD_PREREAD_SKELETON.md:78:- Motion: Approve EV-RUN-002-001 weekly gate closure with conditional governance posture, acknowledging explicit Unverified GPT revision metadata pending source capture and no inferred values used.
+cadence/2026-07-27_BOARD_PREREAD_SKELETON.md:84:- Escalation trigger: Any regression from placeholder scan PASS or manifest integrity drift
+cadence/2026-07-28_EXECUTIVE_DESK_REVISION_ATTEMPT.md:63:This revision attempt is approved to publish with the current update wave:
+cadence/2026-07-28_EXECUTIVE_DESK_REVISION_ATTEMPT.md:90:- Keep explicit Unverified fields
+cadence/2026-07-28_EXECUTIVE_DESK_REVISION_ATTEMPT.md:96:- metadataEvidence.revision_id: Unverified
+cadence/2026-07-28_EXECUTIVE_DESK_REVISION_ATTEMPT.md:97:- metadataEvidence.version_label: Unverified
+cadence/2026-07-28_EXECUTIVE_DESK_REVISION_ATTEMPT.md:98:- metadataEvidence.revision_timestamp: Unverified
+cadence/2026-07-28_FACEPLANE_METADATA_EVIDENCE_OBJECTIVE.md:13:- Preserves Unverified posture without inference until source values are supplied.
+cadence/2026-07-28_FACEPLANE_METADATA_EVIDENCE_OBJECTIVE.md:21:- revision_id: Captured | Unverified
+cadence/2026-07-28_FACEPLANE_METADATA_EVIDENCE_OBJECTIVE.md:22:- version_label: Captured | Unverified
+cadence/2026-07-28_FACEPLANE_METADATA_EVIDENCE_OBJECTIVE.md:23:- revision_timestamp: Captured | Unverified
+cadence/2026-07-28_FACEPLANE_METADATA_EVIDENCE_OBJECTIVE.md:38:- posture: ready | conditional | blocked
+cadence/2026-07-28_FACEPLANE_METADATA_EVIDENCE_OBJECTIVE.md:49:  "prompt": "You are Sentinel Executive Desk. Expose revision metadata evidence status for EV-RUN-002-001 V2 now. If revision_id is not exposed, explicitly mark it Unverified, explain the boundary, and ask the operator for the exact response values needed to close the gap.",
+cadence/2026-07-28_FACEPLANE_METADATA_EVIDENCE_OBJECTIVE.md:66:  "status": "ok|pending_review",
+cadence/2026-07-28_FACEPLANE_METADATA_EVIDENCE_OBJECTIVE.md:77:    "revision_id": "Unverified|<value>",
+cadence/2026-07-28_FACEPLANE_METADATA_EVIDENCE_OBJECTIVE.md:78:    "version_label": "Unverified|<value>",
+cadence/2026-07-28_FACEPLANE_METADATA_EVIDENCE_OBJECTIVE.md:79:    "revision_timestamp": "Unverified|<value>",
+cadence/2026-07-28_GPT_V2_INSTRUCTIONS.md:23:- SentinelOS executes approved operations and returns structured evidence.
+cadence/2026-07-28_GPT_V2_INSTRUCTIONS.md:48:If data is unavailable, mark it explicitly as Unverified. Do not infer values.
+cadence/2026-07-28_GPT_V2_INSTRUCTIONS.md:53:- Preserve explicit Unverified markers until source capture is complete.
+cadence/2026-07-28_GPT_V2_INSTRUCTIONS.md:55:- Re-run placeholder and Unverified scans after each update cycle.
+cadence/2026-07-28_GPT_V2_INSTRUCTIONS.md:56:- Keep a conditional governance posture whenever any critical metadata remains Unverified.
+cadence/2026-07-28_GPT_V2_INSTRUCTIONS.md:74:- Keep a personal voice placeholder for first-contact notes.
+cadence/2026-07-27_MOB_WEEKLY_CADENCE.md:19:- GPT revision metadata placeholder structure staged for exact builder values.
+cadence/2026-07-27_MOB_WEEKLY_CADENCE.md:24:- Replace all remaining exact-value placeholders in metadata where required.
+cadence/2026-07-27_MOB_WEEKLY_CADENCE.md:133:  - Publish concise status snapshot (progress, risks, decisions pending).
+cadence/2026-07-27_MOB_WEEKLY_CADENCE.md:134:  - Include placeholder scan posture and Unverified governance posture.
+cadence/2026-07-27_MOB_WEEKLY_CADENCE.md:157:- 2026-07-27: Weekly cadence reset approved; templates refreshed for active week.
+cadence/2026-07-27_MOB_WEEKLY_CADENCE.md:163:- Carry-forward list approved for next week.

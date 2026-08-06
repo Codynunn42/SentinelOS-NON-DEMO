@@ -1,0 +1,47 @@
+{
+  "envelopeId": "ENV-2026-05-15-002-REPO-INTEGRITY",
+  "operation": "repository.integrity.stabilize",
+  "title": "Repository Integrity Stabilization",
+  "priority": "high",
+  "posture": "hardening_and_consolidation",
+  "objective": "Stabilize repository integrity across nunncorp-global-mono, SentinelOS NON-DEMO, deployment lineage, and build continuity without destructive cleanup.",
+  "scope": [
+    "nunncorp-global-mono",
+    "SentinelOS NON-DEMO",
+    "deployment lineage",
+    "build continuity"
+  ],
+  "tasks": [
+    "Snapshot current repo state before modification.",
+    "Identify stale lock files, duplicated git internals, hanging operations, and workspace integrity anomalies.",
+    "Perform non-destructive repo integrity verification.",
+    "Run git fsck where safe.",
+    "Perform controlled lock cleanup only after explicit approval and backup/fresh-clone confirmation.",
+    "Validate git status, branch integrity, commit lineage, and worktree continuity.",
+    "Produce Repo Integrity Report, Drift Classification, and recommended remediation boundaries."
+  ],
+  "rules": [
+    "No destructive reset.",
+    "No forced history rewrite.",
+    "Preserve audit lineage.",
+    "Preserve active worktree integrity.",
+    "Governance continuity first.",
+    "Do not delete lock files without explicit operator approval."
+  ],
+  "outputs": [
+    "docs/REPO_INTEGRITY_STABILIZATION_2026-05-15.md"
+  ],
+  "status": "executed_read_only",
+  "executedAt": "2026-05-15",
+  "validation": [
+    "git status --short",
+    "git branch --show-current",
+    "git log -1 --oneline",
+    "git fsck --no-progress",
+    "find .git -maxdepth 2 -name '*.lock' -o -name '* 2' -o -name '* 3' -o -name '* 4'",
+    "git status --short --untracked-files=no",
+    "git rev-parse --show-toplevel",
+    "du -sh .git"
+  ],
+  "cleanupAuthorization": "not_authorized"
+}

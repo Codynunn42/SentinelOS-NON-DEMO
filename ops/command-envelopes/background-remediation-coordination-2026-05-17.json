@@ -1,0 +1,137 @@
+{
+  "envelopeId": "ENV-2026-05-17-002-BACKGROUND-REMEDIATION-COORDINATION",
+  "operation": "background.remediation.coordinate",
+  "title": "Background Remediation Coordination",
+  "priority": "high",
+  "posture": "parallel_coordination_with_governance_gates",
+  "objective": "Coordinate implementation of approved snapshot remediation items in the background while foreground governance documentation and planning work continues.",
+  "sourceArtifacts": [
+    "docs/SNAPSHOT_REMEDIATION_APPROVAL_PACKET_2026-05-17.md",
+    "docs/EXECUTIVE_SNAPSHOT_2026-05-16.md"
+  ],
+  "coordinationMode": "background_queue",
+  "foregroundConstraint": "Do not block current governance documentation work unless an implementation item needs explicit operator approval, runtime mutation, destructive cleanup, external publication, or branch/commit action.",
+  "tasks": [
+    "Create a background implementation queue from the approval packet.",
+    "Separate items into read-only preparation, repo documentation work, git checkpoint work, runtime/security work, network/filesystem work, and destructive cleanup.",
+    "Prepare implementation plans and diffs in the background where safe.",
+    "Do not execute gated mutations without explicit operator approval.",
+    "Return approval prompts only when an item is ready to cross a mutation boundary.",
+    "Preserve the active foreground workstream."
+  ],
+  "backgroundQueue": [
+    {
+      "item": "A1.2",
+      "title": "Staged worktree checkpoint by artifact class",
+      "mode": "prepare_only_until_approval",
+      "mutationClass": "git_mutation",
+      "backgroundAction": "Plan checkpoint batches and identify exact file groups without staging, committing, resetting, or altering the index.",
+      "approvalRequiredBefore": [
+        "git add",
+        "git commit",
+        "git restore --staged",
+        "branch creation",
+        "push"
+      ]
+    },
+    {
+      "item": "A2.1",
+      "title": "Redacted secret inventory report",
+      "mode": "read_only_preparation",
+      "mutationClass": "none_to_repo_doc_mutation",
+      "backgroundAction": "Prepare a redacted inventory plan listing secret names and locations only. Do not print or persist secret values.",
+      "approvalRequiredBefore": [
+        "runtime secret read that may reveal values",
+        "secret rotation",
+        "env var update"
+      ]
+    },
+    {
+      "item": "A3.1/A3.2",
+      "title": "Fresh clone comparison for nunncorp-global-mono",
+      "mode": "prepare_only_until_network_filesystem_approval",
+      "mutationClass": "network_or_filesystem_mutation",
+      "backgroundAction": "Prepare comparison checklist and target directory plan. Do not clone or modify filesystem outside approved workspace without approval.",
+      "approvalRequiredBefore": [
+        "network clone",
+        "filesystem copy outside workspace",
+        "destructive cleanup"
+      ]
+    },
+    {
+      "item": "A4.3",
+      "title": "Generated runtime map as authoritative evidence",
+      "mode": "read_only_preparation",
+      "mutationClass": "repo_doc_mutation_after_review",
+      "backgroundAction": "Prepare runtime map template and required fields from existing Infrastructure Truth Report. Refresh live runtime only after approval if needed.",
+      "approvalRequiredBefore": [
+        "live Azure refresh",
+        "repo IaC mutation",
+        "deployment"
+      ]
+    },
+    {
+      "item": "A6.1/A6.2",
+      "title": "Deeper public label check and remediation diff",
+      "mode": "safe_repo_analysis",
+      "mutationClass": "repo_doc_mutation_or_public_copy_repo_edit",
+      "backgroundAction": "Scan public labels and prepare proposed diffs for review. Do not publish externally.",
+      "approvalRequiredBefore": [
+        "external publication",
+        "deployment",
+        "public claim promotion"
+      ]
+    },
+    {
+      "item": "A7.1",
+      "title": "Internal pilot onboarding kit draft",
+      "mode": "repo_doc_draft_allowed",
+      "mutationClass": "repo_doc_mutation",
+      "backgroundAction": "Draft internal-only pilot onboarding kit using verified public-safe claims and no secret or repo-internal diagnostic details.",
+      "approvalRequiredBefore": [
+        "external publication",
+        "buyer send",
+        "public claim promotion"
+      ]
+    },
+    {
+      "item": "A8.1/A8.2",
+      "title": "Architecture diagram inventory and index",
+      "mode": "repo_doc_draft_allowed",
+      "mutationClass": "repo_doc_mutation",
+      "backgroundAction": "Inventory existing diagrams and prepare sanitized diagram index. Do not create new architecture claims.",
+      "approvalRequiredBefore": [
+        "external publication",
+        "new diagram claims",
+        "public promotion"
+      ]
+    },
+    {
+      "item": "A9.1/A9.2",
+      "title": "Governance standards review checklist and invariant validation",
+      "mode": "repo_doc_draft_allowed",
+      "mutationClass": "repo_doc_mutation",
+      "backgroundAction": "Create checklist for held governance standards and validate invariants across the drafted stack. Do not promote any standard.",
+      "approvalRequiredBefore": [
+        "standard promotion",
+        "activation",
+        "public claim"
+      ]
+    }
+  ],
+  "rules": [
+    "Do not normalize the Git index unless explicitly approved.",
+    "Do not commit, stage, unstage, branch, push, or reset without approval.",
+    "Do not rotate secrets or mutate runtime.",
+    "Do not perform destructive cleanup.",
+    "Do not publish externally.",
+    "Do not promote held governance standards.",
+    "Background work may prepare docs, checklists, templates, and proposed diffs where safe.",
+    "Any mutation boundary must return an approval request before execution."
+  ],
+  "outputs": [
+    "docs/BACKGROUND_REMEDIATION_COORDINATION_2026-05-17.md"
+  ],
+  "status": "prepared_for_background_coordination",
+  "preparedAt": "2026-05-17"
+}

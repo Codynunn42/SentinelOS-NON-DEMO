@@ -94,25 +94,50 @@ function subscribeAuditEvents(callback) {
   };
 }
 
+function verifyAuditChain(entries = auditLog) {
+  const normalizedEntries = Array.isArray(entries) ? entries : [];
+  if (!normalizedEntries.length) {
+    return { valid: true, checked: 0 };
+  }
+
+  let previousHash = null;
+  for (let index = 0; index < normalizedEntries.length; index += 1) {
+    const entry = normalizedEntries[index];
+    const expectedHash = hashAuditEntry(entry, previousHash);
+    if (entry.auditHash !== expectedHash) {
+      return { valid: false, reason: 'audit_hash_mismatch', checked: index + 1 };
+    }
+    previousHash = entry.auditHash;
+  }
+
+  return { valid: true, checked: normalizedEntries.length };
+}
+
 const auditLogger = {
+  verifyChain() {
+    return verifyAuditChain(auditLog);
+  },
+
   async log(entry) {
+    const result = entry.result && typeof entry.result === 'object' ? entry.result : {};
+    const signatureVersion = result.signatureVersion || 'unsigned';
     const timestampedEntry = {
       ...entry,
       eventId: entry.eventId || crypto.randomUUID(),
       correlationId: entry.correlationId || null,
       inputPayloadHash: hashPayload(entry.payload),
-      signatureVersion: (entry.result && entry.result.signatureVersion) || 'unsigned',
+      signatureVersion,
       timestamp: entry.timestamp || new Date().toISOString()
     };
     const governanceSignals = evaluateGovernanceSignals(timestampedEntry);
-    const result =
+    const existingResult =
       timestampedEntry.result && typeof timestampedEntry.result === 'object'
         ? timestampedEntry.result
         : {};
     const signaledEntry = {
       ...timestampedEntry,
       result: {
-        ...result,
+        ...existingResult,
         governanceSignals
       }
     };
@@ -263,5 +288,6 @@ const auditLogger = {
 
 module.exports = {
   auditLogger,
-  subscribeAuditEvents
+  subscribeAuditEvents,
+  verifyAuditChain
 };

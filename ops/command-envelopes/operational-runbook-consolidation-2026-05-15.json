@@ -1,0 +1,68 @@
+{
+  "envelopeId": "ENV-2026-05-15-003-OPERATIONAL-RUNBOOK",
+  "operation": "operational.runbook.consolidate",
+  "title": "Operational Runbook Consolidation",
+  "priority": "high",
+  "posture": "hardening_and_consolidation",
+  "objective": "Build a governed operational runbook package from canonical SentinelOS infrastructure and governance sources.",
+  "scope": [
+    "deployment posture",
+    "readiness posture",
+    "authority enforcement",
+    "approval continuity",
+    "governance signals",
+    "drift detection",
+    "health sweep evidence",
+    "execution integrity checks",
+    "operational recovery procedures"
+  ],
+  "tasks": [
+    "Use existing canonical docs first.",
+    "Assemble operational posture from deployment, readiness, governance, approval, health, and drift sources.",
+    "Generate the Operational Runbook.",
+    "Generate the Trust Binder.",
+    "Generate the Demo Reliability Packet.",
+    "Generate the Governance Integrity Appendix.",
+    "Generate Deployment Recovery Procedures.",
+    "Generate the Drift Detection Reference."
+  ],
+  "rules": [
+    "Avoid duplicate conceptual writing.",
+    "Preserve release lineage.",
+    "Preserve historical audit integrity.",
+    "Focus on operational clarity over expansion.",
+    "Do not broaden product scope."
+  ],
+  "outputs": [
+    "docs/OPERATIONAL_RUNBOOK_2026-05-15.md",
+    "docs/TRUST_BINDER_2026-05-15.md",
+    "docs/DEMO_RELIABILITY_PACKET_2026-05-15.md",
+    "docs/GOVERNANCE_INTEGRITY_APPENDIX_2026-05-15.md",
+    "docs/DEPLOYMENT_RECOVERY_PROCEDURES_2026-05-15.md",
+    "docs/DRIFT_DETECTION_REFERENCE_2026-05-15.md"
+  ],
+  "status": "executed_consolidation",
+  "executedAt": "2026-05-15",
+  "sourceDocuments": [
+    "docs/EXECUTIVE_SNAPSHOT_2026-05-15.md",
+    "docs/INFRASTRUCTURE_TRUTH_RECONCILIATION_2026-05-15.md",
+    "docs/REPO_INTEGRITY_STABILIZATION_2026-05-15.md",
+    "docs/DEPLOYMENT.md",
+    "docs/DAILY_OPERATING_GOAL.md",
+    "docs/GOVERNANCE_PREFLIGHT.md",
+    "docs/PHASE1_LIVE_VERIFICATION_2026-05-15.md",
+    "docs/PRODUCT.md",
+    "docs/EXECUTION_ARCHITECTURE.md",
+    "docs/SENTINELOS_DEMO_PACKAGE_V2.md",
+    "docs/SENTINELOS_LIVE_DEMO_SCRIPT_V2.md",
+    "docs/STATE_ANCHORING_RUNBOOK.md",
+    "docs/SENTINELOS_DOCUMENTATION_ADVANCEMENT_2026-05-15.md"
+  ],
+  "validation": [
+    "generated six package artifacts",
+    "preserved hardening posture",
+    "no runtime modification",
+    "no destructive repo operation",
+    "no product expansion"
+  ]
+}

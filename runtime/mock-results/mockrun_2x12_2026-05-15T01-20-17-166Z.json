@@ -1,0 +1,84 @@
+{
+  "runId": "mockrun_2x12_2026-05-15T01-20-17-166Z",
+  "timestamp": "2026-05-15T01:20:17.178Z",
+  "iterations": 2,
+  "config": {
+    "commandsPerRun": 12,
+    "approvalRate": 0.35,
+    "blockRate": 0.15,
+    "telemetryState": "LIMITED",
+    "telemetryActivityCount": 12
+  },
+  "aggregateSummary": {
+    "totalCommands": 72,
+    "totalApprovals": 25,
+    "totalBlocks": 8,
+    "avgApprovalRatio": 0.348,
+    "avgBlockRatio": 0.111,
+    "avgTraceCompleteness": 0.17,
+    "totalDriftRecommendations": 0,
+    "durationMs": 7.56
+  },
+  "results": [
+    {
+      "iteration": 1,
+      "durationMs": 5.51,
+      "success": true,
+      "statusCode": 200,
+      "blocked": false,
+      "summary": {
+        "faceplanes": [
+          "ownerfi",
+          "hotelops",
+          "itad"
+        ],
+        "runId": "mock_run_all_1778808017174",
+        "commandCount": 36,
+        "approvalCount": 14,
+        "blockedCount": 4
+      },
+      "iterationSummary": {
+        "commandCount": 36,
+        "approvalCount": 14,
+        "blockedCount": 4,
+        "approvalRatio": 0.389,
+        "blockRatio": 0.111,
+        "driftRecommendationsGenerated": 0,
+        "traceCompleteness": 0.17,
+        "timestamp": "2026-05-15T01:20:17.175Z",
+        "correlationId": "9dbca6f8-2d18-4831-8a50-12fe9d3384d7"
+      },
+      "error": null
+    },
+    {
+      "iteration": 2,
+      "durationMs": 2.05,
+      "success": true,
+      "statusCode": 200,
+      "blocked": false,
+      "summary": {
+        "faceplanes": [
+          "ownerfi",
+          "hotelops",
+          "itad"
+        ],
+        "runId": "mock_run_all_1778808017176",
+        "commandCount": 36,
+        "approvalCount": 11,
+        "blockedCount": 4
+      },
+      "iterationSummary": {
+        "commandCount": 36,
+        "approvalCount": 11,
+        "blockedCount": 4,
+        "approvalRatio": 0.306,
+        "blockRatio": 0.111,
+        "driftRecommendationsGenerated": 0,
+        "traceCompleteness": 0.17,
+        "timestamp": "2026-05-15T01:20:17.177Z",
+        "correlationId": "08935eb4-c5b5-4006-8da7-d5d8dd1933d3"
+      },
+      "error": null
+    }
+  ]
+}

@@ -1,18 +1,21 @@
-const http = require('http');
-const https = require('https');
+const urls = ["http://127.0.0.1:3000/health", "http://localhost:3000/health"];
+const attempts = 60;
+const delayMs = 1000;
 
-const healthcheckUrl = process.env.HEALTHCHECK_URL || `http://localhost:${process.env.PORT || 3000}/health`;
-const client = healthcheckUrl.startsWith('https://') ? https : http;
+async function sleep(ms){ return new Promise(r => setTimeout(r, ms)); }
 
-client.get(healthcheckUrl, (res) => {
-  if (res.statusCode === 200) {
-    console.log(`Health check passed: ${healthcheckUrl}`);
-    process.exit(0);
-  } else {
-    console.error(`Health check failed: ${healthcheckUrl} returned ${res.statusCode}`);
-    process.exit(1);
+async function check(url){
+  const res = await fetch(url, { method: "GET" });
+  if (!res.ok) throw new Error(`${url} -> ${res.status}`);
+}
+
+(async () => {
+  for (let i = 1; i <= attempts; i++) {
+    for (const url of urls) {
+      try { await check(url); console.log(`Health OK: ${url}`); process.exit(0); }
+      catch (e) { if (i === attempts) console.error(`Final fail: ${e.message}`); }
+    }
+    await sleep(delayMs);
   }
-}).on('error', (err) => {
-  console.error(`Health check error for ${healthcheckUrl}:`, err.message);
   process.exit(1);
-});
+})();
