@@ -3,6 +3,8 @@ const { customerOpsHandlers } = require('./customerops');
 const { hotelHandlers } = require('./hotelops');
 const { nunncloudHandlers } = require('./nunncloud');
 const { mockHandlers } = require('../commands/mockHandlers');
+const { contractReclamationHandlers } = require('../commands/contractReclamation');
+const { sentinelOsHandlers } = require('../commands/sentinelOsHandlers');
 
 const surfaceRegistry = {
   ownerfi: {
@@ -20,6 +22,14 @@ const surfaceRegistry = {
   nunncloud: {
     name: 'Nunn Cloud',
     handlers: nunncloudHandlers
+  },
+  contractreclamation: {
+    name: 'Contract Reclamation',
+    handlers: contractReclamationHandlers
+  },
+  sentinelos: {
+    name: 'SentinelOS',
+    handlers: sentinelOsHandlers
   },
   mock: {
     name: 'Mock Faceplane',

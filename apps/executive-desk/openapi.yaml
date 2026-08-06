@@ -1,0 +1,586 @@
+openapi: 3.1.0
+info:
+  title: Sentinel Executive Desk v1 — Read-Only Proxy
+  version: 1.0.0
+  description: >
+    Governed read-only command proxy for Sentinel Executive Desk v1.
+    All commands flow through: Authority Check → Risk Gate → Receipt.
+    v1 supports only `repo.control.workflow.diagnose` (read-only diagnosis).
+    Executive Desk also exposes hosted Sentinel AI status and scan endpoints for course setting and hardening guidance.
+
+servers:
+  - url: https://YOUR_PROXY_URL
+    description: Replace with your Cloudflare or production proxy endpoint
+
+paths:
+  /proxy/command:
+    post:
+      security:
+        - bearerAuth: []
+        - entraOAuth2:
+            - Governance.Approve
+      operationId: executeGovernedReadOnlyCommand
+      summary: Execute a governed read-only diagnostic command
+      description: >
+        Executes `repo.control.workflow.diagnose` with full governance:
+        Authority Check → Risk Gate → Receipt recording.
+        No mutations are performed. All decisions are logged.
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - tenant
+                - command
+                - payload
+              properties:
+                tenant:
+                  type: string
+                  enum:
+                    - nunncloud
+                  description: Tenant identifier
+
+                command:
+                  type: string
+                  enum:
+                    - repo.control.workflow.diagnose
+                  description: >
+                    v1 supports read-only diagnosis only.
+                    No mutating commands yet.
+
+                payload:
+                  type: object
+                  required:
+                    - principalId
+                  properties:
+                    principalId:
+                      type: string
+                      example: user@example.com
+                      description: >
+                        Authenticated principal executing the command.
+                        v1: any authenticated principal can run read-only commands.
+
+                    repository:
+                      type: string
+                      example: Codynunn42/SentinelOS-NON-DEMO
+                      description: GitHub repository for diagnosis context
+
+                    workflowName:
+                      type: string
+                      example: Sentinel Actions Diagnostic
+                      description: Workflow name or identifier to diagnose
+
+                    runId:
+                      type: string
+                      example: "12345"
+                      description: GitHub workflow run ID (optional)
+
+                    context:
+                      type: object
+                      description: >
+                        Optional context for decision-making
+                        (e.g., briefing item ID, risk notes)
+
+      responses:
+        "200":
+          description: >
+            Governed command executed and received.
+            Response includes authority check result, risk gate outcome, and receipt.
+
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum:
+                      - executed
+                      - blocked
+                    description: >
+                      "executed": command ran through full governance flow
+                      "blocked": authority check failed, risk gate blocked, or schema invalid
+
+                  command:
+                    type: string
+                    example: repo.control.workflow.diagnose
+                    description: Echoed command name
+
+                  executionMode:
+                    type: string
+                    enum:
+                      - read_only_diagnosis
+                    description: v1 only supports read-only diagnosis mode
+
+                  bypassPrevented:
+                    type: boolean
+                    description: >
+                      true if risk gate prevented execution.
+                      false if risk gate passed (no bypass needed).
+
+                  authorityCheckResult:
+                    type: object
+                    properties:
+                      allowed:
+                        type: boolean
+                        description: >
+                          true if principal is authorized.
+                          v1: all authenticated principals can run read-only commands.
+
+                      principalId:
+                        type: string
+                        example: user@example.com
+
+                      reasons:
+                        type: array
+                        items:
+                          type: string
+                        description: >
+                          Explanation of authority decision.
+                          e.g., ["Principal is authenticated and authorized for read-only command"]
+
+                      requiredApprovers:
+                        type: array
+                        items:
+                          type: string
+                        description: >
+                          List of approvers required for escalation.
+                          v1: empty for read-only commands.
+
+                  riskGateOutcome:
+                    type: object
+                    properties:
+                      decision:
+                        type: string
+                        enum:
+                          - pass
+                          - warn
+                          - block
+                        description: >
+                          pass: command can execute safely
+                          warn: command can execute with caution (reserved for future)
+                          block: command is blocked due to risk
+
+                      score:
+                        type: number
+                        minimum: 0
+                        maximum: 1
+                        example: 0.05
+                        description: >
+                          Risk score (0 = no risk, 1 = maximum risk).
+                          v1: read-only commands have score ~0.05 (very low).
+
+                      infraStatus:
+                        type: string
+                        example: ok
+                        description: Infrastructure health status
+
+                      issues:
+                        type: array
+                        items:
+                          type: string
+                        description: Risk issues identified
+
+                      mitigations:
+                        type: array
+                        items:
+                          type: string
+                        description: Recommended mitigations
+
+                  trustScore:
+                    type: number
+                    minimum: 0
+                    maximum: 1
+                    example: 0.95
+                    description: >
+                      Overall governance trust score.
+                      0.95+: authorized and low-risk (trusted)
+                      0.6-0.94: partial trust (escalation, warnings)
+                      <0.6: blocked or high-risk
+
+                  receipt:
+                    type: object
+                    description: >
+                      Immutable receipt recording the command execution.
+                      Signed and stored in the Receipt Ledger for audit.
+                    properties:
+                      id:
+                        type: string
+                        example: 550e8400-e29b-41d4-a716-446655440000
+                        description: Unique receipt ID
+
+                      command:
+                        type: string
+                        example: repo.control.workflow.diagnose
+
+                      executor:
+                        type: string
+                        example: user@example.com
+                        description: Principal who executed the command
+
+                      timestamp:
+                        type: string
+                        format: date-time
+                        example: "2026-07-02T15:30:00Z"
+
+                      status:
+                        type: string
+                        enum:
+                          - issued
+                          - executed
+                          - blocked
+                          - rejected
+                        description: Receipt status
+
+                      signature:
+                        type: string
+                        example: 7c6f7c5c8f9e1a2b3c4d5e6f7c8d9e0f1a2b3c4d5e6f7c8d9e0f1a2b
+                        description: >
+                          HMAC-SHA256 signature for audit verification.
+                          Prevents tampering with receipt data.
+
+                  auditReference:
+                    type: string
+                    example: 550e8400-e29b-41d4-a716-446655440000
+                    description: >
+                      Log entry ID for compliance and tracing.
+                      Use this to cross-reference audit logs.
+
+                  reasons:
+                    type: array
+                    items:
+                      type: string
+                    description: >
+                      Consolidated reasons for the decision.
+                      Includes authority reasons + risk mitigations.
+
+                  diagnosis:
+                    type: object
+                    description: >
+                      Diagnostic result (present only if status === "executed").
+                      Contains findings from the read-only diagnosis.
+                    properties:
+                      state:
+                        type: string
+                        example: diagnosed
+                      repository:
+                        type: string
+                      workflowName:
+                        type: string
+                      findings:
+                        type: array
+                        items:
+                          type: string
+
+        "400":
+          description: Invalid request schema
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum:
+                      - blocked
+                  reasons:
+                    type: array
+                    items:
+                      type: string
+                    description: Schema validation errors
+
+        "403":
+          description: Authority check failed or risk gate blocked
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum:
+                      - blocked
+                  authorityCheckResult:
+                    type: object
+                  riskGateOutcome:
+                    type: object
+                  reasons:
+                    type: array
+                    items:
+                      type: string
+
+  /api/executive/sentinel-ai/status:
+    get:
+      security:
+        - bearerAuth: []
+        - entraOAuth2:
+            - Executive.Read
+      operationId: getSentinelAiStatus
+      summary: Check hosted Sentinel AI connection status
+      description: >
+        Returns the current hosted Sentinel AI connection posture, including whether
+        the remote endpoint is configured and reachable. The route requires an
+        Executive Desk principal header.
+      parameters:
+        - name: X-Principal-Id
+          in: header
+          required: true
+          description: Principal executing the request.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Sentinel AI connection status and hardening guidance
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+                  data:
+                    type: object
+                    properties:
+                      generatedAt:
+                        type: string
+                        format: date-time
+                      currentPosture:
+                        type: string
+                      remote:
+                        type: object
+                        properties:
+                          configured:
+                            type: boolean
+                          reachable:
+                            type: boolean
+                          healthUrl:
+                            type: string
+                            nullable: true
+                          scanUrl:
+                            type: string
+                            nullable: true
+                          statusCode:
+                            type: integer
+                            nullable: true
+                          payload:
+                            nullable: true
+                          error:
+                            type: string
+                            nullable: true
+                      reasoningLens:
+                        type: object
+                        properties:
+                          mode:
+                            type: string
+                          objective:
+                            type: string
+                          priorities:
+                            type: array
+                            items:
+                              type: string
+                          constraints:
+                            type: array
+                            items:
+                              type: string
+                      efficiencyPlan:
+                        type: object
+                        properties:
+                          costReduction:
+                            type: array
+                            items:
+                              type: string
+                          latencyReduction:
+                            type: array
+                            items:
+                              type: string
+                          computeOptimization:
+                            type: array
+                            items:
+                              type: string
+                          greenMode:
+                            type: array
+                            items:
+                              type: string
+                      readyToGo:
+                        type: array
+                        items:
+                          type: string
+                      focusAreas:
+                        type: array
+                        items:
+                          type: string
+                      hardeningPaths:
+                        type: array
+                        items:
+                          type: string
+                      recommendedCourse:
+                        type: array
+                        items:
+                          type: string
+
+  /api/executive/sentinel-ai/scan:
+    post:
+      security:
+        - bearerAuth: []
+        - entraOAuth2:
+            - Infrastructure.Manage
+      operationId: scanSentinelAiCourse
+      summary: Synthesize the Sentinel AI hardening course
+      description: >
+        Returns a scan payload that combines local roadmap, checklist, and readiness
+        signals with the hosted Sentinel AI connection posture.
+      parameters:
+        - name: X-Principal-Id
+          in: header
+          required: true
+          description: Principal executing the request.
+          schema:
+            type: string
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                focus:
+                  type: string
+                  description: Optional scan focus label.
+      responses:
+        "200":
+          description: Sentinel AI scan output and recommended course
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+                  data:
+                    type: object
+                    properties:
+                      generatedAt:
+                        type: string
+                        format: date-time
+                      currentPosture:
+                        type: string
+                      remote:
+                        type: object
+                        properties:
+                          configured:
+                            type: boolean
+                          reachable:
+                            type: boolean
+                          healthUrl:
+                            type: string
+                            nullable: true
+                          scanUrl:
+                            type: string
+                            nullable: true
+                          statusCode:
+                            type: integer
+                            nullable: true
+                          payload:
+                            nullable: true
+                          error:
+                            type: string
+                            nullable: true
+                      reasoningLens:
+                        type: object
+                        properties:
+                          mode:
+                            type: string
+                          objective:
+                            type: string
+                          priorities:
+                            type: array
+                            items:
+                              type: string
+                          constraints:
+                            type: array
+                            items:
+                              type: string
+                      efficiencyPlan:
+                        type: object
+                        properties:
+                          costReduction:
+                            type: array
+                            items:
+                              type: string
+                          latencyReduction:
+                            type: array
+                            items:
+                              type: string
+                          computeOptimization:
+                            type: array
+                            items:
+                              type: string
+                          greenMode:
+                            type: array
+                            items:
+                              type: string
+                      readyToGo:
+                        type: array
+                        items:
+                          type: string
+                      focusAreas:
+                        type: array
+                        items:
+                          type: string
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Bearer token used for proxy auth and protected API routes.
+    entraOAuth2:
+      type: oauth2
+      description: Microsoft Entra delegated scopes for Executive Desk protected APIs.
+      flows:
+        authorizationCode:
+          authorizationUrl: https://login.microsoftonline.com/common/oauth2/v2.0/authorize
+          tokenUrl: https://login.microsoftonline.com/common/oauth2/v2.0/token
+          scopes:
+            Executive.Read: Read executive posture and non-mutating operational data.
+            Governance.Approve: Execute governed actions that alter governance state.
+            Infrastructure.Manage: Run infrastructure-affecting operational actions.
+            Vault.Read: Read evidence, receipt, and audit exports.
+                      localSignals:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            heading:
+                              type: string
+                            items:
+                              type: array
+                              items:
+                                type: string
+                      hardeningPaths:
+                        type: array
+                        items:
+                          type: string
+                      recommendedCourse:
+                        type: array
+                        items:
+                          type: string
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: >
+        Optional in v1 for testing.
+        Production: require Bearer token with `scope:executive-desk-proxy` claim.
+
+security:
+  - bearerAuth: [] # Optional; uncomment for production

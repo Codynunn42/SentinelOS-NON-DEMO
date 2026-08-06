@@ -4,6 +4,7 @@ const {
   buildApprovalCandidates,
   buildBoundaryOutput,
   buildTimeline,
+  buildXeChangePacket,
   buildXeQueue,
   executeTaskStep,
   normalizeTask,
@@ -63,9 +64,11 @@ async function main() {
   assert(candidates.some((item) => item.taskId === 'task_arizona_hold'));
 
   const xeQueue = buildXeQueue(tasks);
-  assert.strictEqual(xeQueue.length, 1);
-  assert.strictEqual(xeQueue[0].taskId, 'task_vendor_final');
-  assert.strictEqual(xeQueue[0].status, 'waiting_for_approval');
+  assert.strictEqual(xeQueue.length, 2);
+  assert(xeQueue.some((item) => item.taskId === 'task_vendor_final' && item.status === 'waiting_for_approval'));
+  assert(xeQueue.some((item) => item.taskId === 'task_mapping_index' && item.status === 'ready_for_xe'));
+  assert.deepStrictEqual(xeQueue[0].overlay.permittedOperations, ['insert', 'change', 'implement']);
+  assert.deepStrictEqual(xeQueue[0].overlay.sentinelAiPass.stages, ['scan', 'fix', 'set']);
 
   const run = await orchestrateTaskTemplates({
     tenant: 'ownerfi',
@@ -81,7 +84,7 @@ async function main() {
       {
         id: 'task_xe_assist',
         title: 'Prepare XE assistance for approval follow-through',
-        category: 'xe',
+        category: 'conditional',
         xeRequired: true,
         nextStep: 'Queue XE only after the human approval is recorded.'
       }
@@ -90,14 +93,14 @@ async function main() {
 
   assert.strictEqual(run.status, 'orchestrated');
   assert.strictEqual(run.summary.taskCount, 2);
-  assert.strictEqual(run.summary.approvalsNeeded, 2);
-  assert.strictEqual(run.summary.xeActionsNeeded, 1);
-  assert.strictEqual(run.summary.approvalsCreated, 2);
-  assert.strictEqual(run.approvalRecords.length, 2);
-  assert.strictEqual(run.boundary.requiresApproval.length, 2);
-  assert.strictEqual(run.boundary.blockedActions.length, 2);
-  assert.strictEqual(run.boundary.xeActions.length, 0);
-  assert.strictEqual(createdApprovals.length, 2);
+  assert.strictEqual(run.summary.approvalsNeeded, 1);
+  assert.strictEqual(run.summary.xeActionsNeeded, 2);
+  assert.strictEqual(run.summary.approvalsCreated, 1);
+  assert.strictEqual(run.approvalRecords.length, 1);
+  assert.strictEqual(run.boundary.requiresApproval.length, 1);
+  assert.strictEqual(run.boundary.blockedActions.length, 1);
+  assert.strictEqual(run.boundary.xeActions.length, 1);
+  assert.strictEqual(createdApprovals.length, 1);
   assert(run.auditHash && run.auditHash.length === 64);
   assert(createdApprovals.every((approval) => approval.context.approvalType === 'task_template_approval'));
 
@@ -106,7 +109,16 @@ async function main() {
     approvalRecords: run.approvalRecords.map((record) => ({ ...record, status: 'approved' }))
   });
   assert.strictEqual(boundary.requiresApproval.length, 0);
-  assert.strictEqual(boundary.xeActions.length, 1);
+  assert.strictEqual(boundary.xeActions.length, 2);
+  assert.deepStrictEqual(boundary.xeActions[0].overlay.permittedOperations, ['insert', 'change', 'implement']);
+  assert.strictEqual(boundary.xeActions[0].overlay.sentinelAiPass.optimizationPass, 'streamline_and_optimize');
+
+  const changePacket = buildXeChangePacket(run.tasks[1], { runId: run.runId, tenant: run.tenant });
+  assert.strictEqual(changePacket.runId, 'task_run_check_001');
+  assert.strictEqual(changePacket.taskId, 'task_xe_assist');
+  assert.deepStrictEqual(changePacket.permittedOperations, ['insert', 'change', 'implement']);
+  assert.deepStrictEqual(changePacket.sentinelAiPass.stages, ['scan', 'fix', 'set']);
+  assert.strictEqual(changePacket.guardrails.approvalRequired, true);
 
   const blockedExecution = executeTaskStep(run.tasks[1]);
   assert.strictEqual(blockedExecution.status, 'BLOCKED');
@@ -121,20 +133,21 @@ async function main() {
 
   const commandBridge = runStepThroughCommand(run.tasks[1]);
   assert.strictEqual(commandBridge.command, 'task.template.execute');
-assert.strictEqual(commandBridge.policy.requiresApproval, true);
-assert.strictEqual(commandBridge.result.status, 'BLOCKED');
+  assert.strictEqual(commandBridge.policy.requiresApproval, true);
+  assert.strictEqual(commandBridge.result.status, 'BLOCKED');
+  assert.strictEqual(commandBridge.xeChangePacket.taskId, 'task_xe_assist');
 
-const billingTask = normalizeTask({
-  title: 'Create governed checkout session',
-  category: 'billing.checkout.create'
-});
+  const billingTask = normalizeTask({
+    title: 'Create governed checkout session',
+    category: 'billing.checkout.create'
+  });
 
-assert.strictEqual(billingTask.category, 'billing_checkout');
-assert.strictEqual(billingTask.approvalRequired, true);
-assert.strictEqual(billingTask.badge, '[APPROVE:BILLING]');
-assert.strictEqual(billingTask.riskLevel, 'high');
+  assert.strictEqual(billingTask.category, 'billing_checkout');
+  assert.strictEqual(billingTask.approvalRequired, true);
+  assert.strictEqual(billingTask.badge, '[APPROVE:BILLING]');
+  assert.strictEqual(billingTask.riskLevel, 'high');
 
-console.log('Task template orchestration check passed');
+  console.log('Task template orchestration check passed');
 }
 
 main().catch((error) => {

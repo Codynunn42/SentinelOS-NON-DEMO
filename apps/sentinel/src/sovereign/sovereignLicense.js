@@ -1,7 +1,7 @@
 // Sentinel Sovereign License Verifier
 // Purpose: Verify a sovereign license locally using a signed license file.
 // Zero platform dependency. No call-home. No subscription check.
-// Verification uses HMAC-SHA256 against the buyer's license key.
+// Verification uses Ed25519 against a buyer-distributable public key.
 //
 // License file format (JSON):
 // {
@@ -11,7 +11,8 @@
 //   "issuedAt": "<ISO timestamp>",
 //   "version": "1.0",
 //   "capabilities": ["execute", "audit", "govern", "drift"],
-//   "signature": "<hmac-sha256 hex>"
+//   "signatureAlgorithm": "ed25519:v1",
+//   "signature": "<base64 signature>"
 // }
 
 const crypto = require('crypto');
@@ -39,18 +40,15 @@ function buildLicensePayload(license) {
 }
 
 function verifyLicenseSignature(license, key) {
-  if (!key || !license.signature) {
+  if (!key || !license.signature || license.signatureAlgorithm !== 'ed25519:v1') {
     return false;
   }
-  const payload = buildLicensePayload(license);
-  const expected = crypto
-    .createHmac('sha256', key)
-    .update(payload)
-    .digest('hex');
-  return crypto.timingSafeEqual(
-    Buffer.from(expected),
-    Buffer.from(license.signature)
-  );
+  try {
+    const payload = Buffer.from(buildLicensePayload(license));
+    return crypto.verify(null, payload, key, Buffer.from(license.signature, 'base64'));
+  } catch {
+    return false;
+  }
 }
 
 function loadLicense(licensePath) {
@@ -75,6 +73,10 @@ function validateLicense(license, key) {
     return { valid: false, reason: 'LICENSE_INCOMPLETE' };
   }
 
+  if (license.signatureAlgorithm !== 'ed25519:v1') {
+    return { valid: false, reason: 'LICENSE_SIGNATURE_ALGORITHM_UNSUPPORTED' };
+  }
+
   if (!verifyLicenseSignature(license, key || LICENSE_PUBLIC_KEY)) {
     return { valid: false, reason: 'LICENSE_SIGNATURE_INVALID' };
   }
@@ -85,6 +87,7 @@ function validateLicense(license, key) {
     issuedTo: license.issuedTo,
     issuedAt: license.issuedAt,
     version: license.version || '1.0',
+    signatureAlgorithm: license.signatureAlgorithm,
     capabilities: Array.isArray(license.capabilities) ? license.capabilities : []
   };
 }
@@ -95,9 +98,9 @@ function verifySovereignLicense(options = {}) {
   return validateLicense(license, key);
 }
 
-function generateLicense({ licenseId, issuedTo, capabilities = [], signingKey }) {
-  if (!signingKey) {
-    throw new Error('SIGNING_KEY_REQUIRED');
+function generateLicense({ licenseId, issuedTo, capabilities = [], privateKey }) {
+  if (!privateKey) {
+    throw new Error('PRIVATE_KEY_REQUIRED');
   }
 
   const license = {
@@ -106,14 +109,12 @@ function generateLicense({ licenseId, issuedTo, capabilities = [], signingKey })
     issuedTo,
     issuedAt: new Date().toISOString(),
     version: '1.0',
-    capabilities
+    capabilities,
+    signatureAlgorithm: 'ed25519:v1'
   };
 
-  const payload = buildLicensePayload(license);
-  const signature = crypto
-    .createHmac('sha256', signingKey)
-    .update(payload)
-    .digest('hex');
+  const payload = Buffer.from(buildLicensePayload(license));
+  const signature = crypto.sign(null, payload, privateKey).toString('base64');
 
   return { ...license, signature };
 }

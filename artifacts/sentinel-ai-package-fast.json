@@ -1,0 +1,33 @@
+{
+  "mode": "fast",
+  "startedAt": "2026-07-12T12:23:18.720Z",
+  "finishedAt": "2026-07-12T12:23:26.433Z",
+  "passed": true,
+  "results": [
+    {
+      "script": "check:executive-desk:types",
+      "ok": true,
+      "durationMs": 2952
+    },
+    {
+      "script": "check:executive-desk:api",
+      "ok": true,
+      "durationMs": 1453
+    },
+    {
+      "script": "check:executive-desk:proxy",
+      "ok": true,
+      "durationMs": 739
+    },
+    {
+      "script": "check:executive-desk:frontend",
+      "ok": true,
+      "durationMs": 1615
+    },
+    {
+      "script": "test",
+      "ok": true,
+      "durationMs": 954
+    }
+  ]
+}

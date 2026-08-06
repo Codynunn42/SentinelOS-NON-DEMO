@@ -33,9 +33,15 @@ function recordStage(correlationId, stage, details = {}) {
   const trace = traces.get(correlationId);
   if (!trace) return null;
 
+  const stageIndex = PIPELINE_STAGES.indexOf(stage);
+  if (stageIndex < 0) return null;
+
+  const lastStage = trace.stages[trace.stages.length - 1];
+  if (lastStage && stageIndex < lastStage.stageIndex) return null;
+
   trace.stages.push({
     stage,
-    stageIndex: PIPELINE_STAGES.indexOf(stage),
+    stageIndex,
     timestamp: new Date().toISOString(),
     ...details
   });
@@ -47,9 +53,19 @@ function completeTrace(correlationId, outcome = {}) {
   const trace = traces.get(correlationId);
   if (!trace) return null;
 
+  if (trace.completedAt) {
+    return {
+      trace,
+      completed: false
+    };
+  }
+
   trace.completedAt = new Date().toISOString();
   trace.outcome = outcome;
-  return trace;
+  return {
+    trace,
+    completed: true
+  };
 }
 
 function getTrace(correlationId) {

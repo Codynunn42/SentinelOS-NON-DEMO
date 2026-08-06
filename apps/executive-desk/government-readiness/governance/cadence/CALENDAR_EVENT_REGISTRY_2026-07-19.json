@@ -1,0 +1,111 @@
+{
+    "events": [
+        {
+            "uid": "nunn-daily-executive-brief-2026-07-20-0800",
+            "summary": "Daily Executive Brief Block",
+            "description": "Standing focus block for executive brief preparation, evidence scan, and next-action review.\nOwner: Strategy Intelligence Lead\nCadence: Weekdays\nSource artifact: government-readiness/governance/cadence/daily/2026-07-18_EXECUTIVE_INTELLIGENCE_BRIEF.md",
+            "start": "2026-07-20",
+            "end": "2026-07-20",
+            "startTime": "08:00",
+            "endTime": "08:30",
+            "allDay": false,
+            "rrule": "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR",
+            "categories": "NUNN2030,BRIEFING,DAILY"
+        },
+        {
+            "uid": "nunn-support-triage-2026-07-20-0830",
+            "summary": "Support Triage Block",
+            "description": "Standing support triage block for urgent asks, dependency checks, and unblock actions.\nCadence: Weekdays\nPurpose: Ensure everyone has what they need from you early in the day.",
+            "start": "2026-07-20",
+            "end": "2026-07-20",
+            "startTime": "08:30",
+            "endTime": "09:00",
+            "allDay": false,
+            "rrule": "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR",
+            "categories": "NUNN2030,SUPPORT,TRIAGE"
+        },
+        {
+            "uid": "nunn-weekly-closeout-prep-2026-07-19-0930",
+            "summary": "Weekly Closeout Preparation",
+            "description": "Scheduled closeout meeting.\nChair: COO Audience\nRecorder: Governance Operations Audience\nDuration: 45 minutes\nSupporting artifact: government-readiness/governance/cadence/weekly/2026-07-19_TOMORROW_CLOSEOUT_COMMAND_SHEET.md",
+            "start": "2026-07-19",
+            "end": "2026-07-19",
+            "startTime": "09:30",
+            "endTime": "10:15",
+            "allDay": false,
+            "categories": "NUNN2030,MEETING,CLOSEOUT"
+        },
+        {
+            "uid": "nunn-strategy-writing-2026-07-21-1000",
+            "summary": "Strategy Writing Block",
+            "description": "Dedicated block for strategic plan refinement, doctrine writing, and executive narrative preparation.\nCadence: Tuesdays and Thursdays.",
+            "start": "2026-07-21",
+            "end": "2026-07-21",
+            "startTime": "10:00",
+            "endTime": "11:30",
+            "allDay": false,
+            "rrule": "FREQ=WEEKLY;BYDAY=TU,TH",
+            "categories": "NUNN2030,STRATEGY,WRITING"
+        },
+        {
+            "uid": "nunn-weekly-program-gate-council-2026-07-24-1100",
+            "summary": "Weekly Program Gate Council",
+            "description": "Standing weekly gate council for readiness, KPI variance, federal posture, and action lock.\nChair: COO Audience\nRecorder: Governance Operations Audience\nSource artifact: government-readiness/governance/cadence/weekly/2026-07-24_PROGRAM_GATE_COUNCIL.md",
+            "start": "2026-07-24",
+            "end": "2026-07-24",
+            "startTime": "11:00",
+            "endTime": "12:00",
+            "allDay": false,
+            "rrule": "FREQ=WEEKLY;BYDAY=FR",
+            "categories": "NUNN2030,MEETING,WEEKLY"
+        },
+        {
+            "uid": "nunn-partner-outreach-2026-07-21-1400",
+            "summary": "Partner Outreach Block",
+            "description": "Standing block for DOE/Genesis positioning follow-up, partner communication, and outbound coordination.\nCadence: Mondays and Wednesdays.",
+            "start": "2026-07-20",
+            "end": "2026-07-20",
+            "startTime": "14:00",
+            "endTime": "15:00",
+            "allDay": false,
+            "rrule": "FREQ=WEEKLY;BYDAY=MO,WE",
+            "categories": "NUNN2030,PARTNER,OUTREACH"
+        },
+        {
+            "uid": "nunn-approval-review-2026-07-20-1600",
+            "summary": "Approval and Review Block",
+            "description": "Standing block for approvals, artifact review, bottleneck clearance, and final decision passes.\nCadence: Weekdays.",
+            "start": "2026-07-20",
+            "end": "2026-07-20",
+            "startTime": "16:00",
+            "endTime": "16:45",
+            "allDay": false,
+            "rrule": "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR",
+            "categories": "NUNN2030,APPROVAL,REVIEW"
+        },
+        {
+            "uid": "nunn-monthly-strategy-review-2026-08-18-1300",
+            "summary": "Monthly Strategy Review",
+            "description": "Standing monthly executive strategy and evidence review.\nExecutive Sponsors: CEO / COO Audience\nSource artifact: government-readiness/governance/cadence/monthly/2026-08-18_MONTHLY_STRATEGY_EVIDENCE_AUDIT_SCORECARD.md",
+            "start": "2026-08-18",
+            "end": "2026-08-18",
+            "startTime": "13:00",
+            "endTime": "14:00",
+            "allDay": false,
+            "rrule": "FREQ=MONTHLY;BYMONTHDAY=18",
+            "categories": "NUNN2030,MEETING,MONTHLY"
+        },
+        {
+            "uid": "nunn-quarterly-objectives-review-2026-10-19-1400",
+            "summary": "Quarterly Objectives and Governance Review",
+            "description": "Standing quarterly board-governance and objectives review block.\nPresenter: Executive Leadership\nSource artifact: government-readiness/governance/EXECUTIVE_TEMPLATES_EXECUTION_PACK_2026-07-18.md",
+            "start": "2026-10-19",
+            "end": "2026-10-19",
+            "startTime": "14:00",
+            "endTime": "15:00",
+            "allDay": false,
+            "rrule": "FREQ=MONTHLY;INTERVAL=3;BYMONTHDAY=19",
+            "categories": "NUNN2030,MEETING,QUARTERLY"
+        }
+    ]
+}

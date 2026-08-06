@@ -51,6 +51,9 @@ const {
 const { buildSentinelGPTActionOpenAPI } = require('../sentinel/src/faceplanes/openai/gptActionManifest');
 const {
   buildBoundaryOutput,
+  buildXeChangePacket,
+  buildXeExecutionEnvelope,
+  buildXeFixSetReport,
   executeTaskStep,
   getTaskTemplateRun,
   listTaskTemplateRuns,
@@ -74,10 +77,12 @@ const { resolveTier, classifyOperation } = require('../sentinel/src/tiers/tierRe
 const { TIERS } = require('../sentinel/src/tiers/tierRegistry');
 const { buildExecutivePlane } = require('../sentinel/src/planes/executive');
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 80;
 const LANDING_PAGE_PATH = path.join(__dirname, 'public', 'index.html');
 const PROOF_PAGE_PATH = path.join(__dirname, 'public', 'proof.html');
 const MISSION_CONTROL_PATH = path.join(__dirname, 'public', 'mission-control.html');
+const GOVERNMENT_OUTCOMES_PATH = path.join(__dirname, 'public', 'government-outcomes.html');
+const ENTITY_INQUIRY_PORTAL_PATH = path.join(__dirname, 'public', 'entity-inquiry-portal.html');
 const OPERATOR_ESCALATIONS_PATH = path.join(__dirname, 'public', 'operator-escalations.html');
 const STRIPE_CHECKOUT_PAGE_PATH = path.join(__dirname, 'public', 'stripe-checkout.html');
 const STRIPE_COMPLETE_PAGE_PATH = path.join(__dirname, 'public', 'stripe-complete.html');
@@ -732,6 +737,65 @@ function getStripeReadiness() {
       'Checkout session creation is feature-flagged',
       'Session creation and status checks are audit logged',
       'No raw card data touches SentinelOS'
+    ]
+  };
+}
+
+function buildRevenueReadiness() {
+  const stripe = getStripeReadiness();
+  const requiredConfig = getStripeRequiredConfig();
+  const paymentReady = stripe.status === 'ready';
+
+  return {
+    status: paymentReady ? 'ready_held_for_owner_activation' : 'scaffolded_held',
+    mode: 'ready_to_turn_on_when_approved',
+    verifiedFacts: {
+      proofHealthRequired: true,
+      billingSurfacePresent: true,
+      checkoutConfigEndpoint: '/billing/checkout/config',
+      checkoutSessionEndpoint: '/billing/checkout/session',
+      sessionStatusEndpoint: '/billing/session-status'
+    },
+    ownerDecisions: {
+      limitedExternalProofShare: 'owner_decision_required',
+      revenueConversations: 'owner_decision_required',
+      liveCheckoutActivation: paymentReady ? 'configuration_ready_owner_decision_required' : 'held_pending_configuration',
+      productionCustomerExecution: 'held_pending_customer_scope_packet'
+    },
+    authorizations: {
+      limitedExternalProofShare: false,
+      revenueConversations: false,
+      livePaymentCollection: false,
+      productionCustomerDealExecution: false,
+      publicPricingPublication: false,
+      customerOnboarding: false
+    },
+    activationReadiness: {
+      liveCheckout: paymentReady,
+      requiredConfig,
+      missing: stripe.missing,
+      safeguards: stripe.safeguards,
+      nextGate: paymentReady
+        ? 'OWNER_APPROVE_STRIPE_CHECKOUT_ACTIVATION'
+        : 'PREPARE_STRIPE_CHECKOUT_CONFIGURATION_APPROVAL_PACKET'
+    },
+    recommendedNextGates: [
+      { gate: 'VERIFY_GPT_ACTION_END_TO_END', status: 'pending' },
+      { gate: 'COMPLETE_RECEIPT_AND_AUDIT_VERIFICATION', status: 'pending' },
+      { gate: 'CONFIGURE_AND_VERIFY_STRIPE_NON_PRODUCTION', status: paymentReady ? 'configuration_present_verify_non_production' : 'pending' },
+      { gate: 'CUSTOMER_IMPLEMENTATION_PACKET', status: 'pending' },
+      { gate: 'PRODUCTION_READINESS_REVIEW', status: 'pending' },
+      { gate: 'COMMERCIAL_LAUNCH_APPROVAL', status: 'pending' }
+    ],
+    nonAuthorization: [
+      'live_payment_collection',
+      'stripe_checkout_activation',
+      'production_customer_processing',
+      'customer_onboarding',
+      'regulated_or_compliance_claims',
+      'production_service_commitments',
+      'public_pricing_publication',
+      'infrastructure_mutation'
     ]
   };
 }
@@ -1397,6 +1461,16 @@ const server = http.createServer(async (req, res) => {
     return sendHtmlFile(res, MISSION_CONTROL_PATH);
   }
 
+  if (pathname === '/government-outcomes' && req.method === 'GET') {
+    auditSurfaceView(req, requestUrl, pathname, 'government-outcomes');
+    return sendHtmlFile(res, GOVERNMENT_OUTCOMES_PATH);
+  }
+
+  if (pathname === '/portal' && req.method === 'GET') {
+    auditSurfaceView(req, requestUrl, pathname, 'entity-inquiry-portal');
+    return sendHtmlFile(res, ENTITY_INQUIRY_PORTAL_PATH);
+  }
+
   if (pathname === '/operator-escalations' && req.method === 'GET') {
     auditSurfaceView(req, requestUrl, pathname, 'operator-escalations');
     return sendHtmlFile(res, OPERATOR_ESCALATIONS_PATH);
@@ -1428,6 +1502,23 @@ const server = http.createServer(async (req, res) => {
 
       try {
         const apiKey = getRequestApiKey(req, requestUrl);
+        const resolved = resolveApiKey(apiKey);
+
+        if (!resolved.ok) {
+          emitSecurityEvent('control_plane.auth.denied', {
+            route: '/api/control/execute',
+            method: req.method,
+            reason: resolved.error,
+            keyId: resolved.keyId || null
+          });
+
+          return sendJson(res, 401, {
+            status: 'blocked',
+            error: 'Unauthorized',
+            reason: resolved.error
+          });
+        }
+
         const result = await executeIntent(body, {
           endpoint: `${getRequestOrigin(req)}/v1/command`,
           headers: apiKey ? { 'x-api-key': apiKey } : {}
@@ -1586,6 +1677,10 @@ const server = http.createServer(async (req, res) => {
 
   if (pathname === '/billing/checkout/readiness' && req.method === 'GET') {
     return sendJson(res, 200, getStripeReadiness());
+  }
+
+  if (pathname === '/billing/revenue-readiness' && req.method === 'GET') {
+    return sendJson(res, 200, buildRevenueReadiness());
   }
 
   if (pathname === '/billing/checkout/session' && req.method === 'POST') {
@@ -2442,7 +2537,7 @@ const server = http.createServer(async (req, res) => {
     });
   }
 
-  if (pathname.startsWith('/task-templates/runs/') && req.method === 'GET') {
+  if (pathname.startsWith('/task-templates/runs/') && !pathname.includes('/steps/') && req.method === 'GET') {
     const parts = pathname.split('/').filter(Boolean);
     const runId = parts[2];
 
@@ -2475,6 +2570,391 @@ const server = http.createServer(async (req, res) => {
       status: 'ok',
       run,
       boundary: buildBoundaryOutput(run)
+    });
+  }
+
+  if (pathname.startsWith('/task-templates/runs/') && pathname.includes('/steps/') && pathname.endsWith('/xe-packet') && req.method === 'GET') {
+    const parts = pathname.split('/').filter(Boolean);
+    const runId = parts[2];
+    const taskId = parts[4];
+
+    if (!runId || !taskId || parts.length !== 6 || parts[3] !== 'steps' || parts[5] !== 'xe-packet') {
+      return sendJson(res, 404, {
+        status: 'error',
+        error: 'Not Found'
+      });
+    }
+
+    const access = authorizeRoute(req, res, '/task-templates/runs/:runId/steps/:taskId/xe-packet', {
+      command: 'task.template.read',
+      requiredScope: 'task:read'
+    });
+
+    if (!access) {
+      return;
+    }
+
+    const run = getTaskTemplateRun(decodeURIComponent(runId));
+
+    if (!run || (access.principal.tenant !== 'platform' && run.tenant !== access.principal.tenant)) {
+      return sendJson(res, 404, {
+        status: 'error',
+        error: 'Execution session not found'
+      });
+    }
+
+    const task = (run.tasks || []).find((item) => item.id === decodeURIComponent(taskId));
+
+    if (!task) {
+      return sendJson(res, 404, {
+        status: 'error',
+        error: 'Workflow step not found'
+      });
+    }
+
+    return sendJson(res, 200, {
+      status: 'ok',
+      runId: run.runId,
+      taskId: task.id,
+      xeChangePacket: buildXeChangePacket(task, {
+        runId: run.runId,
+        executionSession: run.runId,
+        tenant: run.tenant
+      })
+    });
+  }
+
+  if (pathname.startsWith('/task-templates/runs/') && pathname.includes('/steps/') && pathname.endsWith('/xe-intent') && req.method === 'POST') {
+    const parts = pathname.split('/').filter(Boolean);
+    const runId = parts[2];
+    const taskId = parts[4];
+
+    if (!runId || !taskId || parts.length !== 6 || parts[3] !== 'steps' || parts[5] !== 'xe-intent') {
+      return sendJson(res, 404, {
+        status: 'error',
+        error: 'Not Found'
+      });
+    }
+
+    const access = authorizeRoute(req, res, '/task-templates/runs/:runId/steps/:taskId/xe-intent', {
+      command: 'task.template.execute',
+      requiredScope: 'task:execute'
+    });
+
+    if (!access) {
+      return;
+    }
+
+    return readJsonBody(req, async (error, body) => {
+      if (error) {
+        return sendJson(res, 400, {
+          status: 'error',
+          error: 'Invalid JSON body'
+        });
+      }
+
+      const run = getTaskTemplateRun(decodeURIComponent(runId));
+
+      if (!run || (access.principal.tenant !== 'platform' && run.tenant !== access.principal.tenant)) {
+        return sendJson(res, 404, {
+          status: 'error',
+          error: 'Execution session not found'
+        });
+      }
+
+      const task = (run.tasks || []).find((item) => item.id === decodeURIComponent(taskId));
+
+      if (!task) {
+        return sendJson(res, 404, {
+          status: 'error',
+          error: 'Workflow step not found'
+        });
+      }
+
+      const xeChangePacket = buildXeChangePacket(task, {
+        runId: run.runId,
+        executionSession: run.runId,
+        tenant: run.tenant
+      });
+
+      const requestedPacket = body && body.xeChangePacket && typeof body.xeChangePacket === 'object'
+        ? body.xeChangePacket
+        : null;
+      const requestedOperation = body && typeof body.operation === 'string' ? body.operation.trim().toLowerCase() : '';
+
+      if (!requestedPacket || requestedPacket.packetId !== xeChangePacket.packetId) {
+        return sendJson(res, 400, {
+          status: 'error',
+          error: 'XE packet mismatch',
+          expectedPacketId: xeChangePacket.packetId
+        });
+      }
+
+      if (requestedOperation && !xeChangePacket.permittedOperations.includes(requestedOperation)) {
+        return sendJson(res, 400, {
+          status: 'error',
+          error: 'XE operation not permitted',
+          permittedOperations: xeChangePacket.permittedOperations
+        });
+      }
+
+      const intentStatus = xeChangePacket.guardrails.approvalRequired ? 'PENDING_APPROVAL' : 'READY_FOR_SCAN';
+      const xeFixSetReport = buildXeFixSetReport(xeChangePacket, {
+        operation: requestedOperation || null,
+        intentStatus
+      });
+      const intentRecord = await auditLogger.log({
+        tenant: run.tenant,
+        command: 'task.template.xe_intent.recorded',
+        payload: {
+          route: '/task-templates/runs/:runId/steps/:taskId/xe-intent',
+          runId: run.runId,
+          taskId: task.id,
+          operation: requestedOperation || null,
+          target: xeChangePacket.targets.target,
+          packetId: xeChangePacket.packetId,
+          permittedOperations: xeChangePacket.permittedOperations,
+          sentinelAiPass: xeChangePacket.sentinelAiPass,
+          xeFixSetReport
+        },
+        result: {
+          success: true,
+          status: 'INTENT_RECORDED',
+          intentStatus,
+          executionMode: xeChangePacket.guardrails.executionMode,
+          approvalRequired: xeChangePacket.guardrails.approvalRequired,
+          packetId: xeChangePacket.packetId,
+          target: xeChangePacket.targets.target,
+          operation: requestedOperation || null,
+          xeFixSetReport
+        },
+        actor: access.principal.actor,
+        timestamp: new Date().toISOString()
+      });
+
+      return sendJson(res, 202, {
+        status: 'ok',
+        runId: run.runId,
+        taskId: task.id,
+        xeChangePacket,
+        xeIntent: {
+          status: 'INTENT_RECORDED',
+          intentStatus,
+          operation: requestedOperation || null,
+          auditReference: intentRecord.eventId,
+          auditHash: intentRecord.auditHash || null,
+          target: xeChangePacket.targets.target,
+          sentinelAiPass: xeChangePacket.sentinelAiPass
+        },
+        xeFixSetReport
+      });
+    });
+  }
+
+  if (pathname.startsWith('/task-templates/runs/') && pathname.includes('/steps/') && pathname.endsWith('/xe-execute') && req.method === 'POST') {
+    const parts = pathname.split('/').filter(Boolean);
+    const runId = parts[2];
+    const taskId = parts[4];
+
+    if (!runId || !taskId || parts.length !== 6 || parts[3] !== 'steps' || parts[5] !== 'xe-execute') {
+      return sendJson(res, 404, {
+        status: 'error',
+        error: 'Not Found'
+      });
+    }
+
+    const access = authorizeRoute(req, res, '/task-templates/runs/:runId/steps/:taskId/xe-execute', {
+      command: 'task.template.execute',
+      requiredScope: 'task:execute'
+    });
+
+    if (!access) {
+      return;
+    }
+
+    return readJsonBody(req, async (error, body) => {
+      if (error) {
+        return sendJson(res, 400, {
+          status: 'error',
+          error: 'Invalid JSON body'
+        });
+      }
+
+      const run = getTaskTemplateRun(decodeURIComponent(runId));
+
+      if (!run || (access.principal.tenant !== 'platform' && run.tenant !== access.principal.tenant)) {
+        return sendJson(res, 404, {
+          status: 'error',
+          error: 'Execution session not found'
+        });
+      }
+
+      const task = (run.tasks || []).find((item) => item.id === decodeURIComponent(taskId));
+
+      if (!task) {
+        return sendJson(res, 404, {
+          status: 'error',
+          error: 'Workflow step not found'
+        });
+      }
+
+      const xeChangePacket = buildXeChangePacket(task, {
+        runId: run.runId,
+        executionSession: run.runId,
+        tenant: run.tenant
+      });
+
+      const packetId = body && typeof body.packetId === 'string' ? body.packetId.trim() : '';
+      const operation = body && typeof body.operation === 'string' ? body.operation.trim().toLowerCase() : '';
+      const intentAuditReference = body && typeof body.intentAuditReference === 'string'
+        ? body.intentAuditReference.trim()
+        : '';
+
+      if (!packetId) {
+        return sendJson(res, 400, {
+          status: 'error',
+          error: 'packetId is required'
+        });
+      }
+
+      if (packetId !== xeChangePacket.packetId) {
+        return sendJson(res, 400, {
+          status: 'error',
+          error: 'XE packet mismatch',
+          expectedPacketId: xeChangePacket.packetId
+        });
+      }
+
+      if (operation && !xeChangePacket.permittedOperations.includes(operation)) {
+        return sendJson(res, 400, {
+          status: 'error',
+          error: 'XE operation not permitted',
+          permittedOperations: xeChangePacket.permittedOperations
+        });
+      }
+
+      if (intentAuditReference) {
+        const intentRecord = auditLogger.getAll().find((entry) => (
+          entry &&
+          entry.eventId === intentAuditReference &&
+          entry.command === 'task.template.xe_intent.recorded' &&
+          entry.payload &&
+          entry.payload.packetId === xeChangePacket.packetId
+        ));
+
+        if (!intentRecord) {
+          return sendJson(res, 400, {
+            status: 'error',
+            error: 'Intent audit reference not found for packet',
+            intentAuditReference
+          });
+        }
+      }
+
+      const approvalStatusByTaskId = {};
+
+      for (const record of run.approvalRecords || []) {
+        if (record.taskId !== task.id) {
+          continue;
+        }
+
+        const approval = await getApproval(
+          record.approvalId,
+          access.principal.tenant === 'platform' ? run.tenant : access.principal.tenant
+        );
+        approvalStatusByTaskId[record.taskId] = approval ? approval.status : record.status;
+      }
+
+      const stepResult = executeTaskStep(task, { approvalStatusByTaskId });
+
+      if (!stepResult.success) {
+        const blockedEnvelope = buildXeExecutionEnvelope(xeChangePacket, {
+          operation: operation || null,
+          intentAuditReference: intentAuditReference || null,
+          actor: access.principal.actor,
+          allowed: false,
+          executionStatus: 'BLOCKED'
+        });
+
+        await auditLogger.log({
+          tenant: run.tenant,
+          command: 'task.template.xe_execute.blocked',
+          payload: {
+            route: '/task-templates/runs/:runId/steps/:taskId/xe-execute',
+            runId: run.runId,
+            taskId: task.id,
+            packetId: xeChangePacket.packetId,
+            operation: operation || null,
+            intentAuditReference: intentAuditReference || null
+          },
+          result: {
+            success: false,
+            status: 'BLOCKED',
+            reason: stepResult.reason,
+            xeExecutionEnvelope: blockedEnvelope
+          },
+          actor: access.principal.actor,
+          timestamp: new Date().toISOString()
+        });
+
+        return sendJson(res, 423, {
+          status: 'blocked',
+          runId: run.runId,
+          taskId: task.id,
+          packetId: xeChangePacket.packetId,
+          xeExecutionEnvelope: blockedEnvelope,
+          result: stepResult
+        });
+      }
+
+      const xeExecutionEnvelope = buildXeExecutionEnvelope(xeChangePacket, {
+        operation: operation || null,
+        intentAuditReference: intentAuditReference || null,
+        actor: access.principal.actor,
+        executionStatus: 'EXECUTED'
+      });
+      const xeFixSetReport = buildXeFixSetReport(xeChangePacket, {
+        operation: operation || null,
+        intentStatus: 'EXECUTED'
+      });
+
+      const executionRecord = await auditLogger.log({
+        tenant: run.tenant,
+        command: 'task.template.xe_execute',
+        payload: {
+          route: '/task-templates/runs/:runId/steps/:taskId/xe-execute',
+          runId: run.runId,
+          taskId: task.id,
+          packetId: xeChangePacket.packetId,
+          target: xeChangePacket.targets.target,
+          operation: operation || null,
+          intentAuditReference: intentAuditReference || null
+        },
+        result: {
+          success: true,
+          status: 'EXECUTED',
+          xeExecutionEnvelope,
+          xeFixSetReport
+        },
+        actor: access.principal.actor,
+        timestamp: new Date().toISOString()
+      });
+
+      return sendJson(res, 200, {
+        status: 'executed',
+        runId: run.runId,
+        taskId: task.id,
+        packetId: xeChangePacket.packetId,
+        xeExecutionEnvelope,
+        xeFixSetReport,
+        xeExecution: {
+          status: 'EXECUTED',
+          operation: operation || null,
+          target: xeChangePacket.targets.target,
+          auditReference: executionRecord.eventId,
+          auditHash: executionRecord.auditHash || null
+        }
+      });
     });
   }
 

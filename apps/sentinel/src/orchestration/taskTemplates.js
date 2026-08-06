@@ -23,10 +23,11 @@ function hashObject(value) {
 
 const APPROVAL_BADGES = Object.freeze({
   mapping_alignment: '[MAP]',
+  conditional: '[APPROVE]',
   conditional_approval: '[APPROVE]',
   held_review: '[HOLD]',
   xe_assistance: '[XE]',
-  billing_checkout: '[BILLING]'
+  billing_checkout: '[APPROVE:BILLING]'
 });
 
 const DEFAULT_TEMPLATES = Object.freeze([
@@ -78,7 +79,7 @@ const DEFAULT_TEMPLATES = Object.freeze([
     id: 'template_billing_checkout',
     category: 'billing_checkout',
     title: 'Billing Checkout',
-    badge: '[BILLING]',
+    badge: '[APPROVE:BILLING]',
     riskLevel: 'high',
     approvalPolicy: 'approval_before_execution',
     xeEligible: false,
@@ -223,10 +224,42 @@ function buildXeQueue(tasks) {
       status: task.approvalRequired ? 'waiting_for_approval' : 'ready_for_xe',
       requiredApproval: task.approvalRequired,
       suggestedAction: task.nextStep,
+      overlay: buildXeOverlay(task),
       guardrail: task.approvalRequired
         ? 'Do not execute until a matching approval is approved.'
         : 'Run through XE with audit logging enabled.'
     }));
+}
+
+function buildXeOverlay(task = {}) {
+  const source = task.source || (task.metadata && task.metadata.source) || null;
+  const target = task.metadata && typeof task.metadata.target === 'string'
+    ? task.metadata.target
+    : source;
+
+  return {
+    mode: task.approvalRequired ? 'governed_overlay_pending_approval' : 'governed_overlay_ready',
+    changeSurface: 'sentinel_xe_command_plane',
+    permittedOperations: ['insert', 'change', 'implement'],
+    sentinelAiPass: {
+      enabled: true,
+      stages: ['scan', 'fix', 'set'],
+      objective: 'Streamline the requested change and optimize the implementation path after XE overlay authorization.',
+      optimizationPass: 'streamline_and_optimize'
+    },
+    targets: {
+      source,
+      target,
+      category: task.category || null
+    },
+    executionHints: [
+      task.approvalRequired
+        ? 'Hold implementation changes until the required approval is recorded.'
+        : 'Implementation changes may proceed through the XE command surface with audit logging.',
+      'Prefer the smallest scoped insertion or change set that satisfies the requested outcome.',
+      'Run Sentinel AI scan/fix/set only after the overlay target and scope are explicit.'
+    ]
+  };
 }
 
 function buildBoundaryOutput(run) {
@@ -259,7 +292,8 @@ function buildBoundaryOutput(run) {
         step: step.name || step.title,
         status: 'READY_FOR_XE',
         badge: step.badge,
-        nextStep: step.nextStep
+        nextStep: step.nextStep,
+        overlay: buildXeOverlay(step)
       });
     }
   }
@@ -275,6 +309,114 @@ function buildBoundaryOutput(run) {
     allowedActions: xeActions.map((action) => action.step),
     approvalRecords: run.approvalRecords || [],
     auditHash: run.auditHash
+  };
+}
+
+function buildXeChangePacket(step = {}, context = {}) {
+  const taskId = step.taskId || step.id || 'unknown_task';
+  const stepName = step.name || step.title || taskId;
+  const overlay = step.overlay || buildXeOverlay(step);
+  const runId = context.runId || context.executionSession || null;
+  const tenant = context.tenant || null;
+
+  return {
+    packetId: `xe_packet_${hashObject({ runId, taskId, target: overlay.targets }).slice(0, 16)}`,
+    runId,
+    tenant,
+    taskId,
+    step: stepName,
+    mode: overlay.mode,
+    permittedOperations: overlay.permittedOperations,
+    sentinelAiPass: overlay.sentinelAiPass,
+    targets: overlay.targets,
+    guardrails: {
+      approvalRequired: step.requiresApproval === true || step.approvalRequired === true,
+      xeRequired: step.xeRequired === true,
+      executionMode: step.xeRequired ? 'xe_assisted' : 'governed',
+      hints: overlay.executionHints,
+    },
+    nextStep: step.nextStep || overlay.executionHints[0] || 'Await governed XE action.',
+  };
+}
+
+function buildXeFixSetReport(packet = {}, options = {}) {
+  const operation = options.operation || null;
+  const intentStatus = options.intentStatus || 'READY_FOR_SCAN';
+  const approvalRequired = packet.guardrails && packet.guardrails.approvalRequired === true;
+
+  return {
+    reportId: `xe_fixset_${hashObject({ packetId: packet.packetId, operation, intentStatus }).slice(0, 16)}`,
+    packetId: packet.packetId || null,
+    target: packet.targets && packet.targets.target ? packet.targets.target : null,
+    operation,
+    intentStatus,
+    sentinelScan: {
+      objective: packet.sentinelAiPass && packet.sentinelAiPass.objective
+        ? packet.sentinelAiPass.objective
+        : 'Streamline and optimize the requested change path.',
+      targetSummary: packet.targets || {},
+      requestedStages: packet.sentinelAiPass && Array.isArray(packet.sentinelAiPass.stages)
+        ? packet.sentinelAiPass.stages
+        : ['scan', 'fix', 'set'],
+    },
+    fixAndSetPlan: {
+      mode: approvalRequired ? 'awaiting_governed_release' : 'ready_for_governed_scan',
+      changes: [
+        {
+          stage: 'scan',
+          action: 'Inspect the specific target and verify the requested scope before any modification.',
+        },
+        {
+          stage: 'fix',
+          action: `Prepare the smallest governed ${operation || 'change'} set that satisfies the target requirement.`,
+        },
+        {
+          stage: 'set',
+          action: 'Record the approved target state and optimization result as a governed XE outcome.',
+        }
+      ],
+      optimizationPass: packet.sentinelAiPass && packet.sentinelAiPass.optimizationPass
+        ? packet.sentinelAiPass.optimizationPass
+        : 'streamline_and_optimize',
+    },
+    guardrails: packet.guardrails || {},
+    nextReportStep: approvalRequired
+      ? 'Hold the fix/set execution pass until approval is recorded, then rerun Sentinel scan against the same packet.'
+      : 'Run Sentinel scan against the target and emit the governed fix/set result packet.'
+  };
+}
+
+function buildXeExecutionEnvelope(packet = {}, options = {}) {
+  const requestedStages = packet.sentinelAiPass && Array.isArray(packet.sentinelAiPass.stages)
+    ? packet.sentinelAiPass.stages
+    : ['scan', 'fix', 'set'];
+  const allowed = options.allowed !== false;
+  const executionStatus = options.executionStatus || (allowed ? 'EXECUTED' : 'BLOCKED');
+
+  return {
+    executionId: `xe_exec_${hashObject({
+      packetId: packet.packetId,
+      operation: options.operation || null,
+      executionStatus,
+      actor: options.actor || null
+    }).slice(0, 16)}`,
+    packetId: packet.packetId || null,
+    operation: options.operation || null,
+    target: packet.targets && packet.targets.target ? packet.targets.target : null,
+    executionStatus,
+    intentAuditReference: options.intentAuditReference || null,
+    stageResults: requestedStages.map((stage) => ({
+      stage,
+      status: allowed ? 'executed' : 'blocked'
+    })),
+    guardrails: packet.guardrails || {},
+    governedBoundary: {
+      executionMode: packet.guardrails && packet.guardrails.executionMode ? packet.guardrails.executionMode : 'governed',
+      approvalRequired: Boolean(packet.guardrails && packet.guardrails.approvalRequired)
+    },
+    nextStep: allowed
+      ? 'Persist governed XE execution evidence and continue with result validation.'
+      : 'Record approval, then rerun XE execution against the same packetId.'
   };
 }
 
@@ -325,6 +467,7 @@ function runStepThroughCommand(step = {}, context = {}) {
   return {
     command: 'task.template.execute',
     payload: step,
+    xeChangePacket: buildXeChangePacket(step, context),
     policy: {
       requiresApproval: step.requiresApproval === true || step.approvalRequired === true
     },
@@ -531,6 +674,9 @@ module.exports = {
   DEFAULT_TEMPLATES,
   buildApprovalCandidates,
   buildBoundaryOutput,
+  buildXeChangePacket,
+  buildXeExecutionEnvelope,
+  buildXeFixSetReport,
   buildTimeline,
   buildXeQueue,
   buildTelemetryActivities,

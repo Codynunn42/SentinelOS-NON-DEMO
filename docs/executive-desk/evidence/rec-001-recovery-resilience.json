@@ -1,0 +1,37 @@
+{
+  "gateId": "REC-001",
+  "gateName": "Recovery and Resilience",
+  "objective": "Validate graceful recovery from malformed requests, policy-blocked requests, and clean process restart while governed execution remains available.",
+  "method": "Exercise invalid JSON, cross-tenant denial, post-failure valid execution, server close/restart, and post-restart valid execution against the local API server.",
+  "expectedResult": {
+    "invalidJson": "400 and server remains healthy",
+    "crossTenantCommand": "403 TENANT_MISMATCH",
+    "postFailureValidCommand": "200 executed with receipt",
+    "restart": "server returns to healthy state and valid command still executes"
+  },
+  "observedResult": {
+    "status": "passed",
+    "observations": [
+      "initial_health_ok",
+      "invalid_json_blocked",
+      "post_invalid_json_health_ok",
+      "cross_tenant_blocked",
+      "post_failure_valid_command_ok",
+      "first_server_close_ok",
+      "server_restart_ok",
+      "post_restart_health_ok",
+      "post_restart_valid_command_ok"
+    ]
+  },
+  "evidence": {
+    "script": "scripts/check-recovery-resilience.js",
+    "scope": "single-process local API resilience slice"
+  },
+  "pass": true,
+  "reviewer": "unassigned",
+  "timestamp": "2026-07-21T21:50:44.538Z",
+  "startedAt": "2026-07-21T21:50:44.516Z",
+  "notes": [
+    "REC-001 validates graceful recovery and restart behavior, not durable evidence persistence across process restarts."
+  ]
+}

@@ -46,7 +46,16 @@ const commandScopes = {
   'policy.evaluate': 'policy:evaluate',
   'cdnlux.token.evaluate': 'platform:admin',
   'cdnlux.contract.evaluate': 'platform:admin',
-  'docking.evaluate': 'platform:admin'
+  'docking.evaluate': 'platform:admin',
+  'vault.retrieve': 'platform:admin',
+  'architecture.reconstruction.begin': 'platform:admin',
+  'governance.canonicalize.platform': 'platform:admin',
+  'governance.nextsteps.quantitative.light': 'platform:admin',
+  'governance.bridgegaps.report': 'platform:admin',
+  'operational.upgrade.assess': 'platform:admin',
+  'operational.upgrade.plan.prepare': 'platform:admin',
+  'contract.reclamation.assess': 'platform:admin',
+  'contract.reclamation.plan.prepare': 'platform:admin'
 };
 
 function blocked(state, riskLevel, reason, details = {}) {

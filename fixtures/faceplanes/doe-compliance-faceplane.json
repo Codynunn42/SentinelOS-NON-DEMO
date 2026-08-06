@@ -1,0 +1,326 @@
+{
+    "facePlaneId": "doe-compliance",
+    "tenantId": "doe",
+    "name": "DOE Compliance & Reporting FacePlane",
+    "purpose": "Governed surface for EPCRA Tier II reporting, compliance validation, and release authorization under DOE oversight.",
+    "owner": "Department of Energy — Compliance & Reporting Division",
+    "gaasPolicyPack": "gaas.doe.compliance.epcra-tier-ii.v1",
+    "requestedCapabilities": [
+        "FACEPLANE_READ",
+        "FACEPLANE_WRITE",
+        "FACEPLANE_EXECUTE",
+        "GAAS_POLICY_APPLY",
+        "DOCKING_MANIFEST_REGISTER",
+        "COMPLIANCE_VALIDATION",
+        "APPROVAL_GATE_EXECUTE",
+        "RELEASE_RESTRICTION_ENFORCE",
+        "EVIDENCE_PRECEDENCE_VERIFY",
+        "SUBMISSION_AUTHORIZE"
+    ],
+    "approvalModel": "human_review_required",
+    "telemetryMode": "ON",
+    "dataClasses": [
+        "compliance_report",
+        "facility_inventory",
+        "approval_authority_record",
+        "release_restriction_state",
+        "validation_checklist",
+        "evidence_manifest",
+        "disposition_decision",
+        "submission_authorization",
+        "audit_trail"
+    ],
+    "evidence": [
+        "action_validation_matrix",
+        "release_restriction_reference",
+        "approval_authority_identification",
+        "evidence_precedence_hierarchy",
+        "compliance_review_record",
+        "facility_verification_log",
+        "metadata_validation_report",
+        "sign_off_evidence",
+        "disposition_review_record",
+        "submission_authorization_approval",
+        "release_readiness_checklist",
+        "corrective_action_log",
+        "audit_receipt"
+    ],
+    "complianceMandates": [
+        "epcra_tier_ii_reporting",
+        "doe_governance_doctrine",
+        "federal_compliance_framework",
+        "approval_authority_oversight",
+        "evidence_control_requirements",
+        "metadata_integrity_control",
+        "submission_authorization_gate"
+    ],
+    "releaseRestrictions": {
+        "r1_completion_verification": {
+            "name": "R1 — Completed and Verified",
+            "status": "applied",
+            "effect": "Action completed, independently verified, documented with supporting evidence. No restriction on further activities.",
+            "applicableTo": [
+                "document_identification",
+                "title_correction",
+                "reporting_period_alignment",
+                "terminology_replacement",
+                "approval_authorities_section",
+                "evidence_precedence_section",
+                "metadata_control_strengthening",
+                "release_authorization_criteria"
+            ]
+        },
+        "r2_activity_completion": {
+            "name": "R2 — Activity Completion Restriction",
+            "status": "active",
+            "effect": "Outstanding work activities prevent release, submission, distribution, and readiness determination until completed and verified.",
+            "applicableTo": [
+                "overall_document_status_review",
+                "release_readiness_checklist_completion",
+                "validation_and_release_control_activities"
+            ]
+        },
+        "r3_approval_restriction": {
+            "name": "R3 — Approval Restriction",
+            "status": "active",
+            "effect": "Required approvals outstanding. Submission, release, and approval-dependent actions prohibited until all approvals obtained and verified.",
+            "applicableTo": [
+                "submission_authorization_approval",
+                "disposition_review_approval",
+                "facility_inventory_approval",
+                "compliance_findings_disposition"
+            ]
+        },
+        "r4_validation_and_readiness": {
+            "name": "R4 — Validation and Release Readiness Restriction",
+            "status": "active",
+            "effect": "Post-completion validation and release-control verification required before finalization. Release and publication prohibited until all checks complete.",
+            "applicableTo": [
+                "compliance_review_validation",
+                "facility_information_verification",
+                "metadata_validation",
+                "evidence_collection_completion",
+                "sign_off_verification",
+                "corrective_action_verification",
+                "final_release_readiness_confirmation"
+            ]
+        }
+    },
+    "approvalAuthorities": {
+        "primary": {
+            "authority": "DOE Compliance Officer",
+            "role": "doe:compliance_officer",
+            "scope": [
+                "submission_authorization",
+                "release_authorization"
+            ],
+            "requiredFor": [
+                "EPCRA_Tier_II_submission",
+                "report_release"
+            ]
+        },
+        "secondary": {
+            "authority": "Facility Manager",
+            "role": "doe:facility_manager",
+            "scope": [
+                "facility_inventory_verification",
+                "facility_data_accuracy"
+            ],
+            "requiredFor": [
+                "inventory_data_submission",
+                "facility_information_update"
+            ]
+        },
+        "tertiary": {
+            "authority": "Compliance Validator",
+            "role": "doe:compliance_validator",
+            "scope": [
+                "compliance_review",
+                "validation_checklist_completion"
+            ],
+            "requiredFor": [
+                "compliance_assessment",
+                "finding_resolution"
+            ]
+        },
+        "quaternary": {
+            "authority": "Disposition Authority",
+            "role": "doe:disposition_authority",
+            "scope": [
+                "finding_disposition",
+                "corrective_action_approval"
+            ],
+            "requiredFor": [
+                "finding_disposition_record",
+                "corrective_action_closeout"
+            ]
+        }
+    },
+    "evidencePrecedence": {
+        "tier_1_authoritative": [
+            "submission_authorization_approval",
+            "compliance_officer_sign_off",
+            "facility_manager_verification",
+            "audit_receipt_with_timestamp"
+        ],
+        "tier_2_supporting": [
+            "compliance_review_record",
+            "validation_checklist_completion",
+            "facility_inventory_export",
+            "metadata_validation_report"
+        ],
+        "tier_3_reference": [
+            "action_validation_matrix",
+            "release_restriction_status_log",
+            "approval_authority_identification",
+            "disposition_review_record"
+        ]
+    },
+    "validationGates": [
+        {
+            "gateName": "compliance_review_validation",
+            "restriction": "R4",
+            "checklist": [
+                "All compliance review activities completed",
+                "Findings documented and categorized",
+                "Non-conformances identified",
+                "Corrective actions assigned"
+            ],
+            "blockingFailures": true,
+            "requiredForRelease": true
+        },
+        {
+            "gateName": "facility_verification_gate",
+            "restriction": "R4",
+            "checklist": [
+                "Facility inventory data verified against source records",
+                "Chemical inventory accuracy confirmed",
+                "Quantity and location data validated",
+                "Facility manager sign-off obtained"
+            ],
+            "blockingFailures": true,
+            "requiredForRelease": true
+        },
+        {
+            "gateName": "approval_authority_gate",
+            "restriction": "R3",
+            "checklist": [
+                "Compliance officer approval obtained",
+                "Facility manager approval obtained",
+                "Compliance validator approval obtained",
+                "Disposition authority approval obtained"
+            ],
+            "blockingFailures": true,
+            "requiredForRelease": true
+        },
+        {
+            "gateName": "submission_authorization_gate",
+            "restriction": "R3",
+            "checklist": [
+                "All prior validation gates passed",
+                "All approvals obtained",
+                "Evidence package complete",
+                "Compliance officer submission authorization approved"
+            ],
+            "blockingFailures": true,
+            "requiredForRelease": true
+        }
+    ],
+    "releaseAuthorizationCriteria": {
+        "mustBeTrue": [
+            "All R1-marked actions completed and verified",
+            "All R2 activity work items completed",
+            "All R3 approvals obtained from designated authorities",
+            "All R4 validation gates passed",
+            "Compliance review completed with findings resolved or dispositioned",
+            "Facility information verified and signed off",
+            "Metadata controls verified",
+            "Evidence collection complete",
+            "All corrective actions closed or dispositioned",
+            "Submission authorization approval obtained"
+        ],
+        "release_readiness_claim": "Cannot be claimed until all conditions completed and verified",
+        "submission_prohibition": "Release and submission remain prohibited until all R1-R4 requirements met and documented"
+    },
+    "metadataControl": {
+        "documentId": "DOE-T2-CDT-001",
+        "reportingYear": 2025,
+        "reportingCycle": "2026_Tier_II",
+        "documentTitle": "EPCRA Tier II Reporting Year 2025 Submission Compliance Review Checklist",
+        "versionControl": {
+            "currentVersion": "1.0-draft",
+            "lastUpdated": "2026-05-31T00:00:00Z",
+            "updateReason": "Compliance review framework incorporation"
+        },
+        "distributionControl": "Release prohibited; draft only; no external distribution",
+        "accessControl": "DOE personnel only; approval authorities only for designated sections"
+    },
+    "documentDisposition": {
+        "status": "Draft - Revision Required",
+        "disposition": "Hold Pending Validation",
+        "submissionAuthorization": "Pending Approval",
+        "releaseReadiness": "Not Authorized",
+        "distributionAuthorization": "Not Authorized",
+        "releaseState": "LOCKED",
+        "submissionState": "PROHIBITED",
+        "publicationState": "PROHIBITED",
+        "authorityCreated": false
+    },
+    "sentinelReceipts": [
+        {
+            "comm": "Sentinel AI by Cody Nunn | Nunn Cloud",
+            "session": "DOE-T2-CDT-001",
+            "lane": "Conversational",
+            "action": "Document Update Prepared",
+            "result": "Revision Package Incorporated",
+            "status": "HOLD_PENDING_VALIDATION",
+            "ack": "DOC-UPD-84217-HPV",
+            "executionState": "Draft Updated advisory only; no external system changes performed"
+        },
+        {
+            "comm": "Sentinel AI by Cody Nunn | Nunn Cloud",
+            "session": "DOE-T2-CDT-001",
+            "action": "Update Disposition Status",
+            "result": "HOLD_PENDING_VALIDATION",
+            "authorityState": "APPROVALS_OUTSTANDING",
+            "validationState": "IN_PROGRESS",
+            "releaseState": "LOCKED",
+            "submissionState": "PROHIBITED",
+            "ack": "DOE-T2-CDT-001-HPV-20260531"
+        }
+    ],
+    "sentinelAssessment": {
+        "documentDrafting": "Complete",
+        "complianceStructure": "Complete",
+        "governanceControls": "Complete",
+        "evidenceValidation": "Not Started",
+        "approvalWorkflow": "Not Started",
+        "regulatorySubmission": "Not Authorized",
+        "currentState": "Ready for validation; not ready for filing"
+    },
+    "routes": [
+        "/compliance/validation",
+        "/v1/doe/compliance/review",
+        "/v1/doe/compliance/approval",
+        "/v1/doe/facility/verify",
+        "/v1/doe/submission/authorize",
+        "/v1/doe/release/status",
+        "/v1/doe/audit"
+    ],
+    "controls": [
+        "tenant_scope_required",
+        "approval_before_execution",
+        "human_review_required",
+        "release_restriction_enforcement",
+        "approval_authority_validation",
+        "evidence_precedence_verification",
+        "submission_authorization_gate",
+        "compliance_review_blocking",
+        "disposition_review_blocking",
+        "validation_gate_blocking",
+        "telemetry_export_full",
+        "audit_receipt_required",
+        "surface_view_audited",
+        "metadata_integrity_enforced"
+    ]
+}

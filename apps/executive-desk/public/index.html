@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Executive Desk</title>
+  <link rel="stylesheet" href="/executive/styles.css">
+</head>
+
+<body>
+  <header class="topbar">
+    <div>
+      <p class="eyebrow">SentinelOS</p>
+      <h1>Executive Desk</h1>
+    </div>
+    <div class="session-strip" id="sessionStrip" hidden>
+      <span id="sessionStatus">Signed out</span>
+      <button id="signOutButton" type="button">Sign Out</button>
+    </div>
+    <div class="principal-strip">
+      <label for="principalId">Principal</label>
+      <input id="principalId" value="user@example.com" autocomplete="off">
+      <a class="link-button" href="/executive/downloads/nunn-corp-2030-deliverables.ics" download>Calendar</a>
+      <button id="refreshButton" type="button">Refresh</button>
+    </div>
+  </header>
+
+  <section class="white-glove-band" aria-label="White glove faceplane guidance">
+    <div>
+      <p class="eyebrow">White Glove Faceplane Service</p>
+      <h2>Simple portals, mission-docked faceplanes, and plug-and-play governance matched to each job.</h2>
+      <p class="white-glove-copy">The docking layer should recognize the scope of the mission at hand, present the right
+        faceplane for the user, and load the exact governance and compliance measures required for that job.</p>
+    </div>
+    <a class="link-button white-glove-link" href="/executive/sovereign-demo/">Open Sovereign Demo</a>
+  </section>
+
+  <section class="signin-shell" id="signinShell">
+    <article class="signin-card">
+      <p class="eyebrow">App Objective</p>
+      <h2>Connect App to SentinelOS</h2>
+      <p class="signin-copy">This app handles white glove sign-in and guided connection to Sentinel AI so the correct
+        mission faceplane can dock with the right controls, evidence, and scope.
+      </p>
+      <div class="signin-status" id="connectStatus">Checking Sentinel AI connection...</div>
+      <form id="signinForm" class="signin-form">
+        <label for="apiBaseUrl">Sentinel API URL</label>
+        <input id="apiBaseUrl" type="url" placeholder="https://api.nunncloudllc.com" autocomplete="url">
+        <label for="signinEmail">Email</label>
+        <input id="signinEmail" type="email" autocomplete="username" required>
+        <label for="signinPassword">Password</label>
+        <input id="signinPassword" type="password" autocomplete="current-password" required>
+        <button id="signinButton" type="submit">Sign In to SentinelOS</button>
+      </form>
+    </article>
+  </section>
+
+  <main class="desk-shell">
+    <section class="summary-band" aria-label="Operating summary">
+      <div class="metric">
+        <span class="metric-label">Risk</span>
+        <strong id="riskScore">-</strong>
+        <span id="riskDecision" class="status-chip neutral">pending</span>
+      </div>
+      <div class="metric">
+        <span class="metric-label">Receipts</span>
+        <strong id="receiptTotal">-</strong>
+        <span id="receiptWindow">24h</span>
+      </div>
+      <div class="metric">
+        <span class="metric-label">Delegations</span>
+        <strong id="delegationTotal">-</strong>
+        <span id="delegationState">active view</span>
+      </div>
+      <div class="metric">
+        <span class="metric-label">Auth Boundary</span>
+        <strong id="authBoundary">-</strong>
+        <span id="lastUpdated">not synced</span>
+      </div>
+    </section>
+
+    <section class="panel-grid">
+      <article class="panel" id="briefingPanel">
+        <div class="panel-head">
+          <div>
+            <p class="eyebrow">Briefing</p>
+            <h2>Daily Briefing</h2>
+          </div>
+          <div class="panel-actions brief-controls">
+            <label for="cadenceMode" class="inline-label">Cadence</label>
+            <select id="cadenceMode" aria-label="Cadence mode">
+              <option value="daily">Daily</option>
+              <option value="weekly">Weekly</option>
+              <option value="monthly">Monthly</option>
+            </select>
+            <a class="link-button" href="/executive/downloads/nunn-corp-2030-deliverables.ics" download>Download
+              Calendar</a>
+            <select id="weeklyDay" aria-label="Weekly day" hidden>
+              <option value="sunday">Sunday</option>
+              <option value="monday">Monday</option>
+              <option value="tuesday">Tuesday</option>
+              <option value="wednesday">Wednesday</option>
+              <option value="thursday">Thursday</option>
+              <option value="friday">Friday</option>
+              <option value="saturday">Saturday</option>
+            </select>
+            <select id="monthlyDay" aria-label="Monthly day" hidden>
+              <option value="1">Day 1</option>
+              <option value="5">Day 5</option>
+              <option value="10">Day 10</option>
+              <option value="15">Day 15</option>
+              <option value="20">Day 20</option>
+              <option value="25">Day 25</option>
+              <option value="28">Day 28</option>
+              <option value="31">Day 31</option>
+            </select>
+            <button class="icon-button" id="pinBriefing" type="button" title="Pin briefing">Pin</button>
+          </div>
+        </div>
+        <div class="closeout-controls" aria-label="Closeout controls">
+          <label class="toggle">
+            <input id="gbpAttached" type="checkbox">
+            GBP attached
+          </label>
+          <input id="gbpReference" type="text" placeholder="GBP reference (optional)" maxlength="256">
+          <label class="toggle">
+            <input id="mobTemplateRequired" type="checkbox" checked>
+            MOB template required
+          </label>
+          <select id="mobRunStatus" aria-label="MOB run status">
+            <option value="completed">MOB run completed</option>
+            <option value="failed">MOB run failed</option>
+          </select>
+          <button id="runMobTemplate" type="button">Run MOB Template</button>
+          <button id="saveCloseout" type="button">Save Closeout</button>
+        </div>
+        <div id="mobRunHistory" class="mob-history" aria-live="polite"></div>
+        <div id="briefingList" class="briefing-list" aria-live="polite"></div>
+      </article>
+
+      <article class="panel" id="accessPanel">
+        <div class="panel-head">
+          <div>
+            <p class="eyebrow">Authority</p>
+            <h2>Controlled Access</h2>
+          </div>
+          <select id="delegationFilter" aria-label="Delegation filter">
+            <option value="active">Active</option>
+            <option value="all">All</option>
+          </select>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Principal</th>
+                <th>Command</th>
+                <th>Scope</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="delegationRows"></tbody>
+          </table>
+        </div>
+      </article>
+
+      <article class="panel" id="riskPanel">
+        <div class="panel-head">
+          <div>
+            <p class="eyebrow">Readiness</p>
+            <h2>Risk + Infrastructure</h2>
+          </div>
+          <span id="riskTimestamp" class="panel-note">-</span>
+        </div>
+        <div id="serviceList" class="service-list"></div>
+        <div class="factor-grid">
+          <div>
+            <span>Infra</span>
+            <meter id="factorInfra" min="0" max="1" value="0"></meter>
+          </div>
+          <div>
+            <span>Incidents</span>
+            <meter id="factorIncidents" min="0" max="1" value="0"></meter>
+          </div>
+          <div>
+            <span>Deployments</span>
+            <meter id="factorDeployments" min="0" max="1" value="0"></meter>
+          </div>
+          <div>
+            <span>Resources</span>
+            <meter id="factorResources" min="0" max="1" value="0"></meter>
+          </div>
+        </div>
+      </article>
+
+      <article class="panel" id="receiptPanel">
+        <div class="panel-head">
+          <div>
+            <p class="eyebrow">Ledger</p>
+            <h2>Receipt Ledger</h2>
+          </div>
+          <div class="panel-actions">
+            <select id="receiptStatus" aria-label="Receipt status">
+              <option value="">All</option>
+              <option value="executed">Executed</option>
+              <option value="blocked">Blocked</option>
+              <option value="issued">Issued</option>
+              <option value="rejected">Rejected</option>
+            </select>
+            <a id="exportCsv" class="link-button" href="/api/executive/receipts/export?format=csv">CSV</a>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>Command</th>
+                <th>Executor</th>
+                <th>Status</th>
+                <th>Risk</th>
+              </tr>
+            </thead>
+            <tbody id="receiptRows"></tbody>
+          </table>
+        </div>
+      </article>
+
+      <article class="panel" id="mobPanel">
+        <div class="panel-head">
+          <div>
+            <p class="eyebrow">MOB</p>
+            <h2>Executive Template Runs</h2>
+          </div>
+          <div class="panel-actions">
+            <select id="mobFilterStatus" aria-label="MOB run filter status">
+              <option value="all">All</option>
+              <option value="completed">Completed</option>
+              <option value="failed">Failed</option>
+            </select>
+            <select id="mobWindowDays" aria-label="MOB trend window">
+              <option value="7">7d</option>
+              <option value="14">14d</option>
+              <option value="30">30d</option>
+            </select>
+            <select id="mobExportFormat" aria-label="MOB export format">
+              <option value="csv">CSV</option>
+              <option value="json">JSON</option>
+              <option value="jsonl">JSONL</option>
+            </select>
+            <button id="mobExportButton" type="button">Export</button>
+            <button id="mobExportBundleButton" type="button">Export Bundle</button>
+          </div>
+        </div>
+        <div class="mob-metrics">
+          <div>
+            <span>Total</span>
+            <strong id="mobSummaryTotal">0</strong>
+          </div>
+          <div>
+            <span>Success Rate</span>
+            <strong id="mobSummarySuccessRate">0%</strong>
+          </div>
+          <div>
+            <span>Completed</span>
+            <strong id="mobSummaryCompleted">0</strong>
+          </div>
+          <div>
+            <span>Failed</span>
+            <strong id="mobSummaryFailed">0</strong>
+          </div>
+          <div>
+            <span>Last Run</span>
+            <strong id="mobSummaryLastRun">-</strong>
+          </div>
+        </div>
+        <div id="mobTrendLine" class="mob-trend-line" aria-live="polite"></div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>Executor</th>
+                <th>Status</th>
+                <th>Notes</th>
+              </tr>
+            </thead>
+            <tbody id="mobRows"></tbody>
+          </table>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="/executive/app.js" type="module"></script>
+</body>
+
+</html>

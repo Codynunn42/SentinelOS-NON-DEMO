@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SentinelOS Mission Intake Portal</title>
+  <style>
+    :root{--ink:#17211c;--muted:#68766e;--line:#d8dfda;--paper:#f3f5f2;--card:#fff;--green:#145c42;--navy:#10251d;--gold:#c49b42;--gold2:#fff8e7;--blue:#315b78;--blue2:#edf5fa}
+    *{box-sizing:border-box}body{margin:0;color:var(--ink);background:var(--paper);font:14px Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}button,input,textarea,select{font:inherit}
+    .shell{min-height:100vh}.bar{display:flex;justify-content:space-between;gap:20px;padding:15px 28px;color:#d7e3dc;background:var(--navy)}.brand{font-weight:800;letter-spacing:.12em}.bar span{font-size:10px;color:#a9b9b0}.wrap{width:min(1240px,calc(100% - 32px));margin:0 auto;padding:34px 0 48px}
+    .hero{display:grid;grid-template-columns:1fr auto;gap:24px;align-items:end;margin-bottom:18px}.eyebrow{margin:0 0 8px;color:var(--green);font-size:9px;font-weight:800;letter-spacing:.12em}.hero h1{margin:0;font-size:32px;letter-spacing:-.045em}.hero p{max-width:740px;margin:10px 0 0;color:var(--muted);line-height:1.6}.status{padding:8px 12px;border:1px solid #d9c58e;border-radius:20px;color:#805e14;background:var(--gold2);font-size:9px;font-weight:800;letter-spacing:.07em}
+    .notice{margin-bottom:18px;padding:13px 15px;border:1px solid #d9c58e;border-radius:8px;color:#725714;background:var(--gold2);font-size:11px;line-height:1.6}.notice b{display:block;margin-bottom:3px;letter-spacing:.05em}
+    .modes{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}.mode{padding:20px;border:1px solid var(--line);border-radius:9px;background:var(--card);cursor:pointer;text-align:left}.mode.active{border-color:#97b8a7;box-shadow:inset 0 0 0 1px #97b8a7}.mode span,.mode strong,.mode small{display:block}.mode span{color:var(--green);font-size:8px;font-weight:800;letter-spacing:.1em}.mode strong{margin:7px 0 5px;font-size:17px}.mode small{color:var(--muted);line-height:1.5}
+    .grid{display:grid;grid-template-columns:1fr .9fr;gap:14px}.panel{padding:20px;border:1px solid var(--line);border-radius:9px;background:var(--card)}.panel h2{margin:0;font-size:16px}.panel .sub{margin:6px 0 18px;color:var(--muted);font-size:10px;line-height:1.6}.fields{display:grid;grid-template-columns:1fr 1fr;gap:12px}.field.full{grid-column:1/-1}label{display:block;margin-bottom:6px;color:var(--muted);font-size:8px;font-weight:800;letter-spacing:.07em}input,textarea,select{width:100%;padding:10px;border:1px solid var(--line);border-radius:6px;color:var(--ink);background:#fbfcfb}textarea{min-height:72px;resize:vertical}.prepare{width:100%;margin-top:14px;padding:12px;border:0;border-radius:6px;color:#fff;background:var(--green);font-size:10px;font-weight:800;cursor:pointer}.fine{margin:9px 0 0;color:var(--muted);font-size:8px;line-height:1.6}
+    .command{margin-bottom:13px;padding:13px;border-radius:7px;color:#dce7e1;background:var(--navy);font:11px ui-monospace,SFMono-Regular,Menlo,monospace;line-height:1.7;overflow:auto}.command b{color:#e5ca80}.envelope{display:grid;grid-template-columns:1fr 1fr;gap:7px}.section{padding:10px;border:1px solid var(--line);border-radius:6px;background:#fbfcfb}.section b,.section span{display:block}.section b{font-size:8px;letter-spacing:.07em}.section span{margin-top:5px;color:var(--muted);font-size:8px;line-height:1.5}.section.owner{border-color:#d9c58e;background:var(--gold2)}.section.governance{border-color:#b9cedb;background:var(--blue2)}.result{display:none;margin-top:13px;padding:13px;border:1px solid #a9c6b5;border-radius:7px;color:#244d38;background:#eef7f2;font-size:10px;line-height:1.7}.result.show{display:block}
+    .footer{margin-top:14px;padding:15px;border:1px solid var(--line);border-radius:9px;background:#fff}.footer b{display:block;margin-bottom:6px;font-size:9px;letter-spacing:.08em}.footer p{margin:0;color:var(--muted);font-size:9px;line-height:1.7}
+    @media(max-width:850px){.hero,.grid{grid-template-columns:1fr}.hero{align-items:start}.modes{grid-template-columns:1fr}.fields{grid-template-columns:1fr}.field.full{grid-column:auto}.bar{padding:14px 16px}.bar span{display:none}.wrap{padding-top:22px}}
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header class="bar"><div class="brand">SENTINELOS</div><span>MISSION INTAKE PORTAL · WHITE GLOVE EXECUTIVE ENVELOPE</span></header>
+    <main class="wrap">
+      <section class="hero">
+        <div><p class="eyebrow">MAIN ENTITY INQUIRY PORTAL</p><h1>Begin with the outcome.</h1><p>A shared mission-intake faceplane for government and corporate entities to prepare a governed inquiry for owner review.</p></div>
+        <div class="status">REVIEW-HELD · EXTERNAL ACTIVATION HELD</div>
+      </section>
+      <div class="notice"><b>PREPARATION SURFACE ONLY</b>This local surface prepares a White Glove summary for Cody Nunn's personal review, additions, and support. It does not transmit inquiry data, contact an entity, create approval authority, or activate SentinelOS command routing.</div>
+      <section class="modes">
+        <button class="mode active" data-mode="government"><span>GOVERNMENT ENTITY</span><strong>Public Outcome Inquiry</strong><small>Mission, mandate, public value, accountable agency, evidence, policy, and human oversight.</small></button>
+        <button class="mode" data-mode="corporate"><span>CORPORATE ENTITY</span><strong>Enterprise Outcome Inquiry</strong><small>Business objective, strategic value, accountable organization, evidence, risk, and executive ownership.</small></button>
+      </section>
+      <section class="grid">
+        <article class="panel">
+          <h2 id="formTitle">Government outcome intake</h2>
+          <p class="sub" id="formSub">Provide only non-sensitive minimum identity and intended outcome information. Unsupported details remain open.</p>
+          <div class="fields">
+            <div class="field"><label id="entityLabel">GOVERNMENT ENTITY LEGAL NAME</label><input id="entity" placeholder="Entity name"></div>
+            <div class="field"><label id="classLabel">ENTITY CLASSIFICATION</label><select id="classification"><option>Not yet specified</option><option>Federal</option><option>State</option><option>Local</option><option>Tribal</option><option>Education</option><option>SLED</option></select></div>
+            <div class="field full"><label id="missionLabel">INTENDED PUBLIC OUTCOME</label><textarea id="mission" placeholder="What measurable outcome should improve?"></textarea></div>
+            <div class="field full"><label id="valueLabel">PUBLIC VALUE INTENDED</label><textarea id="value" placeholder="Why does this outcome matter?"></textarea></div>
+            <div class="field"><label>KNOWN SOURCE OR COMMITMENT REFERENCE</label><input id="source" placeholder="Optional; pending validation"></div>
+            <div class="field"><label>KNOWN HANDLING RESTRICTIONS</label><input id="restrictions" placeholder="Optional; do not enter sensitive data"></div>
+          </div>
+          <button class="prepare" id="prepare">Prepare inquiry summary for owner review</button>
+          <p class="fine">No external submission or source retrieval occurs. Blank fields remain explicitly unsupported and open.</p>
+          <div class="result" id="result"></div>
+        </article>
+        <article class="panel">
+          <h2>Sentinel White Glove Executive Envelope</h2>
+          <p class="sub">The future universal `/sentinel` command is represented here as a held interface specification, not active command behavior.</p>
+          <div class="command" id="command"><b>/sentinel</b> --mission "&lt;public outcome&gt;" --context "&lt;government entity&gt;" --government --white-glove</div>
+          <div class="envelope">
+            <div class="section"><b>MISSION</b><span>What outcome are we trying to achieve?</span></div>
+            <div class="section"><b>CURRENT POSITION</b><span>Where do we stand today?</span></div>
+            <div class="section"><b>QUANTITATIVE ASSESSMENT</b><span>Verified facts, metrics, constraints, confidence.</span></div>
+            <div class="section"><b>RISK REVIEW</b><span>Operational, governance, resource, timeline risks.</span></div>
+            <div class="section governance"><b>GOVERNANCE REVIEW</b><span>Evidence, policy, security, compliance, oversight.</span></div>
+            <div class="section"><b>RESOLUTION PATH</b><span>Immediate, 30-day, 90-day, strategic actions.</span></div>
+            <div class="section"><b>OUTCOME FORECAST</b><span>Held until supported evidence and model exist.</span></div>
+            <div class="section owner"><b>OWNER ALIGNMENT</b><span>Responsible, accountable, consulted, informed.</span></div>
+            <div class="section owner"><b>EXECUTIVE RECOMMENDATION</b><span>Prepared for personal review before advancement.</span></div>
+            <div class="section owner"><b>WHITE GLOVE CONCIERGE NOTES</b><span>Owner additions, support, escalation considerations.</span></div>
+            <div class="section"><b>NEXT REVIEW</b><span>Review date, criteria, and success indicators.</span></div>
+            <div class="section governance"><b>ASSURANCE</b><span>Observed, recommended, authorized, and executed remain separate.</span></div>
+          </div>
+        </article>
+      </section>
+      <section class="footer"><b>SENTINEL WHITE GLOVE REVIEW</b><p>Mission reviewed · Conditions prepared for assessment · Resolution path held for evidence · Execution not authorized · Optimization not scheduled. Government and corporate inquiries use the same governed envelope with entity-specific intake language.</p></section>
+    </main>
+  </div>
+  <script>
+    const modes=document.querySelectorAll("[data-mode]"),formTitle=document.querySelector("#formTitle"),formSub=document.querySelector("#formSub"),entityLabel=document.querySelector("#entityLabel"),classLabel=document.querySelector("#classLabel"),missionLabel=document.querySelector("#missionLabel"),valueLabel=document.querySelector("#valueLabel"),classification=document.querySelector("#classification"),command=document.querySelector("#command"),result=document.querySelector("#result");
+    let activeMode="government";
+    const configure=(mode)=>{
+      activeMode=mode;modes.forEach(button=>button.classList.toggle("active",button.dataset.mode===mode));result.classList.remove("show");
+      if(mode==="government"){formTitle.textContent="Government outcome intake";formSub.textContent="Provide only non-sensitive minimum identity and intended outcome information. Unsupported details remain open.";entityLabel.textContent="GOVERNMENT ENTITY LEGAL NAME";classLabel.textContent="ENTITY CLASSIFICATION";missionLabel.textContent="INTENDED PUBLIC OUTCOME";valueLabel.textContent="PUBLIC VALUE INTENDED";classification.innerHTML="<option>Not yet specified</option><option>Federal</option><option>State</option><option>Local</option><option>Tribal</option><option>Education</option><option>SLED</option>";command.innerHTML='<b>/sentinel</b> --mission "&lt;public outcome&gt;" --context "&lt;government entity&gt;" --government --white-glove';}
+      else{formTitle.textContent="Corporate outcome intake";formSub.textContent="Provide only non-sensitive minimum organization and intended business outcome information. Unsupported details remain open.";entityLabel.textContent="CORPORATE ENTITY LEGAL NAME";classLabel.textContent="ORGANIZATION CLASSIFICATION";missionLabel.textContent="INTENDED BUSINESS OUTCOME";valueLabel.textContent="STRATEGIC VALUE INTENDED";classification.innerHTML="<option>Not yet specified</option><option>Public company</option><option>Private company</option><option>Nonprofit</option><option>Partnership</option><option>Enterprise division</option>";command.innerHTML='<b>/sentinel</b> --mission "&lt;business outcome&gt;" --context "&lt;corporate entity&gt;" --enterprise --white-glove';}
+    };
+    modes.forEach(button=>button.addEventListener("click",()=>configure(button.dataset.mode)));
+    document.querySelector("#prepare").addEventListener("click",()=>{
+      const entity=document.querySelector("#entity").value.trim()||"Unsupported and open",mission=document.querySelector("#mission").value.trim()||"Unsupported and open";
+      result.innerHTML=`<b>${activeMode==="government"?"Government":"Corporate"} inquiry summary prepared for owner review.</b><br>Entity: ${entity}<br>Outcome: ${mission}<br>Authority created: false · External submission: held · Evidence validation: pending`;
+      result.classList.add("show");
+    });
+  </script>
+</body>
+</html>

@@ -22,6 +22,37 @@ function generateCorrelationId() {
   return `corr_${crypto.randomUUID()}`;
 }
 
+function completeDispatchTrace(envelope, response, reason, options = {}) {
+  const correlationId = envelope.correlationId || null;
+
+  if (options.stage) {
+    recordStage(correlationId, options.stage, options.stageDetails || {});
+  }
+
+  completeTrace(correlationId, {
+    success: options.success !== undefined ? options.success : response && response.success !== false,
+    reason,
+    statusCode: response && response.statusCode ? response.statusCode : null,
+    command: envelope.command || envelope.legacyCommand || null
+  });
+
+  return response;
+}
+
+function recordGovernanceDecision(correlationId, governance) {
+  const policy = governance.policy || (governance.details && governance.details.policy) || {};
+
+  recordStage(correlationId, 'governance', {
+    allowed: governance.allowed,
+    state: policy.state || null,
+    reason: policy.reason || governance.error || null
+  });
+  recordStage(correlationId, 'decision', {
+    decision: policy.decision || (governance.allowed ? 'allow' : 'block'),
+    approvalRequired: Boolean(policy.approvalRequired)
+  });
+}
+
 function emitBlockedPathEvent(envelope, reason, details = {}) {
   const blockedPathEvent = buildBlockedPathEvent(envelope, reason, details);
 
@@ -151,6 +182,10 @@ async function dispatchCommand(body, context) {
   const correlationId = (context && context.correlationId) || generateCorrelationId();
   const envelope = normalizeCommandEnvelope(body);
   envelope.correlationId = correlationId;
+
+  createTrace(correlationId, envelope);
+  recordStage(correlationId, 'api', { route: context && context.route ? context.route : '/v1/command' });
+
   const executionGuard = enforceSentinelExecution(envelope, context);
 
   if (!executionGuard.allowed) {
@@ -174,8 +209,11 @@ async function dispatchCommand(body, context) {
       trustScore: 0,
       reasons: ['execution_guard_block']
     });
-    return failure;
+    recordStage(correlationId, 'security', { blocked: true, reason: 'execution_guard_block' });
+    return completeDispatchTrace(envelope, failure, 'execution_guard_block', { success: false });
   }
+
+  recordStage(correlationId, 'security', { passed: true });
 
   const governance = governanceCheck(envelope, context && context.signals ? context.signals : {}, context ? context.principal : null);
 
@@ -195,9 +233,16 @@ async function dispatchCommand(body, context) {
         severity: 'critical'
       });
       await auditGovernanceBlock(envelope, sigFailure, { trustScore: 0, reasons: ['signature_verification_failed'] });
-      return sigFailure;
+      recordStage(correlationId, 'security', {
+        blocked: true,
+        reason: 'signature_verification_failed'
+      });
+      return completeDispatchTrace(envelope, sigFailure, 'signature_verification_failed', { success: false });
     }
   }
+
+  recordGovernanceDecision(correlationId, governance);
+
   if (!governance.allowed) {
     const blockedPolicy = governance.policy || (governance.details && governance.details.policy) || {};
     const blockedPolicyContext = governance.policyContext || (governance.details && governance.details.policyContext) || {};
@@ -206,6 +251,11 @@ async function dispatchCommand(body, context) {
       const approvalUnlock = await checkApprovalUnlock(envelope, blockedPolicy, blockedPolicyContext);
 
       if (approvalUnlock.unlocked) {
+        recordStage(correlationId, 'approval', {
+          approvalId: approvalUnlock.approvalId,
+          status: 'approved',
+          unlocked: true
+        });
         governance.allowed = true;
         governance.policy = {
           ...blockedPolicy,
@@ -252,7 +302,15 @@ async function dispatchCommand(body, context) {
           trustScore: 0,
           reasons: ['approval_required']
         });
-        return failure;
+        return completeDispatchTrace(envelope, failure, 'approval_required', {
+          success: false,
+          stage: 'approval',
+          stageDetails: {
+            approvalId: approval.id,
+            status: approval.status,
+            unlocked: false
+          }
+        });
       }
     }
   }
@@ -285,7 +343,14 @@ async function dispatchCommand(body, context) {
     });
 
     await auditGovernanceBlock(envelope, failure, trust);
-    return failure;
+    return completeDispatchTrace(envelope, failure, 'governance_preflight_block', { success: false });
+  }
+
+  if (!governance.policy || !governance.policy.approvalId) {
+    recordStage(correlationId, 'approval', {
+      status: 'not_required',
+      unlocked: false
+    });
   }
 
   await auditPolicyAllow(envelope, governance.policy, governance.policyContext, governance.decision);
@@ -307,11 +372,11 @@ async function dispatchCommand(body, context) {
     const mockHandler = mockHandlers[envelope.command];
 
     if (!mockHandler) {
-      return {
+      return completeDispatchTrace(envelope, {
         success: false,
         statusCode: 400,
         error: `Unknown command: ${envelope.command}`
-      };
+      }, 'unknown_mock_command', { success: false });
     }
 
     return executeHandler({
@@ -329,20 +394,20 @@ async function dispatchCommand(body, context) {
   const surfaceRegistry = getSurfaceRegistry();
   const surface = surfaceRegistry[envelope.tenant];
   if (!surface) {
-    return {
+    return completeDispatchTrace(envelope, {
       success: false,
       statusCode: 400,
       error: `Unknown tenant: ${envelope.tenant}`
-    };
+    }, 'unknown_tenant', { success: false });
   }
 
   const handler = surface.handlers[envelope.command];
   if (!handler) {
-    return {
+    return completeDispatchTrace(envelope, {
       success: false,
       statusCode: 400,
       error: `Unknown command: ${envelope.command}`
-    };
+    }, 'unknown_command', { success: false });
   }
 
   return executeHandler({
@@ -362,6 +427,8 @@ async function dispatchCommand(body, context) {
 }
 
 async function executeHandler({ envelope, context, governance, startTime, handler }) {
+  const correlationId = envelope.correlationId || null;
+  recordStage(correlationId, 'execution', { command: envelope.command, tenant: envelope.tenant });
   try {
     const result = await handler();
     const trust = buildTrustScoreResult(buildCommandTrustInput({
@@ -432,7 +499,7 @@ async function executeHandler({ envelope, context, governance, startTime, handle
     };
 
     await auditLogger.log({
-      correlationId: envelope.correlationId || null,
+      correlationId,
       tenant: envelope.tenant,
       command: envelope.command,
       payload: envelope.payload,
@@ -441,6 +508,12 @@ async function executeHandler({ envelope, context, governance, startTime, handle
       timestamp: new Date().toISOString()
     });
 
+    completeTrace(correlationId, {
+      success: enrichedResult.success !== false,
+      reason: 'handler_completed',
+      statusCode: enrichedResult.statusCode || null,
+      command: envelope.command
+    });
     return enrichedResult;
   } catch (error) {
     const trust = buildTrustScoreResult(buildCommandTrustInput({
@@ -461,7 +534,7 @@ async function executeHandler({ envelope, context, governance, startTime, handle
     };
 
     await auditLogger.log({
-      correlationId: envelope.correlationId || null,
+      correlationId,
       tenant: envelope.tenant,
       command: envelope.command,
       payload: envelope.payload,
@@ -470,6 +543,13 @@ async function executeHandler({ envelope, context, governance, startTime, handle
       timestamp: new Date().toISOString()
     });
 
+    completeTrace(correlationId, {
+      success: false,
+      reason: 'handler_failed',
+      statusCode: failure.statusCode,
+      command: envelope.command,
+      error: failure.error
+    });
     return failure;
   }
 }

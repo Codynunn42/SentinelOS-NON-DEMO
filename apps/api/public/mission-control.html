@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -318,6 +319,14 @@
       justify-content: flex-end;
     }
 
+    .row-actions.start {
+      justify-content: flex-start;
+    }
+
+    .top-gap {
+      margin-top: 12px;
+    }
+
     .row-actions button {
       width: 38px;
       padding: 0;
@@ -550,19 +559,19 @@
       border-left: 3px solid var(--yellow);
       border-radius: 6px;
       padding: 10px 12px;
-      background: rgba(246,211,101,0.04);
+      background: rgba(246, 211, 101, 0.04);
       font-size: 13px;
       line-height: 1.45;
     }
 
     .drift-rec.approved {
       border-left-color: var(--green);
-      background: rgba(110,231,168,0.04);
+      background: rgba(110, 231, 168, 0.04);
     }
 
     .drift-rec.rejected {
       border-left-color: var(--red);
-      background: rgba(255,123,114,0.04);
+      background: rgba(255, 123, 114, 0.04);
     }
 
     .drift-rec strong {
@@ -610,27 +619,34 @@
     }
 
     .trace-stage.reached {
-      background: rgba(110,231,168,0.12);
+      background: rgba(110, 231, 168, 0.12);
       color: var(--green);
-      border-color: rgba(110,231,168,0.3);
+      border-color: rgba(110, 231, 168, 0.3);
     }
 
     .trace-stage.blocked {
-      background: rgba(255,123,114,0.12);
+      background: rgba(255, 123, 114, 0.12);
       color: var(--red);
-      border-color: rgba(255,123,114,0.3);
+      border-color: rgba(255, 123, 114, 0.3);
     }
 
     @keyframes pulse-warn {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.45; }
+
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.45;
+      }
     }
 
     .pipeline-paused {
       animation: pulse-warn 1.4s ease-in-out infinite;
-      background: rgba(246,211,101,0.15) !important;
+      background: rgba(246, 211, 101, 0.15) !important;
       color: var(--yellow) !important;
-      border-color: rgba(246,211,101,0.5) !important;
+      border-color: rgba(246, 211, 101, 0.5) !important;
     }
 
     .error {
@@ -697,13 +713,15 @@
     }
   </style>
 </head>
+
 <body>
   <main>
     <header class="topbar">
       <div>
         <p class="eyebrow">SentinelOS</p>
         <h1>Mission Control</h1>
-        <p class="subtitle">Live operating surface for learning state, Sentinel Analysis, decisions, and human approval gates.</p>
+        <p class="subtitle">Live operating surface for learning state, Sentinel Analysis, decisions, and human approval
+          gates.</p>
       </div>
       <div class="status-strip">
         <span id="connectionChip" class="chip warn">Disconnected</span>
@@ -784,6 +802,12 @@
             <p class="empty">No timeline loaded.</p>
           </div>
         </div>
+        <div class="row-actions start top-gap">
+          <button id="loadXePacketButton" class="secondary" type="button">Load XE Packet</button>
+          <button id="recordXeIntentButton" class="secondary" type="button">Record XE Intent</button>
+          <span id="xePacketChip" class="chip">xe packet idle</span>
+        </div>
+        <pre id="xePacketOutput" class="output-box">No XE packet loaded.</pre>
       </article>
 
       <article class="panel span-4">
@@ -1009,22 +1033,22 @@
 
       <article class="panel span-4">
         <div class="panel-head">
-          <h2>Billing Controls</h2>
+          <h2>SINTENEX Commercial Trigger Review</h2>
           <span id="billingChip" class="chip">not checked</span>
         </div>
         <div class="metric-grid">
           <div class="metric">
-            <span>Checkout</span>
+            <span>Revenue Stage</span>
             <strong id="billingStatus">-</strong>
           </div>
           <div class="metric">
-            <span>Config Gate</span>
+            <span>Activation Gate</span>
             <strong id="billingGate">-</strong>
           </div>
         </div>
         <div class="actions" style="margin-top:12px">
-          <button id="loadBillingButton" class="secondary" type="button">Check Billing</button>
-          <button id="attemptBillingButton" class="secondary" type="button">Attempt Checkout</button>
+          <button id="loadBillingButton" class="secondary" type="button">Check Revenue Gate</button>
+          <button id="attemptBillingButton" class="secondary" type="button">Test Held Checkout</button>
         </div>
       </article>
 
@@ -1080,7 +1104,9 @@
           <button id="loadDriftButton" class="secondary" type="button">Load Drift</button>
           <button id="runDriftButton" class="secondary" type="button">Analyze Now</button>
         </div>
-        <div id="driftList" class="signal-list"><p class="empty">No drift recommendations loaded.</p></div>
+        <div id="driftList" class="signal-list">
+          <p class="empty">No drift recommendations loaded.</p>
+        </div>
       </article>
 
       <article class="panel span-6">
@@ -1091,7 +1117,9 @@
         <div class="actions" style="margin-bottom:10px;">
           <button id="loadTracesButton" class="secondary" type="button">Load Traces</button>
         </div>
-        <div id="traceList" style="max-height:320px;overflow:auto;"><p class="empty">No traces loaded.</p></div>
+        <div id="traceList" style="max-height:320px;overflow:auto;">
+          <p class="empty">No traces loaded.</p>
+        </div>
       </article>
 
       <article class="panel span-6">
@@ -1119,7 +1147,7 @@
   <script>
     const PIPELINE_STAGES = ['API', 'Security', 'Governance', 'Learning', 'Analysis', 'Decision', 'Approval', 'Execution'];
 
-    const STAGE_MAP = { api:0, security:1, governance:2, learning:3, analysis:4, decision:5, approval:6, execution:7 };
+    const STAGE_MAP = { api: 0, security: 1, governance: 2, learning: 3, analysis: 4, decision: 5, approval: 6, execution: 7 };
 
     function renderPipeline(activeIndex, paused) {
       const container = document.getElementById('pipelineStages');
@@ -1178,9 +1206,13 @@
       commandOutput: document.getElementById('commandOutput'),
       runWorkflowButton: document.getElementById('runWorkflowButton'),
       executeWorkflowButton: document.getElementById('executeWorkflowButton'),
+      loadXePacketButton: document.getElementById('loadXePacketButton'),
+      recordXeIntentButton: document.getElementById('recordXeIntentButton'),
       commandChip: document.getElementById('commandChip'),
       workflowChip: document.getElementById('workflowChip'),
       workflowBoard: document.getElementById('workflowBoard'),
+      xePacketChip: document.getElementById('xePacketChip'),
+      xePacketOutput: document.getElementById('xePacketOutput'),
       runTelemetryButton: document.getElementById('runTelemetryButton'),
       telemetryChip: document.getElementById('telemetryChip'),
       telemetrySafe: document.getElementById('telemetrySafe'),
@@ -1593,9 +1625,9 @@
             state.liveEvents = [payload, ...state.liveEvents].slice(0, 20);
             setChip(el.auditStreamChip, 'live', 'good');
             renderLiveAuditFeed();
-            loadMetrics().catch(() => {});
+            loadMetrics().catch(() => { });
             if (Array.isArray(payload.governanceSignals) && payload.governanceSignals.length) {
-              loadGovernanceSignals().catch(() => {});
+              loadGovernanceSignals().catch(() => { });
             }
           });
         }
@@ -1701,7 +1733,7 @@
             }
 
             setChip(el.signalsChip, 'live', payload.signal && payload.signal.severity === 'high' ? 'bad' : 'warn');
-            loadGovernanceSignals().catch(() => {});
+            loadGovernanceSignals().catch(() => { });
           });
         }
       } catch (error) {
@@ -1718,6 +1750,10 @@
 
     function writeCommandOutput(payload) {
       el.commandOutput.textContent = JSON.stringify(payload, null, 2);
+    }
+
+    function writeXePacketOutput(payload) {
+      el.xePacketOutput.textContent = JSON.stringify(payload, null, 2);
     }
 
     function parseCommandPayload() {
@@ -1776,10 +1812,59 @@
         body: JSON.stringify(payload)
       });
       state.workflow = result;
+      state.xePacket = null;
       renderWorkflowBoard(result);
       writeCommandOutput(result);
+      writeXePacketOutput({ status: 'idle', message: 'No XE packet loaded for this workflow yet.' });
       setChip(el.commandChip, result.status || 'workflow initialized', result.requiresApproval && result.requiresApproval.length ? 'warn' : 'good');
       return result;
+    }
+
+    function getWorkflowStepCandidate() {
+      const blocked = state.workflow && state.workflow.requiresApproval && state.workflow.requiresApproval[0];
+      const ready = state.workflow && state.workflow.xeActions && state.workflow.xeActions[0];
+      return blocked || ready || null;
+    }
+
+    async function loadXePacket() {
+      if (!state.workflow) {
+        await initializeWorkflowFromConsole();
+      }
+
+      const step = getWorkflowStepCandidate();
+      if (!step) {
+        throw new Error('No workflow step available for XE packet preparation.');
+      }
+
+      const runId = state.workflow.executionSession || state.workflow.runId;
+      const taskId = step.taskId || step.step;
+      const payload = await api(`/task-templates/runs/${encodeURIComponent(runId)}/steps/${encodeURIComponent(taskId)}/xe-packet`, {
+        method: 'GET',
+        headers: {}
+      });
+      state.xePacket = payload;
+      writeXePacketOutput(payload);
+      setChip(el.xePacketChip, payload.xeChangePacket && payload.xeChangePacket.targets && payload.xeChangePacket.targets.target ? payload.xeChangePacket.targets.target : 'packet loaded', 'good');
+      return payload;
+    }
+
+    async function recordXeIntent() {
+      const packetPayload = state.xePacket || await loadXePacket();
+      const payload = await api(`/task-templates/runs/${encodeURIComponent(packetPayload.runId)}/steps/${encodeURIComponent(packetPayload.taskId)}/xe-intent`, {
+        method: 'POST',
+        body: JSON.stringify({
+          operation: 'change',
+          xeChangePacket: packetPayload.xeChangePacket
+        })
+      });
+      writeXePacketOutput(payload);
+      writeCommandOutput({
+        xeIntent: payload.xeIntent,
+        xeChangePacket: payload.xeChangePacket
+      });
+      setChip(el.xePacketChip, payload.xeIntent && payload.xeIntent.auditReference ? payload.xeIntent.auditReference : 'intent recorded', 'warn');
+      setChip(el.commandChip, payload.xeIntent && payload.xeIntent.status ? payload.xeIntent.status : 'xe intent', 'warn');
+      return payload;
     }
 
     async function attemptWorkflowExecution() {
@@ -1787,9 +1872,7 @@
         await initializeWorkflowFromConsole();
       }
 
-      const blocked = state.workflow.requiresApproval && state.workflow.requiresApproval[0];
-      const ready = state.workflow.xeActions && state.workflow.xeActions[0];
-      const step = blocked || ready;
+      const step = getWorkflowStepCandidate();
 
       if (!step) {
         throw new Error('No workflow step available to execute.');
@@ -1835,10 +1918,11 @@
     }
 
     async function loadBillingStatus() {
-      const payload = await fetch('/billing/checkout/config').then((response) => response.json());
+      const payload = await fetch('/billing/revenue-readiness').then((response) => response.json());
       el.billingStatus.textContent = payload.status || '-';
-      el.billingGate.textContent = payload.enabled ? 'enabled' : (payload.missing || []).join(', ') || 'not enabled';
-      setChip(el.billingChip, payload.status || 'unknown', payload.status === 'ready' ? 'good' : 'warn');
+      const activation = payload.activationReadiness || {};
+      el.billingGate.textContent = activation.liveCheckout ? 'owner approval required' : (activation.requiredConfig || []).join(', ') || 'held';
+      setChip(el.billingChip, payload.status || 'unknown', activation.liveCheckout ? 'warn' : 'warn');
       return payload;
     }
 
@@ -2165,6 +2249,16 @@
       el.errorText.textContent = error.message;
       writeCommandOutput({ status: 'error', error: error.message });
     }));
+    el.loadXePacketButton.addEventListener('click', () => loadXePacket().catch((error) => {
+      setChip(el.xePacketChip, 'error', 'bad');
+      el.errorText.textContent = error.message;
+      writeXePacketOutput({ status: 'error', error: error.message });
+    }));
+    el.recordXeIntentButton.addEventListener('click', () => recordXeIntent().catch((error) => {
+      setChip(el.xePacketChip, 'error', 'bad');
+      el.errorText.textContent = error.message;
+      writeXePacketOutput({ status: 'error', error: error.message });
+    }));
     el.runTelemetryButton.addEventListener('click', () => runTelemetry().then(writeCommandOutput).catch((error) => {
       setChip(el.telemetryChip, 'error', 'bad');
       el.errorText.textContent = error.message;
@@ -2223,4 +2317,5 @@
     }
   </script>
 </body>
+
 </html>

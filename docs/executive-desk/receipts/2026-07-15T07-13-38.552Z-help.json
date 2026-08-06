@@ -1,0 +1,16 @@
+{
+  "status": "executed",
+  "command": "help",
+  "execution_mode": "local_repository_only",
+  "generated_at": "2026-07-15T07:13:38.552Z",
+  "what_if": false,
+  "summary": "SentinelOS Executive Desk Runtime (local-only)\n\nCommands:\n  pwsh ./scripts/sentinel.ps1 executive daily\n  pwsh ./scripts/sentinel.ps1 executive weekly\n  pwsh ./scripts/sentinel.ps1 executive monthly\n  pwsh ./scripts/sentinel.ps1 executive board\n  pwsh ./scripts/sentinel.ps1 government readiness\n  pwsh ./scripts/sentinel.ps1 mob review\n  pwsh ./scripts/sentinel.ps1 evidence scan\n  pwsh ./scripts/sentinel.ps1 outcome status\n  pwsh ./scripts/sentinel.ps1 health\n  pwsh ./scripts/sentinel.ps1 help\n\nAliases:\n  pwsh ./scripts/sentinel.ps1 daily|weekly|monthly|board",
+  "warnings": [],
+  "blockers": [],
+  "generated_artifacts": [],
+  "comm": "Sentinel AI by Cody Nunn | Nunn Cloud",
+  "authority_created": false,
+  "operational_mutation": false,
+  "external_claims_authorized": false,
+  "generated_by": "Local SentinelOS Executive Desk"
+}

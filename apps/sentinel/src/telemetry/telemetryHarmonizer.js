@@ -22,7 +22,36 @@ function hashObject(value) {
   return crypto.createHash('sha256').update(stableStringify(value)).digest('hex');
 }
 
-const TELEMETRY_ACTION_MAP = {};
+const TELEMETRY_ACTION_MAP = {
+  'workflow.metrics': {
+    command: 'telemetry.metric.write',
+    riskLevel: 'low',
+    reason: 'Operational metrics can be sent when tenant and scope policy allow.'
+  },
+  'audit.summary': {
+    command: 'telemetry.audit.summary',
+    riskLevel: 'low',
+    reason: 'Audit summaries can be reviewed without exporting sensitive payloads.'
+  },
+  'deal.execution': {
+    command: 'deal.execute',
+    riskLevel: 'high',
+    reason: 'Financial execution visibility requires human approval.',
+    approvalRequired: true
+  },
+  'external.export': {
+    command: 'telemetry.export.external',
+    riskLevel: 'high',
+    reason: 'External telemetry export is blocked while telemetry is off or limited.',
+    forceBlock: true
+  },
+  'sensitive.payload': {
+    command: 'telemetry.payload.sensitive',
+    riskLevel: 'critical',
+    reason: 'Sensitive payload telemetry cannot be sent without explicit export approval.',
+    forceBlock: true
+  }
+};
 
 function normalizeActivity(item = {}, index = 0) {
   const type = hasText(item.type)

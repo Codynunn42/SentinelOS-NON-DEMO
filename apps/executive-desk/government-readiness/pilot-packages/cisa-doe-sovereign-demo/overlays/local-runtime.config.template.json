@@ -1,0 +1,15 @@
+{
+    "packageMode": "air-gapped-evaluation",
+    "networkEgress": "disabled",
+    "signInMode": "local-demo-identities",
+    "ledger": {
+        "mode": "append-only",
+        "signatureAlgorithm": "sha256",
+        "tamperCheck": "hash-chain"
+    },
+    "controlPlane": {
+        "authorityCheck": "required",
+        "complianceGate": "required",
+        "externalRelease": false
+    }
+}

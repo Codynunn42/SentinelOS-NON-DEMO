@@ -1,0 +1,215 @@
+openapi: 3.1.0
+info:
+  title: The Executive Desk SentinelOS Diagnostic API
+  version: 1.0.0
+  description: >
+    Phase 1 and Phase 2 read-only diagnostic API for verifying the SentinelOS
+    signing proxy and one governed downstream read-only command path.
+servers:
+  - url: https://spoken-labels-seventh-massage.trycloudflare.com
+paths:
+  /health:
+    get:
+      operationId: getProxyHealth
+      summary: Check SentinelOS signing proxy health
+      description: Returns the current health status of the signing proxy.
+      responses:
+        "200":
+          description: Proxy health status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  service:
+                    type: string
+                  sentinel_api:
+                    type: string
+                  timestamp:
+                    type: string
+  /proxy/status:
+    get:
+      operationId: getProxyStatus
+      summary: Check SentinelOS signing proxy configuration status
+      description: Returns proxy configuration and downstream readiness indicators.
+      responses:
+        "200":
+          description: Proxy status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  service:
+                    type: string
+                  status:
+                    type: string
+                  sentinel_api:
+                    type: string
+                  api_key_set:
+                    type: boolean
+                  hmac_secret_set:
+                    type: boolean
+                  timestamp:
+                    type: string
+  /proxy/command:
+    post:
+      operationId: runRepoWorkflowDiagnosis
+      summary: Run a governed read-only repository workflow diagnosis
+      description: >
+        Sends only repo.control.workflow.diagnose through the signing proxy.
+        This read-only operation classifies workflow evidence and must not be
+        used for retry, deploy, push, rollback, billing, identity, DNS,
+        infrastructure, or runtime mutation.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - tenant
+                - command
+                - payload
+              properties:
+                tenant:
+                  type: string
+                  const: nunncloud
+                  description: Fixed tenant for the approved read-only repo diagnosis command.
+                command:
+                  type: string
+                  const: repo.control.workflow.diagnose
+                  description: Fixed read-only diagnosis command.
+                payload:
+                  type: object
+                  required:
+                    - repository
+                    - workflowName
+                    - conclusion
+                    - jobs
+                    - logsAvailable
+                  properties:
+                    repository:
+                      type: string
+                      description: Repository name or owner/repository identifier.
+                    workflowName:
+                      type: string
+                      description: Workflow name being diagnosed.
+                    runId:
+                      type: string
+                      description: Optional workflow run identifier.
+                    runUrl:
+                      type: string
+                      description: Optional workflow run URL.
+                    conclusion:
+                      type: string
+                      enum:
+                        - success
+                        - failure
+                        - startup_failure
+                        - unknown
+                      description: Observed workflow conclusion.
+                    jobs:
+                      type: array
+                      items:
+                        type: object
+                        additionalProperties: true
+                      description: Observed workflow jobs, if any.
+                    logsAvailable:
+                      type: boolean
+                      description: Whether workflow logs are available for review.
+                    transient:
+                      type: boolean
+                      description: Whether evidence suggests a transient failure.
+                  additionalProperties: false
+              additionalProperties: false
+            examples:
+              startupFailureDiagnosis:
+                summary: Diagnose a startup failure with no logs
+                value:
+                  tenant: nunncloud
+                  command: repo.control.workflow.diagnose
+                  payload:
+                    repository: Codynunn42/SentinelOS-NON-DEMO
+                    workflowName: Sentinel Actions Diagnostic
+                    runId: ""
+                    runUrl: ""
+                    conclusion: startup_failure
+                    jobs: []
+                    logsAvailable: false
+      responses:
+        "200":
+          description: Governed read-only diagnosis completed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  result:
+                    type: object
+                    properties:
+                      controlledBoundary:
+                        type: string
+                      executionMode:
+                        type: string
+                      approvalRequired:
+                        type: boolean
+                      bypassPrevented:
+                        type: boolean
+                      diagnosis:
+                        type: object
+                        properties:
+                          state:
+                            type: string
+                          driftType:
+                            type: string
+                          confidence:
+                            type: number
+                          riskLevel:
+                            type: string
+                          action:
+                            type: string
+                          nextAction:
+                            type: string
+                          retryAllowed:
+                            type: boolean
+                          reason:
+                            type: string
+                          evidence:
+                            type: object
+                            properties:
+                              repo:
+                                type: string
+                              workflowName:
+                                type: string
+                              runId:
+                                type: string
+                              runUrl:
+                                type: string
+                              conclusion:
+                                type: string
+                              jobCount:
+                                type: number
+                              logsAvailable:
+                                type: boolean
+                            additionalProperties: true
+                        additionalProperties: true
+                    additionalProperties: true
+                  trustScore:
+                    type: number
+                  reasons:
+                    type: array
+                    items:
+                      type: string
+        "400":
+          description: Invalid request or unsupported command payload
+        "403":
+          description: Governance or authorization rejected the command
+        "423":
+          description: Approval is required before command execution
+        "500":
+          description: Proxy or Sentinel API error

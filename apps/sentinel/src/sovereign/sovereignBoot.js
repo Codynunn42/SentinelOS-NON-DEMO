@@ -18,7 +18,7 @@ function enforceSovereignBoot() {
 
   if (!result.valid) {
     console.error(`FATAL: Sovereign license verification failed — ${result.reason}`);
-    console.error('Provide a valid sentinel.license.json and SENTINEL_LICENSE_KEY to start in sovereign mode.');
+    console.error('Provide a valid sentinel.license.json and SENTINEL_LICENSE_KEY public key to start in sovereign mode.');
     process.exit(1);
   }
 

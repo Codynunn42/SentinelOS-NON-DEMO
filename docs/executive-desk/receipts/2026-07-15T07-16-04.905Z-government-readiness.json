@@ -1,0 +1,18 @@
+{
+  "status": "executed",
+  "command": "government readiness",
+  "execution_mode": "local_repository_only",
+  "generated_at": "2026-07-15T07:16:04.905Z",
+  "what_if": false,
+  "summary": "Government readiness assessment generated.",
+  "warnings": [],
+  "blockers": [],
+  "generated_artifacts": [
+    "/Users/codynunn/SentinelOS/SentinelOS-NON-DEMO/SentinelOS-NON-DEMO/docs/executive-desk/government-readiness/2026-07-15.md"
+  ],
+  "comm": "Sentinel AI by Cody Nunn | Nunn Cloud",
+  "authority_created": false,
+  "operational_mutation": false,
+  "external_claims_authorized": false,
+  "generated_by": "Local SentinelOS Executive Desk"
+}

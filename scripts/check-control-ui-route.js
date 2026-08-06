@@ -22,6 +22,55 @@ async function main() {
   const base = `http://127.0.0.1:${port}`;
 
   try {
+    const unauthorized = await fetch(`${base}/api/control/execute`, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json'
+      },
+      body: JSON.stringify({
+        intent: 'deal.execute',
+        entity: 'deal',
+        action: 'execute',
+        context: { dealId: 'demo-123' },
+        actor: {
+          role: 'operator',
+          userId: 'control-ui-route@nunncloud.local'
+        },
+        tenantId: 'ownerfi',
+        metadata: { sessionId: 'control-ui-route-no-key' }
+      })
+    });
+    const unauthorizedBody = await unauthorized.json();
+
+    assert.strictEqual(unauthorized.status, 401);
+    assert.strictEqual(unauthorizedBody.status, 'blocked');
+    assert.strictEqual(unauthorizedBody.error, 'Unauthorized');
+
+    const invalid = await fetch(`${base}/api/control/execute`, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'x-api-key': 'definitely-invalid-key'
+      },
+      body: JSON.stringify({
+        intent: 'deal.execute',
+        entity: 'deal',
+        action: 'execute',
+        context: { dealId: 'demo-123' },
+        actor: {
+          role: 'operator',
+          userId: 'control-ui-route@nunncloud.local'
+        },
+        tenantId: 'ownerfi',
+        metadata: { sessionId: 'control-ui-route-invalid-key' }
+      })
+    });
+    const invalidBody = await invalid.json();
+
+    assert.strictEqual(invalid.status, 401);
+    assert.strictEqual(invalidBody.status, 'blocked');
+    assert.strictEqual(invalidBody.error, 'Unauthorized');
+
     const response = await fetch(`${base}/api/control/execute`, {
       method: 'POST',
       headers: {
