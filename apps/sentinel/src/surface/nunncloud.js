@@ -12,6 +12,7 @@ const {
   handleRepoWorkflowDiagnose,
   handleRepoWorkflowRetry
 } = require('../commands/repo/control');
+const { handleRepoRead } = require('../commands/repo/read');
 const { handleRepoUpdate } = require('../commands/repo/updateStructure');
 const { handleProductReframe } = require('../commands/system/productReframe');
 const { handleSystemValidate } = require('../commands/system/validateIntegrity');
@@ -36,6 +37,7 @@ async function evaluateCdnluxToken(payload = {}) {
 
 const nunncloudHandlers = {
   'system.reframe.product': handleProductReframe,
+  'repo.read': handleRepoRead,
   'repo.update.structure': handleRepoUpdate,
   'repo.control.workflow.diagnose': handleRepoWorkflowDiagnose,
   'repo.control.workflow.retry': handleRepoWorkflowRetry,

@@ -35,6 +35,7 @@ const commandScopes = {
   'billing.checkout.session.status': 'billing:read',
   'billing.webhook.receive': 'billing:webhook',
   'system.reframe.product': 'platform:admin',
+  'repo.read': 'repo:read',
   'repo.update.structure': 'platform:admin',
   'repo.control.workflow.diagnose': 'platform:admin',
   'repo.control.workflow.retry': 'platform:admin',

@@ -12,6 +12,7 @@ const { createApprovalRequest, getApproval } = require('../approval/approval');
 const { emitSNCSEvidence } = require('../evidence/sncs');
 const { emitAIRoutingEvidence } = require('../evidence/ai');
 const { routeAIRequest } = require('../modules/ai-operations/modelBroker');
+const { completeTrace, createTrace, recordStage } = require('../audit/executionTrace');
 const crypto = require('crypto');
 
 function getSigningKey() {

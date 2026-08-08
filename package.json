@@ -81,6 +81,7 @@
     "check:vendor-onboarding": "node scripts/check-vendor-onboarding-rules.js",
     "governance:heartbeat": "node scripts/write-governance-heartbeat.js",
     "repo:scan": "node scripts/sentinel-repo-organization-scan.js",
+    "check:repo-read": "node scripts/check-repo-read.js",
     "check:repo-control": "node scripts/check-repo-control-layer.js",
     "check:asset-classification": "node scripts/classify-sentinel-assets.js",
     "check:ownerfi-ai-financial-manifest": "node scripts/verify-manifest-checksums.js",
