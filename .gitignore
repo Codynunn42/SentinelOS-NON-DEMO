@@ -1,4 +1,5 @@
 node_modules/
+coverage/
 .env
 aws-footprint.txt
 apps/executive-desk/docs/SENTINEL_BRIDGE_DISCOVERY_*.md
