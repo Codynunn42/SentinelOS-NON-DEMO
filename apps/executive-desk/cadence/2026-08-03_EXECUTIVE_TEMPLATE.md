@@ -22,7 +22,7 @@ Current posture:
 
 Remaining posture:
 
-- Final approval remains dependent on completion of outstanding evidence metadata fields, reviewer disposition, and final integrity verification where applicable.
+- Conditional final approval was recorded on 2026-08-07. Exact GPT Builder revision metadata remains an explicit post-approval carry-forward and must not be inferred.
 
 ## Owner Confirmation (2026-07-27)
 
@@ -64,7 +64,7 @@ Remaining posture:
 
 - Governance gate: Pass-in-progress; health-only boundary preserved.
 - Evidence integrity gate: Pass-in-progress; manifest and attestation present.
-- Trust and approval gate: Pending final EV-RUN-002-001 disposition.
+- Trust and approval gate: Conditionally approved on 2026-08-07.
 - Operational readiness gate: Pass-in-progress; cadence and board artifacts refreshed.
 
 ## 5. Risks and Mitigations
@@ -76,16 +76,17 @@ Remaining posture:
 
 ## 6. Decisions and Approvals
 
-- Decision requested: Approve EV-RUN-002-001 final disposition if metadata lock and attestation checks pass.
+- Decision: Conditionally approve EV-RUN-002-001 final disposition with explicit Unverified handling for unavailable GPT Builder revision metadata.
 - Decision owner: Cody Nunn (Interim, role: COO / Chief of Staff)
 - Due by: 2026-07-31
-- Approval status: Pending
+- Approval status: Conditionally Approved (2026-08-07)
+- Approval record: 2026-08-07_EV-RUN-002-001_FINAL_APPROVAL.md
 
 ## 7. Board-Ready Notes
 
 - Narrative headline: Cadence integrity is active and board packet controls remain complete.
 - Evidence-backed claim: Identity lock and board packet validation checklist remain completed and source-linked from the execution workbook.
-- Confidence level: High (pending final EV-RUN-002-001 disposition).
+- Confidence level: High (conditional approval recorded; exact-value metadata carry-forward remains open).
 
 ## 7A. GBP Status Checkpoint
 
@@ -101,9 +102,9 @@ Remaining posture:
 
 ## 8. Next Week Preview
 
-- Expected carry-forward: Any remaining EV-RUN-002-001 approval residue only.
+- Expected carry-forward: Exact-value metadata normalization under the conditional approval terms.
 - New proposed priorities: Convert weekly cadence outputs into board pre-read motion format.
-- Dependencies to clear now: Metadata exact-value lock and final approval record.
+- Dependencies to clear now: Metadata exact-value lock when source values become available.
 
 ## 9. Sentinel AI Orchestration Plan (Phases 1 and 2)
 
