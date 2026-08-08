@@ -4,6 +4,7 @@ const path = require('path');
 const { dispatchCommand } = require('../apps/sentinel/src/commands/dispatch');
 const { handleRepoRead } = require('../apps/sentinel/src/commands/repo/read');
 const { scanRepository } = require('../apps/sentinel/src/repo/organizationScan');
+const { auditLogger } = require('../apps/sentinel/src/audit/auditLogger');
 const {
   resetLocalPassportState,
   signLocalCommand
@@ -20,6 +21,31 @@ const principal = {
   role: 'platform',
   scopes: ['repo:read', 'audit:read']
 };
+let receiptSequence = 0;
+
+function buildReceipt(command, entity, outcome, tenantId) {
+  receiptSequence += 1;
+  return {
+    receiptId: `rcpt_repo_read_check_${receiptSequence}`,
+    auditId: `audit_repo_read_check_${receiptSequence}`,
+    command,
+    tenantId,
+    status: 'executed',
+    verified: true,
+    entity,
+    outcome,
+    timestamp: new Date().toISOString()
+  };
+}
+
+function dispatchContext(overrides = {}) {
+  return {
+    principal,
+    source: 'sentinel',
+    buildReceipt,
+    ...overrides
+  };
+}
 
 function signedCommand(overrides = {}) {
   return signLocalCommand({
@@ -63,7 +89,18 @@ async function main() {
   resetLocalPassportState();
   assertNoProhibitedServiceEffects();
 
-  const direct = await handleRepoRead(PAYLOAD);
+  const missingBuilder = await handleRepoRead(PAYLOAD, {}, { correlationId: 'corr_missing_builder' });
+  assert.strictEqual(missingBuilder.error, 'RECEIPT_BUILDER_UNAVAILABLE');
+
+  const missingCorrelation = await handleRepoRead(PAYLOAD, { buildReceipt });
+  assert.strictEqual(missingCorrelation.error, 'RECEIPT_CORRELATION_UNAVAILABLE');
+
+  const directCorrelationId = 'corr_repo_read_direct_check';
+  const direct = await handleRepoRead(
+    PAYLOAD,
+    { tenant: 'nunncloud', buildReceipt },
+    { tenant: 'nunncloud', command: COMMAND, correlationId: directCorrelationId }
+  );
   assert.strictEqual(direct.success, true);
   assert.strictEqual(direct.statusCode, 200);
   assert.strictEqual(direct.data.result.capabilityId, 'repo-read');
@@ -71,6 +108,10 @@ async function main() {
   assert.strictEqual(direct.data.result.executionMode, 'read_only');
   assert.strictEqual(direct.data.result.rootPolicy, 'server_controlled');
   assert.ok(Array.isArray(direct.data.result.findings));
+  assert.strictEqual(direct.data.receipt.correlationId, directCorrelationId);
+  assert.strictEqual(direct.data.receipt.entity.id, directCorrelationId);
+  assert.strictEqual(direct.data.receipt.outcome.correlationId, directCorrelationId);
+  assert.strictEqual(direct.data.receipt.outcome.capabilityId, 'repo-read');
 
   for (const forbiddenField of ['root', 'path', 'cwd', 'command', 'reportPath']) {
     const rejected = await handleRepoRead({ ...PAYLOAD, [forbiddenField]: '..\\outside' });
@@ -85,11 +126,26 @@ async function main() {
   const wrongOperation = await handleRepoRead({ ...PAYLOAD, operation: '../organization_scan' });
   assert.strictEqual(wrongOperation.error, 'UNSUPPORTED_OPERATION');
 
-  const governed = await dispatchCommand(signedCommand(), { principal, source: 'sentinel' });
+  const governed = await dispatchCommand(signedCommand(), dispatchContext());
   assert.strictEqual(governed.success, true);
   assert.strictEqual(governed.data.result.capabilityId, 'repo-read');
   assert.strictEqual(governed.data.result.executionMode, 'read_only');
   assert.ok(governed.data.evidence);
+  assert.ok(governed.data.receipt.receiptId);
+  assert.strictEqual(governed.data.receipt.correlationId, governed.data.evidence.sessionId);
+  assert.strictEqual(governed.data.receipt.entity.id, governed.data.evidence.sessionId);
+  assert.strictEqual(governed.data.receipt.outcome.correlationId, governed.data.evidence.sessionId);
+
+  const receiptMatch = await auditLogger.getByReceiptId(
+    governed.data.receipt.receiptId,
+    'nunncloud'
+  );
+  assert.ok(receiptMatch);
+  assert.strictEqual(receiptMatch.source, 'memory');
+  assert.strictEqual(receiptMatch.receipt.receiptId, governed.data.receipt.receiptId);
+  assert.strictEqual(receiptMatch.receipt.correlationId, governed.data.evidence.sessionId);
+  assert.strictEqual(receiptMatch.entry.correlationId, governed.data.evidence.sessionId);
+  assert.strictEqual(receiptMatch.entry.command, COMMAND);
 
   const unsigned = await dispatchCommand(
     { tenant: 'nunncloud', command: COMMAND, payload: PAYLOAD },
@@ -104,8 +160,8 @@ async function main() {
   assert.strictEqual(spoofed.details.reason, 'unauthorized_execution:missing_signature');
 
   const replayed = signedCommand();
-  const firstReplayAttempt = await dispatchCommand(replayed, { principal, source: 'sentinel' });
-  const secondReplayAttempt = await dispatchCommand(replayed, { principal, source: 'sentinel' });
+  const firstReplayAttempt = await dispatchCommand(replayed, dispatchContext());
+  const secondReplayAttempt = await dispatchCommand(replayed, dispatchContext());
   assert.strictEqual(firstReplayAttempt.success, true);
   assert.strictEqual(secondReplayAttempt.details.reason, 'unauthorized_execution:replay');
 
@@ -125,8 +181,8 @@ async function main() {
   assert.strictEqual(wrongSurfaceResult.details.reason, 'unauthorized_execution:scope_violation');
 
   const wrongScope = await dispatchCommand(signedCommand(), {
-    principal: { ...principal, scopes: ['audit:read'] },
-    source: 'sentinel'
+    ...dispatchContext(),
+    principal: { ...principal, scopes: ['audit:read'] }
   });
   assert.strictEqual(wrongScope.error, 'SCOPE_REQUIRED');
 
