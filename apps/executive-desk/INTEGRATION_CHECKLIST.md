@@ -35,19 +35,38 @@ Operational meaning:
 
 ### Stage 1 — Public Presence (Now)
 
-- [ ] Reposition `nunncorporation.com` to outcome-first messaging.
-- [ ] Publish Executive Assessment entry point.
-- [ ] Publish Executive Solutions and Executive Library pages.
-- [ ] Ensure no sensitive/governed internal data is exposed publicly.
-- [ ] Route all public engagement to assessment/scheduling workflow.
+- [x] Reposition `nunncorporation.com` to outcome-first messaging.
+- [x] Publish Executive Assessment entry point.
+- [x] Publish Executive Solutions and Executive Library pages.
+- [x] Ensure no sensitive/governed internal data is exposed publicly.
+- [x] Route all public engagement to assessment/scheduling workflow.
+
+Stage 1 acceptance criteria (scope lock: 2026-08-10):
+
+- [x] Outcome-first public messaging is visible on the primary entry page.
+  - Evidence: `apps/executive-desk/public/index.html` (copy updated)
+- [x] Executive Assessment call to action is visible and routes to the intended assessment/scheduling flow.
+  - Evidence: `apps/executive-desk/public/index.html`, `apps/executive-desk/public/app.js`
+- [x] Public surface excludes sensitive/governed internals (no privileged command details or internal-only data).
+  - Evidence: `apps/executive-desk/public/index.html`, `apps/executive-desk/public/styles.css`, `apps/executive-desk/README.md`
+- [x] Stage 1 verification note is recorded in cadence with pass/fail outcome and links.
+  - Evidence: `apps/executive-desk/cadence/2026-08-10_SUPPORT_TRIAGE_BLOCK_DAILY_RESPONSE.md`
 
 ### Stage 2 — Public GPT Concierge (Front Door)
 
 - [ ] Publish GPT as Executive Desk Concierge only (no privileged execution).
-- [ ] Limit GPT scope to: introduction, qualification, outcomes framing, assessment invitation.
-- [ ] Remove/disable mutating or sensitive command affordances in public action schema.
-- [ ] Add policy text in GPT instructions: no customer-specific or government-sensitive execution.
-- [ ] Add human handoff CTA to Executive Assessment flow.
+- [x] Limit GPT scope to: introduction, qualification, outcomes framing, assessment invitation.
+- [x] Remove/disable mutating or sensitive command affordances in public action schema.
+- [x] Add policy text in GPT instructions: no customer-specific or government-sensitive execution.
+- [x] Add human handoff CTA to Executive Assessment flow.
+
+Stage 2 execution note (2026-08-10):
+
+- Concierge policy baseline and public boundary controls are now implemented in:
+  - `apps/executive-desk/gpt-integration.md`
+  - `apps/executive-desk/openapi.yaml` (Stage 3 only; public concierge actions disabled by policy)
+  - `apps/executive-desk/public/index.html`
+- Remaining step to close Stage 2: publish the configured concierge GPT in GPT Builder.
 
 ### Stage 3 — Governed Backend for Approved Workflows
 
@@ -58,6 +77,25 @@ Operational meaning:
 - [ ] Restrict production command set to approved non-sensitive workflows only.
 - [ ] Keep government/customer privileged workflows behind authenticated Executive Desk.
 - [ ] Add production monitoring/alerting for proxy, auth failures, and error spikes.
+
+Stage 3 execution note (Day 6 implementation progress):
+
+- Implemented repo-side controls in `api/express-adapter.ts`:
+  - Optional API bearer auth mode for `/api/executive/*` via `EXECUTIVE_DESK_API_AUTH_REQUIRED`.
+  - HTTPS enforcement middleware via `EXECUTIVE_DESK_REQUIRE_HTTPS` with `X-Forwarded-Proto` support.
+  - CORS allowlist compatibility using `EXECUTIVE_DESK_ALLOWED_ORIGINS` with `CORS_ORIGIN` fallback.
+- Updated environment guidance in `.env.example` for production auth, CORS, HTTPS, and Stage 3 rollout posture.
+- Added coverage in `api/__tests__/routes.test.ts` for API bearer enforcement and HTTPS-required behavior.
+- Remaining for Stage 3 closure: enable production env values, switch live ledger to postgres, and complete gateway/WAF deployment controls.
+
+Stage 3 execution note (Day 7 hardening progress):
+
+- Made the governed proxy command allowlist explicit in `proxy/command-handler.ts` via `PROXY_APPROVED_COMMANDS` with a default of `repo.control.workflow.diagnose`.
+- Added gateway/WAF and rate-limiting guidance to `.env.example` and `README.md` so `/proxy/command` is deployed behind the production enforcement point.
+- Exposed `pnpm run db:executive-desk:setup` as the operator path for applying the receipts migration and delegation migration.
+- Added `pnpm run db:executive-desk:smoke` as the operator follow-up to confirm the receipts table is reachable after setup.
+- Final smoke verification is blocked in this workspace until a live `DATABASE_URL` is provided.
+- Remaining for Stage 3 closure: turn on the production environment values, move receipts to postgres in the live deployment, and complete gateway/WAF deployment implementation in the live stack.
 
 ### Sentinel AI Remote Connector
 
@@ -90,6 +128,12 @@ Operational meaning:
 - [ ] MOB updated with Commercial Chapter milestone and operating SOP.
 - [ ] Founder sign-off recorded for public launch scope.
 
+Governance pass note (2026-08-10):
+
+- Board governance chain is documented in [government-readiness/BOARD_INDEX.md](government-readiness/BOARD_INDEX.md) and the promotion policy in [government-readiness/governance/CERTIFICATION_PROMOTION_POLICY.md](government-readiness/governance/CERTIFICATION_PROMOTION_POLICY.md).
+- Runtime governance posture is now explicit in the repo: Stage 3 command scope is allowlisted, `/proxy/command` is documented as gateway/WAF protected, and public concierge actions remain disabled by policy.
+- Remaining governance closure items stay unchanged: founder sign-off, live cadence finalization, and live GBP mission package linkage.
+
 ## Go/No-Go Decision Gates
 
 ### Go for Local Operation
@@ -99,7 +143,7 @@ Operational meaning:
 
 ### Go for Public Concierge Launch
 
-- [ ] Stage 1 complete.
+- [x] Stage 1 complete.
 - [ ] Stage 2 controls complete.
 - [ ] Public copy/legal review complete.
 
@@ -113,8 +157,15 @@ Operational meaning:
 
 ## Immediate Next Actions (Priority Order)
 
-1. [ ] Finish Stage 1 web repositioning and assessment funnel. — Owner: Cody Dale Nunn — State: In progress
-2. [ ] Publish Stage 2 concierge GPT with strict non-sensitive scope. — Owner: Cody Dale Nunn — State: Queued after Stage 1
-3. [ ] Stand up Stage 3 production environment with auth + postgres + gateway. — Owner: Cody Dale Nunn — State: Queued after Stage 2
+1. [x] Finish Stage 1 web repositioning and assessment funnel. — Owner: Cody Dale Nunn — State: Completed 2026-08-10
+   - Stage 1 execution window: 2026-08-10 through 2026-08-12
+   - [x] 2026-08-10: Define Stage 1 acceptance criteria and evidence links in this checklist.
+     - Evidence slot: `apps/executive-desk/cadence/2026-08-10_EXECUTIVE_DESK_LAUNCH_EXECUTION_PLAN.md`
+   - [x] 2026-08-11: Complete public messaging pass (outcome-first copy, assessment CTA, no sensitive/governed disclosure).
+     - Evidence slot: `apps/executive-desk/public/index.html`, `apps/executive-desk/public/styles.css`, `apps/executive-desk/public/app.js`
+   - [x] 2026-08-12: Run Stage 1 verification and determine Stage 1 pass/hold status with proof links.
+     - Evidence slot: `apps/executive-desk/cadence/2026-08-10_SUPPORT_TRIAGE_BLOCK_DAILY_RESPONSE.md`
+2. [ ] Publish Stage 2 concierge GPT with strict non-sensitive scope. — Owner: Cody Dale Nunn — State: In progress (policy/spec complete; publish pending)
+3. [ ] Stand up Stage 3 production environment with auth + postgres + gateway. — Owner: Cody Dale Nunn — State: In progress (Day 7 command allowlist and gateway guidance added; production rollout pending)
 4. [ ] Connect Executive Desk to hosted Sentinel AI and verify scan/status endpoints. — Owner: Cody Dale Nunn — State: Queued after Stage 3
 5. [ ] Run final launch dry run with full checklist sign-off. — Owner: Cody Dale Nunn — State: Queued after connector verification

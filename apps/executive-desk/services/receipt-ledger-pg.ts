@@ -239,12 +239,16 @@ export class PostgresReceiptLedger {
      * Internal: map database row to ReceiptEntry
      */
     private mapRow(row: any): ReceiptEntry {
+        const timestamp = row.timestamp instanceof Date
+            ? row.timestamp
+            : new Date(row.timestamp);
+
         return {
             id: row.id,
             command: row.command,
             tenant: row.tenant,
             executor: row.executor,
-            timestamp: row.timestamp.toISOString(),
+            timestamp: timestamp.toISOString(),
             status: row.status,
             payload: row.payload,
             authorityCheckResult: row.authority_check_result,

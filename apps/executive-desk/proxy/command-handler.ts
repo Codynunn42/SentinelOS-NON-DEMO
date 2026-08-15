@@ -43,6 +43,15 @@ export interface ProxyCommandResponse {
     diagnosis?: Record<string, unknown>;
 }
 
+function getApprovedCommands(): string[] {
+    const configured = String(process.env.PROXY_APPROVED_COMMANDS || '').trim();
+    const commands = configured
+        ? configured.split(',')
+        : ['repo.control.workflow.diagnose'];
+
+    return commands.map((command) => command.trim()).filter(Boolean);
+}
+
 /**
  * Validate request schema
  */
@@ -57,8 +66,10 @@ function validateRequest(req: ProxyCommandRequest): { valid: boolean; errors: st
 
     if (!req.command) {
         errors.push('command is required');
-    } else if (!['repo.control.workflow.diagnose'].includes(req.command)) {
-        errors.push(`command must be 'repo.control.workflow.diagnose', got '${req.command}'`);
+    } else if (!getApprovedCommands().includes(req.command)) {
+        errors.push(
+            `command must be one of ${getApprovedCommands().map((command) => `'${command}'`).join(', ')}, got '${req.command}'`,
+        );
     }
 
     if (!req.payload) {

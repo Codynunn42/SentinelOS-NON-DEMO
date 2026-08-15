@@ -126,6 +126,21 @@ function authEnabled(): boolean {
     return String(process.env.AUTH_ENABLED || 'false').toLowerCase() === 'true';
 }
 
+function apiAuthEnabled(): boolean {
+    const explicit = String(process.env.EXECUTIVE_DESK_API_AUTH_REQUIRED || '').trim().toLowerCase();
+    if (explicit === 'true') {
+        return true;
+    }
+    if (explicit === 'false') {
+        return false;
+    }
+    return authEnabled();
+}
+
+function httpsRequired(): boolean {
+    return String(process.env.EXECUTIVE_DESK_REQUIRE_HTTPS || 'false').toLowerCase() === 'true';
+}
+
 function scopeEnforcementEnabled(): boolean {
     return String(process.env.ENTRA_SCOPE_ENFORCEMENT || 'false').toLowerCase() === 'true';
 }
@@ -168,6 +183,29 @@ function parseScopes(raw: unknown): string[] {
         .filter(Boolean);
 }
 
+function getBearerToken(req: Request): string {
+    const authHeader = String(req.headers.authorization || '');
+    const match = authHeader.match(/^Bearer\s+(.+)$/i);
+    return match?.[1]?.trim() || '';
+}
+
+function getPrincipalFromJwt(token: string): string {
+    const payload = decodeJwtPayload(token);
+    if (!payload) {
+        return '';
+    }
+
+    const candidateKeys = ['upn', 'preferred_username', 'email', 'sub'];
+    for (const key of candidateKeys) {
+        const value = payload[key];
+        if (typeof value === 'string' && value.trim()) {
+            return value.trim();
+        }
+    }
+
+    return '';
+}
+
 function getRequestScopes(req: Request): string[] {
     const headerValues = [
         req.headers['x-auth-scopes'],
@@ -184,8 +222,7 @@ function getRequestScopes(req: Request): string[] {
         }
     });
 
-    const authHeader = String(req.headers.authorization || '');
-    const bearer = authHeader.match(/^Bearer\s+(.+)$/i)?.[1]?.trim();
+    const bearer = getBearerToken(req);
     if (bearer) {
         const payload = decodeJwtPayload(bearer);
         if (payload) {
@@ -665,14 +702,41 @@ function rateLimitMiddleware(
  * Principal authentication middleware
  */
 function authMiddleware(req: Request, res: Response, next: NextFunction): void {
-    // Get principal from header or bearer token
-    const principalId =
-        req.headers['x-principal-id'] ||
-        (req.headers.authorization
-            ? req.headers.authorization.replace('Bearer ', '')
-            : undefined);
+    const principalFromHeader =
+        typeof req.headers['x-principal-id'] === 'string'
+            ? req.headers['x-principal-id'].trim()
+            : '';
 
-    if (!principalId || typeof principalId !== 'string') {
+    const bearer = getBearerToken(req);
+
+    if (apiAuthEnabled()) {
+        const expectedToken = getExpectedProxyToken();
+        if (!expectedToken) {
+            res.status(500).json({
+                error: 'Internal Server Error',
+                details: 'API auth is enabled but no AUTH_BEARER_TOKEN/JWT_SECRET configured',
+                code: 'AUTH_MISCONFIGURED',
+            });
+            return;
+        }
+
+        if (!bearer || bearer !== expectedToken) {
+            res.status(401).json({
+                error: 'Unauthorized',
+                details: 'Valid bearer token is required for /api/executive routes',
+                code: 'MISSING_OR_INVALID_BEARER',
+            });
+            return;
+        }
+    }
+
+    const principalId =
+        principalFromHeader
+        || getPrincipalFromJwt(bearer)
+        || (!apiAuthEnabled() ? bearer : '')
+        || '';
+
+    if (!principalId) {
         res.status(401).json({
             error: 'Unauthorized',
             details: 'X-Principal-Id header is required',
@@ -707,9 +771,7 @@ function proxyAuthMiddleware(req: Request, res: Response, next: NextFunction): v
         return;
     }
 
-    const authHeader = String(req.headers.authorization || '');
-    const match = authHeader.match(/^Bearer\s+(.+)$/i);
-    const token = match?.[1]?.trim();
+    const token = getBearerToken(req);
 
     if (!token || token !== expectedToken) {
         res.status(401).json({
@@ -720,6 +782,31 @@ function proxyAuthMiddleware(req: Request, res: Response, next: NextFunction): v
         return;
     }
 
+    next();
+}
+
+function requireHttpsMiddleware(req: Request, res: Response, next: NextFunction): void {
+    if (!httpsRequired()) {
+        next();
+        return;
+    }
+
+    const forwardedProtoRaw = req.headers['x-forwarded-proto'];
+    const forwardedProto = Array.isArray(forwardedProtoRaw)
+        ? forwardedProtoRaw[0]
+        : String(forwardedProtoRaw || '');
+    const isHttps = req.secure || forwardedProto.split(',')[0].trim().toLowerCase() === 'https';
+
+    if (!isHttps) {
+        res.status(426).json({
+            error: 'Upgrade Required',
+            details: 'HTTPS is required for this environment',
+            code: 'HTTPS_REQUIRED',
+        });
+        return;
+    }
+
+    res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
     next();
 }
 
@@ -736,7 +823,11 @@ function requestIdMiddleware(req: Request, res: Response, next: NextFunction): v
 }
 
 function getAllowedOrigins(): string[] {
-    const raw = String(process.env.EXECUTIVE_DESK_ALLOWED_ORIGINS || '').trim();
+    const raw = String(
+        process.env.EXECUTIVE_DESK_ALLOWED_ORIGINS
+        || process.env.CORS_ORIGIN
+        || '',
+    ).trim();
     if (!raw) {
         return [];
     }
@@ -798,6 +889,7 @@ export function mountApiRoutes(app: Express): void {
     // Global middleware
     app.use(express.json());
     app.use(requestIdMiddleware);
+    app.use(requireHttpsMiddleware);
     app.use(corsMiddleware);
     app.get('/executive', (_req: Request, res: Response) => {
         res.sendFile(path.join(publicDir, 'index.html'));

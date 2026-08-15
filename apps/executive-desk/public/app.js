@@ -100,6 +100,42 @@ const el = {
 
 const SESSION_STORAGE_KEY = 'executiveDeskSentinelSession';
 const API_BASE_STORAGE_KEY = 'executiveDeskApiBaseUrl';
+const DEFAULT_ASSESSMENT_CTA = 'mailto:executive-desk@nunncorporation.com?subject=Executive%20Assessment%20Request';
+const DEFAULT_SCHEDULING_CTA = 'mailto:executive-desk@nunncorporation.com?subject=Schedule%20Discovery%20Session';
+
+function normalizeEngagementLink(value, fallback) {
+  if (!value) return fallback;
+  const raw = String(value).trim();
+  if (!raw) return fallback;
+  if (raw.startsWith('mailto:')) return raw;
+
+  try {
+    const url = new URL(raw);
+    if (url.protocol === 'https:' || url.protocol === 'http:') {
+      return url.toString();
+    }
+  } catch {
+    return fallback;
+  }
+
+  return fallback;
+}
+
+function applyPublicCtaLinks() {
+  const params = new URLSearchParams(window.location.search);
+  const assessmentUrl = normalizeEngagementLink(params.get('assessmentUrl'), DEFAULT_ASSESSMENT_CTA);
+  const schedulingUrl = normalizeEngagementLink(params.get('scheduleUrl'), DEFAULT_SCHEDULING_CTA);
+
+  const assessmentCta = document.getElementById('assessmentCta');
+  const schedulingCta = document.getElementById('schedulingCta');
+
+  if (assessmentCta) {
+    assessmentCta.setAttribute('href', assessmentUrl);
+  }
+  if (schedulingCta) {
+    schedulingCta.setAttribute('href', schedulingUrl);
+  }
+}
 
 function normalizeApiBase(value) {
   if (!value) return '';
@@ -912,6 +948,7 @@ renderCloseoutControls();
 renderMobHistory();
 renderMobPanel();
 loadApiBaseUrl();
+applyPublicCtaLinks();
 updateAuthShell();
 loadConnectionStatus();
 

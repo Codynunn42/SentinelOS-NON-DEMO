@@ -22,6 +22,13 @@ Operating Summary
 - Focus now: GBP mission package, government relationship building, readiness assets, pilot readiness, and Sentinel AI runtime verification.
 - Scan logic: use Sentinel AI to enact the user's logic, show what is ready, and surface the highest-value focus areas for government engagement.
 
+Stage 1 Public Messaging Guardrails (2026-08-10 scope lock)
+
+- Keep public content outcome-first and assessment-led.
+- Keep sensitive/governed operational detail off public surfaces.
+- Keep privileged execution pathways and internal workflow controls behind authenticated Executive Desk boundaries.
+- Route public engagement to assessment/scheduling flow instead of direct command execution.
+
 Documentation
 
 - `docs/EXECUTIVE_DESK_V1.md`: high-level design and product vision
@@ -107,12 +114,22 @@ Scripted equivalents:
   - `pnpm run api:sentinel-status`
   - `pnpm run api:sentinel-scan:oauth-fix`
 
+Receipt Ledger PostgreSQL setup
+
+- From the repo root: `pnpm run db:executive-desk:setup`
+- Follow it with `pnpm run db:executive-desk:smoke` to confirm the receipts table is reachable and queryable.
+- Set `DATABASE_URL` first, then `RECEIPT_LEDGER_BACKEND=postgres` for production or durable test environments.
+- The setup command applies `apps/executive-desk/db/migrations/001-receipt-ledger.sql` and the delegation migration already present in the same folder.
+
 Production proxy auth
 
 - Set `AUTH_ENABLED=true` to require bearer auth on `POST /proxy/command`.
 - Set `AUTH_BEARER_TOKEN=<strong-random-token>` (preferred).
 - If `AUTH_BEARER_TOKEN` is unset, `JWT_SECRET` is used as fallback.
 - Use this token in GPT Action auth or upstream API gateway auth policy.
+- Set `PROXY_APPROVED_COMMANDS=repo.control.workflow.diagnose` in production and keep it limited to approved non-sensitive workflows.
+- Place `/proxy/command` behind an API gateway or WAF with rate limiting, request logging, and abuse controls before exposing it outside trusted internal traffic.
+- Keep the gateway as the production enforcement point for command shaping and request throttling.
 
 Sentinel AI remote connector
 

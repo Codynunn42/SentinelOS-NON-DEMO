@@ -11,13 +11,97 @@
       "gbpReference": "GBP-2026-07",
       "mobTemplateRequired": true,
       "mobLastRunStatus": "failed",
-      "updatedAt": "2026-07-18T20:06:16.376Z",
+      "updatedAt": "2026-08-12T01:16:10.916Z",
       "updatedBy": "user@example.com",
-      "mobLastRunAt": "2026-07-18T20:06:16.376Z"
+      "mobLastRunAt": "2026-08-12T01:16:10.916Z"
     }
   },
   "mobRuns": {
     "user@example.com": [
+      {
+        "id": "f393066a-724c-43e5-aca5-5e87ffff1905",
+        "principalId": "user@example.com",
+        "status": "failed",
+        "timestamp": "2026-08-12T01:16:10.916Z",
+        "executor": "user@example.com"
+      },
+      {
+        "id": "d010c8e3-0166-471d-92f0-b53808e09848",
+        "principalId": "user@example.com",
+        "status": "completed",
+        "timestamp": "2026-08-12T01:16:10.905Z",
+        "executor": "user@example.com"
+      },
+      {
+        "id": "be5d14ef-62eb-4385-89f3-f664a455f504",
+        "principalId": "user@example.com",
+        "status": "failed",
+        "timestamp": "2026-08-12T00:47:34.575Z",
+        "executor": "user@example.com"
+      },
+      {
+        "id": "79ad394e-1b51-4e73-b978-b902d9a29730",
+        "principalId": "user@example.com",
+        "status": "completed",
+        "timestamp": "2026-08-12T00:47:34.562Z",
+        "executor": "user@example.com"
+      },
+      {
+        "id": "f4e30d7d-55f2-47fd-bfe4-4becf2f4dd9a",
+        "principalId": "user@example.com",
+        "status": "failed",
+        "timestamp": "2026-08-10T18:14:30.648Z",
+        "executor": "user@example.com"
+      },
+      {
+        "id": "4fc4a7ca-b23a-4ce5-b56a-0fad6f9add90",
+        "principalId": "user@example.com",
+        "status": "completed",
+        "timestamp": "2026-08-10T18:14:30.646Z",
+        "executor": "user@example.com"
+      },
+      {
+        "id": "7cd5a601-64f4-4815-960d-f6f34956e324",
+        "principalId": "user@example.com",
+        "status": "failed",
+        "timestamp": "2026-08-10T18:09:43.801Z",
+        "executor": "user@example.com"
+      },
+      {
+        "id": "aea08421-0f61-46fc-84ad-61d95aa8d57d",
+        "principalId": "user@example.com",
+        "status": "completed",
+        "timestamp": "2026-08-10T18:09:43.798Z",
+        "executor": "user@example.com"
+      },
+      {
+        "id": "5826cbc3-7b25-4697-883a-95bc0c3ba1f6",
+        "principalId": "user@example.com",
+        "status": "failed",
+        "timestamp": "2026-08-10T18:02:16.797Z",
+        "executor": "user@example.com"
+      },
+      {
+        "id": "d56e2c7f-3ec2-43c0-b570-6f376ac8f58d",
+        "principalId": "user@example.com",
+        "status": "completed",
+        "timestamp": "2026-08-10T18:02:16.794Z",
+        "executor": "user@example.com"
+      },
+      {
+        "id": "d60b9bcd-55c3-4e58-a789-b0f6826f3b81",
+        "principalId": "user@example.com",
+        "status": "failed",
+        "timestamp": "2026-08-10T17:58:11.158Z",
+        "executor": "user@example.com"
+      },
+      {
+        "id": "eaf57f45-d830-4a11-ae2e-ac318ceede40",
+        "principalId": "user@example.com",
+        "status": "completed",
+        "timestamp": "2026-08-10T17:58:11.155Z",
+        "executor": "user@example.com"
+      },
       {
         "id": "0a807323-897c-4819-be5d-781d5b3b2420",
         "principalId": "user@example.com",

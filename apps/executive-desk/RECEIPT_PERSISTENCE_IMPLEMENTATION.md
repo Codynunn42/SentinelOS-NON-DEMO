@@ -80,6 +80,12 @@ Receipts are appended as JSON lines:
    npx ts-node apps/executive-desk/db/setup.ts
    ```
 
+   Or from the repo root:
+
+   ```bash
+   pnpm run db:executive-desk:setup
+   ```
+
 4. **Test:**
 
    ```bash

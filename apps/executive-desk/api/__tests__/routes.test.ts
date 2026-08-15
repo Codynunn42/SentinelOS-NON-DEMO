@@ -40,6 +40,104 @@ describe('Executive Desk API Routes', () => {
 
             assert(res.status !== 401, `Got 401 but expected success: ${res.body.error}`);
         });
+
+        it('should require bearer token for API routes when API auth is enabled', async () => {
+            const prevApiAuth = process.env.EXECUTIVE_DESK_API_AUTH_REQUIRED;
+            const prevToken = process.env.AUTH_BEARER_TOKEN;
+
+            process.env.EXECUTIVE_DESK_API_AUTH_REQUIRED = 'true';
+            process.env.AUTH_BEARER_TOKEN = 'api-test-token';
+
+            try {
+                const res = await request(app)
+                    .get('/api/executive/receipts')
+                    .set('X-Principal-Id', 'user@example.com');
+
+                assert.strictEqual(res.status, 401);
+                assert.strictEqual(res.body.code, 'MISSING_OR_INVALID_BEARER');
+            } finally {
+                if (prevApiAuth === undefined) {
+                    delete process.env.EXECUTIVE_DESK_API_AUTH_REQUIRED;
+                } else {
+                    process.env.EXECUTIVE_DESK_API_AUTH_REQUIRED = prevApiAuth;
+                }
+
+                if (prevToken === undefined) {
+                    delete process.env.AUTH_BEARER_TOKEN;
+                } else {
+                    process.env.AUTH_BEARER_TOKEN = prevToken;
+                }
+            }
+        });
+
+        it('should accept bearer token for API routes when API auth is enabled', async () => {
+            const prevApiAuth = process.env.EXECUTIVE_DESK_API_AUTH_REQUIRED;
+            const prevToken = process.env.AUTH_BEARER_TOKEN;
+
+            process.env.EXECUTIVE_DESK_API_AUTH_REQUIRED = 'true';
+            process.env.AUTH_BEARER_TOKEN = 'api-test-token';
+
+            try {
+                const res = await request(app)
+                    .get('/api/executive/receipts')
+                    .set('Authorization', 'Bearer api-test-token')
+                    .set('X-Principal-Id', 'user@example.com');
+
+                assert(res.status !== 401, `Got 401 but expected success: ${res.body.error}`);
+            } finally {
+                if (prevApiAuth === undefined) {
+                    delete process.env.EXECUTIVE_DESK_API_AUTH_REQUIRED;
+                } else {
+                    process.env.EXECUTIVE_DESK_API_AUTH_REQUIRED = prevApiAuth;
+                }
+
+                if (prevToken === undefined) {
+                    delete process.env.AUTH_BEARER_TOKEN;
+                } else {
+                    process.env.AUTH_BEARER_TOKEN = prevToken;
+                }
+            }
+        });
+    });
+
+    describe('HTTPS Enforcement', () => {
+        it('should reject non-HTTPS requests when HTTPS is required', async () => {
+            const prevHttps = process.env.EXECUTIVE_DESK_REQUIRE_HTTPS;
+            process.env.EXECUTIVE_DESK_REQUIRE_HTTPS = 'true';
+
+            try {
+                const res = await request(app).get('/health');
+
+                assert.strictEqual(res.status, 426);
+                assert.strictEqual(res.body.code, 'HTTPS_REQUIRED');
+            } finally {
+                if (prevHttps === undefined) {
+                    delete process.env.EXECUTIVE_DESK_REQUIRE_HTTPS;
+                } else {
+                    process.env.EXECUTIVE_DESK_REQUIRE_HTTPS = prevHttps;
+                }
+            }
+        });
+
+        it('should accept forwarded HTTPS requests when HTTPS is required', async () => {
+            const prevHttps = process.env.EXECUTIVE_DESK_REQUIRE_HTTPS;
+            process.env.EXECUTIVE_DESK_REQUIRE_HTTPS = 'true';
+
+            try {
+                const res = await request(app)
+                    .get('/health')
+                    .set('X-Forwarded-Proto', 'https');
+
+                assert.strictEqual(res.status, 200);
+                assert(res.headers['strict-transport-security']);
+            } finally {
+                if (prevHttps === undefined) {
+                    delete process.env.EXECUTIVE_DESK_REQUIRE_HTTPS;
+                } else {
+                    process.env.EXECUTIVE_DESK_REQUIRE_HTTPS = prevHttps;
+                }
+            }
+        });
     });
 
     describe('Health Check', () => {
