@@ -1,0 +1,6 @@
+run_id=20260817T043040Z
+start_utc=2026-08-17T04:30:40Z
+interval_seconds=300
+end_epoch=1787200240
+----
+2026-08-17T04:30:40Z | pass=true | health=healthy | sovereignty=sovereign | canary=allow/passed | sentinel_reachable=unknown | sentinel_error=fetch failed

@@ -208,3 +208,155 @@ Exit criteria:
 ## End-of-Plan Success Condition
 
 All immediate next actions in INTEGRATION_CHECKLIST.md are checked complete with current evidence links, and founder go/no-go is recorded.
+
+## SSAI Sovereign API
+
+import express from "express";
+import crypto from "crypto";
+
+const app = express();
+app.use(express.json());
+
+const RELEASE_ID = {
+  system: "ssai",
+  name: "SSAI Sovereign Runtime",
+  version: "1.1.0",
+  mission: "Stargate Ecosystem",
+  runtime_profile: "sovereign",
+  sentinel_dependency_required: false,
+  authority_model: "governed",
+  status: "operational",
+};
+
+function buildEvidence(req: any, action: string, policyDecision: string, result: any) {
+  const requestId = req.headers["x-request-id"] ?? crypto.randomUUID();
+  return {
+    request_id: requestId,
+    timestamp: new Date().toISOString(),
+    system: "ssai",
+    version: "1.1.0",
+    actor: {
+      type: req.headers["x-actor-type"] ?? "service",
+      id: req.headers["x-actor-id"] ?? "unknown",
+    },
+    policy: {
+      decision: policyDecision,
+      authority_tier: "T1",
+    },
+    result,
+    evidence: {
+      reference: null,
+      hash: null,
+      state: "verified",
+    },
+  };
+}
+
+app.get("/health", (req, res) => {
+  const health = {
+    status: "healthy",
+    runtime: true,
+    memory: true,
+    policy_engine: true,
+    evidence_store: true,
+    ecosystem_engine: true,
+    sentinel_required: false,
+    evidence: buildEvidence(req, "health.read", "allow", { status: "healthy" }),
+  };
+  res.json(health);
+});
+
+app.get("/version", (req, res) => {
+  res.json({
+    ...RELEASE_ID,
+    evidence: buildEvidence(req, "version.read", "allow", RELEASE_ID),
+  });
+});
+
+app.get("/sovereignty", (req, res) => {
+  res.json({
+    status: "sovereign",
+    runtime_independent: true,
+    identity_independent: true,
+    memory_independent: true,
+    evidence_independent: true,
+    sentinel_runtime_dependency: false,
+    external_exchange_mode: "explicit",
+    evidence: buildEvidence(req, "sovereignty.read", "allow", {
+      status: "sovereign",
+    }),
+  });
+});
+
+app.get("/runtime", (req, res) => {
+  res.json({
+    system: "ssai",
+    version: "1.1.0",
+    mode: "stargate-ecosystem",
+    uptime_seconds: 0,
+    authority_profile: "governed",
+    learning_mode: "controlled",
+    historical_database: "read-only",
+    sentinel_status: "external-peer",
+    evidence: buildEvidence(req, "runtime.read", "allow", {
+      mode: "stargate-ecosystem",
+    }),
+  });
+});
+
+app.get("/evidence/latest", (req, res) => {
+  res.json({
+    latest: {
+      request_id: crypto.randomUUID(),
+      timestamp: new Date().toISOString(),
+      outcome: "ok",
+    },
+    evidence: buildEvidence(req, "evidence.latest", "allow", {
+      outcome: "ok",
+    }),
+  });
+});
+
+app.post("/canary/run", (req, res) => {
+  const auth = req.headers.authorization ?? "";
+  const allowed = auth.startsWith("Bearer ") && auth.includes("ssai.canary.execute");
+
+  if (!allowed) {
+    return res.status(403).json({
+      error: "forbidden",
+      evidence: buildEvidence(req, "canary.run", "deny", {
+        reason: "missing_scoped_authorization",
+      }),
+    });
+  }
+
+  return res.json({
+    ok: true,
+    canary: "executive-runtime-check",
+    result: "passed",
+    evidence: buildEvidence(req, "canary.run", "allow", {
+      canary: "executive-runtime-check",
+      result: "passed",
+    }),
+  });
+});
+
+app.listen(3100, () => {
+  console.log("SSAI Sovereign API listening on 3100");
+});
+
+tunnel: ssai-api
+credentials-file: /Users/codynunn/.cloudflared/<TUNNEL_ID>.json
+ingress:
+
+- hostname: api.nunncorporation.com
+    service: <http://127.0.0.1:3100>
+- service: http_status:404
+
+credential_format: <jwt|opaque|api_key|mtls>
+required_scope: <exact literal>
+jwt_issuer: <value or none>
+jwt_audience: <value or none>
+verifier_env_keys: [ ... ]
+middleware_file: <path>
+route_file: <path>

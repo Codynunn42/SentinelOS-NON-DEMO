@@ -14,6 +14,20 @@
       "updatedAt": "2026-08-12T01:16:10.916Z",
       "updatedBy": "user@example.com",
       "mobLastRunAt": "2026-08-12T01:16:10.916Z"
+    },
+    "founder@nunncorp.example": {
+      "principalId": "founder@nunncorp.example",
+      "cadence": {
+        "mode": "daily",
+        "weeklyDay": "sunday",
+        "monthlyDay": "1"
+      },
+      "gbpAttached": false,
+      "gbpReference": "",
+      "mobTemplateRequired": true,
+      "mobLastRunStatus": "not_run",
+      "updatedAt": "2026-08-16T04:19:11.855Z",
+      "updatedBy": "founder@nunncorp.example"
     }
   },
   "mobRuns": {
