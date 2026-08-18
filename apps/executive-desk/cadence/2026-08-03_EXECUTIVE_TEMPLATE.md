@@ -180,12 +180,14 @@ Phase 2 completion criteria:
 ## Processed Updates — 2026-08-18
 
 ### Strategic Evidence Audit Scorecard
+
 - Owner: CEO / COO
 - Status: Completed
 - Evidence: government-readiness/governance/cadence/monthly/2026-08-18_MONTHLY_STRATEGY_EVIDENCE_AUDIT_SCORECARD.md
 - Source: NUNN_CORP_2030_EXECUTION_WORKBOOK.md
 
 ### Controlled Operations Compliance Score Report
+
 - Owner: Governance Ops Lead
 - Status: Completed
 - Evidence: government-readiness/governance/cadence/monthly/2026-08-18_CONTROLLED_OPERATIONS_COMPLIANCE_SCORE_REPORT.md, government-readiness/governance/CADENCE_DUTY_CONTROL_REGISTER_2026-07-18.md
@@ -194,6 +196,7 @@ Phase 2 completion criteria:
 ## Next Steps Execution Tracker — 2026-08-18
 
 ### Completed Today (Locked)
+
 1. **Monthly Strategy Evidence Audit Scorecard**
    - Owner: CEO / COO
    - Status: Completed
@@ -209,7 +212,7 @@ Phase 2 completion criteria:
 ### In-Progress to Handoff (Live)
 
 | Deliverable | Owner | Status | Evidence Path | Verifier | Due (MST) | Handoff Ready |
-|---|---|---|---|---|---|---|
+| --- | --- | --- | --- | --- | --- | --- |
 | Monitoring window completion report | Governance Ops Lead | In Progress | `government-readiness/governance/cadence/monthly/2026-08-18_MONITORING_WINDOW_COMPLETION_REPORT.md` | SSAI Runtime Owner | 2026-08-18 17:00 | ⬜ |
 | Manifest verification cleanup report | SSAI Runtime Owner | In Progress | `government-readiness/governance/cadence/monthly/2026-08-18_MANIFEST_VERIFICATION_CLEANUP_REPORT.md` | Security/Compliance Reviewer | 2026-08-18 17:30 | ⬜ |
 | Runtime re-validation evidence (`/health`, `/sovereignty`) | SSAI Runtime Owner | In Progress | `government-readiness/governance/cadence/monthly/2026-08-18_RUNTIME_REVALIDATION_EVIDENCE.md` | Governance Ops Lead | 2026-08-18 17:45 | ⬜ |
@@ -217,11 +220,66 @@ Phase 2 completion criteria:
 | Promotion approval memo | CEO / COO | Not Started | `government-readiness/governance/cadence/monthly/2026-08-18_SOVEREIGNTY_PROMOTION_APPROVAL.md` | Governance Ops Lead | 2026-08-18 18:30 | ⬜ |
 
 ### Gate Rule
+
 Sovereignty status remains **Conditional** until monitoring window + manifest verification cleanup are completed, validated, and signed.
 
 ### Live Update Log (append as you go)
+
 - `2026-08-18T13:00 MST` Review started.
 - `2026-08-18T__:__ MST` __________________________________________
 - `2026-08-18T__:__ MST` __________________________________________
 - `2026-08-18T__:__ MST` __________________________________________
 
+### Conditional Gate — Pending Proof Closure (Explicit)
+
+Status remains `Conditional` until all items below are `Completed` and signed.
+
+| Pending Proof Item | Current | Owner | Evidence | Verifier | Completion Rule | Status |
+| --- | --- | --- | --- | --- | --- | --- |
+| `identity_independent` | `not_configured` | Security/Compliance Reviewer | `government-readiness/governance/cadence/monthly/2026-08-18_IDENTITY_INDEPENDENCE_PROOF.md` | Security/Compliance Reviewer | Identity independence test + rationale = Pass | ⬜ |
+| `memory_independent` | `not_configured` | SSAI Runtime Owner | `government-readiness/governance/cadence/monthly/2026-08-18_MEMORY_INDEPENDENCE_PROOF.md` | SSAI Runtime Owner | Memory/integrity dependency proof = Pass | ⬜ |
+| `ecosystem_independent` | `not_configured` | Governance Ops Lead | `government-readiness/governance/cadence/monthly/2026-08-18_ECOSYSTEM_INDEPENDENCE_PROOF.md` | Governance Ops Lead | Ecosystem control validation = Pass | ⬜ |
+| `sentinel_ai_outage_test` | `pending` | Governance Ops Lead | `government-readiness/governance/cadence/monthly/2026-08-18_SENTINEL_AI_OUTAGE_TEST_REPORT.md` | Governance Ops Lead + CEO/COO | Outage simulation completed and accepted | ⬜ |
+
+Promotion rule: Advance to `Promotion Ready` only when all four rows are marked complete with verifier sign-off.
+
+## Approval and Review Block — Sovereignty Gate
+
+### Review Summary
+
+- Review Date: 2026-08-18
+- Review Scope: Runtime stability, governance evidence completeness, pending-proof closure readiness
+- Current Gate Status: Conditional
+- Promotion Condition: All pending-proof rows completed with verifier sign-off and executive approval
+
+### Required Approvals
+
+| Role | Name | Decision (Approve / Conditional / Reject) | Signature Method | Date/Time (MST) | Notes |
+|---|---|---|---|---|---|
+| Governance Ops Lead |  |  | GPG Commit/Tag Attestation |  |  |
+| SSAI Runtime Owner |  |  | GPG Commit/Tag Attestation |  |  |
+| Security/Compliance Reviewer |  |  | GPG Commit/Tag Attestation |  |  |
+| CEO / COO |  |  | Executive Approval Memo + Tag Reference |  |  |
+
+### Signed Evidence References
+
+- Signed Tag: `sovereignty-gate-2026-08-18`
+- Signed Tag (ratified): `sovereignty-gate-2026-08-18-ratified`
+- Signature Proof Artifact: `apps/executive-desk/government-readiness/governance/cadence/monthly/2026-08-18_GPG_SIGNATURE_PROOF.txt`
+
+### Final Decision
+
+- [ ] Promotion Ready
+- [ ] Remain Conditional
+- [ ] Hold / Rollback
+
+Decision Rationale:
+
+- ________________________________________________
+- ________________________________________________
+
+### Next Checkpoint
+
+- Date/Time (MST): __________________
+- Owner: __________________
+- Expected Outcome: __________________
