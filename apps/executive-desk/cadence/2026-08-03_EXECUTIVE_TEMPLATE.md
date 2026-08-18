@@ -283,3 +283,65 @@ Decision Rationale:
 - Date/Time (MST): __________________
 - Owner: __________________
 - Expected Outcome: __________________
+
+# 2026-08-18 Sovereignty Promotion Approval Memo
+
+## Document Control
+
+- Memo ID: SOV-GATE-APPROVAL-2026-08-18
+- System: SSAI Sovereign API (`v1.1.0`)
+- Prepared By: Governance Ops Lead
+- Approval Authority: CEO / COO
+- Review Date (MST): 2026-08-18
+
+## Executive Summary
+
+Runtime stability and governance controls have been materially advanced and cryptographically attested.  
+Container health is stable (`healthy`), required governance records are updated, and signed evidence artifacts/tags are present.  
+Promotion posture remains **Conditional** until all listed `pending_proof` items are explicitly closed and verified.
+
+## Evidence Reviewed
+
+- Runtime healthcheck fix and validation:
+  - `services/ssai-sovereign-api/docker-compose.yml`
+  - `/health` and `/sovereignty` verification outputs
+- Governance cadence updates:
+  - `cadence/2026-08-03_EXECUTIVE_TEMPLATE.md`
+- Signature proof:
+  - `government-readiness/governance/cadence/monthly/2026-08-18_GPG_SIGNATURE_PROOF.txt`
+- Signed tags:
+  - `sovereignty-gate-2026-08-18`
+  - `sovereignty-gate-2026-08-18-ratified`
+  - `sovereignty-pending-proofs-2026-08-18` (if created)
+
+## Pending Proof Items (Required for Promotion Ready)
+
+1. `identity_independent` (`not_configured`)
+2. `memory_independent` (`not_configured`)
+3. `ecosystem_independent` (`not_configured`)
+4. `sentinel_ai_outage_test` (`pending`)
+
+Reference closure artifacts under:
+`government-readiness/governance/cadence/monthly/2026-08-18_*_PROOF.md` and `..._OUTAGE_TEST_REPORT.md`.
+
+## Decision
+
+- Current Decision: **Conditional Approval**
+- Condition: Promotion to `Promotion Ready` is authorized only after all pending-proof items are marked `Completed` with verifier sign-off and no unresolved critical findings.
+
+## Approval Block
+
+- CEO / COO Decision: ☐ Approve  ☐ Conditional  ☐ Reject
+- Decision Notes:
+  - ________________________________________________
+  - ________________________________________________
+- Signed by: _______________________________________
+- Role: CEO / COO
+- Date/Time (MST): _________________________________
+- Signature Method: ☐ GPG Attestation  ☐ Formal e-Sign (DocuSign/Adobe)  ☐ Both
+
+## Governance Verification Block
+
+- Governance Ops Lead: __________________  Date/Time: ______________
+- SSAI Runtime Owner: ____________________ Date/Time: ______________
+- Security/Compliance Reviewer: ___________ Date/Time: ______________
