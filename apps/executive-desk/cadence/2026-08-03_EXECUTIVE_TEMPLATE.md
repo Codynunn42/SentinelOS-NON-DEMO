@@ -190,3 +190,38 @@ Phase 2 completion criteria:
 - Status: Completed
 - Evidence: government-readiness/governance/cadence/monthly/2026-08-18_CONTROLLED_OPERATIONS_COMPLIANCE_SCORE_REPORT.md, government-readiness/governance/CADENCE_DUTY_CONTROL_REGISTER_2026-07-18.md
 - Source: NUNN_CORP_2030_EXECUTION_WORKBOOK.md
+
+## Next Steps Execution Tracker — 2026-08-18
+
+### Completed Today (Locked)
+1. **Monthly Strategy Evidence Audit Scorecard**
+   - Owner: CEO / COO
+   - Status: Completed
+   - Evidence: `government-readiness/governance/cadence/monthly/2026-08-18_MONTHLY_STRATEGY_EVIDENCE_AUDIT_SCORECARD.md`
+   - Source: `NUNN_CORP_2030_EXECUTION_WORKBOOK.md`
+
+2. **Controlled Operations Compliance Score Report**
+   - Owner: Governance Ops Lead
+   - Status: Completed
+   - Evidence: `government-readiness/governance/cadence/monthly/2026-08-18_CONTROLLED_OPERATIONS_COMPLIANCE_SCORE_REPORT.md`, `government-readiness/governance/CADENCE_DUTY_CONTROL_REGISTER_2026-07-18.md`
+   - Source: `NUNN_CORP_2030_EXECUTION_WORKBOOK.md`
+
+### In-Progress to Handoff (Live)
+
+| Deliverable | Owner | Status | Evidence Path | Verifier | Due (MST) | Handoff Ready |
+|---|---|---|---|---|---|---|
+| Monitoring window completion report | Governance Ops Lead | In Progress | `government-readiness/governance/cadence/monthly/2026-08-18_MONITORING_WINDOW_COMPLETION_REPORT.md` | SSAI Runtime Owner | 2026-08-18 17:00 | ⬜ |
+| Manifest verification cleanup report | SSAI Runtime Owner | In Progress | `government-readiness/governance/cadence/monthly/2026-08-18_MANIFEST_VERIFICATION_CLEANUP_REPORT.md` | Security/Compliance Reviewer | 2026-08-18 17:30 | ⬜ |
+| Runtime re-validation evidence (`/health`, `/sovereignty`) | SSAI Runtime Owner | In Progress | `government-readiness/governance/cadence/monthly/2026-08-18_RUNTIME_REVALIDATION_EVIDENCE.md` | Governance Ops Lead | 2026-08-18 17:45 | ⬜ |
+| Sovereignty closure evidence index | Executive Desk Program Manager | Not Started | `government-readiness/governance/cadence/monthly/2026-08-18_SOVEREIGNTY_CLOSURE_EVIDENCE_INDEX.md` | Governance Ops Lead | 2026-08-18 18:00 | ⬜ |
+| Promotion approval memo | CEO / COO | Not Started | `government-readiness/governance/cadence/monthly/2026-08-18_SOVEREIGNTY_PROMOTION_APPROVAL.md` | Governance Ops Lead | 2026-08-18 18:30 | ⬜ |
+
+### Gate Rule
+Sovereignty status remains **Conditional** until monitoring window + manifest verification cleanup are completed, validated, and signed.
+
+### Live Update Log (append as you go)
+- `2026-08-18T13:00 MST` Review started.
+- `2026-08-18T__:__ MST` __________________________________________
+- `2026-08-18T__:__ MST` __________________________________________
+- `2026-08-18T__:__ MST` __________________________________________
+
