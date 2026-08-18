@@ -176,3 +176,17 @@ Phase 2 completion criteria:
 ### Scheduling Reference
 
 - Weekly ICS schedule file: cadence/2026-07-27_SENTINEL_ORCHESTRATION_DELIVERABLES.ics
+
+## Processed Updates — 2026-08-18
+
+### Strategic Evidence Audit Scorecard
+- Owner: CEO / COO
+- Status: Completed
+- Evidence: government-readiness/governance/cadence/monthly/2026-08-18_MONTHLY_STRATEGY_EVIDENCE_AUDIT_SCORECARD.md
+- Source: NUNN_CORP_2030_EXECUTION_WORKBOOK.md
+
+### Controlled Operations Compliance Score Report
+- Owner: Governance Ops Lead
+- Status: Completed
+- Evidence: government-readiness/governance/cadence/monthly/2026-08-18_CONTROLLED_OPERATIONS_COMPLIANCE_SCORE_REPORT.md, government-readiness/governance/CADENCE_DUTY_CONTROL_REGISTER_2026-07-18.md
+- Source: NUNN_CORP_2030_EXECUTION_WORKBOOK.md
