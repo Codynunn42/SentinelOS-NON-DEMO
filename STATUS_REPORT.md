@@ -22,6 +22,7 @@ The next hardening layer is governance preflight: command requests are checked f
 
 - `docs/2026-09-07_SentinelOS-NON-DEMO_Governance_Record.md`
 - `docs/2026-09-07_VSCode_Daily_Cadence.md`
+- `docs/2026-09-07_DOE_Nuclear_Pursuit_Map.md`
 
 ## Completed
 

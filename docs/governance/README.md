@@ -41,6 +41,7 @@ This index is the current docs control map. It shows which document is canonical
 | Phase 1.1 artifact decisions | `docs/governance/SENTINEL_ARTIFACT_DECISION_REGISTER_2026-05-13.md` | `[APPROVED:18-ARTIFACT-DECISIONS]` | item-level governance decisions for the 2026-05-13 repo organization scan | `docs/governance/SENTINEL_REPO_ORGANIZATION_REPORT_2026-05-13.md` | Internal approval record |
 | Daily governance record 2026-09-07 | `docs/2026-09-07_SentinelOS-NON-DEMO_Governance_Record.md` | `[KEEP:DAILY-GOVERNANCE-RECORD]` | daily evidence-bound governance disposition, D1 posture, and carry-forward controls | file hash and dated record content | Internal governance evidence |
 | Daily cadence record 2026-09-07 | `docs/2026-09-07_VSCode_Daily_Cadence.md` | `[KEEP:DAILY-CADENCE-RECORD]` | daily operating cadence across deployment, evidence, federal pursuit, and holds/deferred state | file hash and dated record content | Internal operations evidence |
+| DOE nuclear pursuit map 2026-09-07 | `docs/2026-09-07_DOE_Nuclear_Pursuit_Map.md` | `[KEEP:PURSUIT-MAP-RECORD]` | lane prioritization, mission-fit boundaries, and sequence doctrine for DOE nuclear pursuit | dated map narrative and source links | Internal strategy record |
 
 ## Approval Boundary
 

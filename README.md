@@ -141,3 +141,4 @@ SentinelOS NON-DEMO is now established as the **post-demo client repository base
 
 - `docs/2026-09-07_SentinelOS-NON-DEMO_Governance_Record.md`
 - `docs/2026-09-07_VSCode_Daily_Cadence.md`
+- `docs/2026-09-07_DOE_Nuclear_Pursuit_Map.md`
