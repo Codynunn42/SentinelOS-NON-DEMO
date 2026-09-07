@@ -18,6 +18,11 @@ On 2026-04-28, the current shareable proof surface was verified on `ca-nc-dev-se
 
 The next hardening layer is governance preflight: command requests are checked for tenant, command, actor, role, and role-based execution rights before a surface-plane handler can run.
 
+## Daily Records (2026-09-07)
+
+- `docs/2026-09-07_SentinelOS-NON-DEMO_Governance_Record.md`
+- `docs/2026-09-07_VSCode_Daily_Cadence.md`
+
 ## Completed
 
 - repository initialized

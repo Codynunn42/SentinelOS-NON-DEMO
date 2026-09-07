@@ -7,14 +7,17 @@
 ---
 
 ## Overview
+
 SentinelOS NON-DEMO is the client-facing operational repository for the system after demo validation. This repository is intended to mature into the governed, production-direction environment where clients, operators, and stakeholders access SentinelOS capabilities beyond the demo lane.
 
 This repository is not intended to be a temporary proof shell. It is the starting point for the real operating surface that clients will use once the platform transitions from demonstration into structured deployment.
 
 ## Mission
+
 SentinelOS is designed to support command-driven execution with governance, accountability, and verification. The NON-DEMO repository exists to carry that model into a client-ready environment.
 
 Core intent:
+
 - provide a trustworthy client entry point
 - support governed operational workflows
 - maintain clear deployment and security posture
@@ -22,9 +25,11 @@ Core intent:
 - establish a stable foundation for production buildout
 
 ## Client Use Direction
+
 This is the repository that should back the next stage of system use after demo adoption.
 
 Target outcomes:
+
 - clients access the real operating surface
 - workflows move from demo proof to controlled execution
 - documentation supports stakeholder trust
@@ -32,9 +37,11 @@ Target outcomes:
 - deployment, governance, and security posture remain visible
 
 ## Current State
+
 The repository is in bootstrap mode.
 
 Current condition:
+
 - repository initialized and active
 - baseline documentation established
 - non-demo positioning defined
@@ -42,6 +49,7 @@ Current condition:
 - security baseline introduced
 
 ## Immediate Priorities
+
 1. Define runtime and deployment architecture
 2. Add CI/CD workflow coverage
 3. Establish authentication and authorization model
@@ -80,6 +88,7 @@ HERGLASS -> Intent -> Control Plane -> Sentinel Core
 ```
 
 ## Suggested Repository Shape
+
 ```text
 .github/
 apps/
@@ -93,7 +102,9 @@ STATUS_REPORT.md
 ```
 
 ## Governance Direction
+
 This repository should remain aligned with Sentinel operating principles:
+
 - secure by default
 - auditable execution
 - production-first discipline
@@ -102,7 +113,9 @@ This repository should remain aligned with Sentinel operating principles:
 - controlled change management
 
 ## Production Readiness Standard
+
 Before broad client onboarding, this repository should contain:
+
 - deployment and runtime documentation
 - CI/CD automation
 - security reporting path
@@ -113,6 +126,7 @@ Before broad client onboarding, this repository should contain:
 - incident response references
 
 ## Next Actions
+
 - add baseline workflow automation
 - define application and service structure
 - document runtime and environment requirements
@@ -120,4 +134,10 @@ Before broad client onboarding, this repository should contain:
 - begin non-demo client path implementation
 
 ## Status
+
 SentinelOS NON-DEMO is now established as the **post-demo client repository baseline** and is ready for structured buildout.
+
+## Daily Records
+
+- `docs/2026-09-07_SentinelOS-NON-DEMO_Governance_Record.md`
+- `docs/2026-09-07_VSCode_Daily_Cadence.md`
