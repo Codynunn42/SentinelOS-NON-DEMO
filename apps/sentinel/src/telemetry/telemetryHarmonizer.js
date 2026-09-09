@@ -22,7 +22,45 @@ function hashObject(value) {
   return crypto.createHash('sha256').update(stableStringify(value)).digest('hex');
 }
 
-const TELEMETRY_ACTION_MAP = {};
+// Keep the externally supplied activity labels separate from the governed
+// command names.  Policy evaluation operates on command names, so treating an
+// activity label as its command makes ordinary telemetry look unregistered
+// (and therefore blocked) instead of applying its intended guardrail.
+const TELEMETRY_ACTION_MAP = Object.freeze({
+  'workflow.metrics': {
+    command: 'telemetry.metric.write',
+    riskLevel: 'low',
+    reason: 'Operational metrics can be sent when tenant and scope policy allow.'
+  },
+  'audit.summary': {
+    command: 'telemetry.audit.summary',
+    riskLevel: 'low',
+    reason: 'Audit summaries are safe when scoped and non-sensitive.'
+  },
+  'deal.execution': {
+    command: 'deal.execute',
+    riskLevel: 'medium',
+    approvalRequired: true,
+    reason: 'Financial execution visibility requires human approval.'
+  },
+  'approval.state': {
+    command: 'approval.read',
+    riskLevel: 'medium',
+    reason: 'Approval state visibility is read-scoped and tenant-bound.'
+  },
+  'external.export': {
+    command: 'telemetry.export.external',
+    riskLevel: 'high',
+    forceBlock: true,
+    reason: 'External export is blocked when telemetry is off or limited.'
+  },
+  'sensitive.payload': {
+    command: 'telemetry.payload.sensitive',
+    riskLevel: 'high',
+    forceBlock: true,
+    reason: 'Sensitive payload telemetry cannot be sent without explicit external export approval.'
+  }
+});
 
 function normalizeActivity(item = {}, index = 0) {
   const type = hasText(item.type)

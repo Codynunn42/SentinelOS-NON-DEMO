@@ -22,11 +22,16 @@ function hashObject(value) {
 }
 
 const APPROVAL_BADGES = Object.freeze({
-  mapping_alignment: '[MAP]',
-  conditional_approval: '[APPROVE]',
-  held_review: '[HOLD]',
-  xe_assistance: '[XE]',
-  billing_checkout: '[BILLING]'
+  mapping_alignment: '[APPROVED:MAPPING]',
+  conditional_approval: '[APPROVE:CONDITIONAL]',
+  held_review: '[HOLD:REVIEW]',
+  xe_assistance: '[XE:ASSISTANCE]',
+  billing_checkout: '[APPROVE:BILLING]',
+  // Preserve the shorthand keys used by the Executive and Board templates.
+  conditional: '[APPROVE:CONDITIONAL]',
+  hold: '[HOLD:REVIEW]',
+  xe: '[XE:ASSISTANCE]',
+  billing: '[APPROVE:BILLING]'
 });
 
 const DEFAULT_TEMPLATES = Object.freeze([
@@ -34,55 +39,55 @@ const DEFAULT_TEMPLATES = Object.freeze([
     id: 'template_mapping_alignment',
     category: 'mapping_alignment',
     title: 'Mapping Alignment',
-    badge: '[MAP]',
-    riskLevel: 'low',
-    approvalPolicy: 'allowed_with_audit',
-    xeEligible: true,
-    reason: 'Mapping alignment task. Proceed under existing mapped approval.',
-    nextStep: 'Proceed under existing mapped approval.'
+    badge: APPROVAL_BADGES.mapping_alignment,
+    riskLevel: 'medium',
+    approvalPolicy: 'human_review_required',
+    xeEligible: false,
+    reason: 'Canonical mappings must exist before streamlining or external publication.',
+    nextStep: 'Confirm mapping evidence and preserve the canonical source.'
   },
   {
     id: 'template_conditional_approval',
     category: 'conditional_approval',
     title: 'Conditional Approval',
-    badge: '[APPROVE]',
+    badge: APPROVAL_BADGES.conditional_approval,
     riskLevel: 'medium',
-    approvalPolicy: 'approval_before_execution',
+    approvalPolicy: 'human_review_required',
     xeEligible: true,
-    reason: 'Conditional approval required before execution.',
-    nextStep: 'Prepare evidence and route for human approval.'
+    reason: 'Conditional items need evidence, verification, and a final human decision.',
+    nextStep: 'Gather evidence, verify, then route for human approval.'
   },
   {
     id: 'template_held_review',
     category: 'held_review',
     title: 'Held For Review',
-    badge: '[HOLD]',
+    badge: APPROVAL_BADGES.held_review,
     riskLevel: 'high',
     approvalPolicy: 'human_review_required',
     xeEligible: false,
-    reason: 'Task is held pending human review.',
-    nextStep: 'Route for human review before proceeding.'
+    reason: 'Held material cannot become canonical or external without explicit approval.',
+    nextStep: 'Resolve the source, audience, compliance boundary, and publication status.'
   },
   {
     id: 'template_xe_assistance',
     category: 'xe_assistance',
     title: 'XE Assistance',
-    badge: '[XE]',
-    riskLevel: 'low',
-    approvalPolicy: 'allowed_with_audit',
+    badge: APPROVAL_BADGES.xe_assistance,
+    riskLevel: 'medium',
+    approvalPolicy: 'approval_before_execution',
     xeEligible: true,
-    reason: 'XE-assisted execution. Audit logging required.',
-    nextStep: 'Run through XE with audit logging enabled.'
+    reason: 'XE actions can assist only after required approvals are recorded.',
+    nextStep: 'Create approval, approve, then run through XE with audit logging enabled.'
   },
   {
     id: 'template_billing_checkout',
     category: 'billing_checkout',
     title: 'Billing Checkout',
-    badge: '[BILLING]',
+    badge: APPROVAL_BADGES.billing_checkout,
     riskLevel: 'high',
     approvalPolicy: 'approval_before_execution',
-    xeEligible: false,
-    reason: 'Billing checkout requires configuration approval before payment execution.',
+    xeEligible: true,
+    reason: 'Revenue actions require approved configuration, pricing, and audit boundaries before execution.',
     nextStep: 'Approve Stripe checkout configuration before enabling revenue execution.'
   }
 ]);

@@ -2,6 +2,7 @@ const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
 const {
+  analyzeDockingLearning,
   buildSentinelDockingEvent,
   evaluateDocking
 } = require('../apps/sentinel/src/integrations/docking/protocol');
@@ -27,6 +28,35 @@ assert.strictEqual(docking.manifest.systemId, 'SYS-CDNLUX-UTILITY');
 assert.strictEqual(docking.riskLevel, 'high');
 assert.strictEqual(docking.approvalRequired, true);
 assert.ok(docking.capabilitiesDenied.includes('REQUEST_CDLUX_TRANSFER'));
+
+const unsupportedVersion = evaluateDocking({
+  ...manifest,
+  udpVersion: '2.0'
+});
+assert.strictEqual(unsupportedVersion.status, 'INVALID');
+assert.strictEqual(unsupportedVersion.executionMode, 'blocked');
+assert.deepStrictEqual(unsupportedVersion.capabilitiesGranted, []);
+assert(unsupportedVersion.validation.errors.includes('UDP_VERSION_UNSUPPORTED'));
+
+const unsupportedCapability = evaluateDocking({
+  ...manifest,
+  capabilities: ['READ_STATUS', 'UNRECOGNIZED_ADMIN_ACTION']
+});
+assert.strictEqual(unsupportedCapability.status, 'INVALID');
+assert(unsupportedCapability.validation.errors.includes('CAPABILITY_UNSUPPORTED'));
+
+const learning = analyzeDockingLearning([
+  { type: 'docking.requested', payload: docking },
+  { type: 'docking.evaluated', payload: unsupportedCapability },
+  { type: 'docking.requested', payload: { status: 'DOCKABLE', protocol: 'forged-protocol' } },
+  { type: 'unrelated.event', payload: { status: 'DOCKABLE' } }
+]);
+assert.strictEqual(learning.scope, 'docking_operations_security');
+assert.strictEqual(learning.observations, 2);
+assert.strictEqual(learning.ignoredEvents, 1);
+assert.strictEqual(learning.automaticChange, false);
+assert.strictEqual(learning.actionGate, 'human_review_required');
+assert.match(learning.recommendation, /do not grant new capabilities automatically/i);
 
 const event = buildSentinelDockingEvent(manifest);
 

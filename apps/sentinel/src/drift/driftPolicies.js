@@ -8,7 +8,10 @@ const IMMUTABLE_TARGETS = Object.freeze([
   'apps/sentinel/src/governance/executionPassport.js',
   'apps/sentinel/src/security/signing.js',
   'apps/sentinel/src/audit/auditLogger.js',
-  'apps/sentinel/src/approval/approval.js'
+  'apps/sentinel/src/approval/approval.js',
+  'apps/api/server.js',
+  'apps/sentinel/src/orchestration/taskTemplates.js',
+  'apps/sentinel/src/telemetry/telemetryHarmonizer.js'
 ]);
 
 const ALLOWED_FORK_TARGETS = Object.freeze([

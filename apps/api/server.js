@@ -89,6 +89,7 @@ const NEXUS_EXECUTIVE_PATH = path.join(__dirname, '..', '..', 'nexus', 'public',
 const NEXUS_SOVEREIGN_PATH = path.join(__dirname, '..', '..', 'nexus', 'public', 'nexus-sovereign.html');
 const RATE_LIMIT_WINDOW_MS = 60 * 1000;
 const RATE_LIMIT_MAX_REQUESTS = 30;
+const MAX_JSON_BODY_BYTES = 1024 * 1024;
 const commandRateLimits = new Map();
 const commandIdempotencyCache = new Map();
 
@@ -166,23 +167,46 @@ function emitSecurityEvent(eventType, details) {
 
 function readJsonBody(req, callback) {
   let body = '';
+  let bodyBytes = 0;
+  let completed = false;
+
+  function complete(error, parsedBody) {
+    if (completed) return;
+    completed = true;
+    callback(error, parsedBody);
+  }
 
   req.on('data', chunk => {
+    bodyBytes += chunk.length;
+
+    if (bodyBytes > MAX_JSON_BODY_BYTES) {
+      return complete(new Error('JSON body exceeds maximum size'));
+    }
+
     body += chunk;
   });
 
   req.on('end', () => {
+    if (completed) return;
+
     if (!body) {
-      return callback(null, {});
+      return complete(null, {});
     }
 
     try {
       const parsed = JSON.parse(body);
-      callback(null, parsed);
+      if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+        return complete(new Error('JSON body must be an object'));
+      }
+
+      complete(null, parsed);
     } catch (error) {
-      callback(error);
+      complete(error);
     }
   });
+
+  req.on('error', (error) => complete(error));
+  req.on('aborted', () => complete(new Error('Request aborted')));
 }
 
 function getRequestOrigin(req) {
