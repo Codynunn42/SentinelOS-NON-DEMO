@@ -63,7 +63,7 @@ function normalizeCapabilities(value) {
   return normalizeList(value)
     .map((capability) => capability.toUpperCase())
     .filter((capability, index, list) => {
-      return ALLOWED_CAPABILITIES.has(capability) && list.indexOf(capability) === index;
+      return list.indexOf(capability) === index;
     });
 }
 
@@ -80,10 +80,30 @@ function highestRequestedTrustTier(capabilities) {
   }, 'TIER_0');
 }
 
-function hashManifest(manifest) {
+function stableStringify(value) {
+  if (Array.isArray(value)) {
+    return `[${value.map(stableStringify).join(',')}]`;
+  }
+
+  if (value && typeof value === 'object') {
+    return `{${Object.keys(value)
+      .sort()
+      .map((key) => `${JSON.stringify(key)}:${stableStringify(value[key])}`)
+      .join(',')}}`;
+  }
+
+  return JSON.stringify(value);
+}
+
+function manifestPayload(manifest = {}) {
+  const { manifestHash, ...payload } = manifest;
+  return payload;
+}
+
+function hashFacePlaneManifest(manifest) {
   return crypto
     .createHash('sha256')
-    .update(JSON.stringify(manifest))
+    .update(stableStringify(manifestPayload(manifest)))
     .digest('hex');
 }
 
@@ -114,7 +134,7 @@ function buildFacePlaneManifest(input = {}) {
 
   return {
     ...manifest,
-    manifestHash: hashManifest(manifest)
+    manifestHash: hashFacePlaneManifest(manifest)
   };
 }
 
@@ -144,6 +164,21 @@ function validateFacePlaneManifest(manifest = {}) {
 
   if (!['human_review_required', 'approval_before_execution', 'read_only'].includes(manifest.approvalModel)) {
     invalid.push('APPROVAL_MODEL_INVALID');
+  }
+
+  const requestedCapabilities = Array.isArray(manifest.requestedCapabilities)
+    ? manifest.requestedCapabilities
+    : [];
+  if (requestedCapabilities.some((capability) => !ALLOWED_CAPABILITIES.has(capability))) {
+    invalid.push('CAPABILITY_UNSUPPORTED');
+  }
+
+  if (!/^\d{4}-\d{2}-\d{2}T/.test(manifest.createdAt || '')) {
+    invalid.push('CREATED_AT_INVALID');
+  }
+
+  if (!/^[a-f0-9]{64}$/.test(manifest.manifestHash || '') || manifest.manifestHash !== hashFacePlaneManifest(manifest)) {
+    invalid.push('MANIFEST_HASH_INVALID');
   }
 
   return {

@@ -40,6 +40,10 @@ const CAPABILITY_RISK = {
   UPDATE_AUTHORITY: 'high'
 };
 
+const VALID_TRUST_TIERS = Object.freeze(Object.keys(TRUST_TIERS));
+const DOCKING_EVENT_TYPES = Object.freeze(['docking.requested', 'docking.evaluated']);
+const LEARNABLE_DOCKING_STATUSES = Object.freeze(['INVALID', 'RESTRICTED', 'PENDING_APPROVAL', 'DOCKABLE']);
+
 function normalizeCapability(capability) {
   return String(capability || '').trim().toUpperCase();
 }
@@ -80,11 +84,57 @@ function normalizeManifest(input = {}) {
   };
 }
 
+function validateDockingManifest(manifest) {
+  const errors = [];
+
+  if (manifest.udpVersion !== SUPPORTED_UDP_VERSION) {
+    errors.push('UDP_VERSION_UNSUPPORTED');
+  }
+  if (!/^[A-Z0-9_-]{3,128}$/.test(manifest.systemId)) {
+    errors.push('SYSTEM_ID_INVALID');
+  }
+  if (!/^[A-Z0-9_-]{3,128}$/.test(manifest.adapterId)) {
+    errors.push('ADAPTER_ID_INVALID');
+  }
+  if (!VALID_TRUST_TIERS.includes(manifest.requestedTrustTier)) {
+    errors.push('TRUST_TIER_INVALID');
+  }
+  if (!manifest.capabilities.length) {
+    errors.push('CAPABILITIES_REQUIRED');
+  }
+  if (new Set(manifest.capabilities).size !== manifest.capabilities.length) {
+    errors.push('CAPABILITIES_DUPLICATE');
+  }
+  if (manifest.capabilities.some((capability) => !Object.hasOwn(CAPABILITY_RISK, capability))) {
+    errors.push('CAPABILITY_UNSUPPORTED');
+  }
+
+  return { valid: errors.length === 0, errors };
+}
+
 function evaluateDocking(input = {}) {
   const manifest = normalizeManifest(input);
-  const requestedTier = TRUST_TIERS[manifest.requestedTrustTier]
-    ? manifest.requestedTrustTier
-    : 'TIER_0';
+  const validation = validateDockingManifest(manifest);
+
+  if (!validation.valid) {
+    return {
+      protocol: 'universal-docking-protocol',
+      udpVersion: manifest.udpVersion,
+      status: 'INVALID',
+      manifest,
+      validation,
+      trustTier: { requested: manifest.requestedTrustTier, granted: null, name: null },
+      riskLevel: 'high',
+      capabilityRisks: [],
+      capabilitiesGranted: [],
+      capabilitiesDenied: manifest.capabilities,
+      approvalRequired: true,
+      executionMode: 'blocked',
+      reason: `Docking manifest rejected: ${validation.errors.join(', ')}.`
+    };
+  }
+
+  const requestedTier = manifest.requestedTrustTier;
   const capabilityRisks = manifest.capabilities.map((capability) => ({
     capability,
     risk: getCapabilityRisk(capability)
@@ -113,6 +163,7 @@ function evaluateDocking(input = {}) {
     udpVersion: manifest.udpVersion,
     status,
     manifest,
+    validation,
     trustTier: {
       requested: manifest.requestedTrustTier,
       granted: requestedTier,
@@ -147,7 +198,7 @@ function buildSentinelDockingEvent(input = {}) {
     type: 'docking.requested',
     eventType: 'docking.requested',
     source: 'universal-docking-protocol',
-    tenant: 'nunncloud',
+    tenant: docking.manifest.metadata.tenantId || 'nunncloud',
     riskLevel: docking.riskLevel,
     reason: docking.reason,
     evidence: [
@@ -160,12 +211,50 @@ function buildSentinelDockingEvent(input = {}) {
   };
 }
 
+function analyzeDockingLearning(events = []) {
+  const candidates = (Array.isArray(events) ? events : [])
+    .filter((event) => event && (DOCKING_EVENT_TYPES.includes(event.type) || event.command === 'docking.evaluate'));
+  const observations = candidates
+    .map((event) => event.docking || event.payload || event.data || {})
+    .filter((docking) => (
+      docking.protocol === 'universal-docking-protocol' &&
+      LEARNABLE_DOCKING_STATUSES.includes(docking.status)
+    ));
+  const counts = observations.reduce((result, docking) => {
+    result[docking.status] = (result[docking.status] || 0) + 1;
+    return result;
+  }, {});
+  const hasSecurityConcern = ['INVALID', 'RESTRICTED'].some((status) => counts[status] > 0);
+  const pendingApprovals = counts.PENDING_APPROVAL || 0;
+
+  return {
+    scope: 'docking_operations_security',
+    observations: observations.length,
+    ignoredEvents: candidates.length - observations.length,
+    statusCounts: counts,
+    learningBoundary: 'recommendation_only',
+    automaticChange: false,
+    actionGate: hasSecurityConcern || pendingApprovals ? 'human_review_required' : 'observe_only',
+    recommendation: hasSecurityConcern
+      ? 'Upgrade manifest validation and retain the current trust-tier and approval gates; do not grant new capabilities automatically.'
+      : pendingApprovals
+        ? 'Keep approval gates in place and review pending high-risk docking requests with their evidence.'
+        : observations.length
+          ? 'Keep current read-only docking posture; no capability or trust-tier expansion is authorized from learning alone.'
+          : 'Collect governed docking outcomes before proposing an operations-security change.'
+  };
+}
+
 module.exports = {
   CAPABILITY_RISK,
+  DOCKING_EVENT_TYPES,
+  LEARNABLE_DOCKING_STATUSES,
   SUPPORTED_UDP_VERSION,
   TRUST_TIERS,
   buildSentinelDockingEvent,
   evaluateDocking,
   getCapabilityRisk,
-  normalizeManifest
+  normalizeManifest,
+  validateDockingManifest,
+  analyzeDockingLearning
 };

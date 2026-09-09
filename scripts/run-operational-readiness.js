@@ -1,7 +1,7 @@
 // Operational Readiness Harness
 // COMM: Sentinel AI by Cody Nunn | Nunn Cloud
 //
-// Executes all five operational readiness campaigns against the live SentinelOS
+// Executes all six operational readiness campaigns against the live SentinelOS
 // sovereign runtime, produces a confidence score, and writes a dated report to docs/.
 //
 // Usage:
@@ -918,7 +918,7 @@ function writeReport(opts) {
   lines.push(``);
 
   if (allCampaignsFailed === 0 && baseline.failed === 0) {
-    lines.push(`**Yes.** All five operational campaigns passed. All baseline suites passed. The sovereign runtime behaves correctly under real-world conditions.`);
+    lines.push(`**Yes.** All six operational campaigns passed. All baseline suites passed. The sovereign runtime behaves correctly under real-world conditions.`);
   } else {
     lines.push(`**Not yet.** ${allCampaignsFailed + baseline.failed} defect(s) identified. See campaign results below.`);
   }

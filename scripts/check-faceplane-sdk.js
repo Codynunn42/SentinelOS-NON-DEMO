@@ -59,4 +59,17 @@ assert.strictEqual(invalid.status, 'INVALID');
 assert.ok(invalid.validation.missing.includes('tenantId'));
 assert.ok(invalid.validation.invalid.includes('FACEPLANE_ID_INVALID'));
 
+const unsupportedCapability = buildFacePlaneManifest({
+  ...fixture,
+  requestedCapabilities: ['FACEPLANE_READ', 'UNRECOGNIZED_ADMIN_ACTION']
+});
+const unsupportedCapabilityResult = evaluateFacePlaneManifest(unsupportedCapability);
+assert.strictEqual(unsupportedCapabilityResult.valid, false);
+assert(unsupportedCapabilityResult.validation.invalid.includes('CAPABILITY_UNSUPPORTED'));
+
+const tamperedManifest = { ...manifest, purpose: 'Tampered after hashing' };
+const tamperedResult = evaluateFacePlaneManifest(tamperedManifest);
+assert.strictEqual(tamperedResult.valid, false);
+assert(tamperedResult.validation.invalid.includes('MANIFEST_HASH_INVALID'));
+
 console.log('Face Plane SDK check passed');

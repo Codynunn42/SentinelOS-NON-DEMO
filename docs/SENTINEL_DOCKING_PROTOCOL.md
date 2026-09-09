@@ -81,6 +81,28 @@ No signed decision -> no execution
 No approval -> no high-risk action
 ```
 
+## Operations Security Posture
+
+Docking is fail-closed. A manifest is rejected, grants no capabilities, and cannot
+enter an execution path when it has an unsupported UDP version, invalid system or
+adapter identifier, invalid trust tier, duplicate capabilities, an empty capability
+set, or an unknown capability. Face-plane manifests also carry a deterministic
+hash; changing a manifest after it is signed for review invalidates registration.
+
+Docking learning is limited to operations-security recommendations. It counts only
+validated Universal Docking Protocol outcomes (and records rejected candidate events)
+and can recommend **keep**, **upgrade validation**, or
+**review/revert** actions. Learning never grants a capability, raises a trust tier,
+or removes an approval gate automatically; any such change remains human-review
+required and must be expressed in a new governed manifest.
+
+Run the local security checks with:
+
+```bash
+npm run check:docking
+npm run check:faceplane-sdk
+```
+
 ## CDNLUX Fit
 
 CDNLUX should dock as a utility-token adapter:

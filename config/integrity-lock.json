@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "lockId": "sentinelos-governed-release-2026-09-09",
+  "status": "LOCKED",
+  "sourceCommit": "43fa8ae",
+  "purpose": "Tamper-evident lock for the hardened governed telemetry, executive workflow, API JSON validation, and readiness evidence release.",
+  "files": [
+    {
+      "path": "apps/api/server.js",
+      "sha256": "72dca5b6abb45443ff529e9b52bd7689b06320c1824f10227192a09ecd0f10ea"
+    },
+    {
+      "path": "apps/sentinel/src/orchestration/taskTemplates.js",
+      "sha256": "97b85daf2473872218eaddaa35630eb7935b5f6426ce7d0efe04c9479e9d0338"
+    },
+    {
+      "path": "apps/sentinel/src/telemetry/telemetryHarmonizer.js",
+      "sha256": "c5a6578d0b7ead7531ce97fb1691e3c4837952a538d866d91e7f5b2efe82718e"
+    },
+    {
+      "path": "scripts/run-operational-readiness.js",
+      "sha256": "f35ebbfc76a6c128fa44c2eeaa380cfc0b42f0e946422ca031aac1b1e16f4a54"
+    },
+    {
+      "path": "docs/OPERATIONAL_READINESS_REPORT_2026-09-09.md",
+      "sha256": "2bb0faed3e53a8b2e2ebeafa0159e936a7809b249edc4bcccf0ac10f33dab0f4"
+    }
+  ]
+}
