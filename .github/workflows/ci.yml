@@ -22,6 +22,8 @@ jobs:
         run: npm install || true
 
       - name: Start API
+        env:
+          SENTINEL_HMAC_SECRET: ci-healthcheck-signing-secret-0123456789
         run: |
           node apps/api/server.js &
           sleep 2
