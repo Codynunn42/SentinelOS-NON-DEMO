@@ -46,7 +46,7 @@ services:
       POSTGRES_PASSWORD: sentinel
       POSTGRES_DB: sentinelos
     ports:
-      - "5433:5432"
+      - "127.0.0.1:5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -65,7 +65,7 @@ services:
       - core
       - full
     ports:
-      - "6379:6379"
+      - "127.0.0.1:6379:6379"
     volumes:
       - redis_data:/data
     healthcheck:
