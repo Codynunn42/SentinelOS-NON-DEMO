@@ -80,14 +80,67 @@ jobs:
               --query properties.configuration.ingress.fqdn \
               --output tsv)"
 
+            wait_for_healthy_revision() {
+              local attempts=20
+              local sleep_seconds=15
+              local i
+              for i in $(seq 1 "$attempts"); do
+                row="$(az containerapp revision list \
+                  --name ${{ secrets.CONTAINER_APP_NAME }} \
+                  --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
+                  --query "[?trafficWeight==\`100\`].[name,healthState,provisioningState]" \
+                  --output tsv || true)"
+
+                health_state="$(printf '%s\n' "$row" | awk 'NR==1 {print $2}')"
+                provisioning_state="$(printf '%s\n' "$row" | awk 'NR==1 {print $3}')"
+
+                echo "Revision check ${i}/${attempts}: health=${health_state:-unknown} provisioning=${provisioning_state:-unknown}"
+                if [ "$health_state" = "Healthy" ] && [ "$provisioning_state" = "Provisioned" ]; then
+                  return 0
+                fi
+
+                sleep "$sleep_seconds"
+              done
+
+              echo "Timed out waiting for healthy provisioned revision with 100% traffic."
+              return 1
+            }
+
+            retry_curl() {
+              local url="$1"
+              local header_name="${2:-}"
+              local header_value="${3:-}"
+              local attempts=10
+              local sleep_seconds=10
+              local i
+              for i in $(seq 1 "$attempts"); do
+                echo "Attempt ${i}/${attempts}: ${url}"
+                if [ -n "$header_name" ]; then
+                  if curl --fail --show-error --silent --max-time 30 "$url" -H "${header_name}: ${header_value}"; then
+                    echo
+                    return 0
+                  fi
+                else
+                  if curl --fail --show-error --silent --max-time 30 "$url"; then
+                    echo
+                    return 0
+                  fi
+                fi
+
+                sleep "$sleep_seconds"
+              done
+
+              echo "Request did not succeed within retry window: ${url}"
+              return 1
+            }
+
+            wait_for_healthy_revision
+
             echo "Testing https://${FQDN}/health"
-            curl --fail --show-error --silent --max-time 30 "https://${FQDN}/health"
-            echo
+            retry_curl "https://${FQDN}/health"
 
             echo "Testing authenticated protected route"
-            curl --fail --show-error --silent --max-time 30 "https://${FQDN}/approvals" \
-              -H "x-api-key: ${{ secrets.SENTINEL_API_KEY }}"
-            echo
+            retry_curl "https://${FQDN}/approvals" "x-api-key" "${{ secrets.SENTINEL_API_KEY }}"
 
             az containerapp revision list \
               --name ${{ secrets.CONTAINER_APP_NAME }} \
