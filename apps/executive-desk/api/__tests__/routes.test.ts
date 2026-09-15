@@ -8,6 +8,15 @@ import express, { Express } from 'express';
 import request from 'supertest';
 import { mountApiRoutes } from '../express-adapter';
 
+function restoreEnv(name: string, value: string | undefined): void {
+    if (value === undefined) {
+        delete process.env[name];
+        return;
+    }
+
+    process.env[name] = value;
+}
+
 describe('Executive Desk API Routes', () => {
     let app: Express;
 
@@ -39,6 +48,29 @@ describe('Executive Desk API Routes', () => {
                 .set('Authorization', 'Bearer user@example.com');
 
             assert(res.status !== 401, `Got 401 but expected success: ${res.body.error}`);
+        });
+
+        it('should require bearer token for API routes when AUTH_ENABLED is true by default', async () => {
+            const prevAuthEnabled = process.env.AUTH_ENABLED;
+            const prevApiAuth = process.env.EXECUTIVE_DESK_API_AUTH_REQUIRED;
+            const prevToken = process.env.AUTH_BEARER_TOKEN;
+
+            process.env.AUTH_ENABLED = 'true';
+            delete process.env.EXECUTIVE_DESK_API_AUTH_REQUIRED;
+            process.env.AUTH_BEARER_TOKEN = 'api-default-auth-token';
+
+            try {
+                const res = await request(app)
+                    .get('/api/executive/receipts')
+                    .set('X-Principal-Id', 'user@example.com');
+
+                assert.strictEqual(res.status, 401);
+                assert.strictEqual(res.body.code, 'MISSING_OR_INVALID_BEARER');
+            } finally {
+                restoreEnv('AUTH_ENABLED', prevAuthEnabled);
+                restoreEnv('EXECUTIVE_DESK_API_AUTH_REQUIRED', prevApiAuth);
+                restoreEnv('AUTH_BEARER_TOKEN', prevToken);
+            }
         });
 
         it('should require bearer token for API routes when API auth is enabled', async () => {
@@ -309,8 +341,8 @@ describe('Executive Desk API Routes', () => {
                 assert.strictEqual(res.status, 401);
                 assert.strictEqual(res.body.code, 'MISSING_OR_INVALID_BEARER');
             } finally {
-                process.env.AUTH_ENABLED = prevAuthEnabled;
-                process.env.AUTH_BEARER_TOKEN = prevToken;
+                restoreEnv('AUTH_ENABLED', prevAuthEnabled);
+                restoreEnv('AUTH_BEARER_TOKEN', prevToken);
             }
         });
 
@@ -338,8 +370,8 @@ describe('Executive Desk API Routes', () => {
                 assert.strictEqual(res.status, 200);
                 assert.strictEqual(res.body.status, 'executed');
             } finally {
-                process.env.AUTH_ENABLED = prevAuthEnabled;
-                process.env.AUTH_BEARER_TOKEN = prevToken;
+                restoreEnv('AUTH_ENABLED', prevAuthEnabled);
+                restoreEnv('AUTH_BEARER_TOKEN', prevToken);
             }
         });
 

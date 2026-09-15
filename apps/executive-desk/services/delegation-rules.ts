@@ -4,7 +4,7 @@
  * Append-only ledger (no mutations after creation)
  */
 
-import { v4 as uuid } from 'uuid';
+import { randomUUID } from 'node:crypto';
 
 export interface DelegationRule {
     id: string;
@@ -72,7 +72,7 @@ class InMemoryDelegationRulesEngine implements DelegationRulesEngine {
         },
     ): Promise<DelegationRule> {
         const rule: DelegationRule = {
-            id: uuid(),
+            id: randomUUID(),
             grantedBy,
             grantedTo,
             command,

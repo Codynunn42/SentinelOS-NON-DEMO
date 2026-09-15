@@ -11,13 +11,27 @@
       "gbpReference": "GBP-2026-07",
       "mobTemplateRequired": true,
       "mobLastRunStatus": "failed",
-      "updatedAt": "2026-09-07T06:30:41.732Z",
+      "updatedAt": "2026-09-15T18:39:12.644Z",
       "updatedBy": "user@example.com",
-      "mobLastRunAt": "2026-09-07T06:30:41.732Z"
+      "mobLastRunAt": "2026-09-15T18:39:12.644Z"
     }
   },
   "mobRuns": {
     "user@example.com": [
+      {
+        "id": "1bf877c4-5cff-47d4-937c-2904918aaec0",
+        "principalId": "user@example.com",
+        "status": "failed",
+        "timestamp": "2026-09-15T18:39:12.644Z",
+        "executor": "user@example.com"
+      },
+      {
+        "id": "658d20bf-a52d-4d84-bf3c-a39b9f56e72e",
+        "principalId": "user@example.com",
+        "status": "completed",
+        "timestamp": "2026-09-15T18:39:12.640Z",
+        "executor": "user@example.com"
+      },
       {
         "id": "b4c930fb-9a4d-4407-8142-cb34d1b6c048",
         "principalId": "user@example.com",
