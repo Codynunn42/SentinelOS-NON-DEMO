@@ -4,7 +4,7 @@
  * Append-only ledger (no mutations after creation)
  */
 
-import { v4 as uuid } from 'uuid';
+import { randomUUID as uuid } from 'node:crypto';
 
 export interface DelegationRule {
     id: string;

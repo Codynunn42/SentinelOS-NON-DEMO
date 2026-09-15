@@ -10,16 +10,19 @@ services:
       - core
       - full
     ports:
-      - "80:80"
+      - "3000:3000"
     environment:
       NODE_ENV: ${NODE_ENV:-production}
-      PORT: 80
+      PORT: 3000
+      SENTINEL_DATA_DIR: /var/lib/sentinelos
       SENTINEL_API_KEY: ${SENTINEL_API_KEY}
       SENTINEL_HMAC_SECRET: ${SENTINEL_HMAC_SECRET}
       DATABASE_URL: postgresql://sentinel:sentinel@postgres:5432/sentinelos
       REDIS_URL: redis://redis:6379
     env_file:
       - .env
+    volumes:
+      - sentinel_data:/var/lib/sentinelos
     depends_on:
       postgres:
         condition: service_healthy
@@ -78,6 +81,8 @@ services:
       - sentinel
 
 volumes:
+  sentinel_data:
+    driver: local
   postgres_data:
     driver: local
   redis_data:

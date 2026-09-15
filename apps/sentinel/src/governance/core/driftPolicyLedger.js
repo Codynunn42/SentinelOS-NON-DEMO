@@ -2,8 +2,9 @@ const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 const { hasText } = require('../../shared/validation');
+const { getRuntimeDataPath } = require('../../runtime/dataPaths');
 
-const DEFAULT_DRIFT_POLICY_LEDGER_PATH = '/private/tmp/sentinel_drift_policy_ledger.jsonl';
+const DEFAULT_DRIFT_POLICY_LEDGER_PATH = getRuntimeDataPath('sentinel_drift_policy_ledger.jsonl');
 
 function stableStringify(value) {
   if (Array.isArray(value)) {

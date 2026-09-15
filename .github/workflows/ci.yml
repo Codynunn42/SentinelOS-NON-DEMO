@@ -21,22 +21,64 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install deps
-        run: npm ci || npm install
+      - name: Install pnpm
+        run: npm install --global pnpm@11.19.0
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run test suite
+        run: pnpm test
+
+      - name: Run TypeScript checks
+        run: pnpm run check:executive-desk:types
+
+      - name: Run Executive Desk end-to-end check
+        run: pnpm run check:executive-desk:e2e
+
+      - name: Verify controlled runtime storage
+        run: pnpm run check:runtime-storage
+
+      - name: Build container image
+        run: docker build --tag sentinel-api:ci .
+
+      - name: Verify container defaults
+        run: |
+          test "$(docker image inspect sentinel-api:ci --format '{{.Config.User}}')" = "node"
+          test "$(docker image inspect sentinel-api:ci --format '{{json .Config.ExposedPorts}}')" = '{"3000/tcp":{}}'
 
       - name: Start API
-        env:
-          SENTINEL_HMAC_SECRET: ci-healthcheck-only
         run: |
-          nohup node apps/api/server.js > /tmp/sentinel-api.log 2>&1 &
-          sleep 2
+          docker run --detach \
+            --name sentinel-api-ci \
+            --publish 3000:3000 \
+            --env SENTINEL_HMAC_SECRET=ci-healthcheck-only \
+            --volume sentinel-api-ci-data:/var/lib/sentinelos \
+            sentinel-api:ci
+          for attempt in $(seq 1 20); do
+            if curl --fail --silent --max-time 5 http://127.0.0.1:3000/health; then
+              exit 0
+            fi
+            sleep 1
+          done
+          docker logs sentinel-api-ci
+          exit 1
 
       - name: Run healthcheck
         run: node scripts/healthcheck.js
 
+      - name: Verify writable runtime directory
+        run: |
+          docker exec sentinel-api-ci node -e "require('fs').writeFileSync('/var/lib/sentinelos/ci-write-check', 'ok')"
+          docker exec sentinel-api-ci node -e "const r=require('./apps/sentinel/src/repo/organizationScan').scanRepository(); if(r.completeRepositoryInventory!==false || r.findings[0].type!=='runtime_image_inventory') process.exit(1)"
+
       - name: Dump API log on failure
         if: failure()
-        run: tail -n 200 /tmp/sentinel-api.log || true
+        run: docker logs sentinel-api-ci || true
+
+      - name: Stop API container
+        if: always()
+        run: docker rm --force sentinel-api-ci || true
 
       - name: Done
         run: echo "Sentinel API health validated"
