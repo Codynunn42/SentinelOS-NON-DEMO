@@ -7,8 +7,9 @@ const {
   DRIFT_TOLERANCE
 } = require('./driftConfig');
 const crypto = require('crypto');
+const { getRuntimeDataPath } = require('../../runtime/dataPaths');
 
-const DEFAULT_THRESHOLD_LEDGER_PATH = '/private/tmp/sentinel_threshold_change_ledger.jsonl';
+const DEFAULT_THRESHOLD_LEDGER_PATH = getRuntimeDataPath('sentinel_threshold_change_ledger.jsonl');
 
 function sha256(value) {
   return crypto.createHash('sha256').update(value).digest('hex');

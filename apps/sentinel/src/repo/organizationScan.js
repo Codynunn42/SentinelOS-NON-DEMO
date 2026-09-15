@@ -3,6 +3,8 @@ const fs = require('fs');
 const path = require('path');
 
 const APPROVED_ROOT = path.resolve(__dirname, '../../../..');
+const INVENTORY_SCOPE = process.env.SENTINEL_REPOSITORY_SCAN_SCOPE || 'repository_checkout';
+const COMPLETE_REPOSITORY_INVENTORY = INVENTORY_SCOPE === 'repository_checkout';
 const MAX_FILES = 5000;
 const MAX_HASH_BYTES = 1024 * 1024;
 const SKIP_DIRECTORIES = new Set([
@@ -102,11 +104,16 @@ function buildFindings(inventory) {
 
   return [
     {
-      type: 'repository_inventory',
+      type: COMPLETE_REPOSITORY_INVENTORY ? 'repository_inventory' : 'runtime_image_inventory',
       filesScanned: inventory.files.length,
       directoriesScanned: inventory.directoriesScanned,
       truncated: inventory.truncated,
-      skippedLinks: inventory.skippedLinks
+      skippedLinks: inventory.skippedLinks,
+      completeRepositoryInventory: COMPLETE_REPOSITORY_INVENTORY,
+      inventoryScope: INVENTORY_SCOPE,
+      omittedByBuildPolicy: COMPLETE_REPOSITORY_INVENTORY
+        ? []
+        : ['.git', '.github', 'artifacts', '*.log', '.env', '.env.*']
     },
     {
       type: 'file_type_distribution',
@@ -127,6 +134,8 @@ function scanRepository() {
     operation: 'organization_scan',
     executionMode: 'read_only',
     rootPolicy: 'server_controlled',
+    inventoryScope: INVENTORY_SCOPE,
+    completeRepositoryInventory: COMPLETE_REPOSITORY_INVENTORY,
     findings: buildFindings(inventory)
   };
 }

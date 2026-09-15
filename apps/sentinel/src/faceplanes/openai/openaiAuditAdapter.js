@@ -2,8 +2,9 @@ const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 const { stableStringify } = require('../../governance/vendorOnboarding/auditLedger');
+const { getRuntimeDataPath } = require('../../runtime/dataPaths');
 
-const DEFAULT_OPENAI_AUDIT_LEDGER_PATH = '/private/tmp/sentinel_openai_faceplane_audit_ledger.jsonl';
+const DEFAULT_OPENAI_AUDIT_LEDGER_PATH = getRuntimeDataPath('sentinel_openai_faceplane_audit_ledger.jsonl');
 
 function sha256(value) {
   return crypto.createHash('sha256').update(value).digest('hex');

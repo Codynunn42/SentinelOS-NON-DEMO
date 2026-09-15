@@ -1,6 +1,7 @@
 const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
+const { getRuntimeDataPath } = require('../runtime/dataPaths');
 
 const ANCHOR_TYPES = {
   SYSTEM_RELEASE: 'SYSTEM_RELEASE',
@@ -33,7 +34,9 @@ const NEXT_ANCHORS = [
 ];
 
 const ROOT = path.resolve(__dirname, '..', '..', '..', '..');
-const ANCHOR_DIR = path.join(ROOT, 'docs', 'anchors');
+const ANCHOR_DIR = process.env.SENTINEL_DATA_DIR
+  ? getRuntimeDataPath('anchors')
+  : path.join(ROOT, 'docs', 'anchors');
 const SYSTEM_RELEASE_ANCHOR_PATH = path.join(ANCHOR_DIR, 'system-release-current.json');
 
 function stableStringify(value) {

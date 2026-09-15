@@ -133,7 +133,7 @@ async function runChecks() {
 }
 
 async function main() {
-  const child = spawn('pnpm', ['exec', 'tsx', 'apps/executive-desk/server.ts'], {
+  const child = spawn(process.execPath, ['--import', 'tsx', 'apps/executive-desk/server.ts'], {
     cwd: process.cwd(),
     env: {
       ...process.env,
