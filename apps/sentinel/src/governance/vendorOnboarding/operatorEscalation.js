@@ -2,9 +2,10 @@ const { createAuditLedger, stableStringify } = require('./auditLedger');
 const { evaluateVendorOnboarding } = require('./engine');
 const { deriveLatencyClass } = require('./latencyGovernor');
 const crypto = require('crypto');
+const { getRuntimeDataPath } = require('../../runtime/dataPaths');
 
 const DECISIONS = new Set(['approve', 'require_correction', 'escalate_further', 'refuse', 'confirm_refusal']);
-const DEFAULT_LEDGER_PATH = '/private/tmp/sentinel_vendor_onboarding_operator_ledger.jsonl';
+const DEFAULT_LEDGER_PATH = getRuntimeDataPath('sentinel_vendor_onboarding_operator_ledger.jsonl');
 const decisionStore = new Map();
 
 function sha256(value) {

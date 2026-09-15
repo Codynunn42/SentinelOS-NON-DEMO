@@ -1,8 +1,9 @@
 const fs = require('fs');
 const path = require('path');
 const { query } = require('../db/client');
+const { getRuntimeDataPath } = require('../runtime/dataPaths');
 
-const DEFAULT_SIGNAL_STORE_PATH = path.join('/private', 'tmp', 'sentinel-governance-signals.jsonl');
+const DEFAULT_SIGNAL_STORE_PATH = getRuntimeDataPath('sentinel-governance-signals.jsonl');
 const signalStorePath = process.env.SIGNAL_STORE_PATH || DEFAULT_SIGNAL_STORE_PATH;
 const memorySignals = [];
 let loadedFromDisk = false;

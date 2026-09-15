@@ -1,6 +1,9 @@
 const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
+const { getRuntimeDataPath } = require('../../runtime/dataPaths');
+
+const DEFAULT_AUDIT_LEDGER_PATH = getRuntimeDataPath('sentinel_vendor_onboarding_audit_ledger.jsonl');
 
 const REQUIRED_FIELDS = [
   'workflowId',
@@ -75,7 +78,7 @@ function buildLedgerEntry(entry, previousHash = null) {
   });
 }
 
-function createAuditLedger({ ledgerPath = '/private/tmp/sentinel_vendor_onboarding_audit_ledger.jsonl' } = {}) {
+function createAuditLedger({ ledgerPath = DEFAULT_AUDIT_LEDGER_PATH } = {}) {
   ensureLedgerDir(ledgerPath);
 
   return Object.freeze({
@@ -94,6 +97,7 @@ function createAuditLedger({ ledgerPath = '/private/tmp/sentinel_vendor_onboardi
 }
 
 module.exports = {
+  DEFAULT_AUDIT_LEDGER_PATH,
   buildLedgerEntry,
   createAuditLedger,
   stableStringify
