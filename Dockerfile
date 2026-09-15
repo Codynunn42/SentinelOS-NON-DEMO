@@ -4,7 +4,7 @@ FROM node:20-alpine
 WORKDIR /app
 
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-RUN npm install -g pnpm@11.19.0 && pnpm install --frozen-lockfile
+RUN npm install -g pnpm@10.33.4 && pnpm install --frozen-lockfile
 
 COPY . .
 
