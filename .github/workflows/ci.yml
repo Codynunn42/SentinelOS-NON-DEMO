@@ -16,13 +16,31 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.32.1
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: pnpm
 
       - name: Install deps
-        run: npm ci || npm install
+        run: pnpm install --frozen-lockfile
+
+      - name: Run tests
+        run: pnpm test
+
+      - name: Run Executive Desk typecheck
+        run: pnpm run check:executive-desk:types
+
+      - name: Run linting
+        run: pnpm run lint
+
+      - name: Run build validation
+        run: pnpm run build:validate
 
       - name: Start API
         env:
@@ -33,6 +51,9 @@ jobs:
 
       - name: Run healthcheck
         run: node scripts/healthcheck.js
+
+      - name: Run deployment readiness gates
+        run: pnpm run check:deployment-readiness
 
       - name: Dump API log on failure
         if: failure()

@@ -17,6 +17,9 @@ importers:
       pg:
         specifier: ^8.20.0
         version: 8.20.0
+      uuid:
+        specifier: 14.0.2
+        version: 14.0.2
     devDependencies:
       '@types/express':
         specifier: ^5.0.6
@@ -996,6 +999,10 @@ packages:
   unpipe@1.0.0:
     resolution: {integrity: sha512-pjy2bYhSsufwWlKwPc+l3cN7+wuJlK6uz0YdJEOlQDbl6jo/YlPi4mb8agUkVC8BF7V8NuzeyPNqRksA3hztKQ==}
     engines: {node: '>= 0.8'}
+
+  uuid@14.0.2:
+    resolution: {integrity: sha512-xZe/16rV4aa+HGSOCiY2YeLT1OybRLrrkL/Rqaq7p7GMVXjFh+6wN4oMYgjFmnSnhY8t6Xpdl2l9qmnHYuMHwQ==}
+    hasBin: true
 
   v8-to-istanbul@9.3.0:
     resolution: {integrity: sha512-kiGUalWN+rgBJ/1OHZsBtU4rXZOfj/7rKQxULKlIzwzQSvMJUUNgPwJEEh7gU6xEVxC0ahoOBvN2YI8GH6FNgA==}
@@ -1977,6 +1984,8 @@ snapshots:
   undici-types@8.3.0: {}
 
   unpipe@1.0.0: {}
+
+  uuid@14.0.2: {}
 
   v8-to-istanbul@9.3.0:
     dependencies:
