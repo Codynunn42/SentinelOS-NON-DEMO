@@ -113,9 +113,15 @@
     "@types/pg": "^8.20.0",
     "@types/supertest": "^7.2.0",
     "c8": "^11.0.0",
-    "mocha": "^11.7.6",
+    "mocha": "^12.0.1",
     "supertest": "^7.2.2",
     "tsx": "^4.22.5",
     "typescript": "^6.0.3"
+  },
+  "pnpm": {
+    "overrides": {
+      "qs": "6.16.0",
+      "brace-expansion": "5.0.9"
+    }
   }
 }
