@@ -129,8 +129,9 @@ jobs:
                   --query "[?trafficWeight==\`100\`].[name,healthState,provisioningState]" \
                   --output tsv || true)"
 
-                health_state="$(printf '%s\n' "$row" | awk 'NR==1 {print $2}')"
-                provisioning_state="$(printf '%s\n' "$row" | awk 'NR==1 {print $3}')"
+                set -- $row
+                health_state="${2:-}"
+                provisioning_state="${3:-}"
 
                 echo "Revision check ${i}/${attempts}: health=${health_state:-unknown} provisioning=${provisioning_state:-unknown}"
                 if [ "$health_state" = "Healthy" ] && [ "$provisioning_state" = "Provisioned" ]; then
