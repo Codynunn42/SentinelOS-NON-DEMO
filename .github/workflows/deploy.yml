@@ -132,9 +132,7 @@ jobs:
                 first_row="${row%%$'\n'*}"
                 health_state=""
                 provisioning_state=""
-                IFS=$'\t' read -r _ health_state provisioning_state <<EOF || true
-                $first_row
-                EOF
+                IFS=$'\t' read -r _ health_state provisioning_state <<< "$first_row" || true
 
                 echo "Revision check ${i}/${attempts}: health=${health_state:-unknown} provisioning=${provisioning_state:-unknown}"
                 if [ "$health_state" = "Healthy" ] && [ "$provisioning_state" = "Provisioned" ]; then
