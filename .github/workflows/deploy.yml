@@ -125,12 +125,13 @@ jobs:
             primary["image"] = image_uri
 
             governed_env = {
+                "PORT": {"value": "3000"},
                 "SENTINEL_API_KEY": {"secretRef": "sentinel-api-key"},
                 "SENTINEL_API_KEY_TENANT": {"value": "nunncloud"},
                 "SENTINEL_API_KEY_ACTOR": {
                     "value": "sentinel.repo-reader@nunncloud.local"
                 },
-                "SENTINEL_API_KEY_ROLE": {"value": "reader"},
+                "SENTINEL_API_KEY_ROLE": {"value": "viewer"},
                 "SENTINEL_API_KEY_SCOPES": {
                     "value": "repo:read,audit:read,receipt:read,approval:read"
                 },
@@ -215,19 +216,19 @@ jobs:
                   --name "$APP_NAME" \
                   --resource-group "$RESOURCE_GROUP" \
                   --revision "$REVISION_NAME" \
-                  --query healthState \
+                  --query properties.healthState \
                   --output tsv 2>/dev/null || true)"
                 provisioning_state="$(az containerapp revision show \
                   --name "$APP_NAME" \
                   --resource-group "$RESOURCE_GROUP" \
                   --revision "$REVISION_NAME" \
-                  --query provisioningState \
+                  --query properties.provisioningState \
                   --output tsv 2>/dev/null || true)"
                 active="$(az containerapp revision show \
                   --name "$APP_NAME" \
                   --resource-group "$RESOURCE_GROUP" \
                   --revision "$REVISION_NAME" \
-                  --query active \
+                  --query properties.active \
                   --output tsv 2>/dev/null || true)"
 
                 echo "Revision check ${i}/${attempts}: name=${REVISION_NAME} health=${health_state:-unknown} provisioning=${provisioning_state:-unknown} active=${active:-unknown}"
@@ -322,7 +323,7 @@ jobs:
               --name "$APP_NAME" \
               --resource-group "$RESOURCE_GROUP" \
               --revision "$REVISION_NAME" \
-              --query "template.containers[0].image" \
+              --query "properties.template.containers[0].image" \
               --output tsv)"
 
             test "$latest_revision" = "$REVISION_NAME"
@@ -351,7 +352,7 @@ jobs:
               --name "$APP_NAME" \
               --resource-group "$RESOURCE_GROUP" \
               --revision "$REVISION_NAME" \
-              --query "[name,healthState,provisioningState,active,template.containers[0].image]" \
+              --query "[name,properties.healthState,properties.provisioningState,properties.active,properties.template.containers[0].image]" \
               --output table
 
       - name: Show deployment target
