@@ -229,6 +229,33 @@ PY
           AZURE_DEPLOYMENT_CONTRACT_EXACT_REVISION_PATH=/tmp/sentinel-exact-revision.json \
           node scripts/validate-live-azure-deployment-contract.js /tmp/sentinel-app.json /tmp/sentinel-revisions.json
 
+          python - <<'PY'
+import json
+import os
+
+with open('/tmp/sentinel-exact-revision.json', 'r', encoding='utf-8') as fh:
+    revision = json.load(fh)
+
+expected_port = str(os.environ['EXPECTED_PORT'])
+required = {'Startup', 'Readiness', 'Liveness'}
+containers = revision.get('properties', {}).get('template', {}).get('containers', [])
+sentinel = next((container for container in containers if container.get('name') == 'sentinel'), None)
+if sentinel is None:
+    raise SystemExit('Exact revision does not include sentinel container for probe validation.')
+
+probe_map = {probe.get('type'): probe for probe in sentinel.get('probes', []) if isinstance(probe, dict)}
+missing = sorted(required - set(probe_map))
+if missing:
+    raise SystemExit(f'Missing required probe types: {", ".join(missing)}')
+
+for probe_type in sorted(required):
+    http_get = probe_map[probe_type].get('httpGet') or {}
+    if http_get.get('path') != '/health':
+        raise SystemExit(f'Probe {probe_type} path mismatch: expected /health, got {http_get.get("path")}')
+    if str(http_get.get('port')) != expected_port:
+        raise SystemExit(f'Probe {probe_type} port mismatch: expected {expected_port}, got {http_get.get("port")}')
+PY
+
       - name: Smoke test live endpoint
         uses: azure/CLI@v2
         with:
