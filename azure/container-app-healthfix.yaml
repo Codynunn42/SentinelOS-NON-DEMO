@@ -1,5 +1,6 @@
 # SentinelOS - Azure Container Apps health fix
-# Removes stale TCP probes on port 4000 and replaces them with HTTP /health probes on port 80.
+# Historic drift repair: the live contract is port 3000 and /health on HTTP port 3000.
+# This file is retained as a repair reference and must match the active deployment contract.
 #
 # Apply with:
 # az containerapp update --name ca-nc-dev-sentinel --resource-group rg-nc-dev-sentinel --yaml azure/container-app-healthfix.yaml
@@ -27,7 +28,7 @@ properties:
     activeRevisionsMode: Single
     ingress:
       external: true
-      targetPort: 80
+      targetPort: 3000
       transport: Auto
       allowInsecure: false
       traffic:
@@ -60,7 +61,7 @@ properties:
           - name: NODE_ENV
             value: staging
           - name: PORT
-            value: "80"
+            value: "3000"
           - name: SENTINEL_VERSION
             value: command-ledger-live-20260405-061515
           - name: AZURE_TENANT_ID
@@ -101,7 +102,7 @@ properties:
           - type: Startup
             httpGet:
               path: /health
-              port: 80
+              port: 3000
               scheme: HTTP
             initialDelaySeconds: 5
             periodSeconds: 10
@@ -110,7 +111,7 @@ properties:
           - type: Readiness
             httpGet:
               path: /health
-              port: 80
+              port: 3000
               scheme: HTTP
             initialDelaySeconds: 5
             periodSeconds: 10
@@ -119,7 +120,7 @@ properties:
           - type: Liveness
             httpGet:
               path: /health
-              port: 80
+              port: 3000
               scheme: HTTP
             initialDelaySeconds: 10
             periodSeconds: 30

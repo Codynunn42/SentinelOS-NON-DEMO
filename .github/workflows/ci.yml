@@ -30,6 +30,12 @@ jobs:
       - name: Run test suite
         run: pnpm test
 
+      - name: Validate deployment artifact contract
+        run: pnpm run test:deployment-contract
+
+      - name: Verify deployment contract
+        run: pnpm run check:deployment-contract
+
       - name: Run TypeScript checks
         run: pnpm run check:executive-desk:types
 

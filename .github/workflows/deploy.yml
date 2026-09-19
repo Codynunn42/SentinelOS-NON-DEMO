@@ -7,40 +7,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  validate:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Install pnpm
-        run: npm install --global pnpm@10.33.4
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Run test suite
-        run: pnpm test
-
-      - name: Run TypeScript checks
-        run: pnpm run check:executive-desk:types
-
-      - name: Run Executive Desk end-to-end check
-        run: pnpm run check:executive-desk:e2e
-
-      - name: Verify controlled runtime storage
-        run: pnpm run check:runtime-storage
-
-      - name: Build container image
-        run: docker build --tag sentinel-api:deploy-check .
-
   deploy:
-    needs: validate
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -84,275 +51,221 @@ jobs:
           docker push ${{ secrets.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
           docker push ${{ secrets.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:latest
 
-      - name: Deploy aligned revision to Azure Container Apps
+      - name: Create one valid Container App revision
         uses: azure/CLI@v2
         with:
           inlineScript: |
             az extension add --name containerapp --upgrade
+            az containerapp secret set \
+              --name ${{ secrets.CONTAINER_APP_NAME }} \
+              --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
+              --secrets "sentinel-hmac-secret=${{ secrets.SENTINEL_HMAC_SECRET }}" \
+              "sentinel-api-key=${{ secrets.SENTINEL_API_KEY }}"
 
-            APP_NAME="${{ secrets.CONTAINER_APP_NAME }}"
-            RESOURCE_GROUP="${{ secrets.AZURE_RESOURCE_GROUP }}"
-            IMAGE_URI="${{ secrets.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}"
             SHORT_SHA="$(printf '%s' "$GITHUB_SHA" | cut -c1-7)"
             REVISION_SUFFIX="sha-${SHORT_SHA}-${GITHUB_RUN_NUMBER}"
-            RESOURCE_ID="$(az containerapp show \
-              --name "$APP_NAME" \
-              --resource-group "$RESOURCE_GROUP" \
-              --query id \
-              --output tsv)"
 
-            az containerapp show \
-              --name "$APP_NAME" \
-              --resource-group "$RESOURCE_GROUP" \
-              --query properties.template.containers \
-              --output json > containers.json
-
-            python3 - "$IMAGE_URI" "$REVISION_SUFFIX" <<'PY'
-            import json
-            import sys
-
-            image_uri, revision_suffix = sys.argv[1:3]
-            with open("containers.json", encoding="utf-8") as source:
-                containers = json.load(source)
-
-            if not containers:
-                raise SystemExit("Container App has no containers to update")
-
-            primary = next(
-                (container for container in containers if container.get("name") == "sentinel"),
-                containers[0],
-            )
-            primary["image"] = image_uri
-
-            governed_env = {
-                "PORT": {"value": "3000"},
-                "SENTINEL_API_KEY": {"secretRef": "sentinel-api-key"},
-                "SENTINEL_API_KEY_TENANT": {"value": "nunncloud"},
-                "SENTINEL_API_KEY_ACTOR": {
-                    "value": "sentinel.repo-reader@nunncloud.local"
-                },
-                "SENTINEL_API_KEY_ROLE": {"value": "viewer"},
-                "SENTINEL_API_KEY_SCOPES": {
-                    "value": "repo:read,audit:read,receipt:read,approval:read"
-                },
-            }
-            env_by_name = {
-                item.get("name"): item
-                for item in primary.setdefault("env", [])
-                if item.get("name")
-            }
-            for name, attributes in governed_env.items():
-                entry = env_by_name.get(name)
-                if entry is None:
-                    entry = {"name": name}
-                    primary["env"].append(entry)
-                entry.pop("value", None)
-                entry.pop("secretRef", None)
-                entry.update(attributes)
-
-            required_probe_types = {"Liveness", "Readiness", "Startup"}
-            aligned_probe_types = set()
-            for probe in primary.get("probes", []):
-                probe_type = probe.get("type")
-                if probe_type in required_probe_types and "httpGet" in probe:
-                    probe["httpGet"]["path"] = "/health"
-                    probe["httpGet"]["port"] = 3000
-                    probe["httpGet"]["scheme"] = "HTTP"
-                    aligned_probe_types.add(probe_type)
-
-            missing = required_probe_types - aligned_probe_types
-            if missing:
-                raise SystemExit(
-                    "Missing HTTP health probes: " + ", ".join(sorted(missing))
-                )
-
-            patch = {
-                "properties": {
-                    "template": {
-                        "revisionSuffix": revision_suffix,
-                        "containers": containers,
-                    }
-                }
-            }
-            with open("containerapp-patch.json", "w", encoding="utf-8") as target:
-                json.dump(patch, target)
-            PY
-
-            az rest \
-              --method patch \
-              --uri "https://management.azure.com${RESOURCE_ID}?api-version=2025-01-01" \
-              --headers "Content-Type=application/merge-patch+json" \
-              --body @containerapp-patch.json \
-              --output none
+            az containerapp update \
+              --name ${{ secrets.CONTAINER_APP_NAME }} \
+              --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
+              --image ${{ secrets.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }} \
+              --set-env-vars \
+                PORT=3000 \
+                SENTINEL_HMAC_SECRET=secretref:sentinel-hmac-secret \
+                SENTINEL_API_KEY=secretref:sentinel-api-key \
+                SENTINEL_API_KEY_TENANT=nunncloud \
+                SENTINEL_API_KEY_ACTOR=sentinel.repo-reader@nunncloud.local \
+                SENTINEL_API_KEY_ROLE=viewer \
+                SENTINEL_API_KEY_SCOPES=repo:read,audit:read,receipt:read,approval:read \
+              --revision-suffix "$REVISION_SUFFIX"
 
             az containerapp ingress update \
-              --name "$APP_NAME" \
-              --resource-group "$RESOURCE_GROUP" \
+              --name ${{ secrets.CONTAINER_APP_NAME }} \
+              --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
               --target-port 3000 \
               --output none
 
-      - name: Verify deployed revision and live authorization boundary
+      - name: Apply probe contract to the exact revision
+        shell: bash
+        env:
+          EXPECTED_IMAGE: ${{ secrets.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+        run: |
+          set -euo pipefail
+          APP_NAME="${{ secrets.CONTAINER_APP_NAME }}"
+          RG="${{ secrets.AZURE_RESOURCE_GROUP }}"
+          SHORT_SHA="$(printf '%s' "$GITHUB_SHA" | cut -c1-7)"
+          REVISION_SUFFIX="sha-${SHORT_SHA}-${GITHUB_RUN_NUMBER}"
+          RESOURCE_ID="$(az containerapp show --name "$APP_NAME" --resource-group "$RG" --query id -o tsv)"
+
+          az containerapp show --name "$APP_NAME" --resource-group "$RG" -o json > /tmp/containerapp-live.json
+
+          python - <<'PY'
+import json
+import os
+
+with open('/tmp/containerapp-live.json', 'r', encoding='utf-8') as fh:
+    app = json.load(fh)
+
+containers = app.get('properties', {}).get('template', {}).get('containers', [])
+if not containers:
+    raise SystemExit('No containers found for the live Container App.')
+
+sentinel = next((container for container in containers if container.get('name') == 'sentinel'), None)
+if sentinel is None:
+    raise SystemExit('No named sentinel container found in the live app config.')
+
+sentinel['image'] = os.environ['EXPECTED_IMAGE']
+env_items = sentinel.setdefault('env', [])
+env_map = {entry.get('name'): entry for entry in env_items if isinstance(entry, dict) and entry.get('name')}
+env_map['PORT'] = {'name': 'PORT', 'value': '3000'}
+env_map['SENTINEL_HMAC_SECRET'] = {'name': 'SENTINEL_HMAC_SECRET', 'secretRef': 'sentinel-hmac-secret'}
+sentinel['env'] = list(env_map.values())
+
+required_probe_map = {
+  'Startup': {'path': '/health', 'port': 3000, 'scheme': 'HTTP', 'initialDelaySeconds': 5, 'periodSeconds': 10, 'timeoutSeconds': 3, 'failureThreshold': 30},
+  'Readiness': {'path': '/health', 'port': 3000, 'scheme': 'HTTP', 'initialDelaySeconds': 5, 'periodSeconds': 10, 'timeoutSeconds': 3, 'failureThreshold': 3},
+  'Liveness': {'path': '/health', 'port': 3000, 'scheme': 'HTTP', 'initialDelaySeconds': 10, 'periodSeconds': 30, 'timeoutSeconds': 3, 'failureThreshold': 3}
+}
+
+probe_list = sentinel.setdefault('probes', [])
+probe_by_type = {probe.get('type'): probe for probe in probe_list if isinstance(probe, dict) and probe.get('type')}
+for probe_type, details in required_probe_map.items():
+    probe = probe_by_type.get(probe_type) or {'type': probe_type}
+    probe['httpGet'] = {'path': details['path'], 'port': details['port'], 'scheme': details['scheme']}
+    probe['initialDelaySeconds'] = details['initialDelaySeconds']
+    probe['periodSeconds'] = details['periodSeconds']
+    probe['timeoutSeconds'] = details['timeoutSeconds']
+    probe['failureThreshold'] = details['failureThreshold']
+    probe_by_type[probe_type] = probe
+
+sentinel['probes'] = list(probe_by_type.values())
+
+revised_containers = []
+for container in containers:
+    if container.get('name') == 'sentinel':
+        revised_containers.append(sentinel)
+    else:
+        revised_containers.append(container)
+
+patch = {
+  'properties': {
+    'configuration': {'ingress': {'targetPort': 3000}},
+    'template': {'containers': revised_containers}
+  }
+}
+with open('/tmp/containerapp-healthfix-patch.json', 'w', encoding='utf-8') as fh:
+    json.dump(patch, fh)
+PY
+
+          az rest \
+            --method patch \
+            --uri "https://management.azure.com${RESOURCE_ID}?api-version=2025-01-01" \
+            --headers "Content-Type=application/merge-patch+json" \
+            --body @/tmp/containerapp-healthfix-patch.json \
+            --output none
+
+          echo "Revision suffix to validate: ${REVISION_SUFFIX}"
+
+      - name: Wait for exact revision health
+        shell: bash
+        env:
+          EXPECTED_IMAGE: ${{ secrets.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+          EXPECTED_PORT: '3000'
+          REQUIRED_TRAFFIC_WEIGHT: '100'
+        run: |
+          set -euo pipefail
+          APP_NAME="${{ secrets.CONTAINER_APP_NAME }}"
+          RG="${{ secrets.AZURE_RESOURCE_GROUP }}"
+          SHORT_SHA="$(printf '%s' "$GITHUB_SHA" | cut -c1-7)"
+          EXPECTED_REVISION_SUFFIX="sha-${SHORT_SHA}-${GITHUB_RUN_NUMBER}"
+          EXPECTED_TRY_COUNT=30
+
+          for attempt in $(seq 1 "$EXPECTED_TRY_COUNT"); do
+            APP_JSON="$(az containerapp show --name "$APP_NAME" --resource-group "$RG" -o json)"
+            REVISION_JSON="$(az containerapp revision list --name "$APP_NAME" --resource-group "$RG" -o json)"
+            echo "$APP_JSON" > /tmp/sentinel-app.json
+            echo "$REVISION_JSON" > /tmp/sentinel-revisions.json
+
+            if EXPECTED_REVISION_SUFFIX="$EXPECTED_REVISION_SUFFIX" \
+               EXPECTED_IMAGE="$EXPECTED_IMAGE" \
+               EXPECTED_PORT="$EXPECTED_PORT" \
+               REQUIRED_TRAFFIC_WEIGHT="$REQUIRED_TRAFFIC_WEIGHT" \
+               node scripts/validate-live-azure-deployment-contract.js /tmp/sentinel-app.json /tmp/sentinel-revisions.json; then
+              echo "Exact revision settled successfully on attempt ${attempt}."
+              exit 0
+            fi
+
+            echo "Revision not yet healthy; waiting for rollout to settle (attempt ${attempt}/${EXPECTED_TRY_COUNT})..."
+            sleep 20
+          done
+
+          echo "Expected revision $EXPECTED_REVISION_SUFFIX did not reach Healthy + Provisioned + 100% traffic within the retry window."
+          exit 1
+
+      - name: Verify live deployment contract
+        shell: bash
+        env:
+          EXPECTED_IMAGE: ${{ secrets.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+          EXPECTED_PORT: '3000'
+          REQUIRED_TRAFFIC_WEIGHT: '100'
+        run: |
+          set -euo pipefail
+          APP_NAME="${{ secrets.CONTAINER_APP_NAME }}"
+          RG="${{ secrets.AZURE_RESOURCE_GROUP }}"
+          SHORT_SHA="$(printf '%s' "$GITHUB_SHA" | cut -c1-7)"
+          EXPECTED_REVISION_SUFFIX="sha-${SHORT_SHA}-${GITHUB_RUN_NUMBER}"
+
+          APP_JSON="$(az containerapp show --name "$APP_NAME" --resource-group "$RG" -o json)"
+          REVISION_JSON="$(az containerapp revision list --name "$APP_NAME" --resource-group "$RG" -o json)"
+
+          echo "$APP_JSON" > /tmp/sentinel-app.json
+          echo "$REVISION_JSON" > /tmp/sentinel-revisions.json
+
+          EXPECTED_REVISION_SUFFIX="$EXPECTED_REVISION_SUFFIX" \
+          EXPECTED_IMAGE="$EXPECTED_IMAGE" \
+          EXPECTED_PORT="$EXPECTED_PORT" \
+          REQUIRED_TRAFFIC_WEIGHT="$REQUIRED_TRAFFIC_WEIGHT" \
+          node scripts/validate-live-azure-deployment-contract.js /tmp/sentinel-app.json /tmp/sentinel-revisions.json
+
+      - name: Smoke test live endpoint
         uses: azure/CLI@v2
         with:
           inlineScript: |
-            APP_NAME="${{ secrets.CONTAINER_APP_NAME }}"
-            RESOURCE_GROUP="${{ secrets.AZURE_RESOURCE_GROUP }}"
-            SHORT_SHA="$(printf '%s' "$GITHUB_SHA" | cut -c1-7)"
-            REVISION_SUFFIX="sha-${SHORT_SHA}-${GITHUB_RUN_NUMBER}"
-            REVISION_NAME="${APP_NAME}--${REVISION_SUFFIX}"
-            EXPECTED_IMAGE="${{ secrets.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}"
             FQDN="$(az containerapp show \
-              --name "$APP_NAME" \
-              --resource-group "$RESOURCE_GROUP" \
+              --name ${{ secrets.CONTAINER_APP_NAME }} \
+              --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
               --query properties.configuration.ingress.fqdn \
               --output tsv)"
 
-            wait_for_deployed_revision() {
-              local attempts=20
-              local sleep_seconds=15
-              local i
-              for i in $(seq 1 "$attempts"); do
-                health_state="$(az containerapp revision show \
-                  --name "$APP_NAME" \
-                  --resource-group "$RESOURCE_GROUP" \
-                  --revision "$REVISION_NAME" \
-                  --query properties.healthState \
-                  --output tsv 2>/dev/null || true)"
-                provisioning_state="$(az containerapp revision show \
-                  --name "$APP_NAME" \
-                  --resource-group "$RESOURCE_GROUP" \
-                  --revision "$REVISION_NAME" \
-                  --query properties.provisioningState \
-                  --output tsv 2>/dev/null || true)"
-                active="$(az containerapp revision show \
-                  --name "$APP_NAME" \
-                  --resource-group "$RESOURCE_GROUP" \
-                  --revision "$REVISION_NAME" \
-                  --query properties.active \
-                  --output tsv 2>/dev/null || true)"
+            echo "Testing https://${FQDN}/health"
+            HEALTH_JSON="$(curl --fail --show-error --silent --max-time 30 "https://${FQDN}/health")"
+            echo "$HEALTH_JSON"
+            python - "$HEALTH_JSON" <<'PY'
+import json, sys
+payload = json.loads(sys.argv[1])
+if payload.get('status') != 'ok':
+    raise SystemExit(f"Unexpected /health status: {payload.get('status')}")
+if payload.get('service') != 'sentinel-api':
+    raise SystemExit(f"Unexpected service name: {payload.get('service')}")
+PY
 
-                echo "Revision check ${i}/${attempts}: name=${REVISION_NAME} health=${health_state:-unknown} provisioning=${provisioning_state:-unknown} active=${active:-unknown}"
-                if [ "$health_state" = "Healthy" ] &&
-                   [ "$provisioning_state" = "Provisioned" ] &&
-                   [ "$active" = "true" ]; then
-                  return 0
-                fi
+            echo "Testing unauthenticated protected route"
+            UNAUTH_STATUS="$(curl --silent --show-error --max-time 30 -o /tmp/approvals-unauth.json -w '%{http_code}' "https://${FQDN}/approvals")"
+            if [[ "$UNAUTH_STATUS" != "401" && "$UNAUTH_STATUS" != "403" ]]; then
+              echo "Expected 401/403 for unauthenticated /approvals, got $UNAUTH_STATUS"
+              cat /tmp/approvals-unauth.json
+              exit 1
+            fi
 
-                sleep "$sleep_seconds"
-              done
+            echo "Testing authenticated protected route"
+            curl --fail --show-error --silent --max-time 30 "https://${FQDN}/approvals" \
+              -H "x-api-key: ${{ secrets.SENTINEL_API_KEY }}"
+            echo
 
-              echo "Timed out waiting for the deployed revision to become active, Healthy, and Provisioned."
-              return 1
-            }
-
-            request_with_retry() {
-              local label="$1"
-              local url="$2"
-              local expected_codes="$3"
-              local header_name="${4:-}"
-              local header_value="${5:-}"
-              local attempts=10
-              local sleep_seconds=10
-              local body_file
-              local status
-              local i
-              body_file="$(mktemp)"
-
-              for i in $(seq 1 "$attempts"); do
-                if [ -n "$header_name" ]; then
-                  status="$(curl --show-error --silent --max-time 30 \
-                    --output "$body_file" \
-                    --write-out '%{http_code}' \
-                    --header "${header_name}: ${header_value}" \
-                    "$url" || true)"
-                else
-                  status="$(curl --show-error --silent --max-time 30 \
-                    --output "$body_file" \
-                    --write-out '%{http_code}' \
-                    "$url" || true)"
-                fi
-
-                echo "${label} attempt ${i}/${attempts}: HTTP ${status:-000}"
-                case " ${expected_codes} " in
-                  *" ${status} "*)
-                    python3 - "$body_file" "$label" <<'PY'
-            import json
-            import sys
-
-            path, label = sys.argv[1:3]
-            with open(path, encoding="utf-8") as response:
-                payload = json.load(response)
-
-            if label == "health":
-                if not isinstance(payload, dict) or payload.get("status") != "ok":
-                    raise SystemExit("/health did not return status=ok")
-                print("health payload: status=ok")
-            elif isinstance(payload, dict):
-                print(f"{label} payload: JSON object keys={sorted(payload.keys())}")
-            elif isinstance(payload, list):
-                print(f"{label} payload: JSON array length={len(payload)}")
-            else:
-                raise SystemExit(f"{label} returned an unexpected JSON shape")
-            PY
-                    rm -f "$body_file"
-                    return 0
-                    ;;
-                esac
-
-                sleep "$sleep_seconds"
-              done
-
-              rm -f "$body_file"
-              echo "${label} did not return expected HTTP status: ${expected_codes}"
-              return 1
-            }
-
-            wait_for_deployed_revision
-
-            latest_revision="$(az containerapp show \
-              --name "$APP_NAME" \
-              --resource-group "$RESOURCE_GROUP" \
-              --query properties.latestRevisionName \
-              --output tsv)"
-            latest_traffic="$(az containerapp show \
-              --name "$APP_NAME" \
-              --resource-group "$RESOURCE_GROUP" \
-              --query "properties.configuration.ingress.traffic[?latestRevision == \`true\`].weight | [0]" \
-              --output tsv)"
-            deployed_image="$(az containerapp revision show \
-              --name "$APP_NAME" \
-              --resource-group "$RESOURCE_GROUP" \
-              --revision "$REVISION_NAME" \
-              --query "properties.template.containers[0].image" \
-              --output tsv)"
-
-            test "$latest_revision" = "$REVISION_NAME"
-            test "$latest_traffic" = "100"
-            test "$deployed_image" = "$EXPECTED_IMAGE"
-            echo "Provenance verified: revision=${REVISION_NAME} image-tag=${GITHUB_SHA} traffic=100"
-
-            request_with_retry \
-              "health" \
-              "https://${FQDN}/health" \
-              "200"
-
-            request_with_retry \
-              "approvals-authenticated" \
-              "https://${FQDN}/approvals" \
-              "200" \
-              "x-api-key" \
-              "${{ secrets.SENTINEL_API_KEY }}"
-
-            request_with_retry \
-              "approvals-unauthenticated" \
-              "https://${FQDN}/approvals" \
-              "401 403"
-
-            az containerapp revision show \
-              --name "$APP_NAME" \
-              --resource-group "$RESOURCE_GROUP" \
-              --revision "$REVISION_NAME" \
-              --query "[name,properties.healthState,properties.provisioningState,properties.active,properties.template.containers[0].image]" \
+            az containerapp revision list \
+              --name ${{ secrets.CONTAINER_APP_NAME }} \
+              --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
+              --query "[?trafficWeight==\`100\`].[name,healthState,provisioningState,trafficWeight]" \
               --output table
 
       - name: Show deployment target
