@@ -111,8 +111,15 @@ function validateAzureDeploymentContract({
     issues.push(`Expected revision ${expectedRevision?.name ?? expectedSuffix} provisioningState is not Provisioned: ${expectedProps.provisioningState}.`);
   }
 
-  if (expectedRevision?.image && expectedRevision.image !== expectedImage) {
-    issues.push(`Expected revision image mismatch: expected ${expectedImage}, got ${expectedRevision.image}.`);
+  const revisionImage =
+    expectedRevision?.image ??
+    expectedRevision?.properties?.template?.containers?.find((container) => container?.name === 'sentinel')?.image ??
+    expectedRevision?.properties?.containers?.find((container) => container?.name === 'sentinel')?.image ??
+    getSentinelContainer(app)?.image ??
+    '';
+
+  if (revisionImage && revisionImage !== expectedImage) {
+    issues.push(`Expected revision image mismatch: expected ${expectedImage}, got ${revisionImage}.`);
   }
 
   return {

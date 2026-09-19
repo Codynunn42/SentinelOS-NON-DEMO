@@ -64,6 +64,32 @@ test('accepts a valid Azure Container Apps deployment contract', () => {
   assert.deepEqual(result.issues, []);
 });
 
+test('accepts a revision whose image is nested under the template container', () => {
+  const result = validateAzureDeploymentContract({
+    app: validApp,
+    revisions: [{
+      name: 'sentinel-sha-abc123-9',
+      properties: {
+        active: true,
+        trafficWeight: 100,
+        healthState: 'Healthy',
+        provisioningState: 'Provisioned',
+        template: {
+          containers: [{
+            name: 'sentinel',
+            image: 'example.azurecr.io/sentinel-api:sha-abc123'
+          }]
+        }
+      }
+    }],
+    expectedImage: 'example.azurecr.io/sentinel-api:sha-abc123',
+    expectedRevisionSuffix: 'sha-abc123'
+  });
+
+  assert.equal(result.ok, true);
+  assert.deepEqual(result.issues, []);
+});
+
 test('rejects malformed port and probe state', () => {
   const result = validateAzureDeploymentContract({
     app: {

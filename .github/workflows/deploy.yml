@@ -51,13 +51,20 @@ jobs:
           docker push ${{ secrets.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
           docker push ${{ secrets.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:latest
 
-      - name: Deploy to Azure Container Apps
+      - name: Create one valid Container App revision
         uses: azure/CLI@v2
         with:
           inlineScript: |
             az extension add --name containerapp --upgrade
+            az containerapp secret set \
+              --name ${{ secrets.CONTAINER_APP_NAME }} \
+              --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
+              --secrets "sentinel-hmac-secret=${{ secrets.SENTINEL_HMAC_SECRET }}" \
+              "sentinel-api-key=${{ secrets.SENTINEL_API_KEY }}"
+
             SHORT_SHA="$(printf '%s' "$GITHUB_SHA" | cut -c1-7)"
             REVISION_SUFFIX="sha-${SHORT_SHA}-${GITHUB_RUN_NUMBER}"
+
             az containerapp update \
               --name ${{ secrets.CONTAINER_APP_NAME }} \
               --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
@@ -70,11 +77,15 @@ jobs:
                 SENTINEL_API_KEY_ACTOR=sentinel.repo-reader@nunncloud.local \
                 SENTINEL_API_KEY_ROLE=viewer \
                 SENTINEL_API_KEY_SCOPES=repo:read,audit:read,receipt:read,approval:read \
-              --ingress external \
-              --target-port 3000 \
               --revision-suffix "$REVISION_SUFFIX"
 
-      - name: Apply sentinel probe contract to live revision
+            az containerapp ingress update \
+              --name ${{ secrets.CONTAINER_APP_NAME }} \
+              --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
+              --target-port 3000 \
+              --output none
+
+      - name: Apply probe contract to the exact revision
         shell: bash
         env:
           EXPECTED_IMAGE: ${{ secrets.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
@@ -82,6 +93,8 @@ jobs:
           set -euo pipefail
           APP_NAME="${{ secrets.CONTAINER_APP_NAME }}"
           RG="${{ secrets.AZURE_RESOURCE_GROUP }}"
+          SHORT_SHA="$(printf '%s' "$GITHUB_SHA" | cut -c1-7)"
+          REVISION_SUFFIX="sha-${SHORT_SHA}-${GITHUB_RUN_NUMBER}"
           RESOURCE_ID="$(az containerapp show --name "$APP_NAME" --resource-group "$RG" --query id -o tsv)"
 
           az containerapp show --name "$APP_NAME" --resource-group "$RG" -o json > /tmp/containerapp-live.json
@@ -126,20 +139,23 @@ for probe_type, details in required_probe_map.items():
     probe_by_type[probe_type] = probe
 
 sentinel['probes'] = list(probe_by_type.values())
-
 patch = {
   'properties': {
     'configuration': {
-      'ingress': {
-        'targetPort': 3000
-      }
+      'ingress': {'targetPort': 3000}
     },
     'template': {
-      'containers': containers
+      'containers': [
+        {
+          'name': 'sentinel',
+          'image': os.environ['EXPECTED_IMAGE'],
+          'env': sentinel['env'],
+          'probes': sentinel['probes']
+        }
+      ]
     }
   }
 }
-
 with open('/tmp/containerapp-healthfix-patch.json', 'w', encoding='utf-8') as fh:
     json.dump(patch, fh)
 PY
@@ -151,16 +167,43 @@ PY
             --body @/tmp/containerapp-healthfix-patch.json \
             --output none
 
-          az containerapp ingress update \
-            --name "$APP_NAME" \
-            --resource-group "$RG" \
-            --target-port 3000 \
-            --output none
+          echo "Revision suffix to validate: ${REVISION_SUFFIX}"
 
-          az containerapp secret set \
-            --name "$APP_NAME" \
-            --resource-group "$RG" \
-            --secrets "sentinel-hmac-secret=${{ secrets.SENTINEL_HMAC_SECRET }}"
+      - name: Wait for exact revision health
+        shell: bash
+        env:
+          EXPECTED_IMAGE: ${{ secrets.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+          EXPECTED_PORT: '3000'
+          REQUIRED_TRAFFIC_WEIGHT: '100'
+        run: |
+          set -euo pipefail
+          APP_NAME="${{ secrets.CONTAINER_APP_NAME }}"
+          RG="${{ secrets.AZURE_RESOURCE_GROUP }}"
+          SHORT_SHA="$(printf '%s' "$GITHUB_SHA" | cut -c1-7)"
+          EXPECTED_REVISION_SUFFIX="sha-${SHORT_SHA}-${GITHUB_RUN_NUMBER}"
+          EXPECTED_TRY_COUNT=30
+
+          for attempt in $(seq 1 "$EXPECTED_TRY_COUNT"); do
+            APP_JSON="$(az containerapp show --name "$APP_NAME" --resource-group "$RG" -o json)"
+            REVISION_JSON="$(az containerapp revision list --name "$APP_NAME" --resource-group "$RG" -o json)"
+            echo "$APP_JSON" > /tmp/sentinel-app.json
+            echo "$REVISION_JSON" > /tmp/sentinel-revisions.json
+
+            if EXPECTED_REVISION_SUFFIX="$EXPECTED_REVISION_SUFFIX" \
+               EXPECTED_IMAGE="$EXPECTED_IMAGE" \
+               EXPECTED_PORT="$EXPECTED_PORT" \
+               REQUIRED_TRAFFIC_WEIGHT="$REQUIRED_TRAFFIC_WEIGHT" \
+               node scripts/validate-live-azure-deployment-contract.js /tmp/sentinel-app.json /tmp/sentinel-revisions.json; then
+              echo "Exact revision settled successfully on attempt ${attempt}."
+              exit 0
+            fi
+
+            echo "Revision not yet healthy; waiting for rollout to settle (attempt ${attempt}/${EXPECTED_TRY_COUNT})..."
+            sleep 20
+          done
+
+          echo "Expected revision $EXPECTED_REVISION_SUFFIX did not reach Healthy + Provisioned + 100% traffic within the retry window."
+          exit 1
 
       - name: Verify live deployment contract
         shell: bash
