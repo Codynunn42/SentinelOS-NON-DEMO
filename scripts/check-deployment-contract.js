@@ -11,12 +11,13 @@ const checks = [
     file: workflowPath,
     required: [
       'node scripts/validate-live-azure-deployment-contract.js',
-      '--target-port 3000',
-      'az containerapp revision list --name',
+      'az containerapp revision show --name',
+      "'revisionSuffix':",
+      'az containerapp ingress update',
       'curl --fail --show-error --silent --max-time 30 "https://${FQDN}/health"',
       'curl --fail --show-error --silent --max-time 30 "https://${FQDN}/approvals"'
     ],
-    message: 'Deploy workflow must invoke the executable validator and verify the live health/auth boundary.'
+    message: 'Deploy workflow must patch the exact revision and verify the live health/auth boundary.'
   },
   {
     file: ciWorkflowPath,

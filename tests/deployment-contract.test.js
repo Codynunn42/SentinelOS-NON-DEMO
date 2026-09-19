@@ -51,7 +51,22 @@ const validRevisions = [
       template: {
         containers: [{
           name: 'sentinel',
-          image: 'example.azurecr.io/sentinel-api:sha-abc123'
+          image: 'example.azurecr.io/sentinel-api:sha-abc123',
+          env: [{ name: 'PORT', value: '3000' }],
+          probes: [
+            {
+              type: 'Startup',
+              httpGet: { path: '/health', port: 3000, scheme: 'HTTP' }
+            },
+            {
+              type: 'Readiness',
+              httpGet: { path: '/health', port: 3000, scheme: 'HTTP' }
+            },
+            {
+              type: 'Liveness',
+              httpGet: { path: '/health', port: 3000, scheme: 'HTTP' }
+            }
+          ]
         }]
       }
     }
@@ -83,7 +98,13 @@ test('accepts a revision whose image is nested under the template container', ()
         template: {
           containers: [{
             name: 'sentinel',
-            image: 'example.azurecr.io/sentinel-api:sha-abc123'
+            image: 'example.azurecr.io/sentinel-api:sha-abc123',
+            env: [{ name: 'PORT', value: '3000' }],
+            probes: [
+              { type: 'Startup', httpGet: { path: '/health', port: 3000, scheme: 'HTTP' } },
+              { type: 'Readiness', httpGet: { path: '/health', port: 3000, scheme: 'HTTP' } },
+              { type: 'Liveness', httpGet: { path: '/health', port: 3000, scheme: 'HTTP' } }
+            ]
           }]
         }
       }
@@ -122,6 +143,37 @@ test('fails closed when the exact revision has no image evidence', () => {
   assert.ok(result.issues.some((issue) => issue.includes('no image data')));
 });
 
+test('rejects when the app is healthy but the exact revision is stale', () => {
+  const staleExactRevision = {
+    name: 'sentinel-sha-abc123-99',
+    properties: {
+      active: true,
+      trafficWeight: 100,
+      healthState: 'Healthy',
+      provisioningState: 'Provisioned',
+      template: {
+        containers: [{
+          name: 'sentinel',
+          image: 'example.azurecr.io/sentinel-api:sha-abc123',
+          env: [{ name: 'PORT', value: '3000' }],
+          probes: [{ type: 'Startup', httpGet: { path: '/status', port: 80, scheme: 'HTTP' } }]
+        }]
+      }
+    }
+  };
+
+  const result = validateAzureDeploymentContract({
+    app: validApp,
+    revisions: validRevisions,
+    exactRevision: staleExactRevision,
+    expectedImage: 'example.azurecr.io/sentinel-api:sha-abc123',
+    expectedRevisionSuffix: 'sha-abc123'
+  });
+
+  assert.equal(result.ok, false);
+  assert.ok(result.issues.some((issue) => issue.toLowerCase().includes('required probe types')));
+});
+
 test('rejects malformed port and probe state', () => {
   const result = validateAzureDeploymentContract({
     app: {
@@ -143,9 +195,34 @@ test('rejects malformed port and probe state', () => {
         active: true,
         trafficWeight: 100,
         healthState: 'Unhealthy',
-        provisioningState: 'Failed'
+        provisioningState: 'Failed',
+        template: {
+          containers: [{
+            name: 'sentinel',
+            image: 'example.azurecr.io/sentinel-api:sha-xyz',
+            env: [{ name: 'PORT', value: '8080' }],
+            probes: [{ type: 'Startup', httpGet: { path: '/status', port: 80, scheme: 'HTTP' } }]
+          }]
+        }
       }
     }],
+    exactRevision: {
+      name: 'sentinel-sha-abc123-99',
+      properties: {
+        active: true,
+        trafficWeight: 100,
+        healthState: 'Unhealthy',
+        provisioningState: 'Failed',
+        template: {
+          containers: [{
+            name: 'sentinel',
+            image: 'example.azurecr.io/sentinel-api:sha-xyz',
+            env: [{ name: 'PORT', value: '8080' }],
+            probes: [{ type: 'Startup', httpGet: { path: '/status', port: 80, scheme: 'HTTP' } }]
+          }]
+        }
+      }
+    },
     expectedImage: 'example.azurecr.io/sentinel-api:sha-abc123',
     expectedRevisionSuffix: 'sha-abc123'
   });
@@ -153,6 +230,6 @@ test('rejects malformed port and probe state', () => {
   assert.equal(result.ok, false);
   assert.ok(result.issues.some((issue) => issue.includes('PORT')));
   assert.ok(result.issues.some((issue) => issue.includes('Ingress targetPort')));
-  assert.ok(result.issues.some((issue) => issue.includes('Required probe types')));
+  assert.ok(result.issues.some((issue) => issue.toLowerCase().includes('required probe types')));
   assert.ok(result.issues.some((issue) => issue.includes('healthState')));
 });
