@@ -50,6 +50,12 @@ function validateAzureDeploymentContract({
     return { ok: false, issues };
   }
 
+  const exactRevisionName = String(exactRevisionCandidate?.name ?? '');
+  if (exactRevisionName && !exactRevisionName.includes(expectedSuffix)) {
+    issues.push(`Exact revision ${exactRevisionName} does not match expected suffix ${expectedSuffix}.`);
+    return { ok: false, issues };
+  }
+
   const revisionProps = exactRevisionCandidate?.properties ?? {};
   const targetContainer =
     revisionProps?.template?.containers?.find((container) => container?.name === 'sentinel') ??

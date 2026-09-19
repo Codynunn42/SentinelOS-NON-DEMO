@@ -169,12 +169,12 @@ PY
           RG="${{ secrets.AZURE_RESOURCE_GROUP }}"
           SHORT_SHA="$(printf '%s' "$GITHUB_SHA" | cut -c1-7)"
           EXPECTED_REVISION_SUFFIX="sha-${SHORT_SHA}-${GITHUB_RUN_NUMBER}"
-          EXPECTED_REVISION_NAME="$(az containerapp revision list --name "$APP_NAME" --resource-group "$RG" --query "[?contains(name, '${EXPECTED_REVISION_SUFFIX}')].name | [0]" -o tsv)"
           EXPECTED_TRY_COUNT=30
 
           for attempt in $(seq 1 "$EXPECTED_TRY_COUNT"); do
+            EXPECTED_REVISION_NAME="$(az containerapp revision list --name "$APP_NAME" --resource-group "$RG" --query "[?contains(name, '${EXPECTED_REVISION_SUFFIX}')].name | [0]" -o tsv)"
             if [[ -n "$EXPECTED_REVISION_NAME" ]]; then
-              az containerapp revision show --name "$APP_NAME" --revision "$EXPECTED_REVISION_NAME" -o json > /tmp/sentinel-exact-revision.json
+              az containerapp revision show --name "$APP_NAME" --resource-group "$RG" --revision "$EXPECTED_REVISION_NAME" -o json > /tmp/sentinel-exact-revision.json
             fi
 
             APP_JSON="$(az containerapp show --name "$APP_NAME" --resource-group "$RG" -o json)"
@@ -219,7 +219,7 @@ PY
           echo "$APP_JSON" > /tmp/sentinel-app.json
           echo "$REVISION_JSON" > /tmp/sentinel-revisions.json
           if [[ -n "$EXPECTED_REVISION_NAME" ]]; then
-            az containerapp revision show --name "$APP_NAME" --revision "$EXPECTED_REVISION_NAME" -o json > /tmp/sentinel-exact-revision.json
+            az containerapp revision show --name "$APP_NAME" --resource-group "$RG" --revision "$EXPECTED_REVISION_NAME" -o json > /tmp/sentinel-exact-revision.json
           fi
 
           EXPECTED_REVISION_SUFFIX="$EXPECTED_REVISION_SUFFIX" \

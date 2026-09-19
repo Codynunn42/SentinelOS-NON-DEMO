@@ -143,6 +143,41 @@ test('fails closed when the exact revision has no image evidence', () => {
   assert.ok(result.issues.some((issue) => issue.includes('no image data')));
 });
 
+test('rejects when the supplied exact revision name does not match the expected suffix', () => {
+  const mismatchedExactRevision = {
+    name: 'sentinel-sha-other-99',
+    properties: {
+      active: true,
+      trafficWeight: 100,
+      healthState: 'Healthy',
+      provisioningState: 'Provisioned',
+      template: {
+        containers: [{
+          name: 'sentinel',
+          image: 'example.azurecr.io/sentinel-api:sha-abc123',
+          env: [{ name: 'PORT', value: '3000' }],
+          probes: [
+            { type: 'Startup', httpGet: { path: '/health', port: 3000, scheme: 'HTTP' } },
+            { type: 'Readiness', httpGet: { path: '/health', port: 3000, scheme: 'HTTP' } },
+            { type: 'Liveness', httpGet: { path: '/health', port: 3000, scheme: 'HTTP' } }
+          ]
+        }]
+      }
+    }
+  };
+
+  const result = validateAzureDeploymentContract({
+    app: validApp,
+    revisions: validRevisions,
+    exactRevision: mismatchedExactRevision,
+    expectedImage: 'example.azurecr.io/sentinel-api:sha-abc123',
+    expectedRevisionSuffix: 'sha-abc123'
+  });
+
+  assert.equal(result.ok, false);
+  assert.ok(result.issues.some((issue) => issue.includes('does not match expected suffix')));
+});
+
 test('rejects when the app is healthy but the exact revision is stale', () => {
   const staleExactRevision = {
     name: 'sentinel-sha-abc123-99',
