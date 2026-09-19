@@ -7,7 +7,11 @@ on:
   workflow_dispatch:
 
 jobs:
+  validate:
+    uses: ./.github/workflows/ci.yml
+
   deploy:
+    needs: validate
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -51,7 +55,7 @@ jobs:
           docker push ${{ secrets.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
           docker push ${{ secrets.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:latest
 
-      - name: Set secret and ingress config
+      - name: Set deployment secrets
         uses: azure/CLI@v2
         with:
           inlineScript: |
@@ -61,12 +65,6 @@ jobs:
               --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
               --secrets "sentinel-hmac-secret=${{ secrets.SENTINEL_HMAC_SECRET }}" \
               "sentinel-api-key=${{ secrets.SENTINEL_API_KEY }}"
-
-            az containerapp ingress update \
-              --name ${{ secrets.CONTAINER_APP_NAME }} \
-              --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
-              --target-port 3000 \
-              --output none
 
       - name: Patch exact-suffix revision template
         shell: bash
@@ -84,69 +82,70 @@ jobs:
           az containerapp show --name "$APP_NAME" --resource-group "$RG" -o json > /tmp/containerapp-live.json
 
           REVISION_SUFFIX="$REVISION_SUFFIX" python - <<'PY'
-import json
-import os
+          import json
+          import os
 
-with open('/tmp/containerapp-live.json', 'r', encoding='utf-8') as fh:
-    app = json.load(fh)
+          with open('/tmp/containerapp-live.json', 'r', encoding='utf-8') as fh:
+              app = json.load(fh)
 
-containers = app.get('properties', {}).get('template', {}).get('containers', [])
-if not containers:
-    raise SystemExit('No containers found for the live Container App.')
+          containers = app.get('properties', {}).get('template', {}).get('containers', [])
+          if not containers:
+              raise SystemExit('No containers found for the live Container App.')
 
-sentinel = next((container for container in containers if container.get('name') == 'sentinel'), None)
-if sentinel is None:
-    raise SystemExit('No named sentinel container found in the live app config.')
+          sentinel = next((container for container in containers if container.get('name') == 'sentinel'), None)
+          if sentinel is None:
+              raise SystemExit('No named sentinel container found in the live app config.')
 
-sentinel['image'] = os.environ['EXPECTED_IMAGE']
-env_items = sentinel.setdefault('env', [])
-env_map = {entry.get('name'): entry for entry in env_items if isinstance(entry, dict) and entry.get('name')}
-env_map['PORT'] = {'name': 'PORT', 'value': '3000'}
-env_map['SENTINEL_HMAC_SECRET'] = {'name': 'SENTINEL_HMAC_SECRET', 'secretRef': 'sentinel-hmac-secret'}
-env_map['SENTINEL_API_KEY'] = {'name': 'SENTINEL_API_KEY', 'secretRef': 'sentinel-api-key'}
-env_map['SENTINEL_API_KEY_TENANT'] = {'name': 'SENTINEL_API_KEY_TENANT', 'value': 'nunncloud'}
-env_map['SENTINEL_API_KEY_ACTOR'] = {'name': 'SENTINEL_API_KEY_ACTOR', 'value': 'sentinel.repo-reader@nunncloud.local'}
-env_map['SENTINEL_API_KEY_ROLE'] = {'name': 'SENTINEL_API_KEY_ROLE', 'value': 'viewer'}
-env_map['SENTINEL_API_KEY_SCOPES'] = {'name': 'SENTINEL_API_KEY_SCOPES', 'value': 'repo:read,audit:read,receipt:read,approval:read'}
-sentinel['env'] = list(env_map.values())
+          sentinel['image'] = os.environ['EXPECTED_IMAGE']
+          env_items = sentinel.setdefault('env', [])
+          env_map = {entry.get('name'): entry for entry in env_items if isinstance(entry, dict) and entry.get('name')}
+          env_map['PORT'] = {'name': 'PORT', 'value': '3000'}
+          env_map['SENTINEL_HMAC_SECRET'] = {'name': 'SENTINEL_HMAC_SECRET', 'secretRef': 'sentinel-hmac-secret'}
+          env_map['SENTINEL_API_KEY'] = {'name': 'SENTINEL_API_KEY', 'secretRef': 'sentinel-api-key'}
+          env_map['SENTINEL_API_KEY_TENANT'] = {'name': 'SENTINEL_API_KEY_TENANT', 'value': 'nunncloud'}
+          env_map['SENTINEL_API_KEY_ACTOR'] = {'name': 'SENTINEL_API_KEY_ACTOR', 'value': 'sentinel.repo-reader@nunncloud.local'}
+          env_map['SENTINEL_API_KEY_ROLE'] = {'name': 'SENTINEL_API_KEY_ROLE', 'value': 'viewer'}
+          env_map['SENTINEL_API_KEY_SCOPES'] = {'name': 'SENTINEL_API_KEY_SCOPES', 'value': 'repo:read,audit:read,receipt:read,approval:read'}
+          sentinel['env'] = list(env_map.values())
 
-required_probe_map = {
-  'Startup': {'path': '/health', 'port': 3000, 'scheme': 'HTTP', 'initialDelaySeconds': 5, 'periodSeconds': 10, 'timeoutSeconds': 3, 'failureThreshold': 30},
-  'Readiness': {'path': '/health', 'port': 3000, 'scheme': 'HTTP', 'initialDelaySeconds': 5, 'periodSeconds': 10, 'timeoutSeconds': 3, 'failureThreshold': 3},
-  'Liveness': {'path': '/health', 'port': 3000, 'scheme': 'HTTP', 'initialDelaySeconds': 10, 'periodSeconds': 30, 'timeoutSeconds': 3, 'failureThreshold': 3}
-}
+          required_probe_map = {
+            'Startup': {'path': '/health', 'port': 3000, 'scheme': 'HTTP', 'initialDelaySeconds': 5, 'periodSeconds': 10, 'timeoutSeconds': 3, 'failureThreshold': 30},
+            'Readiness': {'path': '/health', 'port': 3000, 'scheme': 'HTTP', 'initialDelaySeconds': 5, 'periodSeconds': 10, 'timeoutSeconds': 3, 'failureThreshold': 3},
+            'Liveness': {'path': '/health', 'port': 3000, 'scheme': 'HTTP', 'initialDelaySeconds': 10, 'periodSeconds': 30, 'timeoutSeconds': 3, 'failureThreshold': 3}
+          }
 
-probe_list = sentinel.setdefault('probes', [])
-probe_by_type = {probe.get('type'): probe for probe in probe_list if isinstance(probe, dict) and probe.get('type')}
-for probe_type, details in required_probe_map.items():
-    probe = probe_by_type.get(probe_type) or {'type': probe_type}
-    probe['httpGet'] = {'path': details['path'], 'port': details['port'], 'scheme': details['scheme']}
-    probe['initialDelaySeconds'] = details['initialDelaySeconds']
-    probe['periodSeconds'] = details['periodSeconds']
-    probe['timeoutSeconds'] = details['timeoutSeconds']
-    probe['failureThreshold'] = details['failureThreshold']
-    probe_by_type[probe_type] = probe
+          probe_list = sentinel.setdefault('probes', [])
+          probe_by_type = {probe.get('type'): probe for probe in probe_list if isinstance(probe, dict) and probe.get('type')}
+          for probe_type, details in required_probe_map.items():
+              probe = probe_by_type.get(probe_type) or {'type': probe_type}
+              probe['httpGet'] = {'path': details['path'], 'port': details['port'], 'scheme': details['scheme']}
+              probe['initialDelaySeconds'] = details['initialDelaySeconds']
+              probe['periodSeconds'] = details['periodSeconds']
+              probe['timeoutSeconds'] = details['timeoutSeconds']
+              probe['failureThreshold'] = details['failureThreshold']
+              probe_by_type[probe_type] = probe
 
-sentinel['probes'] = list(probe_by_type.values())
+          sentinel['probes'] = list(probe_by_type.values())
 
-revised_containers = []
-for container in containers:
-    if container.get('name') == 'sentinel':
-        revised_containers.append(sentinel)
-    else:
-        revised_containers.append(container)
+          revised_containers = []
+          for container in containers:
+              if container.get('name') == 'sentinel':
+                  revised_containers.append(sentinel)
+              else:
+                  revised_containers.append(container)
 
-patch = {
-  'properties': {
-    'template': {
-      'revisionSuffix': os.environ['REVISION_SUFFIX'],
-      'containers': revised_containers
-    }
-  }
-}
-with open('/tmp/containerapp-healthfix-patch.json', 'w', encoding='utf-8') as fh:
-    json.dump(patch, fh)
-PY
+          patch = {
+            'properties': {
+              'configuration': {'ingress': {'targetPort': 3000}},
+              'template': {
+                'revisionSuffix': os.environ['REVISION_SUFFIX'],
+                'containers': revised_containers
+              }
+            }
+          }
+          with open('/tmp/containerapp-healthfix-patch.json', 'w', encoding='utf-8') as fh:
+              json.dump(patch, fh)
+          PY
 
           az rest \
             --method patch \
@@ -172,6 +171,7 @@ PY
           EXPECTED_TRY_COUNT=30
 
           for attempt in $(seq 1 "$EXPECTED_TRY_COUNT"); do
+            rm -f /tmp/sentinel-exact-revision.json
             EXPECTED_REVISION_NAME="$(az containerapp revision list --name "$APP_NAME" --resource-group "$RG" --query "[?contains(name, '${EXPECTED_REVISION_SUFFIX}')].name | [0]" -o tsv)"
             if [[ -n "$EXPECTED_REVISION_NAME" ]]; then
               az containerapp revision show --name "$APP_NAME" --resource-group "$RG" --revision "$EXPECTED_REVISION_NAME" -o json > /tmp/sentinel-exact-revision.json
@@ -218,9 +218,11 @@ PY
 
           echo "$APP_JSON" > /tmp/sentinel-app.json
           echo "$REVISION_JSON" > /tmp/sentinel-revisions.json
-          if [[ -n "$EXPECTED_REVISION_NAME" ]]; then
-            az containerapp revision show --name "$APP_NAME" --resource-group "$RG" --revision "$EXPECTED_REVISION_NAME" -o json > /tmp/sentinel-exact-revision.json
+          if [[ -z "$EXPECTED_REVISION_NAME" ]]; then
+            echo "No exact revision matched suffix $EXPECTED_REVISION_SUFFIX."
+            exit 1
           fi
+          az containerapp revision show --name "$APP_NAME" --resource-group "$RG" --revision "$EXPECTED_REVISION_NAME" -o json > /tmp/sentinel-exact-revision.json
 
           EXPECTED_REVISION_SUFFIX="$EXPECTED_REVISION_SUFFIX" \
           EXPECTED_IMAGE="$EXPECTED_IMAGE" \
@@ -229,32 +231,6 @@ PY
           AZURE_DEPLOYMENT_CONTRACT_EXACT_REVISION_PATH=/tmp/sentinel-exact-revision.json \
           node scripts/validate-live-azure-deployment-contract.js /tmp/sentinel-app.json /tmp/sentinel-revisions.json
 
-          python - <<'PY'
-import json
-import os
-
-with open('/tmp/sentinel-exact-revision.json', 'r', encoding='utf-8') as fh:
-    revision = json.load(fh)
-
-expected_port = str(os.environ['EXPECTED_PORT'])
-required = {'Startup', 'Readiness', 'Liveness'}
-containers = revision.get('properties', {}).get('template', {}).get('containers', [])
-sentinel = next((container for container in containers if container.get('name') == 'sentinel'), None)
-if sentinel is None:
-    raise SystemExit('Exact revision does not include sentinel container for probe validation.')
-
-probe_map = {probe.get('type'): probe for probe in sentinel.get('probes', []) if isinstance(probe, dict)}
-missing = sorted(required - set(probe_map))
-if missing:
-    raise SystemExit(f'Missing required probe types: {", ".join(missing)}')
-
-for probe_type in sorted(required):
-    http_get = probe_map[probe_type].get('httpGet') or {}
-    if http_get.get('path') != '/health':
-        raise SystemExit(f'Probe {probe_type} path mismatch: expected /health, got {http_get.get("path")}')
-    if str(http_get.get('port')) != expected_port:
-        raise SystemExit(f'Probe {probe_type} port mismatch: expected {expected_port}, got {http_get.get("port")}')
-PY
 
       - name: Smoke test live endpoint
         uses: azure/CLI@v2
@@ -270,13 +246,13 @@ PY
             HEALTH_JSON="$(curl --fail --show-error --silent --max-time 30 "https://${FQDN}/health")"
             echo "$HEALTH_JSON"
             python - "$HEALTH_JSON" <<'PY'
-import json, sys
-payload = json.loads(sys.argv[1])
-if payload.get('status') != 'ok':
-    raise SystemExit(f"Unexpected /health status: {payload.get('status')}")
-if payload.get('service') != 'sentinel-api':
-    raise SystemExit(f"Unexpected service name: {payload.get('service')}")
-PY
+            import json, sys
+            payload = json.loads(sys.argv[1])
+            if payload.get('status') != 'ok':
+                raise SystemExit(f"Unexpected /health status: {payload.get('status')}")
+            if payload.get('service') != 'sentinel-api':
+                raise SystemExit(f"Unexpected service name: {payload.get('service')}")
+            PY
 
             echo "Testing unauthenticated protected route"
             UNAUTH_STATUS="$(curl --silent --show-error --max-time 30 -o /tmp/approvals-unauth.json -w '%{http_code}' "https://${FQDN}/approvals")"

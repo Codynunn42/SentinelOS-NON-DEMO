@@ -42,7 +42,7 @@ const validApp = {
 
 const validRevisions = [
   {
-    name: 'sentinel-sha-abc123-1',
+    name: 'sentinel--sha-abc123',
     properties: {
       active: true,
       trafficWeight: 100,
@@ -89,7 +89,7 @@ test('accepts a revision whose image is nested under the template container', ()
   const result = validateAzureDeploymentContract({
     app: validApp,
     revisions: [{
-      name: 'sentinel-sha-abc123-9',
+      name: 'sentinel--sha-abc123',
       properties: {
         active: true,
         trafficWeight: 100,
@@ -126,7 +126,7 @@ test('fails closed when the exact revision has no image evidence', () => {
       }
     },
     revisions: [{
-      name: 'sentinel-sha-abc123-9',
+      name: 'sentinel--sha-abc123',
       properties: {
         active: true,
         trafficWeight: 100,
@@ -145,7 +145,7 @@ test('fails closed when the exact revision has no image evidence', () => {
 
 test('rejects when the supplied exact revision name does not match the expected suffix', () => {
   const mismatchedExactRevision = {
-    name: 'sentinel-sha-other-99',
+    name: 'sentinel--sha-other',
     properties: {
       active: true,
       trafficWeight: 100,
@@ -178,9 +178,26 @@ test('rejects when the supplied exact revision name does not match the expected 
   assert.ok(result.issues.some((issue) => issue.includes('does not match expected suffix')));
 });
 
+test('rejects a supplied exact revision without a name', () => {
+  const namelessExactRevision = {
+    properties: validRevisions[0].properties
+  };
+
+  const result = validateAzureDeploymentContract({
+    app: validApp,
+    revisions: validRevisions,
+    exactRevision: namelessExactRevision,
+    expectedImage: 'example.azurecr.io/sentinel-api:sha-abc123',
+    expectedRevisionSuffix: 'sha-abc123'
+  });
+
+  assert.equal(result.ok, false);
+  assert.ok(result.issues.some((issue) => issue.includes('name is missing')));
+});
+
 test('rejects when the app is healthy but the exact revision is stale', () => {
   const staleExactRevision = {
-    name: 'sentinel-sha-abc123-99',
+    name: 'sentinel--sha-abc123',
     properties: {
       active: true,
       trafficWeight: 100,
@@ -225,7 +242,7 @@ test('rejects malformed port and probe state', () => {
       }
     },
     revisions: [{
-      name: 'sentinel-sha-abc123-99',
+      name: 'sentinel--sha-abc123',
       properties: {
         active: true,
         trafficWeight: 100,
@@ -242,7 +259,7 @@ test('rejects malformed port and probe state', () => {
       }
     }],
     exactRevision: {
-      name: 'sentinel-sha-abc123-99',
+      name: 'sentinel--sha-abc123',
       properties: {
         active: true,
         trafficWeight: 100,

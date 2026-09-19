@@ -50,8 +50,15 @@ function validateAzureDeploymentContract({
     return { ok: false, issues };
   }
 
-  const exactRevisionName = String(exactRevisionCandidate?.name ?? '');
-  if (exactRevisionName && !exactRevisionName.includes(expectedSuffix)) {
+  const exactRevisionName = String(exactRevisionCandidate?.name ?? '').trim();
+  if (!exactRevisionName) {
+    issues.push('Exact revision name is missing; provenance cannot be verified.');
+    return { ok: false, issues };
+  }
+  const matchesExpectedSuffix =
+    exactRevisionName === expectedSuffix ||
+    exactRevisionName.endsWith(`--${expectedSuffix}`);
+  if (!matchesExpectedSuffix) {
     issues.push(`Exact revision ${exactRevisionName} does not match expected suffix ${expectedSuffix}.`);
     return { ok: false, issues };
   }
