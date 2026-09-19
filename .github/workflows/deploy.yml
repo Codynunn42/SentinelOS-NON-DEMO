@@ -87,14 +87,14 @@ jobs:
               exit 1
             fi
 
-            IMAGE="$(printf '%s' "$APP_JSON" | python -c 'import json,sys; d=json.load(sys.stdin); print(d.get("properties",{}).get("template",{}).get("containers",[])[0].get("image",""))')"
+            IMAGE="$(printf '%s' "$APP_JSON" | python -c 'import json,sys; d=json.load(sys.stdin); c=d.get("properties",{}).get("template",{}).get("containers",[]); print(next((x.get("image") for x in c if x.get("name") == "sentinel"), ""))')"
             EXPECTED_IMAGE="${{ secrets.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}"
             if [ "$IMAGE" != "$EXPECTED_IMAGE" ]; then
               echo "Container image mismatch: expected $EXPECTED_IMAGE, got $IMAGE" >&2
               exit 1
             fi
 
-            PORT="$(printf '%s' "$APP_JSON" | python -c 'import json,sys; d=json.load(sys.stdin); env=d.get("properties",{}).get("template",{}).get("containers",[])[0].get("env",[]); print(next((e.get("value") for e in env if e.get("name") == "PORT"), ""))')"
+            PORT="$(printf '%s' "$APP_JSON" | python -c 'import json,sys; d=json.load(sys.stdin); c=d.get("properties",{}).get("template",{}).get("containers",[]); print(next((x.get("env") for x in c if x.get("name") == "sentinel"), [])); env = next((x.get("env") for x in c if x.get("name") == "sentinel"), []); print(next((e.get("value") for e in env if e.get("name") == "PORT"), ""))')"
             if [ "$PORT" != "3000" ]; then
               echo "PORT mismatch: expected 3000, got $PORT" >&2
               exit 1
@@ -106,8 +106,46 @@ jobs:
               exit 1
             fi
 
-            PROBES="$(az containerapp show --name "$APP_NAME" --resource-group "$RG" --query properties.template.containers[0].probes -o json)"
+            PROBES="$(az containerapp show --name "$APP_NAME" --resource-group "$RG" --query properties.template.containers[?name=='sentinel'].probes -o json)"
             echo "$PROBES"
+            echo "$PROBES" | python - <<'PY'
+import json, sys
+p=json.load(sys.stdin)
+expected=["Startup","Readiness","Liveness"]
+if not isinstance(p, list):
+    raise SystemExit("Probes are missing or not a list")
+seen=[item.get('type') for item in p if isinstance(item, dict)]
+missing=[t for t in expected if t not in seen]
+if missing:
+    raise SystemExit(f"Missing required probe types: {missing}")
+for item in p:
+    if not isinstance(item, dict):
+        raise SystemExit("Probe item is malformed")
+    if item.get('type') in {'Startup','Readiness','Liveness'}:
+        http=item.get('httpGet') or {}
+        if http.get('path') != '/health':
+            raise SystemExit(f"Probe {item.get('type')} path mismatch: {http.get('path')}")
+        if str(http.get('port')) != '3000':
+            raise SystemExit(f"Probe {item.get('type')} port mismatch: {http.get('port')}")
+PY
+            REVISION_JSON="$(az containerapp revision list --name "$APP_NAME" --resource-group "$RG" -o json)"
+            echo "$REVISION_JSON" | python - <<'PY'
+import json, sys
+items=json.load(sys.stdin)
+if not isinstance(items, list) or not items:
+    raise SystemExit('No revisions found')
+active=[x for x in items if x.get('properties',{}).get('active') is True]
+if not active:
+    raise SystemExit('No active revision found')
+latest=[x for x in items if x.get('properties',{}).get('trafficWeight') == 100]
+if not latest:
+    raise SystemExit('No revision with 100% traffic found')
+for x in active + latest:
+    if x.get('properties',{}).get('healthState') != 'Healthy':
+        raise SystemExit(f"Revision {x.get('name')} is not Healthy")
+    if x.get('properties',{}).get('provisioningState') != 'Succeeded':
+        raise SystemExit(f"Revision {x.get('name')} provisioningState is not Succeeded")
+PY
 
       - name: Smoke test live endpoint
         uses: azure/CLI@v2
