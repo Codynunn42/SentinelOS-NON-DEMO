@@ -115,8 +115,11 @@ function validateAzureDeploymentContract({
     expectedRevision?.image ??
     expectedRevision?.properties?.template?.containers?.find((container) => container?.name === 'sentinel')?.image ??
     expectedRevision?.properties?.containers?.find((container) => container?.name === 'sentinel')?.image ??
-    getSentinelContainer(app)?.image ??
     '';
+
+  if (!revisionImage) {
+    issues.push(`Expected revision ${expectedRevision?.name ?? expectedSuffix} has no image data under the named sentinel container.`);
+  }
 
   if (revisionImage && revisionImage !== expectedImage) {
     issues.push(`Expected revision image mismatch: expected ${expectedImage}, got ${revisionImage}.`);

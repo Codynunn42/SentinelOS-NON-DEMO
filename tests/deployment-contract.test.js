@@ -47,7 +47,13 @@ const validRevisions = [
       active: true,
       trafficWeight: 100,
       healthState: 'Healthy',
-      provisioningState: 'Provisioned'
+      provisioningState: 'Provisioned',
+      template: {
+        containers: [{
+          name: 'sentinel',
+          image: 'example.azurecr.io/sentinel-api:sha-abc123'
+        }]
+      }
     }
   }
 ];
@@ -88,6 +94,32 @@ test('accepts a revision whose image is nested under the template container', ()
 
   assert.equal(result.ok, true);
   assert.deepEqual(result.issues, []);
+});
+
+test('fails closed when the exact revision has no image evidence', () => {
+  const result = validateAzureDeploymentContract({
+    app: {
+      properties: {
+        configuration: { ingress: { targetPort: 3000 } },
+        template: { containers: [{ name: 'sentinel', image: 'example.azurecr.io/sentinel-api:sha-xyz' }] }
+      }
+    },
+    revisions: [{
+      name: 'sentinel-sha-abc123-9',
+      properties: {
+        active: true,
+        trafficWeight: 100,
+        healthState: 'Healthy',
+        provisioningState: 'Provisioned',
+        template: { containers: [{ name: 'sentinel' }] }
+      }
+    }],
+    expectedImage: 'example.azurecr.io/sentinel-api:sha-abc123',
+    expectedRevisionSuffix: 'sha-abc123'
+  });
+
+  assert.equal(result.ok, false);
+  assert.ok(result.issues.some((issue) => issue.includes('no image data')));
 });
 
 test('rejects malformed port and probe state', () => {

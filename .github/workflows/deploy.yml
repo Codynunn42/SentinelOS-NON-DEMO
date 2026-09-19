@@ -139,21 +139,18 @@ for probe_type, details in required_probe_map.items():
     probe_by_type[probe_type] = probe
 
 sentinel['probes'] = list(probe_by_type.values())
+
+revised_containers = []
+for container in containers:
+    if container.get('name') == 'sentinel':
+        revised_containers.append(sentinel)
+    else:
+        revised_containers.append(container)
+
 patch = {
   'properties': {
-    'configuration': {
-      'ingress': {'targetPort': 3000}
-    },
-    'template': {
-      'containers': [
-        {
-          'name': 'sentinel',
-          'image': os.environ['EXPECTED_IMAGE'],
-          'env': sentinel['env'],
-          'probes': sentinel['probes']
-        }
-      ]
-    }
+    'configuration': {'ingress': {'targetPort': 3000}},
+    'template': {'containers': revised_containers}
   }
 }
 with open('/tmp/containerapp-healthfix-patch.json', 'w', encoding='utf-8') as fh:
