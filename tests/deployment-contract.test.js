@@ -80,7 +80,7 @@ test('rejects malformed port and probe state', () => {
       }
     },
     revisions: [{
-      name: 'sentinel-sha-123',
+      name: 'sentinel-sha-abc123-99',
       properties: {
         active: true,
         trafficWeight: 100,

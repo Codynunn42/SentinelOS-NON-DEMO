@@ -71,38 +71,48 @@ function validateAzureDeploymentContract({
   }
 
   const revisionList = Array.isArray(revisions) ? revisions : [];
-  if (revisionList.length === 0) {
-    issues.push('No revisions were returned for validation.');
+  const expectedSuffix = String(expectedRevisionSuffix ?? '').trim();
+  if (!expectedSuffix) {
+    issues.push('Expected revision suffix is empty.');
     return { ok: false, issues };
   }
 
-  const matchingRevision = revisionList.find((revision) => {
-    const name = revision?.name ?? '';
-    return name.includes(expectedRevisionSuffix) && revision?.properties?.trafficWeight === requiredTrafficWeight;
+  const matchingRevisions = revisionList.filter((revision) => {
+    const name = String(revision?.name ?? '');
+    return name.includes(expectedSuffix);
   });
 
-  if (!matchingRevision) {
-    issues.push(`No active revision matching suffix ${expectedRevisionSuffix} and trafficWeight ${requiredTrafficWeight} was found.`);
+  if (matchingRevisions.length === 0) {
+    issues.push(`No revision matching suffix ${expectedSuffix} was found.`);
+    return { ok: false, issues };
   }
 
-  const active = revisionList.filter((revision) => revision?.properties?.active === true);
-  if (active.length === 0) {
-    issues.push('No active revision was found.');
-  }
-
-  const trafficWeighted = revisionList.filter((revision) => revision?.properties?.trafficWeight === requiredTrafficWeight);
-  if (trafficWeighted.length === 0) {
-    issues.push(`No revision with trafficWeight ${requiredTrafficWeight} was found.`);
-  }
-
-  for (const revision of revisionList) {
+  const expectedRevision = matchingRevisions.find((revision) => {
     const props = revision?.properties ?? {};
-    if (props.healthState && props.healthState !== 'Healthy') {
-      issues.push(`Revision ${revision?.name ?? 'unknown'} healthState is not Healthy: ${props.healthState}.`);
-    }
-    if (props.provisioningState && props.provisioningState !== 'Provisioned') {
-      issues.push(`Revision ${revision?.name ?? 'unknown'} provisioningState is not Provisioned: ${props.provisioningState}.`);
-    }
+    return props.active === true && Number(props.trafficWeight ?? -1) === requiredTrafficWeight;
+  }) || matchingRevisions[0];
+
+  if (!expectedRevision) {
+    issues.push(`Expected revision suffix ${expectedSuffix} was not found in the active revision set.`);
+    return { ok: false, issues };
+  }
+
+  const expectedProps = expectedRevision?.properties ?? {};
+  if (expectedProps.active !== true) {
+    issues.push(`Expected revision ${expectedRevision?.name ?? expectedSuffix} is not active.`);
+  }
+  if (Number(expectedProps.trafficWeight ?? -1) !== requiredTrafficWeight) {
+    issues.push(`Expected revision ${expectedRevision?.name ?? expectedSuffix} does not carry ${requiredTrafficWeight}% traffic.`);
+  }
+  if (expectedProps.healthState !== 'Healthy') {
+    issues.push(`Expected revision ${expectedRevision?.name ?? expectedSuffix} healthState is not Healthy: ${expectedProps.healthState}.`);
+  }
+  if (expectedProps.provisioningState !== 'Provisioned') {
+    issues.push(`Expected revision ${expectedRevision?.name ?? expectedSuffix} provisioningState is not Provisioned: ${expectedProps.provisioningState}.`);
+  }
+
+  if (expectedRevision?.image && expectedRevision.image !== expectedImage) {
+    issues.push(`Expected revision image mismatch: expected ${expectedImage}, got ${expectedRevision.image}.`);
   }
 
   return {

@@ -64,6 +64,7 @@ jobs:
               --image ${{ secrets.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }} \
               --set-env-vars \
                 PORT=3000 \
+                SENTINEL_HMAC_SECRET=secretref:sentinel-hmac-secret \
                 SENTINEL_API_KEY=secretref:sentinel-api-key \
                 SENTINEL_API_KEY_TENANT=nunncloud \
                 SENTINEL_API_KEY_ACTOR=sentinel.repo-reader@nunncloud.local \
@@ -72,6 +73,94 @@ jobs:
               --ingress external \
               --target-port 3000 \
               --revision-suffix "$REVISION_SUFFIX"
+
+      - name: Apply sentinel probe contract to live revision
+        shell: bash
+        env:
+          EXPECTED_IMAGE: ${{ secrets.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+        run: |
+          set -euo pipefail
+          APP_NAME="${{ secrets.CONTAINER_APP_NAME }}"
+          RG="${{ secrets.AZURE_RESOURCE_GROUP }}"
+          RESOURCE_ID="$(az containerapp show --name "$APP_NAME" --resource-group "$RG" --query id -o tsv)"
+
+          az containerapp show --name "$APP_NAME" --resource-group "$RG" -o json > /tmp/containerapp-live.json
+
+          python - <<'PY'
+import json
+import os
+
+with open('/tmp/containerapp-live.json', 'r', encoding='utf-8') as fh:
+    app = json.load(fh)
+
+containers = app.get('properties', {}).get('template', {}).get('containers', [])
+if not containers:
+    raise SystemExit('No containers found for the live Container App.')
+
+sentinel = next((container for container in containers if container.get('name') == 'sentinel'), None)
+if sentinel is None:
+    raise SystemExit('No named sentinel container found in the live app config.')
+
+sentinel['image'] = os.environ['EXPECTED_IMAGE']
+env_items = sentinel.setdefault('env', [])
+env_map = {entry.get('name'): entry for entry in env_items if isinstance(entry, dict) and entry.get('name')}
+env_map['PORT'] = {'name': 'PORT', 'value': '3000'}
+env_map['SENTINEL_HMAC_SECRET'] = {'name': 'SENTINEL_HMAC_SECRET', 'secretRef': 'sentinel-hmac-secret'}
+sentinel['env'] = list(env_map.values())
+
+required_probe_map = {
+  'Startup': {'path': '/health', 'port': 3000, 'scheme': 'HTTP', 'initialDelaySeconds': 5, 'periodSeconds': 10, 'timeoutSeconds': 3, 'failureThreshold': 30},
+  'Readiness': {'path': '/health', 'port': 3000, 'scheme': 'HTTP', 'initialDelaySeconds': 5, 'periodSeconds': 10, 'timeoutSeconds': 3, 'failureThreshold': 3},
+  'Liveness': {'path': '/health', 'port': 3000, 'scheme': 'HTTP', 'initialDelaySeconds': 10, 'periodSeconds': 30, 'timeoutSeconds': 3, 'failureThreshold': 3}
+}
+
+probe_list = sentinel.setdefault('probes', [])
+probe_by_type = {probe.get('type'): probe for probe in probe_list if isinstance(probe, dict) and probe.get('type')}
+for probe_type, details in required_probe_map.items():
+    probe = probe_by_type.get(probe_type) or {'type': probe_type}
+    probe['httpGet'] = {'path': details['path'], 'port': details['port'], 'scheme': details['scheme']}
+    probe['initialDelaySeconds'] = details['initialDelaySeconds']
+    probe['periodSeconds'] = details['periodSeconds']
+    probe['timeoutSeconds'] = details['timeoutSeconds']
+    probe['failureThreshold'] = details['failureThreshold']
+    probe_by_type[probe_type] = probe
+
+sentinel['probes'] = list(probe_by_type.values())
+
+patch = {
+  'properties': {
+    'configuration': {
+      'ingress': {
+        'targetPort': 3000
+      }
+    },
+    'template': {
+      'containers': containers
+    }
+  }
+}
+
+with open('/tmp/containerapp-healthfix-patch.json', 'w', encoding='utf-8') as fh:
+    json.dump(patch, fh)
+PY
+
+          az rest \
+            --method patch \
+            --uri "https://management.azure.com${RESOURCE_ID}?api-version=2025-01-01" \
+            --headers "Content-Type=application/merge-patch+json" \
+            --body @/tmp/containerapp-healthfix-patch.json \
+            --output none
+
+          az containerapp ingress update \
+            --name "$APP_NAME" \
+            --resource-group "$RG" \
+            --target-port 3000 \
+            --output none
+
+          az containerapp secret set \
+            --name "$APP_NAME" \
+            --resource-group "$RG" \
+            --secrets "sentinel-hmac-secret=${{ secrets.SENTINEL_HMAC_SECRET }}"
 
       - name: Verify live deployment contract
         shell: bash
@@ -84,7 +173,7 @@ jobs:
           APP_NAME="${{ secrets.CONTAINER_APP_NAME }}"
           RG="${{ secrets.AZURE_RESOURCE_GROUP }}"
           SHORT_SHA="$(printf '%s' "$GITHUB_SHA" | cut -c1-7)"
-          EXPECTED_REVISION_SUFFIX="sha-${SHORT_SHA}"
+          EXPECTED_REVISION_SUFFIX="sha-${SHORT_SHA}-${GITHUB_RUN_NUMBER}"
 
           APP_JSON="$(az containerapp show --name "$APP_NAME" --resource-group "$RG" -o json)"
           REVISION_JSON="$(az containerapp revision list --name "$APP_NAME" --resource-group "$RG" -o json)"
@@ -109,8 +198,24 @@ jobs:
               --output tsv)"
 
             echo "Testing https://${FQDN}/health"
-            curl --fail --show-error --silent --max-time 30 "https://${FQDN}/health"
-            echo
+            HEALTH_JSON="$(curl --fail --show-error --silent --max-time 30 "https://${FQDN}/health")"
+            echo "$HEALTH_JSON"
+            python - "$HEALTH_JSON" <<'PY'
+import json, sys
+payload = json.loads(sys.argv[1])
+if payload.get('status') != 'ok':
+    raise SystemExit(f"Unexpected /health status: {payload.get('status')}")
+if payload.get('service') != 'sentinel-api':
+    raise SystemExit(f"Unexpected service name: {payload.get('service')}")
+PY
+
+            echo "Testing unauthenticated protected route"
+            UNAUTH_STATUS="$(curl --silent --show-error --max-time 30 -o /tmp/approvals-unauth.json -w '%{http_code}' "https://${FQDN}/approvals")"
+            if [[ "$UNAUTH_STATUS" != "401" && "$UNAUTH_STATUS" != "403" ]]; then
+              echo "Expected 401/403 for unauthenticated /approvals, got $UNAUTH_STATUS"
+              cat /tmp/approvals-unauth.json
+              exit 1
+            fi
 
             echo "Testing authenticated protected route"
             curl --fail --show-error --silent --max-time 30 "https://${FQDN}/approvals" \
