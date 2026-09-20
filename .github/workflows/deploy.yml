@@ -31,6 +31,8 @@ jobs:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Synchronize Sentinel API key
+        env:
+          SENTINEL_API_KEY: ${{ secrets.SENTINEL_API_KEY }}
         uses: azure/CLI@v2
         with:
           inlineScript: |
@@ -38,7 +40,7 @@ jobs:
             az containerapp secret set \
               --name ${{ secrets.CONTAINER_APP_NAME }} \
               --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
-              --secrets "sentinel-api-key=${{ secrets.SENTINEL_API_KEY }}"
+              --secrets "sentinel-api-key=${SENTINEL_API_KEY}"
 
       - name: Log in to Azure Container Registry
         run: |
@@ -55,7 +57,10 @@ jobs:
           docker push ${{ secrets.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
           docker push ${{ secrets.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:latest
 
-      - name: Set deployment secrets
+      - name: Set secret and ingress config
+        env:
+          SENTINEL_API_KEY: ${{ secrets.SENTINEL_API_KEY }}
+          SENTINEL_HMAC_SECRET: ${{ secrets.SENTINEL_HMAC_SECRET }}
         uses: azure/CLI@v2
         with:
           inlineScript: |
@@ -63,8 +68,8 @@ jobs:
             az containerapp secret set \
               --name ${{ secrets.CONTAINER_APP_NAME }} \
               --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
-              --secrets "sentinel-hmac-secret=${{ secrets.SENTINEL_HMAC_SECRET }}" \
-              "sentinel-api-key=${{ secrets.SENTINEL_API_KEY }}"
+              --secrets "sentinel-hmac-secret=${SENTINEL_HMAC_SECRET}" \
+              "sentinel-api-key=${SENTINEL_API_KEY}"
 
       - name: Patch exact-suffix revision template
         shell: bash
@@ -171,25 +176,32 @@ jobs:
           EXPECTED_TRY_COUNT=30
 
           for attempt in $(seq 1 "$EXPECTED_TRY_COUNT"); do
-            rm -f /tmp/sentinel-exact-revision.json
-            EXPECTED_REVISION_NAME="$(az containerapp revision list --name "$APP_NAME" --resource-group "$RG" --query "[?contains(name, '${EXPECTED_REVISION_SUFFIX}')].name | [0]" -o tsv)"
-            if [[ -n "$EXPECTED_REVISION_NAME" ]]; then
-              az containerapp revision show --name "$APP_NAME" --resource-group "$RG" --revision "$EXPECTED_REVISION_NAME" -o json > /tmp/sentinel-exact-revision.json
+            EXPECTED_REVISION_NAME=""
+            if ! EXPECTED_REVISION_NAME="$(az containerapp revision list --name "$APP_NAME" --resource-group "$RG" --query "[?contains(name, '${EXPECTED_REVISION_SUFFIX}')].name | [0]" -o tsv 2>/dev/null)"; then
+              echo "Transient Azure CLI revision-list failure while waiting for expected revision on attempt ${attempt}/${EXPECTED_TRY_COUNT}."
             fi
 
-            APP_JSON="$(az containerapp show --name "$APP_NAME" --resource-group "$RG" -o json)"
-            REVISION_JSON="$(az containerapp revision list --name "$APP_NAME" --resource-group "$RG" -o json)"
-            echo "$APP_JSON" > /tmp/sentinel-app.json
-            echo "$REVISION_JSON" > /tmp/sentinel-revisions.json
+            if [[ -n "$EXPECTED_REVISION_NAME" ]]; then
+              if ! az containerapp revision show --name "$APP_NAME" --resource-group "$RG" --revision "$EXPECTED_REVISION_NAME" -o json > /tmp/sentinel-exact-revision.json 2>/dev/null; then
+                echo "Transient Azure CLI exact-revision fetch failure while waiting for revision ${EXPECTED_REVISION_NAME}."
+              fi
+            fi
 
-            if EXPECTED_REVISION_SUFFIX="$EXPECTED_REVISION_SUFFIX" \
-               EXPECTED_IMAGE="$EXPECTED_IMAGE" \
-               EXPECTED_PORT="$EXPECTED_PORT" \
-               REQUIRED_TRAFFIC_WEIGHT="$REQUIRED_TRAFFIC_WEIGHT" \
-               AZURE_DEPLOYMENT_CONTRACT_EXACT_REVISION_PATH=/tmp/sentinel-exact-revision.json \
-               node scripts/validate-live-azure-deployment-contract.js /tmp/sentinel-app.json /tmp/sentinel-revisions.json; then
-              echo "Exact revision settled successfully on attempt ${attempt}."
-              exit 0
+            if APP_JSON="$(az containerapp show --name "$APP_NAME" --resource-group "$RG" -o json 2>/dev/null)" && REVISION_JSON="$(az containerapp revision list --name "$APP_NAME" --resource-group "$RG" -o json 2>/dev/null)"; then
+              echo "$APP_JSON" > /tmp/sentinel-app.json
+              echo "$REVISION_JSON" > /tmp/sentinel-revisions.json
+
+              if EXPECTED_REVISION_SUFFIX="$EXPECTED_REVISION_SUFFIX" \
+                 EXPECTED_IMAGE="$EXPECTED_IMAGE" \
+                 EXPECTED_PORT="$EXPECTED_PORT" \
+                 REQUIRED_TRAFFIC_WEIGHT="$REQUIRED_TRAFFIC_WEIGHT" \
+                 AZURE_DEPLOYMENT_CONTRACT_EXACT_REVISION_PATH=/tmp/sentinel-exact-revision.json \
+                 node scripts/validate-live-azure-deployment-contract.js /tmp/sentinel-app.json /tmp/sentinel-revisions.json; then
+                echo "Exact revision settled successfully on attempt ${attempt}."
+                exit 0
+              fi
+            else
+              echo "Transient Azure CLI failure during app/revision fetch on attempt ${attempt}/${EXPECTED_TRY_COUNT}; retrying."
             fi
 
             echo "Revision not yet healthy; waiting for rollout to settle (attempt ${attempt}/${EXPECTED_TRY_COUNT})..."
@@ -263,8 +275,14 @@ jobs:
             fi
 
             echo "Testing authenticated protected route"
-            curl --fail --show-error --silent --max-time 30 "https://${FQDN}/approvals" \
-              -H "x-api-key: ${{ secrets.SENTINEL_API_KEY }}"
+            AUTH_STATUS="$(curl --silent --show-error --output /tmp/approvals-auth.json --write-out '%{http_code}' --max-time 30 "https://${FQDN}/approvals" -H "x-api-key: ${{ secrets.SENTINEL_API_KEY }}")"
+            echo "Authenticated /approvals HTTP status: ${AUTH_STATUS}"
+            if [[ "$AUTH_STATUS" != "200" ]]; then
+              echo "Authenticated /approvals returned non-200 status; logging a redacted body preview."
+              head -c 256 /tmp/approvals-auth.json || true
+              echo
+              exit 1
+            fi
             echo
 
             az containerapp revision list \
