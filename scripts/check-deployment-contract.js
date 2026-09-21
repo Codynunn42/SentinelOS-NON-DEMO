@@ -18,12 +18,16 @@ const checks = [
       'node scripts/validate-live-azure-deployment-contract.js',
       'az containerapp revision show --name',
       'curl --fail --show-error --silent --max-time 30 "https://${FQDN}/health"',
-      'curl --fail --show-error --silent --max-time 30 "https://${FQDN}/approvals"'
+      'echo "Testing unauthenticated protected route"',
+      'if [[ "$UNAUTH_STATUS" != "401" && "$UNAUTH_STATUS" != "403" ]]; then',
+      'echo "Testing authenticated protected route"',
+      'if [[ "$AUTH_STATUS" != "200" ]]; then',
+      'x-api-key: ${{ secrets.SENTINEL_API_KEY }}'
     ],
     forbidden: [
       'az containerapp ingress update'
     ],
-    message: 'Deploy workflow must validate the exact SHA, coordinate ingress with the revision patch, and verify the live health/auth boundary.'
+    message: 'Deploy workflow must validate the exact SHA, coordinate ingress with the revision patch, and verify the live security boundary by rejecting unauthenticated access and accepting authenticated access.'
   },
   {
     file: ciWorkflowPath,
