@@ -140,6 +140,23 @@ function httpsRequired(): boolean {
     return String(process.env.EXECUTIVE_DESK_REQUIRE_HTTPS || 'false').toLowerCase() === 'true';
 }
 
+function configureTrustedProxy(app: Express): void {
+    const configuredHops = String(process.env.EXECUTIVE_DESK_TRUST_PROXY_HOPS || '').trim();
+    if (!configuredHops) {
+        return;
+    }
+
+    const hops = Number.parseInt(configuredHops, 10);
+    if (!Number.isInteger(hops) || hops < 1 || hops > 2) {
+        throw new Error('EXECUTIVE_DESK_TRUST_PROXY_HOPS must be an integer between 1 and 2');
+    }
+
+    // Trust only the explicitly configured number of managed ingress hops.
+    // This lets Express derive req.ip from the verified proxy chain without
+    // accepting arbitrary client-supplied X-Forwarded-For values.
+    app.set('trust proxy', hops);
+}
+
 function scopeEnforcementEnabled(): boolean {
     return String(process.env.ENTRA_SCOPE_ENFORCEMENT || 'false').toLowerCase() === 'true';
 }
@@ -887,6 +904,7 @@ function errorMiddleware(
  */
 export function mountApiRoutes(app: Express): void {
     const router = Router();
+    configureTrustedProxy(app);
     const rateLimitMiddleware = createPreAuthRateLimitMiddleware();
 
     // Global middleware
