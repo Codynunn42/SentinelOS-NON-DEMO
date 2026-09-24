@@ -225,8 +225,9 @@ function getPrincipalFromJwt(token: string): string {
 
 function getPreAuthRateLimitKey(req: Request): string {
     // This limiter runs before authentication, so request-supplied identity
-    // headers and bearer claims are untrusted and must not select the bucket.
-    return ipKeyGenerator(req.ip || 'unknown');
+    // headers, bearer claims, and forwarded-client IP headers are untrusted and
+    // must not select the bucket. Use the immediate socket peer instead.
+    return ipKeyGenerator(req.socket.remoteAddress || req.ip || 'unknown');
 }
 
 function getRequestScopes(req: Request): string[] {
@@ -983,12 +984,22 @@ export function mountApiRoutes(app: Express): void {
         try {
             const email = normalizePrincipalId(req.body?.email).toLowerCase();
             const password = normalizePrincipalId(req.body?.password);
+            const authenticatedPrincipal = normalizePrincipalId(req.principalId).toLowerCase();
 
             if (!email || !password) {
                 res.status(400).json({
                     error: 'Bad Request',
                     details: 'email and password are required',
                     code: 'MISSING_CREDENTIALS',
+                });
+                return;
+            }
+
+            if (apiAuthEnabled() && authenticatedPrincipal && email !== authenticatedPrincipal) {
+                res.status(403).json({
+                    error: 'Forbidden',
+                    details: 'email must match the authenticated bearer principal',
+                    code: 'PRINCIPAL_MISMATCH',
                 });
                 return;
             }

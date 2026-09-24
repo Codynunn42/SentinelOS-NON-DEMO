@@ -226,6 +226,28 @@ describe('Executive Desk API Routes', () => {
             assert.strictEqual(res.status, 400);
             assert.strictEqual(res.body.code, 'MISSING_CREDENTIALS');
         });
+
+        it('should reject sign-in principal mismatch when API auth is enabled', async () => {
+            const prevApiAuth = process.env.EXECUTIVE_DESK_API_AUTH_REQUIRED;
+            const prevToken = process.env.AUTH_BEARER_TOKEN;
+            const token = buildUnsignedJwt({ sub: 'founder@example.com' });
+
+            process.env.EXECUTIVE_DESK_API_AUTH_REQUIRED = 'true';
+            process.env.AUTH_BEARER_TOKEN = token;
+
+            try {
+                const res = await request(app)
+                    .post('/api/executive/connect/signin')
+                    .set('Authorization', ['Bearer', token].join(' '))
+                    .send({ email: 'other@example.com', password: 'secret' });
+
+                assert.strictEqual(res.status, 403);
+                assert.strictEqual(res.body.code, 'PRINCIPAL_MISMATCH');
+            } finally {
+                restoreEnv('EXECUTIVE_DESK_API_AUTH_REQUIRED', prevApiAuth);
+                restoreEnv('AUTH_BEARER_TOKEN', prevToken);
+            }
+        });
     });
 
     describe('Scope Authorization', () => {
@@ -978,10 +1000,12 @@ describe('Executive Desk API Routes', () => {
             const prevAuthEnabled = process.env.AUTH_ENABLED;
             const prevApiAuth = process.env.EXECUTIVE_DESK_API_AUTH_REQUIRED;
             const prevToken = process.env.AUTH_BEARER_TOKEN;
+            const prevTrustProxyHops = process.env.EXECUTIVE_DESK_TRUST_PROXY_HOPS;
 
             process.env.AUTH_ENABLED = 'true';
             process.env.EXECUTIVE_DESK_API_AUTH_REQUIRED = 'true';
             process.env.AUTH_BEARER_TOKEN = 'known-good-token';
+            process.env.EXECUTIVE_DESK_TRUST_PROXY_HOPS = '1';
 
             const rateLimitApp = express();
             mountApiRoutes(rateLimitApp);
@@ -992,8 +1016,9 @@ describe('Executive Desk API Routes', () => {
                     const fakeJwt = `e30.${fakePayload}.signature-${i}`;
                     const res = await request(rateLimitApp)
                         .get('/api/executive/receipts')
+                        .set('X-Forwarded-For', `198.51.100.${(i % 200) + 1}`)
                         .set('X-Principal-Id', `rotating-${i}@example.com`)
-                        .set('Authorization', `Bearer ${fakeJwt}`);
+                        .set('Authorization', ['Bearer', fakeJwt].join(' '));
 
                     assert.strictEqual(res.status, 401);
                     assert.strictEqual(res.body.code, 'MISSING_OR_INVALID_BEARER');
@@ -1001,8 +1026,9 @@ describe('Executive Desk API Routes', () => {
 
                 const blocked = await request(rateLimitApp)
                     .get('/api/executive/receipts')
+                    .set('X-Forwarded-For', '203.0.113.101')
                     .set('X-Principal-Id', 'rotating-101@example.com')
-                    .set('Authorization', 'Bearer e30.eyJzdWIiOiJyb3RhdGluZy0xMDEifQ.signature-101');
+                    .set('Authorization', '******');
 
                 assert.strictEqual(blocked.status, 429);
                 assert.strictEqual(blocked.body.code, 'RATE_LIMIT_EXCEEDED');
@@ -1010,6 +1036,7 @@ describe('Executive Desk API Routes', () => {
                 restoreEnv('AUTH_ENABLED', prevAuthEnabled);
                 restoreEnv('EXECUTIVE_DESK_API_AUTH_REQUIRED', prevApiAuth);
                 restoreEnv('AUTH_BEARER_TOKEN', prevToken);
+                restoreEnv('EXECUTIVE_DESK_TRUST_PROXY_HOPS', prevTrustProxyHops);
             }
         });
     });
