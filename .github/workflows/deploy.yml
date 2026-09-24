@@ -15,6 +15,7 @@ jobs:
 
   deploy:
     needs: validate
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -83,7 +84,7 @@ jobs:
           APP_NAME="${{ secrets.CONTAINER_APP_NAME }}"
           RG="${{ secrets.AZURE_RESOURCE_GROUP }}"
           SHORT_SHA="$(printf '%s' "$GITHUB_SHA" | cut -c1-7)"
-          REVISION_SUFFIX="sha-${SHORT_SHA}-${GITHUB_RUN_NUMBER}"
+          REVISION_SUFFIX="sha-${SHORT_SHA}-${GITHUB_RUN_NUMBER}-${GITHUB_RUN_ATTEMPT}"
           export REVISION_SUFFIX
           RESOURCE_ID="$(az containerapp show --name "$APP_NAME" --resource-group "$RG" --query id -o tsv)"
 
@@ -175,7 +176,7 @@ jobs:
           APP_NAME="${{ secrets.CONTAINER_APP_NAME }}"
           RG="${{ secrets.AZURE_RESOURCE_GROUP }}"
           SHORT_SHA="$(printf '%s' "$GITHUB_SHA" | cut -c1-7)"
-          EXPECTED_REVISION_SUFFIX="sha-${SHORT_SHA}-${GITHUB_RUN_NUMBER}"
+          EXPECTED_REVISION_SUFFIX="sha-${SHORT_SHA}-${GITHUB_RUN_NUMBER}-${GITHUB_RUN_ATTEMPT}"
           EXPECTED_TRY_COUNT=30
 
           for attempt in $(seq 1 "$EXPECTED_TRY_COUNT"); do
@@ -225,7 +226,7 @@ jobs:
           APP_NAME="${{ secrets.CONTAINER_APP_NAME }}"
           RG="${{ secrets.AZURE_RESOURCE_GROUP }}"
           SHORT_SHA="$(printf '%s' "$GITHUB_SHA" | cut -c1-7)"
-          EXPECTED_REVISION_SUFFIX="sha-${SHORT_SHA}-${GITHUB_RUN_NUMBER}"
+          EXPECTED_REVISION_SUFFIX="sha-${SHORT_SHA}-${GITHUB_RUN_NUMBER}-${GITHUB_RUN_ATTEMPT}"
           EXPECTED_REVISION_NAME="$(az containerapp revision list --name "$APP_NAME" --resource-group "$RG" --query "[?contains(name, '${EXPECTED_REVISION_SUFFIX}')].name | [0]" -o tsv)"
 
           APP_JSON="$(az containerapp show --name "$APP_NAME" --resource-group "$RG" -o json)"
