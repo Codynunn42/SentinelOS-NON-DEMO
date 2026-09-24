@@ -114,6 +114,7 @@ declare global {
             principalId?: string;
             requestId?: string;
             tokenScopes?: string[];
+            verifiedJwtPayload?: Record<string, unknown>;
         }
     }
 }
@@ -229,31 +230,25 @@ function getPreAuthRateLimitKey(req: Request): string {
 }
 
 function getRequestScopes(req: Request): string[] {
-    const headerValues = [
-        req.headers['x-auth-scopes'],
-        req.headers['x-msal-scopes'],
-        req.headers['x-token-scopes'],
-        req.headers['x-scope'],
-    ];
-
     const scopes = new Set<string>();
+    const payload = req.verifiedJwtPayload;
 
-    headerValues.forEach((value) => {
-        if (typeof value === 'string') {
-            parseScopes(value).forEach((scope) => scopes.add(scope));
-        }
-    });
-
-    const bearer = getBearerToken(req);
-    if (bearer) {
-        const payload = decodeJwtPayload(bearer);
-        if (payload) {
-            parseScopes(payload.scp).forEach((scope) => scopes.add(scope));
-            parseScopes(payload.scope).forEach((scope) => scopes.add(scope));
-        }
+    if (payload) {
+        parseScopes(payload.scp).forEach((scope) => scopes.add(scope));
+        parseScopes(payload.scope).forEach((scope) => scopes.add(scope));
     }
 
     return Array.from(scopes);
+}
+
+function setVerifiedJwtPayload(req: Request, token: string): void {
+    const payload = decodeJwtPayload(token);
+    if (payload) {
+        req.verifiedJwtPayload = payload;
+        return;
+    }
+
+    delete req.verifiedJwtPayload;
 }
 
 function requireScopes(requiredScopes: string[], mode: 'any' | 'all' = 'any') {
@@ -721,6 +716,7 @@ function rateLimitHeadersMiddleware(req: Request, res: Response, next: NextFunct
  * Principal authentication middleware
  */
 function authMiddleware(req: Request, res: Response, next: NextFunction): void {
+    delete req.verifiedJwtPayload;
     const principalFromHeader =
         typeof req.headers['x-principal-id'] === 'string'
             ? req.headers['x-principal-id'].trim()
@@ -747,6 +743,8 @@ function authMiddleware(req: Request, res: Response, next: NextFunction): void {
             });
             return;
         }
+
+        setVerifiedJwtPayload(req, bearer);
     }
 
     const principalId =
@@ -775,6 +773,7 @@ function authMiddleware(req: Request, res: Response, next: NextFunction): void {
  * where token matches AUTH_BEARER_TOKEN (or JWT_SECRET fallback).
  */
 function proxyAuthMiddleware(req: Request, res: Response, next: NextFunction): void {
+    delete req.verifiedJwtPayload;
     if (!authEnabled()) {
         next();
         return;
@@ -801,6 +800,7 @@ function proxyAuthMiddleware(req: Request, res: Response, next: NextFunction): v
         return;
     }
 
+    setVerifiedJwtPayload(req, token);
     next();
 }
 

@@ -17,6 +17,11 @@ function restoreEnv(name: string, value: string | undefined): void {
     process.env[name] = value;
 }
 
+function buildUnsignedJwt(payload: Record<string, unknown>): string {
+    const encodedPayload = Buffer.from(JSON.stringify(payload)).toString('base64url');
+    return `e30.${encodedPayload}.signature`;
+}
+
 describe('Executive Desk API Routes', () => {
     let app: Express;
 
@@ -215,10 +220,16 @@ describe('Executive Desk API Routes', () => {
 
         let prevScopeEnforcement: string | undefined;
         let prevImpersonationFallback: string | undefined;
+        let prevAuthEnabled: string | undefined;
+        let prevApiAuthRequired: string | undefined;
+        let prevAuthBearerToken: string | undefined;
 
         before(() => {
             prevScopeEnforcement = process.env.ENTRA_SCOPE_ENFORCEMENT;
             prevImpersonationFallback = process.env.ENTRA_ALLOW_USER_IMPERSONATION_FALLBACK;
+            prevAuthEnabled = process.env.AUTH_ENABLED;
+            prevApiAuthRequired = process.env.EXECUTIVE_DESK_API_AUTH_REQUIRED;
+            prevAuthBearerToken = process.env.AUTH_BEARER_TOKEN;
             process.env.ENTRA_SCOPE_ENFORCEMENT = 'true';
             process.env.ENTRA_ALLOW_USER_IMPERSONATION_FALLBACK = 'false';
         });
@@ -235,22 +246,38 @@ describe('Executive Desk API Routes', () => {
             } else {
                 process.env.ENTRA_ALLOW_USER_IMPERSONATION_FALLBACK = prevImpersonationFallback;
             }
+
+            restoreEnv('AUTH_ENABLED', prevAuthEnabled);
+            restoreEnv('EXECUTIVE_DESK_API_AUTH_REQUIRED', prevApiAuthRequired);
+            restoreEnv('AUTH_BEARER_TOKEN', prevAuthBearerToken);
         });
 
         it('should reject missing scopes for Vault.Read-protected endpoint', async () => {
+            const token = buildUnsignedJwt({ sub: principal });
+            const authorization = ['Bearer', token].join(' ');
+            process.env.AUTH_ENABLED = 'true';
+            process.env.EXECUTIVE_DESK_API_AUTH_REQUIRED = 'true';
+            process.env.AUTH_BEARER_TOKEN = token;
+
             const res = await request(app)
                 .get('/api/executive/receipts')
-                .set('X-Principal-Id', principal);
+                .set('Authorization', authorization);
 
             assert.strictEqual(res.status, 403);
             assert.strictEqual(res.body.code, 'MISSING_REQUIRED_SCOPE');
         });
 
-        it('should reject wrong scopes for Vault.Read-protected endpoint', async () => {
+        it('should reject client-supplied scope headers for Vault.Read-protected endpoint', async () => {
+            const token = buildUnsignedJwt({ sub: principal });
+            const authorization = ['Bearer', token].join(' ');
+            process.env.AUTH_ENABLED = 'true';
+            process.env.EXECUTIVE_DESK_API_AUTH_REQUIRED = 'true';
+            process.env.AUTH_BEARER_TOKEN = token;
+
             const res = await request(app)
                 .get('/api/executive/receipts')
-                .set('X-Principal-Id', principal)
-                .set('X-Auth-Scopes', 'Executive.Read');
+                .set('Authorization', authorization)
+                .set('X-Auth-Scopes', 'Vault.Read');
 
             assert.strictEqual(res.status, 403);
             assert.strictEqual(res.body.code, 'MISSING_REQUIRED_SCOPE');
@@ -258,11 +285,31 @@ describe('Executive Desk API Routes', () => {
             assert.strictEqual(res.body.requiredScopes.includes('Vault.Read'), true);
         });
 
-        it('should accept required scope for Vault.Read-protected endpoint', async () => {
+        it('should reject wrong verified token scope for Vault.Read-protected endpoint', async () => {
+            const token = buildUnsignedJwt({ sub: principal, scp: 'Executive.Read' });
+            const authorization = ['Bearer', token].join(' ');
+            process.env.AUTH_ENABLED = 'true';
+            process.env.EXECUTIVE_DESK_API_AUTH_REQUIRED = 'true';
+            process.env.AUTH_BEARER_TOKEN = token;
+
             const res = await request(app)
                 .get('/api/executive/receipts')
-                .set('X-Principal-Id', principal)
-                .set('X-Auth-Scopes', 'Vault.Read');
+                .set('Authorization', authorization);
+
+            assert.strictEqual(res.status, 403);
+            assert.strictEqual(res.body.code, 'MISSING_REQUIRED_SCOPE');
+        });
+
+        it('should accept required verified token scope for Vault.Read-protected endpoint', async () => {
+            const token = buildUnsignedJwt({ sub: principal, scp: 'Vault.Read' });
+            const authorization = ['Bearer', token].join(' ');
+            process.env.AUTH_ENABLED = 'true';
+            process.env.EXECUTIVE_DESK_API_AUTH_REQUIRED = 'true';
+            process.env.AUTH_BEARER_TOKEN = token;
+
+            const res = await request(app)
+                .get('/api/executive/receipts')
+                .set('Authorization', authorization);
 
             assert.strictEqual(res.status, 200);
         });
