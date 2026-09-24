@@ -205,20 +205,10 @@ function getPrincipalFromJwt(token: string): string {
     return '';
 }
 
-function getRateLimitKey(req: Request): string {
-    const principalFromHeader =
-        typeof req.headers['x-principal-id'] === 'string'
-            ? req.headers['x-principal-id'].trim()
-            : '';
-
-    if (principalFromHeader) {
-        return principalFromHeader;
-    }
-
-    const bearer = getBearerToken(req);
-    const principalFromBearer = getPrincipalFromJwt(bearer);
-
-    return principalFromBearer || ipKeyGenerator(req.ip || 'unknown');
+function getPreAuthRateLimitKey(req: Request): string {
+    // This limiter runs before authentication, so request-supplied identity
+    // headers and bearer claims are untrusted and must not select the bucket.
+    return ipKeyGenerator(req.ip || 'unknown');
 }
 
 function getRequestScopes(req: Request): string[] {
@@ -677,20 +667,22 @@ async function buildSentinelAiScanResponse(focusHint: string = ''): Promise<Sent
     };
 }
 
-const rateLimitMiddleware = rateLimit({
-    windowMs: RATE_LIMIT_WINDOW_MS,
-    limit: RATE_LIMIT_MAX_REQUESTS,
-    legacyHeaders: false,
-    standardHeaders: false,
-    keyGenerator: getRateLimitKey,
-    handler: (_req: Request, res: Response): void => {
-        res.status(429).json({
-            error: 'Too Many Requests',
-            details: `Rate limit exceeded: ${RATE_LIMIT_MAX_REQUESTS} requests per minute`,
-            code: 'RATE_LIMIT_EXCEEDED',
-        });
-    },
-});
+function createPreAuthRateLimitMiddleware() {
+    return rateLimit({
+        windowMs: RATE_LIMIT_WINDOW_MS,
+        limit: RATE_LIMIT_MAX_REQUESTS,
+        legacyHeaders: false,
+        standardHeaders: false,
+        keyGenerator: getPreAuthRateLimitKey,
+        handler: (_req: Request, res: Response): void => {
+            res.status(429).json({
+                error: 'Too Many Requests',
+                details: `Rate limit exceeded: ${RATE_LIMIT_MAX_REQUESTS} requests per minute`,
+                code: 'RATE_LIMIT_EXCEEDED',
+            });
+        },
+    });
+}
 
 function rateLimitHeadersMiddleware(req: Request, res: Response, next: NextFunction): void {
     const rateLimitState = (req as Request & {
@@ -895,6 +887,7 @@ function errorMiddleware(
  */
 export function mountApiRoutes(app: Express): void {
     const router = Router();
+    const rateLimitMiddleware = createPreAuthRateLimitMiddleware();
 
     // Global middleware
     app.use(express.json());
