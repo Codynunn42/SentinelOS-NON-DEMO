@@ -865,6 +865,47 @@ describe('Executive Desk API Routes', () => {
         });
     });
 
+    describe('Pre-auth Rate Limiting', () => {
+        it('should reject the 101st request even when untrusted identity values rotate', async () => {
+            const prevAuthEnabled = process.env.AUTH_ENABLED;
+            const prevApiAuth = process.env.EXECUTIVE_DESK_API_AUTH_REQUIRED;
+            const prevToken = process.env.AUTH_BEARER_TOKEN;
+
+            process.env.AUTH_ENABLED = 'true';
+            process.env.EXECUTIVE_DESK_API_AUTH_REQUIRED = 'true';
+            process.env.AUTH_BEARER_TOKEN = 'known-good-token';
+
+            const rateLimitApp = express();
+            mountApiRoutes(rateLimitApp);
+
+            try {
+                for (let i = 0; i < 100; i += 1) {
+                    const fakePayload = Buffer.from(JSON.stringify({ sub: `attacker-${i}` })).toString('base64url');
+                    const fakeJwt = `e30.${fakePayload}.signature-${i}`;
+                    const res = await request(rateLimitApp)
+                        .get('/api/executive/receipts')
+                        .set('X-Principal-Id', `rotating-${i}@example.com`)
+                        .set('Authorization', `Bearer ${fakeJwt}`);
+
+                    assert.strictEqual(res.status, 401);
+                    assert.strictEqual(res.body.code, 'MISSING_OR_INVALID_BEARER');
+                }
+
+                const blocked = await request(rateLimitApp)
+                    .get('/api/executive/receipts')
+                    .set('X-Principal-Id', 'rotating-101@example.com')
+                    .set('Authorization', 'Bearer e30.eyJzdWIiOiJyb3RhdGluZy0xMDEifQ.signature-101');
+
+                assert.strictEqual(blocked.status, 429);
+                assert.strictEqual(blocked.body.code, 'RATE_LIMIT_EXCEEDED');
+            } finally {
+                restoreEnv('AUTH_ENABLED', prevAuthEnabled);
+                restoreEnv('EXECUTIVE_DESK_API_AUTH_REQUIRED', prevApiAuth);
+                restoreEnv('AUTH_BEARER_TOKEN', prevToken);
+            }
+        });
+    });
+
     describe('Error Handling', () => {
         it('should return 404 for unknown endpoint', async () => {
             const res = await request(app)
