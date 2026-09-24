@@ -10,6 +10,7 @@ import express, {
     NextFunction,
     Router,
 } from 'express';
+import { ipKeyGenerator, rateLimit } from 'express-rate-limit';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -117,8 +118,6 @@ declare global {
     }
 }
 
-// Rate limiting state (simple in-memory; use redis for production)
-const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
 const RATE_LIMIT_WINDOW_MS = 60 * 1000; // 1 minute
 const RATE_LIMIT_MAX_REQUESTS = 100;
 
@@ -204,6 +203,22 @@ function getPrincipalFromJwt(token: string): string {
     }
 
     return '';
+}
+
+function getRateLimitKey(req: Request): string {
+    const principalFromHeader =
+        typeof req.headers['x-principal-id'] === 'string'
+            ? req.headers['x-principal-id'].trim()
+            : '';
+
+    if (principalFromHeader) {
+        return principalFromHeader;
+    }
+
+    const bearer = getBearerToken(req);
+    const principalFromBearer = getPrincipalFromJwt(bearer);
+
+    return principalFromBearer || ipKeyGenerator(req.ip || 'unknown');
 }
 
 function getRequestScopes(req: Request): string[] {
@@ -662,38 +677,33 @@ async function buildSentinelAiScanResponse(focusHint: string = ''): Promise<Sent
     };
 }
 
-/**
- * Rate limiting middleware
- */
-function rateLimitMiddleware(
-    req: Request,
-    res: Response,
-    next: NextFunction,
-): void {
-    const principalId = req.principalId || req.ip || 'unknown';
-    const now = Date.now();
-
-    let entry = rateLimitMap.get(principalId);
-
-    if (!entry || now >= entry.resetAt) {
-        // Create new window
-        entry = { count: 0, resetAt: now + RATE_LIMIT_WINDOW_MS };
-        rateLimitMap.set(principalId, entry);
-    }
-
-    entry.count += 1;
-
-    if (entry.count > RATE_LIMIT_MAX_REQUESTS) {
+const rateLimitMiddleware = rateLimit({
+    windowMs: RATE_LIMIT_WINDOW_MS,
+    limit: RATE_LIMIT_MAX_REQUESTS,
+    legacyHeaders: false,
+    standardHeaders: false,
+    keyGenerator: getRateLimitKey,
+    handler: (_req: Request, res: Response): void => {
         res.status(429).json({
             error: 'Too Many Requests',
             details: `Rate limit exceeded: ${RATE_LIMIT_MAX_REQUESTS} requests per minute`,
             code: 'RATE_LIMIT_EXCEEDED',
         });
-        return;
-    }
+    },
+});
 
-    res.set('X-RateLimit-Remaining', String(RATE_LIMIT_MAX_REQUESTS - entry.count));
-    res.set('X-RateLimit-Reset', String(entry.resetAt));
+function rateLimitHeadersMiddleware(req: Request, res: Response, next: NextFunction): void {
+    const rateLimitState = (req as Request & {
+        rateLimit?: {
+            remaining?: number;
+            resetTime?: Date;
+        };
+    }).rateLimit;
+
+    if (rateLimitState) {
+        res.set('X-RateLimit-Remaining', String(rateLimitState.remaining ?? RATE_LIMIT_MAX_REQUESTS));
+        res.set('X-RateLimit-Reset', String(rateLimitState.resetTime?.getTime() ?? (Date.now() + RATE_LIMIT_WINDOW_MS)));
+    }
 
     next();
 }
@@ -905,7 +915,7 @@ export function mountApiRoutes(app: Express): void {
     app.use('/executive/sovereign-demo', express.static(sovereignDemoDir));
     app.use('/executive', express.static(publicDir));
 
-    app.get('/api/executive/connect/status', authMiddleware, rateLimitMiddleware, requireScopes(['Executive.Read']), async (_req: Request, res: Response, next: NextFunction) => {
+    app.get('/api/executive/connect/status', rateLimitMiddleware, rateLimitHeadersMiddleware, authMiddleware, requireScopes(['Executive.Read']), async (_req: Request, res: Response, next: NextFunction) => {
         try {
             const probe = await probeRemoteSentinelAi();
             const config = getSentinelAiConnectionConfig();
@@ -923,7 +933,7 @@ export function mountApiRoutes(app: Express): void {
         }
     });
 
-    app.post('/api/executive/connect/signin', authMiddleware, rateLimitMiddleware, requireScopes(['Infrastructure.Manage']), async (req: Request, res: Response, next: NextFunction) => {
+    app.post('/api/executive/connect/signin', rateLimitMiddleware, rateLimitHeadersMiddleware, authMiddleware, requireScopes(['Infrastructure.Manage']), async (req: Request, res: Response, next: NextFunction) => {
         try {
             const email = normalizePrincipalId(req.body?.email).toLowerCase();
             const password = normalizePrincipalId(req.body?.password);
@@ -944,7 +954,7 @@ export function mountApiRoutes(app: Express): void {
         }
     });
 
-    app.post('/proxy/command', proxyAuthMiddleware, rateLimitMiddleware, requireScopes(['Governance.Approve']), async (
+    app.post('/proxy/command', rateLimitMiddleware, rateLimitHeadersMiddleware, proxyAuthMiddleware, requireScopes(['Governance.Approve']), async (
         req: Request,
         res: Response,
         next: NextFunction,
@@ -959,8 +969,9 @@ export function mountApiRoutes(app: Express): void {
 
     // Protected routes
     const protectedRouter = Router();
-    protectedRouter.use(authMiddleware);
     protectedRouter.use(rateLimitMiddleware);
+    protectedRouter.use(rateLimitHeadersMiddleware);
+    protectedRouter.use(authMiddleware);
 
     // Receipt endpoints
     protectedRouter.get('/receipts', requireScopes(['Vault.Read']), async (req: Request, res: Response, next: NextFunction) => {
