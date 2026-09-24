@@ -135,6 +135,7 @@ jobs:
                 "SENTINEL_API_KEY_SCOPES": {
                     "value": "repo:read,audit:read,receipt:read,approval:read"
                 },
+                "EXECUTIVE_DESK_TRUST_PROXY_HOPS": {"value": "1"},
             }
             env_by_name = {
                 item.get("name"): item
@@ -171,6 +172,10 @@ jobs:
                     "template": {
                         "revisionSuffix": revision_suffix,
                         "containers": containers,
+                        "scale": {
+                            "minReplicas": 1,
+                            "maxReplicas": 1,
+                        },
                     }
                 }
             }
@@ -325,11 +330,18 @@ jobs:
               --revision "$REVISION_NAME" \
               --query "properties.template.containers[0].image" \
               --output tsv)"
+            deployed_max_replicas="$(az containerapp revision show \
+              --name "$APP_NAME" \
+              --resource-group "$RESOURCE_GROUP" \
+              --revision "$REVISION_NAME" \
+              --query "properties.template.scale.maxReplicas" \
+              --output tsv)"
 
             test "$latest_revision" = "$REVISION_NAME"
             test "$latest_traffic" = "100"
             test "$deployed_image" = "$EXPECTED_IMAGE"
-            echo "Provenance verified: revision=${REVISION_NAME} image-tag=${GITHUB_SHA} traffic=100"
+            test "$deployed_max_replicas" = "1"
+            echo "Provenance verified: revision=${REVISION_NAME} image-tag=${GITHUB_SHA} traffic=100 maxReplicas=1"
 
             request_with_retry \
               "health" \
