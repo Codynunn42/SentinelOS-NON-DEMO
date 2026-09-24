@@ -171,6 +171,10 @@ function getExpectedProxyToken(): string {
     return String(token || '').trim();
 }
 
+function hasExplicitAuthBearerToken(): boolean {
+    return Boolean(String(process.env.AUTH_BEARER_TOKEN || '').trim());
+}
+
 function decodeJwtPayload(token: string): Record<string, unknown> | null {
     const segments = token.split('.');
     if (segments.length !== 3) {
@@ -243,6 +247,11 @@ function getRequestScopes(req: Request): string[] {
 }
 
 function setAuthenticatedTokenPayload(req: Request, token: string): void {
+    if (!hasExplicitAuthBearerToken()) {
+        delete req.authenticatedTokenPayload;
+        return;
+    }
+
     const payload = decodeJwtPayload(token);
     if (payload) {
         req.authenticatedTokenPayload = payload;
@@ -850,7 +859,11 @@ function requireHttpsMiddleware(req: Request, res: Response, next: NextFunction)
     const forwardedProto = Array.isArray(forwardedProtoRaw)
         ? forwardedProtoRaw[0]
         : String(forwardedProtoRaw || '');
-    const isHttps = req.secure || forwardedProto.split(',')[0].trim().toLowerCase() === 'https';
+    const trustedProxyConfigured = Boolean(req.app.get('trust proxy'));
+    const isHttps = req.secure || (
+        trustedProxyConfigured
+        && forwardedProto.split(',')[0].trim().toLowerCase() === 'https'
+    );
 
     if (!isHttps) {
         res.status(426).json({

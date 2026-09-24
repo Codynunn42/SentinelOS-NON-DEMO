@@ -171,21 +171,23 @@ describe('Executive Desk API Routes', () => {
 
         it('should accept forwarded HTTPS requests when HTTPS is required', async () => {
             const prevHttps = process.env.EXECUTIVE_DESK_REQUIRE_HTTPS;
+            const prevTrustProxyHops = process.env.EXECUTIVE_DESK_TRUST_PROXY_HOPS;
             process.env.EXECUTIVE_DESK_REQUIRE_HTTPS = 'true';
+            process.env.EXECUTIVE_DESK_TRUST_PROXY_HOPS = '1';
+
+            const httpsApp = express();
+            mountApiRoutes(httpsApp);
 
             try {
-                const res = await request(app)
+                const res = await request(httpsApp)
                     .get('/health')
                     .set('X-Forwarded-Proto', 'https');
 
                 assert.strictEqual(res.status, 200);
                 assert(res.headers['strict-transport-security']);
             } finally {
-                if (prevHttps === undefined) {
-                    delete process.env.EXECUTIVE_DESK_REQUIRE_HTTPS;
-                } else {
-                    process.env.EXECUTIVE_DESK_REQUIRE_HTTPS = prevHttps;
-                }
+                restoreEnv('EXECUTIVE_DESK_REQUIRE_HTTPS', prevHttps);
+                restoreEnv('EXECUTIVE_DESK_TRUST_PROXY_HOPS', prevTrustProxyHops);
             }
         });
     });
