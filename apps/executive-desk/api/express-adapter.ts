@@ -114,7 +114,7 @@ declare global {
             principalId?: string;
             requestId?: string;
             tokenScopes?: string[];
-            verifiedJwtPayload?: Record<string, unknown>;
+            authenticatedTokenPayload?: Record<string, unknown>;
         }
     }
 }
@@ -231,7 +231,7 @@ function getPreAuthRateLimitKey(req: Request): string {
 
 function getRequestScopes(req: Request): string[] {
     const scopes = new Set<string>();
-    const payload = req.verifiedJwtPayload;
+    const payload = req.authenticatedTokenPayload;
 
     if (payload) {
         parseScopes(payload.scp).forEach((scope) => scopes.add(scope));
@@ -241,14 +241,14 @@ function getRequestScopes(req: Request): string[] {
     return Array.from(scopes);
 }
 
-function setVerifiedJwtPayload(req: Request, token: string): void {
+function setAuthenticatedTokenPayload(req: Request, token: string): void {
     const payload = decodeJwtPayload(token);
     if (payload) {
-        req.verifiedJwtPayload = payload;
+        req.authenticatedTokenPayload = payload;
         return;
     }
 
-    delete req.verifiedJwtPayload;
+    delete req.authenticatedTokenPayload;
 }
 
 function requireScopes(requiredScopes: string[], mode: 'any' | 'all' = 'any') {
@@ -716,7 +716,7 @@ function rateLimitHeadersMiddleware(req: Request, res: Response, next: NextFunct
  * Principal authentication middleware
  */
 function authMiddleware(req: Request, res: Response, next: NextFunction): void {
-    delete req.verifiedJwtPayload;
+    delete req.authenticatedTokenPayload;
     const principalFromHeader =
         typeof req.headers['x-principal-id'] === 'string'
             ? req.headers['x-principal-id'].trim()
@@ -744,7 +744,30 @@ function authMiddleware(req: Request, res: Response, next: NextFunction): void {
             return;
         }
 
-        setVerifiedJwtPayload(req, bearer);
+        setAuthenticatedTokenPayload(req, expectedToken);
+
+        const principalId = getPrincipalFromJwt(expectedToken);
+        if (!principalId) {
+            res.status(500).json({
+                error: 'Internal Server Error',
+                details: 'API auth requires AUTH_BEARER_TOKEN/JWT_SECRET to include a principal subject claim',
+                code: 'AUTH_PRINCIPAL_MISCONFIGURED',
+            });
+            return;
+        }
+
+        if (principalFromHeader && principalFromHeader !== principalId) {
+            res.status(403).json({
+                error: 'Forbidden',
+                details: 'X-Principal-Id must match the authenticated bearer principal',
+                code: 'PRINCIPAL_MISMATCH',
+            });
+            return;
+        }
+
+        req.principalId = principalId;
+        next();
+        return;
     }
 
     const principalId =
@@ -773,7 +796,7 @@ function authMiddleware(req: Request, res: Response, next: NextFunction): void {
  * where token matches AUTH_BEARER_TOKEN (or JWT_SECRET fallback).
  */
 function proxyAuthMiddleware(req: Request, res: Response, next: NextFunction): void {
-    delete req.verifiedJwtPayload;
+    delete req.authenticatedTokenPayload;
     if (!authEnabled()) {
         next();
         return;
@@ -800,7 +823,19 @@ function proxyAuthMiddleware(req: Request, res: Response, next: NextFunction): v
         return;
     }
 
-    setVerifiedJwtPayload(req, token);
+    setAuthenticatedTokenPayload(req, expectedToken);
+
+    const principalId = getPrincipalFromJwt(expectedToken);
+    if (!principalId) {
+        res.status(500).json({
+            error: 'Internal Server Error',
+            details: 'AUTH_ENABLED=true requires AUTH_BEARER_TOKEN/JWT_SECRET to include a principal subject claim',
+            code: 'AUTH_PRINCIPAL_MISCONFIGURED',
+        });
+        return;
+    }
+
+    req.principalId = principalId;
     next();
 }
 
@@ -971,7 +1006,30 @@ export function mountApiRoutes(app: Express): void {
         next: NextFunction,
     ) => {
         try {
-            const response = await handleCommand(req.body as ProxyCommandRequest);
+            const proxyRequest = req.body as ProxyCommandRequest;
+            const authenticatedPrincipal = normalizePrincipalId(req.principalId);
+            const requestedPrincipal = normalizePrincipalId(proxyRequest?.payload?.principalId);
+
+            if (authenticatedPrincipal) {
+                if (!requestedPrincipal || requestedPrincipal !== authenticatedPrincipal) {
+                    res.status(403).json({
+                        error: 'Forbidden',
+                        details: 'payload.principalId must match the authenticated bearer principal',
+                        code: 'PRINCIPAL_MISMATCH',
+                    });
+                    return;
+                }
+            }
+
+            const response = await handleCommand(authenticatedPrincipal
+                ? {
+                    ...proxyRequest,
+                    payload: {
+                        ...(proxyRequest.payload || {}),
+                        principalId: authenticatedPrincipal,
+                    },
+                }
+                : proxyRequest);
             res.json(response);
         } catch (err) {
             next(err);
