@@ -10,6 +10,7 @@ import express, {
     NextFunction,
     Router,
 } from 'express';
+import { ipKeyGenerator, rateLimit } from 'express-rate-limit';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -113,12 +114,11 @@ declare global {
             principalId?: string;
             requestId?: string;
             tokenScopes?: string[];
+            authenticatedTokenPayload?: Record<string, unknown>;
         }
     }
 }
 
-// Rate limiting state (simple in-memory; use redis for production)
-const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
 const RATE_LIMIT_WINDOW_MS = 60 * 1000; // 1 minute
 const RATE_LIMIT_MAX_REQUESTS = 100;
 
@@ -141,6 +141,23 @@ function httpsRequired(): boolean {
     return String(process.env.EXECUTIVE_DESK_REQUIRE_HTTPS || 'false').toLowerCase() === 'true';
 }
 
+function configureTrustedProxy(app: Express): void {
+    const configuredHops = String(process.env.EXECUTIVE_DESK_TRUST_PROXY_HOPS || '').trim();
+    if (!configuredHops) {
+        return;
+    }
+
+    if (!/^[12]$/.test(configuredHops)) {
+        throw new Error('EXECUTIVE_DESK_TRUST_PROXY_HOPS must be an integer between 1 and 2');
+    }
+    const hops = Number(configuredHops);
+
+    // Trust only the explicitly configured number of managed ingress hops.
+    // This lets Express derive req.ip from the verified proxy chain without
+    // accepting arbitrary client-supplied X-Forwarded-For values.
+    app.set('trust proxy', hops);
+}
+
 function scopeEnforcementEnabled(): boolean {
     return String(process.env.ENTRA_SCOPE_ENFORCEMENT || 'false').toLowerCase() === 'true';
 }
@@ -152,6 +169,10 @@ function allowUserImpersonationFallback(): boolean {
 function getExpectedProxyToken(): string {
     const token = process.env.AUTH_BEARER_TOKEN || process.env.JWT_SECRET;
     return String(token || '').trim();
+}
+
+function hasExplicitAuthBearerToken(): boolean {
+    return Boolean(String(process.env.AUTH_BEARER_TOKEN || '').trim());
 }
 
 function decodeJwtPayload(token: string): Record<string, unknown> | null {
@@ -206,32 +227,38 @@ function getPrincipalFromJwt(token: string): string {
     return '';
 }
 
+function getPreAuthRateLimitKey(req: Request): string {
+    // This limiter runs before authentication, so request-supplied identity
+    // headers, bearer claims, and forwarded-client IP headers are untrusted and
+    // must not select the bucket. Use the immediate socket peer instead.
+    return ipKeyGenerator(req.socket.remoteAddress || req.ip || 'unknown');
+}
+
 function getRequestScopes(req: Request): string[] {
-    const headerValues = [
-        req.headers['x-auth-scopes'],
-        req.headers['x-msal-scopes'],
-        req.headers['x-token-scopes'],
-        req.headers['x-scope'],
-    ];
-
     const scopes = new Set<string>();
+    const payload = req.authenticatedTokenPayload;
 
-    headerValues.forEach((value) => {
-        if (typeof value === 'string') {
-            parseScopes(value).forEach((scope) => scopes.add(scope));
-        }
-    });
-
-    const bearer = getBearerToken(req);
-    if (bearer) {
-        const payload = decodeJwtPayload(bearer);
-        if (payload) {
-            parseScopes(payload.scp).forEach((scope) => scopes.add(scope));
-            parseScopes(payload.scope).forEach((scope) => scopes.add(scope));
-        }
+    if (payload) {
+        parseScopes(payload.scp).forEach((scope) => scopes.add(scope));
+        parseScopes(payload.scope).forEach((scope) => scopes.add(scope));
     }
 
     return Array.from(scopes);
+}
+
+function setAuthenticatedTokenPayload(req: Request, token: string): void {
+    if (!hasExplicitAuthBearerToken()) {
+        delete req.authenticatedTokenPayload;
+        return;
+    }
+
+    const payload = decodeJwtPayload(token);
+    if (payload) {
+        req.authenticatedTokenPayload = payload;
+        return;
+    }
+
+    delete req.authenticatedTokenPayload;
 }
 
 function requireScopes(requiredScopes: string[], mode: 'any' | 'all' = 'any') {
@@ -662,38 +689,35 @@ async function buildSentinelAiScanResponse(focusHint: string = ''): Promise<Sent
     };
 }
 
-/**
- * Rate limiting middleware
- */
-function rateLimitMiddleware(
-    req: Request,
-    res: Response,
-    next: NextFunction,
-): void {
-    const principalId = req.principalId || req.ip || 'unknown';
-    const now = Date.now();
+function createPreAuthRateLimitMiddleware() {
+    return rateLimit({
+        windowMs: RATE_LIMIT_WINDOW_MS,
+        limit: RATE_LIMIT_MAX_REQUESTS,
+        legacyHeaders: false,
+        standardHeaders: false,
+        keyGenerator: getPreAuthRateLimitKey,
+        handler: (_req: Request, res: Response): void => {
+            res.status(429).json({
+                error: 'Too Many Requests',
+                details: `Rate limit exceeded: ${RATE_LIMIT_MAX_REQUESTS} requests per minute`,
+                code: 'RATE_LIMIT_EXCEEDED',
+            });
+        },
+    });
+}
 
-    let entry = rateLimitMap.get(principalId);
+function rateLimitHeadersMiddleware(req: Request, res: Response, next: NextFunction): void {
+    const rateLimitState = (req as Request & {
+        rateLimit?: {
+            remaining?: number;
+            resetTime?: Date;
+        };
+    }).rateLimit;
 
-    if (!entry || now >= entry.resetAt) {
-        // Create new window
-        entry = { count: 0, resetAt: now + RATE_LIMIT_WINDOW_MS };
-        rateLimitMap.set(principalId, entry);
+    if (rateLimitState) {
+        res.set('X-RateLimit-Remaining', String(rateLimitState.remaining ?? RATE_LIMIT_MAX_REQUESTS));
+        res.set('X-RateLimit-Reset', String(rateLimitState.resetTime?.getTime() ?? (Date.now() + RATE_LIMIT_WINDOW_MS)));
     }
-
-    entry.count += 1;
-
-    if (entry.count > RATE_LIMIT_MAX_REQUESTS) {
-        res.status(429).json({
-            error: 'Too Many Requests',
-            details: `Rate limit exceeded: ${RATE_LIMIT_MAX_REQUESTS} requests per minute`,
-            code: 'RATE_LIMIT_EXCEEDED',
-        });
-        return;
-    }
-
-    res.set('X-RateLimit-Remaining', String(RATE_LIMIT_MAX_REQUESTS - entry.count));
-    res.set('X-RateLimit-Reset', String(entry.resetAt));
 
     next();
 }
@@ -702,6 +726,7 @@ function rateLimitMiddleware(
  * Principal authentication middleware
  */
 function authMiddleware(req: Request, res: Response, next: NextFunction): void {
+    delete req.authenticatedTokenPayload;
     const principalFromHeader =
         typeof req.headers['x-principal-id'] === 'string'
             ? req.headers['x-principal-id'].trim()
@@ -728,6 +753,31 @@ function authMiddleware(req: Request, res: Response, next: NextFunction): void {
             });
             return;
         }
+
+        setAuthenticatedTokenPayload(req, expectedToken);
+
+        const principalId = getPrincipalFromJwt(expectedToken);
+        if (!principalId) {
+            res.status(500).json({
+                error: 'Internal Server Error',
+                details: 'API auth requires AUTH_BEARER_TOKEN/JWT_SECRET to include a principal subject claim',
+                code: 'AUTH_PRINCIPAL_MISCONFIGURED',
+            });
+            return;
+        }
+
+        if (principalFromHeader && principalFromHeader !== principalId) {
+            res.status(403).json({
+                error: 'Forbidden',
+                details: 'X-Principal-Id must match the authenticated bearer principal',
+                code: 'PRINCIPAL_MISMATCH',
+            });
+            return;
+        }
+
+        req.principalId = principalId;
+        next();
+        return;
     }
 
     const principalId =
@@ -756,6 +806,7 @@ function authMiddleware(req: Request, res: Response, next: NextFunction): void {
  * where token matches AUTH_BEARER_TOKEN (or JWT_SECRET fallback).
  */
 function proxyAuthMiddleware(req: Request, res: Response, next: NextFunction): void {
+    delete req.authenticatedTokenPayload;
     if (!authEnabled()) {
         next();
         return;
@@ -782,6 +833,19 @@ function proxyAuthMiddleware(req: Request, res: Response, next: NextFunction): v
         return;
     }
 
+    setAuthenticatedTokenPayload(req, expectedToken);
+
+    const principalId = getPrincipalFromJwt(expectedToken);
+    if (!principalId) {
+        res.status(500).json({
+            error: 'Internal Server Error',
+            details: 'AUTH_ENABLED=true requires AUTH_BEARER_TOKEN/JWT_SECRET to include a principal subject claim',
+            code: 'AUTH_PRINCIPAL_MISCONFIGURED',
+        });
+        return;
+    }
+
+    req.principalId = principalId;
     next();
 }
 
@@ -795,7 +859,11 @@ function requireHttpsMiddleware(req: Request, res: Response, next: NextFunction)
     const forwardedProto = Array.isArray(forwardedProtoRaw)
         ? forwardedProtoRaw[0]
         : String(forwardedProtoRaw || '');
-    const isHttps = req.secure || forwardedProto.split(',')[0].trim().toLowerCase() === 'https';
+    const trustedProxyConfigured = Boolean(req.app.get('trust proxy'));
+    const isHttps = req.secure || (
+        trustedProxyConfigured
+        && forwardedProto.split(',')[0].trim().toLowerCase() === 'https'
+    );
 
     if (!isHttps) {
         res.status(426).json({
@@ -885,6 +953,8 @@ function errorMiddleware(
  */
 export function mountApiRoutes(app: Express): void {
     const router = Router();
+    configureTrustedProxy(app);
+    const rateLimitMiddleware = createPreAuthRateLimitMiddleware();
 
     // Global middleware
     app.use(express.json());
@@ -905,7 +975,7 @@ export function mountApiRoutes(app: Express): void {
     app.use('/executive/sovereign-demo', express.static(sovereignDemoDir));
     app.use('/executive', express.static(publicDir));
 
-    app.get('/api/executive/connect/status', authMiddleware, rateLimitMiddleware, requireScopes(['Executive.Read']), async (_req: Request, res: Response, next: NextFunction) => {
+    app.get('/api/executive/connect/status', rateLimitMiddleware, rateLimitHeadersMiddleware, authMiddleware, requireScopes(['Executive.Read']), async (_req: Request, res: Response, next: NextFunction) => {
         try {
             const probe = await probeRemoteSentinelAi();
             const config = getSentinelAiConnectionConfig();
@@ -923,16 +993,26 @@ export function mountApiRoutes(app: Express): void {
         }
     });
 
-    app.post('/api/executive/connect/signin', authMiddleware, rateLimitMiddleware, requireScopes(['Infrastructure.Manage']), async (req: Request, res: Response, next: NextFunction) => {
+    app.post('/api/executive/connect/signin', rateLimitMiddleware, rateLimitHeadersMiddleware, authMiddleware, requireScopes(['Infrastructure.Manage']), async (req: Request, res: Response, next: NextFunction) => {
         try {
             const email = normalizePrincipalId(req.body?.email).toLowerCase();
             const password = normalizePrincipalId(req.body?.password);
+            const authenticatedPrincipal = normalizePrincipalId(req.principalId).toLowerCase();
 
             if (!email || !password) {
                 res.status(400).json({
                     error: 'Bad Request',
                     details: 'email and password are required',
                     code: 'MISSING_CREDENTIALS',
+                });
+                return;
+            }
+
+            if (apiAuthEnabled() && authenticatedPrincipal && email !== authenticatedPrincipal) {
+                res.status(403).json({
+                    error: 'Forbidden',
+                    details: 'email must match the authenticated bearer principal',
+                    code: 'PRINCIPAL_MISMATCH',
                 });
                 return;
             }
@@ -944,13 +1024,36 @@ export function mountApiRoutes(app: Express): void {
         }
     });
 
-    app.post('/proxy/command', proxyAuthMiddleware, rateLimitMiddleware, requireScopes(['Governance.Approve']), async (
+    app.post('/proxy/command', rateLimitMiddleware, rateLimitHeadersMiddleware, proxyAuthMiddleware, requireScopes(['Governance.Approve']), async (
         req: Request,
         res: Response,
         next: NextFunction,
     ) => {
         try {
-            const response = await handleCommand(req.body as ProxyCommandRequest);
+            const proxyRequest = req.body as ProxyCommandRequest;
+            const authenticatedPrincipal = normalizePrincipalId(req.principalId);
+            const requestedPrincipal = normalizePrincipalId(proxyRequest?.payload?.principalId);
+
+            if (authenticatedPrincipal) {
+                if (!requestedPrincipal || requestedPrincipal !== authenticatedPrincipal) {
+                    res.status(403).json({
+                        error: 'Forbidden',
+                        details: 'payload.principalId must match the authenticated bearer principal',
+                        code: 'PRINCIPAL_MISMATCH',
+                    });
+                    return;
+                }
+            }
+
+            const response = await handleCommand(authenticatedPrincipal
+                ? {
+                    ...proxyRequest,
+                    payload: {
+                        ...(proxyRequest.payload || {}),
+                        principalId: authenticatedPrincipal,
+                    },
+                }
+                : proxyRequest);
             res.json(response);
         } catch (err) {
             next(err);
@@ -959,8 +1062,9 @@ export function mountApiRoutes(app: Express): void {
 
     // Protected routes
     const protectedRouter = Router();
-    protectedRouter.use(authMiddleware);
     protectedRouter.use(rateLimitMiddleware);
+    protectedRouter.use(rateLimitHeadersMiddleware);
+    protectedRouter.use(authMiddleware);
 
     // Receipt endpoints
     protectedRouter.get('/receipts', requireScopes(['Vault.Read']), async (req: Request, res: Response, next: NextFunction) => {

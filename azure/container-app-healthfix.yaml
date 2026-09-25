@@ -129,5 +129,8 @@ properties:
           cpu: 0.5
           memory: 1Gi
     scale:
+      # The in-process Executive Desk limiter is authoritative only for a
+      # single replica. Increase this only after a shared store or gateway/WAF
+      # distributed limiter is deployed and evidenced.
       minReplicas: 1
-      maxReplicas: 2
+      maxReplicas: 1

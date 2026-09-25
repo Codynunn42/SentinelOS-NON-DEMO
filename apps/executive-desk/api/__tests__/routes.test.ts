@@ -17,6 +17,11 @@ function restoreEnv(name: string, value: string | undefined): void {
     process.env[name] = value;
 }
 
+function buildUnsignedJwt(payload: Record<string, unknown>): string {
+    const encodedPayload = Buffer.from(JSON.stringify(payload)).toString('base64url');
+    return `e30.${encodedPayload}.signature`;
+}
+
 describe('Executive Desk API Routes', () => {
     let app: Express;
 
@@ -105,29 +110,42 @@ describe('Executive Desk API Routes', () => {
         it('should accept bearer token for API routes when API auth is enabled', async () => {
             const prevApiAuth = process.env.EXECUTIVE_DESK_API_AUTH_REQUIRED;
             const prevToken = process.env.AUTH_BEARER_TOKEN;
+            const token = buildUnsignedJwt({ sub: 'user@example.com' });
 
             process.env.EXECUTIVE_DESK_API_AUTH_REQUIRED = 'true';
-            process.env.AUTH_BEARER_TOKEN = 'api-test-token';
+            process.env.AUTH_BEARER_TOKEN = token;
 
             try {
                 const res = await request(app)
                     .get('/api/executive/receipts')
-                    .set('Authorization', 'Bearer api-test-token')
-                    .set('X-Principal-Id', 'user@example.com');
+                    .set('Authorization', ['Bearer', token].join(' '));
 
                 assert(res.status !== 401, `Got 401 but expected success: ${res.body.error}`);
             } finally {
-                if (prevApiAuth === undefined) {
-                    delete process.env.EXECUTIVE_DESK_API_AUTH_REQUIRED;
-                } else {
-                    process.env.EXECUTIVE_DESK_API_AUTH_REQUIRED = prevApiAuth;
-                }
+                restoreEnv('EXECUTIVE_DESK_API_AUTH_REQUIRED', prevApiAuth);
+                restoreEnv('AUTH_BEARER_TOKEN', prevToken);
+            }
+        });
 
-                if (prevToken === undefined) {
-                    delete process.env.AUTH_BEARER_TOKEN;
-                } else {
-                    process.env.AUTH_BEARER_TOKEN = prevToken;
-                }
+        it('should reject principal header mismatch when API auth is enabled', async () => {
+            const prevApiAuth = process.env.EXECUTIVE_DESK_API_AUTH_REQUIRED;
+            const prevToken = process.env.AUTH_BEARER_TOKEN;
+            const token = buildUnsignedJwt({ sub: 'user@example.com' });
+
+            process.env.EXECUTIVE_DESK_API_AUTH_REQUIRED = 'true';
+            process.env.AUTH_BEARER_TOKEN = token;
+
+            try {
+                const res = await request(app)
+                    .get('/api/executive/receipts')
+                    .set('Authorization', ['Bearer', token].join(' '))
+                    .set('X-Principal-Id', 'other@example.com');
+
+                assert.strictEqual(res.status, 403);
+                assert.strictEqual(res.body.code, 'PRINCIPAL_MISMATCH');
+            } finally {
+                restoreEnv('EXECUTIVE_DESK_API_AUTH_REQUIRED', prevApiAuth);
+                restoreEnv('AUTH_BEARER_TOKEN', prevToken);
             }
         });
     });
@@ -153,21 +171,37 @@ describe('Executive Desk API Routes', () => {
 
         it('should accept forwarded HTTPS requests when HTTPS is required', async () => {
             const prevHttps = process.env.EXECUTIVE_DESK_REQUIRE_HTTPS;
+            const prevTrustProxyHops = process.env.EXECUTIVE_DESK_TRUST_PROXY_HOPS;
             process.env.EXECUTIVE_DESK_REQUIRE_HTTPS = 'true';
+            process.env.EXECUTIVE_DESK_TRUST_PROXY_HOPS = '1';
+
+            const httpsApp = express();
+            mountApiRoutes(httpsApp);
 
             try {
-                const res = await request(app)
+                const res = await request(httpsApp)
                     .get('/health')
                     .set('X-Forwarded-Proto', 'https');
 
                 assert.strictEqual(res.status, 200);
                 assert(res.headers['strict-transport-security']);
             } finally {
-                if (prevHttps === undefined) {
-                    delete process.env.EXECUTIVE_DESK_REQUIRE_HTTPS;
-                } else {
-                    process.env.EXECUTIVE_DESK_REQUIRE_HTTPS = prevHttps;
+                restoreEnv('EXECUTIVE_DESK_REQUIRE_HTTPS', prevHttps);
+                restoreEnv('EXECUTIVE_DESK_TRUST_PROXY_HOPS', prevTrustProxyHops);
+            }
+        });
+
+        it('should reject partially parsed trust proxy hop values', () => {
+            const prevTrustProxyHops = process.env.EXECUTIVE_DESK_TRUST_PROXY_HOPS;
+
+            try {
+                for (const configuredHops of ['2foo', '2.5']) {
+                    process.env.EXECUTIVE_DESK_TRUST_PROXY_HOPS = configuredHops;
+
+                    assert.throws(() => mountApiRoutes(express()), /EXECUTIVE_DESK_TRUST_PROXY_HOPS must be an integer between 1 and 2/);
                 }
+            } finally {
+                restoreEnv('EXECUTIVE_DESK_TRUST_PROXY_HOPS', prevTrustProxyHops);
             }
         });
     });
@@ -208,6 +242,28 @@ describe('Executive Desk API Routes', () => {
             assert.strictEqual(res.status, 400);
             assert.strictEqual(res.body.code, 'MISSING_CREDENTIALS');
         });
+
+        it('should reject sign-in principal mismatch when API auth is enabled', async () => {
+            const prevApiAuth = process.env.EXECUTIVE_DESK_API_AUTH_REQUIRED;
+            const prevToken = process.env.AUTH_BEARER_TOKEN;
+            const token = buildUnsignedJwt({ sub: 'founder@example.com' });
+
+            process.env.EXECUTIVE_DESK_API_AUTH_REQUIRED = 'true';
+            process.env.AUTH_BEARER_TOKEN = token;
+
+            try {
+                const res = await request(app)
+                    .post('/api/executive/connect/signin')
+                    .set('Authorization', ['Bearer', token].join(' '))
+                    .send({ email: 'other@example.com', password: 'secret' });
+
+                assert.strictEqual(res.status, 403);
+                assert.strictEqual(res.body.code, 'PRINCIPAL_MISMATCH');
+            } finally {
+                restoreEnv('EXECUTIVE_DESK_API_AUTH_REQUIRED', prevApiAuth);
+                restoreEnv('AUTH_BEARER_TOKEN', prevToken);
+            }
+        });
     });
 
     describe('Scope Authorization', () => {
@@ -215,10 +271,16 @@ describe('Executive Desk API Routes', () => {
 
         let prevScopeEnforcement: string | undefined;
         let prevImpersonationFallback: string | undefined;
+        let prevAuthEnabled: string | undefined;
+        let prevApiAuthRequired: string | undefined;
+        let prevAuthBearerToken: string | undefined;
 
         before(() => {
             prevScopeEnforcement = process.env.ENTRA_SCOPE_ENFORCEMENT;
             prevImpersonationFallback = process.env.ENTRA_ALLOW_USER_IMPERSONATION_FALLBACK;
+            prevAuthEnabled = process.env.AUTH_ENABLED;
+            prevApiAuthRequired = process.env.EXECUTIVE_DESK_API_AUTH_REQUIRED;
+            prevAuthBearerToken = process.env.AUTH_BEARER_TOKEN;
             process.env.ENTRA_SCOPE_ENFORCEMENT = 'true';
             process.env.ENTRA_ALLOW_USER_IMPERSONATION_FALLBACK = 'false';
         });
@@ -235,22 +297,38 @@ describe('Executive Desk API Routes', () => {
             } else {
                 process.env.ENTRA_ALLOW_USER_IMPERSONATION_FALLBACK = prevImpersonationFallback;
             }
+
+            restoreEnv('AUTH_ENABLED', prevAuthEnabled);
+            restoreEnv('EXECUTIVE_DESK_API_AUTH_REQUIRED', prevApiAuthRequired);
+            restoreEnv('AUTH_BEARER_TOKEN', prevAuthBearerToken);
         });
 
         it('should reject missing scopes for Vault.Read-protected endpoint', async () => {
+            const token = buildUnsignedJwt({ sub: principal });
+            const authorization = ['Bearer', token].join(' ');
+            process.env.AUTH_ENABLED = 'true';
+            process.env.EXECUTIVE_DESK_API_AUTH_REQUIRED = 'true';
+            process.env.AUTH_BEARER_TOKEN = token;
+
             const res = await request(app)
                 .get('/api/executive/receipts')
-                .set('X-Principal-Id', principal);
+                .set('Authorization', authorization);
 
             assert.strictEqual(res.status, 403);
             assert.strictEqual(res.body.code, 'MISSING_REQUIRED_SCOPE');
         });
 
-        it('should reject wrong scopes for Vault.Read-protected endpoint', async () => {
+        it('should reject client-supplied scope headers for Vault.Read-protected endpoint', async () => {
+            const token = buildUnsignedJwt({ sub: principal });
+            const authorization = ['Bearer', token].join(' ');
+            process.env.AUTH_ENABLED = 'true';
+            process.env.EXECUTIVE_DESK_API_AUTH_REQUIRED = 'true';
+            process.env.AUTH_BEARER_TOKEN = token;
+
             const res = await request(app)
                 .get('/api/executive/receipts')
-                .set('X-Principal-Id', principal)
-                .set('X-Auth-Scopes', 'Executive.Read');
+                .set('Authorization', authorization)
+                .set('X-Auth-Scopes', 'Vault.Read');
 
             assert.strictEqual(res.status, 403);
             assert.strictEqual(res.body.code, 'MISSING_REQUIRED_SCOPE');
@@ -258,11 +336,46 @@ describe('Executive Desk API Routes', () => {
             assert.strictEqual(res.body.requiredScopes.includes('Vault.Read'), true);
         });
 
-        it('should accept required scope for Vault.Read-protected endpoint', async () => {
+        it('should reject forged bearer payload scopes that do not match the configured token', async () => {
+            const token = buildUnsignedJwt({ sub: principal });
+            const forgedToken = buildUnsignedJwt({ sub: principal, scp: 'Vault.Read' });
+            process.env.AUTH_ENABLED = 'true';
+            process.env.EXECUTIVE_DESK_API_AUTH_REQUIRED = 'true';
+            process.env.AUTH_BEARER_TOKEN = token;
+
             const res = await request(app)
                 .get('/api/executive/receipts')
-                .set('X-Principal-Id', principal)
-                .set('X-Auth-Scopes', 'Vault.Read');
+                .set('Authorization', ['Bearer', forgedToken].join(' '));
+
+            assert.strictEqual(res.status, 401);
+            assert.strictEqual(res.body.code, 'MISSING_OR_INVALID_BEARER');
+        });
+
+        it('should reject wrong verified token scope for Vault.Read-protected endpoint', async () => {
+            const token = buildUnsignedJwt({ sub: principal, scp: 'Executive.Read' });
+            const authorization = ['Bearer', token].join(' ');
+            process.env.AUTH_ENABLED = 'true';
+            process.env.EXECUTIVE_DESK_API_AUTH_REQUIRED = 'true';
+            process.env.AUTH_BEARER_TOKEN = token;
+
+            const res = await request(app)
+                .get('/api/executive/receipts')
+                .set('Authorization', authorization);
+
+            assert.strictEqual(res.status, 403);
+            assert.strictEqual(res.body.code, 'MISSING_REQUIRED_SCOPE');
+        });
+
+        it('should accept required verified token scope for Vault.Read-protected endpoint', async () => {
+            const token = buildUnsignedJwt({ sub: principal, scp: 'Vault.Read' });
+            const authorization = ['Bearer', token].join(' ');
+            process.env.AUTH_ENABLED = 'true';
+            process.env.EXECUTIVE_DESK_API_AUTH_REQUIRED = 'true';
+            process.env.AUTH_BEARER_TOKEN = token;
+
+            const res = await request(app)
+                .get('/api/executive/receipts')
+                .set('Authorization', authorization);
 
             assert.strictEqual(res.status, 200);
         });
@@ -321,9 +434,10 @@ describe('Executive Desk API Routes', () => {
         it('should require bearer token for proxy when auth is enabled', async () => {
             const prevAuthEnabled = process.env.AUTH_ENABLED;
             const prevToken = process.env.AUTH_BEARER_TOKEN;
+            const token = buildUnsignedJwt({ sub: 'user@example.com' });
 
             process.env.AUTH_ENABLED = 'true';
-            process.env.AUTH_BEARER_TOKEN = 'proxy-test-token';
+            process.env.AUTH_BEARER_TOKEN = token;
 
             try {
                 const res = await request(app)
@@ -349,14 +463,15 @@ describe('Executive Desk API Routes', () => {
         it('should accept proxy bearer token when auth is enabled', async () => {
             const prevAuthEnabled = process.env.AUTH_ENABLED;
             const prevToken = process.env.AUTH_BEARER_TOKEN;
+            const token = buildUnsignedJwt({ sub: 'user@example.com' });
 
             process.env.AUTH_ENABLED = 'true';
-            process.env.AUTH_BEARER_TOKEN = 'proxy-test-token';
+            process.env.AUTH_BEARER_TOKEN = token;
 
             try {
                 const res = await request(app)
                     .post('/proxy/command')
-                    .set('Authorization', 'Bearer proxy-test-token')
+                    .set('Authorization', ['Bearer', token].join(' '))
                     .send({
                         tenant: 'nunncloud',
                         command: 'repo.control.workflow.diagnose',
@@ -369,6 +484,37 @@ describe('Executive Desk API Routes', () => {
 
                 assert.strictEqual(res.status, 200);
                 assert.strictEqual(res.body.status, 'executed');
+                assert.strictEqual(res.body.receipt.executor, 'user@example.com');
+            } finally {
+                restoreEnv('AUTH_ENABLED', prevAuthEnabled);
+                restoreEnv('AUTH_BEARER_TOKEN', prevToken);
+            }
+        });
+
+        it('should reject proxy principal mismatch when auth is enabled', async () => {
+            const prevAuthEnabled = process.env.AUTH_ENABLED;
+            const prevToken = process.env.AUTH_BEARER_TOKEN;
+            const token = buildUnsignedJwt({ sub: 'user@example.com' });
+
+            process.env.AUTH_ENABLED = 'true';
+            process.env.AUTH_BEARER_TOKEN = token;
+
+            try {
+                const res = await request(app)
+                    .post('/proxy/command')
+                    .set('Authorization', ['Bearer', token].join(' '))
+                    .send({
+                        tenant: 'nunncloud',
+                        command: 'repo.control.workflow.diagnose',
+                        payload: {
+                            principalId: 'other@example.com',
+                            repository: 'Codynunn42/SentinelOS-NON-DEMO',
+                            workflowName: 'Sentinel Actions Diagnostic',
+                        },
+                    });
+
+                assert.strictEqual(res.status, 403);
+                assert.strictEqual(res.body.code, 'PRINCIPAL_MISMATCH');
             } finally {
                 restoreEnv('AUTH_ENABLED', prevAuthEnabled);
                 restoreEnv('AUTH_BEARER_TOKEN', prevToken);
@@ -862,6 +1008,52 @@ describe('Executive Desk API Routes', () => {
             assert(Array.isArray(res.body.mobRuns.data));
             assert(res.body.mobRuns.summary);
             assert(Array.isArray(res.body.mobRuns.timeseries));
+        });
+    });
+
+    describe('Pre-auth Rate Limiting', () => {
+        it('should reject the 101st request even when untrusted identity values rotate', async () => {
+            const prevAuthEnabled = process.env.AUTH_ENABLED;
+            const prevApiAuth = process.env.EXECUTIVE_DESK_API_AUTH_REQUIRED;
+            const prevToken = process.env.AUTH_BEARER_TOKEN;
+            const prevTrustProxyHops = process.env.EXECUTIVE_DESK_TRUST_PROXY_HOPS;
+
+            process.env.AUTH_ENABLED = 'true';
+            process.env.EXECUTIVE_DESK_API_AUTH_REQUIRED = 'true';
+            process.env.AUTH_BEARER_TOKEN = 'known-good-token';
+            process.env.EXECUTIVE_DESK_TRUST_PROXY_HOPS = '1';
+
+            const rateLimitApp = express();
+            mountApiRoutes(rateLimitApp);
+
+            try {
+                for (let i = 0; i < 100; i += 1) {
+                    const fakePayload = Buffer.from(JSON.stringify({ sub: `attacker-${i}` })).toString('base64url');
+                    const fakeJwt = `e30.${fakePayload}.signature-${i}`;
+                    const res = await request(rateLimitApp)
+                        .get('/api/executive/receipts')
+                        .set('X-Forwarded-For', `198.51.100.${(i % 200) + 1}`)
+                        .set('X-Principal-Id', `rotating-${i}@example.com`)
+                        .set('Authorization', ['Bearer', fakeJwt].join(' '));
+
+                    assert.strictEqual(res.status, 401);
+                    assert.strictEqual(res.body.code, 'MISSING_OR_INVALID_BEARER');
+                }
+
+                const blocked = await request(rateLimitApp)
+                    .get('/api/executive/receipts')
+                    .set('X-Forwarded-For', '203.0.113.101')
+                    .set('X-Principal-Id', 'rotating-101@example.com')
+                    .set('Authorization', '******');
+
+                assert.strictEqual(blocked.status, 429);
+                assert.strictEqual(blocked.body.code, 'RATE_LIMIT_EXCEEDED');
+            } finally {
+                restoreEnv('AUTH_ENABLED', prevAuthEnabled);
+                restoreEnv('EXECUTIVE_DESK_API_AUTH_REQUIRED', prevApiAuth);
+                restoreEnv('AUTH_BEARER_TOKEN', prevToken);
+                restoreEnv('EXECUTIVE_DESK_TRUST_PROXY_HOPS', prevTrustProxyHops);
+            }
         });
     });
 

@@ -124,9 +124,9 @@ Receipt Ledger PostgreSQL setup
 Production proxy auth
 
 - Set `AUTH_ENABLED=true` to require bearer auth on `POST /proxy/command`.
-- Set `AUTH_BEARER_TOKEN=<strong-random-token>` (preferred).
-- If `AUTH_BEARER_TOKEN` is unset, `JWT_SECRET` is used as fallback.
-- Use this token in GPT Action auth or upstream API gateway auth policy.
+- Set `AUTH_BEARER_TOKEN=<jwt-with-subject-and-required-scopes>` so protected routes can bind the authenticated principal and trusted scopes to the configured bearer credential.
+- If `AUTH_BEARER_TOKEN` is unset, `JWT_SECRET` is used as a legacy fallback secret, but it does not provide the subject/scope claims needed by the hardened Executive Desk auth paths.
+- Use this token in GPT Action auth or upstream API gateway auth policy, and keep `X-Principal-Id` / proxy payload principals aligned with the bearer subject.
 - Set `PROXY_APPROVED_COMMANDS=repo.control.workflow.diagnose` in production and keep it limited to approved non-sensitive workflows.
 - Place `/proxy/command` behind an API gateway or WAF with rate limiting, request logging, and abuse controls before exposing it outside trusted internal traffic.
 - Keep the gateway as the production enforcement point for command shaping and request throttling.
