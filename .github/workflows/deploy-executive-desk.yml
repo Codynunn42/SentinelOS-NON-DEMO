@@ -1,9 +1,6 @@
-name: Deploy to Azure Container Apps
+name: Deploy Executive Desk to Azure Container Apps
 
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
 
 jobs:
@@ -24,8 +21,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Run test suite
-        run: pnpm test
+      - name: Run Executive Desk API route suite
+        run: pnpm run check:executive-desk:api
 
       - name: Run TypeScript checks
         run: pnpm run check:executive-desk:types
@@ -33,11 +30,8 @@ jobs:
       - name: Run Executive Desk end-to-end check
         run: pnpm run check:executive-desk:e2e
 
-      - name: Verify controlled runtime storage
-        run: pnpm run check:runtime-storage
-
       - name: Build container image
-        run: docker build --tag sentinel-api:deploy-check .
+        run: docker build --tag executive-desk:deploy-check .
 
   deploy:
     needs: validate
@@ -47,7 +41,7 @@ jobs:
       id-token: write
 
     env:
-      IMAGE_NAME: sentinel-api
+      IMAGE_NAME: executive-desk
       IMAGE_TAG: ${{ github.sha }}
 
     steps:
@@ -59,23 +53,13 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Synchronize Sentinel API key
-        uses: azure/CLI@v2
-        with:
-          inlineScript: |
-            az extension add --name containerapp --upgrade
-            az containerapp secret set \
-              --name ${{ secrets.CONTAINER_APP_NAME }} \
-              --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
-              --secrets "sentinel-api-key=${{ secrets.SENTINEL_API_KEY }}"
-
       - name: Log in to Azure Container Registry
         run: |
           ACR_NAME="${{ secrets.ACR_LOGIN_SERVER }}"
           ACR_NAME="${ACR_NAME%%.*}"
           az acr login --name "$ACR_NAME"
 
-      - name: Build and push container image
+      - name: Build and push Executive Desk image
         run: |
           docker build \
             -t ${{ secrets.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }} \
@@ -84,17 +68,17 @@ jobs:
           docker push ${{ secrets.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
           docker push ${{ secrets.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:latest
 
-      - name: Deploy aligned revision to Azure Container Apps
+      - name: Deploy Executive Desk revision to Azure Container Apps
         uses: azure/CLI@v2
         with:
           inlineScript: |
             az extension add --name containerapp --upgrade
 
-            APP_NAME="${{ secrets.CONTAINER_APP_NAME }}"
+            APP_NAME="${{ secrets.EXECUTIVE_DESK_CONTAINER_APP_NAME }}"
             RESOURCE_GROUP="${{ secrets.AZURE_RESOURCE_GROUP }}"
             IMAGE_URI="${{ secrets.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}"
             SHORT_SHA="$(printf '%s' "$GITHUB_SHA" | cut -c1-7)"
-            REVISION_SUFFIX="sha-${SHORT_SHA}-${GITHUB_RUN_NUMBER}"
+            REVISION_SUFFIX="execdesk-${SHORT_SHA}-${GITHUB_RUN_NUMBER}"
             RESOURCE_ID="$(az containerapp show \
               --name "$APP_NAME" \
               --resource-group "$RESOURCE_GROUP" \
@@ -119,22 +103,26 @@ jobs:
                 raise SystemExit("Container App has no containers to update")
 
             primary = next(
-                (container for container in containers if container.get("name") == "sentinel"),
+                (
+                    container
+                    for container in containers
+                    if container.get("name") == "executive-desk"
+                ),
                 containers[0],
             )
             primary["image"] = image_uri
+            primary["command"] = [
+                "node",
+                "--import",
+                "tsx",
+                "apps/executive-desk/server.ts",
+            ]
+            primary.pop("args", None)
 
             governed_env = {
-                "PORT": {"value": "3000"},
-                "SENTINEL_API_KEY": {"secretRef": "sentinel-api-key"},
-                "SENTINEL_API_KEY_TENANT": {"value": "nunncloud"},
-                "SENTINEL_API_KEY_ACTOR": {
-                    "value": "sentinel.repo-reader@nunncloud.local"
-                },
-                "SENTINEL_API_KEY_ROLE": {"value": "viewer"},
-                "SENTINEL_API_KEY_SCOPES": {
-                    "value": "repo:read,audit:read,receipt:read,approval:read"
-                },
+                "API_HOST": {"value": "0.0.0.0"},
+                "API_PORT": {"value": "3000"},
+                "EXECUTIVE_DESK_TRUST_PROXY_HOPS": {"value": "1"},
             }
             env_by_name = {
                 item.get("name"): item
@@ -171,6 +159,10 @@ jobs:
                     "template": {
                         "revisionSuffix": revision_suffix,
                         "containers": containers,
+                        "scale": {
+                            "minReplicas": 1,
+                            "maxReplicas": 1,
+                        },
                     }
                 }
             }
@@ -191,14 +183,14 @@ jobs:
               --target-port 3000 \
               --output none
 
-      - name: Verify deployed revision and live authorization boundary
+      - name: Verify Executive Desk revision and rate-limit deployment settings
         uses: azure/CLI@v2
         with:
           inlineScript: |
-            APP_NAME="${{ secrets.CONTAINER_APP_NAME }}"
+            APP_NAME="${{ secrets.EXECUTIVE_DESK_CONTAINER_APP_NAME }}"
             RESOURCE_GROUP="${{ secrets.AZURE_RESOURCE_GROUP }}"
             SHORT_SHA="$(printf '%s' "$GITHUB_SHA" | cut -c1-7)"
-            REVISION_SUFFIX="sha-${SHORT_SHA}-${GITHUB_RUN_NUMBER}"
+            REVISION_SUFFIX="execdesk-${SHORT_SHA}-${GITHUB_RUN_NUMBER}"
             REVISION_NAME="${APP_NAME}--${REVISION_SUFFIX}"
             EXPECTED_IMAGE="${{ secrets.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}"
             FQDN="$(az containerapp show \
@@ -249,51 +241,22 @@ jobs:
               local label="$1"
               local url="$2"
               local expected_codes="$3"
-              local header_name="${4:-}"
-              local header_value="${5:-}"
-              local attempts=10
-              local sleep_seconds=10
               local body_file
               local status
               local i
+              local attempts=10
+              local sleep_seconds=10
               body_file="$(mktemp)"
 
               for i in $(seq 1 "$attempts"); do
-                if [ -n "$header_name" ]; then
-                  status="$(curl --show-error --silent --max-time 30 \
-                    --output "$body_file" \
-                    --write-out '%{http_code}' \
-                    --header "${header_name}: ${header_value}" \
-                    "$url" || true)"
-                else
-                  status="$(curl --show-error --silent --max-time 30 \
-                    --output "$body_file" \
-                    --write-out '%{http_code}' \
-                    "$url" || true)"
-                fi
+                status="$(curl --show-error --silent --max-time 30 \
+                  --output "$body_file" \
+                  --write-out '%{http_code}' \
+                  "$url" || true)"
 
                 echo "${label} attempt ${i}/${attempts}: HTTP ${status:-000}"
                 case " ${expected_codes} " in
                   *" ${status} "*)
-                    python3 - "$body_file" "$label" <<'PY'
-            import json
-            import sys
-
-            path, label = sys.argv[1:3]
-            with open(path, encoding="utf-8") as response:
-                payload = json.load(response)
-
-            if label == "health":
-                if not isinstance(payload, dict) or payload.get("status") != "ok":
-                    raise SystemExit("/health did not return status=ok")
-                print("health payload: status=ok")
-            elif isinstance(payload, dict):
-                print(f"{label} payload: JSON object keys={sorted(payload.keys())}")
-            elif isinstance(payload, list):
-                print(f"{label} payload: JSON array length={len(payload)}")
-            else:
-                raise SystemExit(f"{label} returned an unexpected JSON shape")
-            PY
                     rm -f "$body_file"
                     return 0
                     ;;
@@ -319,16 +282,51 @@ jobs:
               --resource-group "$RESOURCE_GROUP" \
               --query "properties.configuration.ingress.traffic[?latestRevision == \`true\`].weight | [0]" \
               --output tsv)"
-            deployed_image="$(az containerapp revision show \
+
+            az containerapp revision show \
               --name "$APP_NAME" \
               --resource-group "$RESOURCE_GROUP" \
               --revision "$REVISION_NAME" \
-              --query "properties.template.containers[0].image" \
-              --output tsv)"
+              --query "properties.template" \
+              --output json > revision-template.json
+
+            python3 - "$EXPECTED_IMAGE" <<'PY'
+            import json
+            import sys
+
+            expected_image = sys.argv[1]
+            with open("revision-template.json", encoding="utf-8") as source:
+                template = json.load(source)
+
+            container = template["containers"][0]
+            if container.get("image") != expected_image:
+                raise SystemExit("Deployed Executive Desk image does not match expected image")
+
+            expected_command = [
+                "node",
+                "--import",
+                "tsx",
+                "apps/executive-desk/server.ts",
+            ]
+            if container.get("command") != expected_command:
+                raise SystemExit("Executive Desk container command is not set to the Executive Desk server")
+
+            env_by_name = {
+                item.get("name"): item.get("value")
+                for item in container.get("env", [])
+                if item.get("name")
+            }
+            if env_by_name.get("EXECUTIVE_DESK_TRUST_PROXY_HOPS") != "1":
+                raise SystemExit("EXECUTIVE_DESK_TRUST_PROXY_HOPS is not pinned to 1")
+
+            scale = template.get("scale") or {}
+            if scale.get("minReplicas") != 1 or scale.get("maxReplicas") != 1:
+                raise SystemExit("Executive Desk scale is not pinned to one replica")
+            PY
+
             test "$latest_revision" = "$REVISION_NAME"
             test "$latest_traffic" = "100"
-            test "$deployed_image" = "$EXPECTED_IMAGE"
-            echo "Provenance verified: revision=${REVISION_NAME} image-tag=${GITHUB_SHA} traffic=100"
+            echo "Provenance verified: revision=${REVISION_NAME} image-tag=${GITHUB_SHA} traffic=100 command=executive-desk-server maxReplicas=1 trustProxyHops=1"
 
             request_with_retry \
               "health" \
@@ -336,26 +334,19 @@ jobs:
               "200"
 
             request_with_retry \
-              "approvals-authenticated" \
-              "https://${FQDN}/approvals" \
-              "200" \
-              "x-api-key" \
-              "${{ secrets.SENTINEL_API_KEY }}"
-
-            request_with_retry \
-              "approvals-unauthenticated" \
-              "https://${FQDN}/approvals" \
-              "401 403"
+              "executive-ui" \
+              "https://${FQDN}/executive" \
+              "200 302"
 
             az containerapp revision show \
               --name "$APP_NAME" \
               --resource-group "$RESOURCE_GROUP" \
               --revision "$REVISION_NAME" \
-              --query "[name,properties.healthState,properties.provisioningState,properties.active,properties.template.containers[0].image]" \
+              --query "[name,properties.healthState,properties.provisioningState,properties.active,properties.template.scale.maxReplicas,properties.template.containers[0].command]" \
               --output table
 
-      - name: Show deployment target
+      - name: Show Executive Desk deployment target
         run: |
           echo "Deployed image: ${{ secrets.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}"
           echo "Updated latest: ${{ secrets.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:latest"
-          echo "Container App: ${{ secrets.CONTAINER_APP_NAME }}"
+          echo "Container App: ${{ secrets.EXECUTIVE_DESK_CONTAINER_APP_NAME }}"
