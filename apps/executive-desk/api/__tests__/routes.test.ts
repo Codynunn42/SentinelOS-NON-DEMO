@@ -190,6 +190,20 @@ describe('Executive Desk API Routes', () => {
                 restoreEnv('EXECUTIVE_DESK_TRUST_PROXY_HOPS', prevTrustProxyHops);
             }
         });
+
+        it('should reject partially parsed trust proxy hop values', () => {
+            const prevTrustProxyHops = process.env.EXECUTIVE_DESK_TRUST_PROXY_HOPS;
+
+            try {
+                for (const configuredHops of ['2foo', '2.5']) {
+                    process.env.EXECUTIVE_DESK_TRUST_PROXY_HOPS = configuredHops;
+
+                    assert.throws(() => mountApiRoutes(express()), /EXECUTIVE_DESK_TRUST_PROXY_HOPS must be an integer between 1 and 2/);
+                }
+            } finally {
+                restoreEnv('EXECUTIVE_DESK_TRUST_PROXY_HOPS', prevTrustProxyHops);
+            }
+        });
     });
 
     describe('Health Check', () => {

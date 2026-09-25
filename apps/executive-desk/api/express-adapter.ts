@@ -147,10 +147,10 @@ function configureTrustedProxy(app: Express): void {
         return;
     }
 
-    const hops = Number.parseInt(configuredHops, 10);
-    if (!Number.isInteger(hops) || hops < 1 || hops > 2) {
+    if (!/^[12]$/.test(configuredHops)) {
         throw new Error('EXECUTIVE_DESK_TRUST_PROXY_HOPS must be an integer between 1 and 2');
     }
+    const hops = Number(configuredHops);
 
     // Trust only the explicitly configured number of managed ingress hops.
     // This lets Express derive req.ip from the verified proxy chain without
