@@ -1,5 +1,5 @@
 # NEXUS Integration Pack — SentinelOS
-Owner: Cody Nunn (Interim, role: Executive Desk)
+Owner: Cody Nunn (Owner, role: Executive Desk)
 Status: Active
 Purpose: Make NEXUS a native capability subsystem within SentinelOS.
 

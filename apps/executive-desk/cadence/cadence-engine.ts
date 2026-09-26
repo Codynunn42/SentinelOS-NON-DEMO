@@ -12,6 +12,8 @@ export type DateParts = {
     monthKey: string;
 };
 
+const VERIFIED_EVIDENCE_PREFIX = 'evidence_present_not_behavior_verified';
+
 async function exists(targetPath: string): Promise<boolean> {
     try {
         await access(targetPath);
@@ -94,7 +96,7 @@ export async function buildSentinelCompletionState(
 
     for (const item of checks.verified) {
         if (await exists(item)) {
-            verified.push(`artifact_present_not_behavior_verified: ${path.relative(repo, item)}`);
+            verified.push(`${VERIFIED_EVIDENCE_PREFIX}: ${path.relative(repo, item)}`);
         }
     }
 
@@ -127,7 +129,7 @@ export function renderSentinelCompletionMarkdown(state: SentinelCompletionState)
         '  implemented:',
         '    description: "Capability or artifact exists."',
         '  verified:',
-        '    description: "Capability has supporting test or evidence."',
+        '    description: "Supporting test/evidence artifact is present; behavioral verification may still be pending."',
         '  operational:',
         '    description: "Capability is actively usable in the intended environment."',
         '  not_claimable:',

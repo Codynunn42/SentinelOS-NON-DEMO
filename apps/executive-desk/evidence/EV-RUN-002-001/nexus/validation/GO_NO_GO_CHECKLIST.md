@@ -1,5 +1,5 @@
 # Go / No-Go Checklist — NEXUS Integration
-Owner: Cody Nunn (Interim, role: Executive Desk)
+Owner: Cody Nunn (Owner, role: Executive Desk)
 
 ## Must Pass
 - [ ] Capability registry populated for all priority features.
