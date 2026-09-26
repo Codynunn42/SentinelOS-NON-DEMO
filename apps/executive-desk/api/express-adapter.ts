@@ -228,10 +228,13 @@ function getPrincipalFromJwt(token: string): string {
 }
 
 function getPreAuthRateLimitKey(req: Request): string {
-    // This limiter runs before authentication, so request-supplied identity
-    // headers, bearer claims, and forwarded-client IP headers are untrusted and
-    // must not select the bucket. Use the immediate socket peer instead.
-    return ipKeyGenerator(req.socket.remoteAddress || req.ip || 'unknown');
+    const trustProxy = req.app.get('trust proxy');
+
+    const address = trustProxy
+        ? req.ip ?? 'unknown'
+        : req.socket.remoteAddress ?? req.ip ?? 'unknown';
+
+    return ipKeyGenerator(address);
 }
 
 function getRequestScopes(req: Request): string[] {

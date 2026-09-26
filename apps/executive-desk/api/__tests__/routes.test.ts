@@ -1032,7 +1032,7 @@ describe('Executive Desk API Routes', () => {
                     const fakeJwt = `e30.${fakePayload}.signature-${i}`;
                     const res = await request(rateLimitApp)
                         .get('/api/executive/receipts')
-                        .set('X-Forwarded-For', `198.51.100.${(i % 200) + 1}`)
+                        .set('X-Forwarded-For', '198.51.100.10')
                         .set('X-Principal-Id', `rotating-${i}@example.com`)
                         .set('Authorization', ['Bearer', fakeJwt].join(' '));
 
@@ -1042,12 +1042,65 @@ describe('Executive Desk API Routes', () => {
 
                 const blocked = await request(rateLimitApp)
                     .get('/api/executive/receipts')
-                    .set('X-Forwarded-For', '203.0.113.101')
+                    .set('X-Forwarded-For', '198.51.100.10')
                     .set('X-Principal-Id', 'rotating-101@example.com')
-                    .set('Authorization', '******');
+                    .set('Authorization', 'Bearer e30.aW52YWxpZC5zdGF0ZS5jbGFpbQ.signature-101');
 
                 assert.strictEqual(blocked.status, 429);
                 assert.strictEqual(blocked.body.code, 'RATE_LIMIT_EXCEEDED');
+            } finally {
+                restoreEnv('AUTH_ENABLED', prevAuthEnabled);
+                restoreEnv('EXECUTIVE_DESK_API_AUTH_REQUIRED', prevApiAuth);
+                restoreEnv('AUTH_BEARER_TOKEN', prevToken);
+                restoreEnv('EXECUTIVE_DESK_TRUST_PROXY_HOPS', prevTrustProxyHops);
+            }
+        });
+
+        it('should isolate the pre-auth limiter by socket peer rather than forwarded headers', async () => {
+            const prevAuthEnabled = process.env.AUTH_ENABLED;
+            const prevApiAuth = process.env.EXECUTIVE_DESK_API_AUTH_REQUIRED;
+            const prevToken = process.env.AUTH_BEARER_TOKEN;
+            const prevTrustProxyHops = process.env.EXECUTIVE_DESK_TRUST_PROXY_HOPS;
+
+            process.env.AUTH_ENABLED = 'true';
+            process.env.EXECUTIVE_DESK_API_AUTH_REQUIRED = 'true';
+            process.env.AUTH_BEARER_TOKEN = 'known-good-token';
+            process.env.EXECUTIVE_DESK_TRUST_PROXY_HOPS = '1';
+
+            const rateLimitApp = express();
+            mountApiRoutes(rateLimitApp);
+
+            try {
+                for (let i = 0; i < 100; i += 1) {
+                    const fakePayload = Buffer.from(JSON.stringify({ sub: `attacker-${i}` })).toString('base64url');
+                    const fakeJwt = `e30.${fakePayload}.signature-${i}`;
+                    const res = await request(rateLimitApp)
+                        .get('/api/executive/receipts')
+                        .set('X-Forwarded-For', '198.51.100.10')
+                        .set('X-Principal-Id', `rotating-${i}@example.com`)
+                        .set('Authorization', ['Bearer', fakeJwt].join(' '));
+
+                    assert.strictEqual(res.status, 401);
+                    assert.strictEqual(res.body.code, 'MISSING_OR_INVALID_BEARER');
+                }
+
+                const differentIp = await request(rateLimitApp)
+                    .get('/api/executive/receipts')
+                    .set('X-Forwarded-For', '203.0.113.101')
+                    .set('X-Principal-Id', 'foreign@example.com')
+                    .set('Authorization', 'Bearer e30.aW52YWxpZC5zdGF0ZS5jbGFpbQ.signature-foreign');
+
+                assert.strictEqual(differentIp.status, 401);
+                assert.strictEqual(differentIp.body.code, 'MISSING_OR_INVALID_BEARER');
+
+                const originalIp = await request(rateLimitApp)
+                    .get('/api/executive/receipts')
+                    .set('X-Forwarded-For', '198.51.100.10')
+                    .set('X-Principal-Id', 'rotating-101@example.com')
+                    .set('Authorization', 'Bearer e30.aW52YWxpZC5zdGF0ZS5jbGFpbQ.signature-101');
+
+                assert.strictEqual(originalIp.status, 429);
+                assert.strictEqual(originalIp.body.code, 'RATE_LIMIT_EXCEEDED');
             } finally {
                 restoreEnv('AUTH_ENABLED', prevAuthEnabled);
                 restoreEnv('EXECUTIVE_DESK_API_AUTH_REQUIRED', prevApiAuth);
