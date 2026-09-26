@@ -46,6 +46,13 @@ export async function runWeeklyCadence(context: CommandContext): Promise<Command
                 'No external mutation command executed.',
             ]),
             '',
+            buildSection('Warnings Review and Processing', [
+                'Record lint, runtime, scan, and generation warnings encountered during weekly processing.',
+                'Classify warnings as resolved_in_run, accepted_for_manual_processing, or deferred_with_owner.',
+                'Include warning source, affected artifact, operational impact, disposition, owner, and follow-up path.',
+                'Escalate any warning affecting evidence integrity, governance claims, or execution posture into the approvals lane before closure.',
+            ]),
+            '',
             buildSection('Action Register', [
                 'Package a local-first pilot asset that can run without calling home.',
                 'Refresh government contact follow-up notes.',
