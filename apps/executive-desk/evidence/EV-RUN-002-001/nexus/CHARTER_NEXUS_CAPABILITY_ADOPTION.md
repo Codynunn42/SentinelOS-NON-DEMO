@@ -1,7 +1,7 @@
 # NEXUS Integration & Capability Adoption Charter
 Framework: SentinelOS Black Phoenix  
 Program: NEXUS Capability Integration  
-Owner: Cody Nunn (Interim, role: Executive Desk)  
+Owner: Cody Nunn (Owner, role: Executive Desk)  
 Date: 2026-08-01
 
 ## Objective

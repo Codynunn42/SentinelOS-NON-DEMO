@@ -2,7 +2,7 @@
 **Track:** 2 of 5 — Security
 **Evidence ID:** EV-RUN-002-001
 **Baseline Timestamp:** 2026-08-02T12:15:00Z
-**Owner:** Cody Nunn (Interim, Executive Desk)
+**Owner:** Cody Nunn (Owner, Executive Desk)
 **Approval Authority:** Executive Desk
 **Inherits:** PHASE2_DOMAIN_MAPPING.md (scope, ownership, control ownership)
 
@@ -56,7 +56,7 @@
 | Auth policy review | Quarterly | Executive Desk | Calendar or on key rotation |
 | Threat boundary review | On scope change | Executive Desk | New route, new principal, new environment |
 | Audit chain spot-check | Monthly | Executive Desk Automated | Scheduled or on `riskIndex > 0.7` |
-| Full security baseline review | Each major NEXUS version | Cody Nunn (Interim) | Version gate |
+| Full security baseline review | Each major NEXUS version | Cody Nunn | Version gate |
 | Incident-triggered review | Immediate | Executive Desk | Any auth failure, escalation, or drift alert |
 
 ---

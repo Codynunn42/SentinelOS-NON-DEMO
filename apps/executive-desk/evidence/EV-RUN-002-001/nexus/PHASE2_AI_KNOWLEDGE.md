@@ -2,7 +2,7 @@
 **Track:** 5 of 5 — AI Knowledge
 **Evidence ID:** EV-RUN-002-001
 **Baseline Timestamp:** 2026-08-02T12:30:00Z
-**Owner:** Cody Nunn (Interim, Executive Desk)
+**Owner:** Cody Nunn (Owner, Executive Desk)
 **Approval Authority:** Executive Desk
 **Inherits:** PHASE2_DOMAIN_MAPPING.md, PHASE2_SECURITY.md, PHASE2_RUNTIME.md, PHASE2_WORKFLOW.md
 
