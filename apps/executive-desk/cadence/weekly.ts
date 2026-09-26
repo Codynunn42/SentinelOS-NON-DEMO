@@ -9,10 +9,23 @@ import {
 } from './cadence-engine';
 import { writeMarkdownArtifact } from '../reporting/markdown-reporter';
 
+function buildWarningsSectionLines(warnings: string[]): string[] {
+    if (warnings.length === 0) {
+        return ['No warnings observed in this weekly generation run.'];
+    }
+
+    return warnings.map((warning) => `Observed warning: ${warning}`);
+}
+
 export async function runWeeklyCadence(context: CommandContext): Promise<CommandExecutionResult> {
     const date = getDateParts(context);
     const targetPath = path.join(context.docsRoot, 'weekly', `${date.week}.md`);
     const completion = await buildSentinelCompletionState(context);
+    const observedWarnings: string[] = [];
+
+    if (completion.verified.some((item) => item.includes('not_behavior_verified'))) {
+        observedWarnings.push('verified_evidence_requires_behavior_verification_followup');
+    }
 
     const markdown = wrapGovernedReport(
         [
@@ -47,10 +60,7 @@ export async function runWeeklyCadence(context: CommandContext): Promise<Command
             ]),
             '',
             buildSection('Warnings Review and Processing', [
-                'Record lint, runtime, scan, and generation warnings encountered during weekly processing.',
-                'Classify warnings as resolved_in_run, accepted_for_manual_processing, or deferred_with_owner.',
-                'Include warning source, affected artifact, operational impact, disposition, owner, and follow-up path.',
-                'Escalate any warning affecting evidence integrity, governance claims, or execution posture into the approvals lane before closure.',
+                ...buildWarningsSectionLines(observedWarnings),
             ]),
             '',
             buildSection('Action Register', [
@@ -113,7 +123,7 @@ export async function runWeeklyCadence(context: CommandContext): Promise<Command
         command: 'executive weekly',
         summary: 'Weekly Executive Operations Report generated.',
         artifacts: [artifact],
-        warnings: [],
+        warnings: observedWarnings,
         blockers: [],
     };
 }

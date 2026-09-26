@@ -5,10 +5,12 @@
   "generated_at": "2026-09-25T19:38:39.099Z",
   "what_if": false,
   "summary": "Weekly Executive Operations Report generated.",
-  "warnings": [],
+  "warnings": [
+    "verified_evidence_requires_behavior_verification_followup"
+  ],
   "blockers": [],
   "generated_artifacts": [
-    "/Users/codynunn/SentinelOS/SentinelOS-NON-DEMO/SentinelOS-NON-DEMO/SentinelOS-NON-DEMO/docs/executive-desk/weekly/2026-W39.md"
+    "docs/executive-desk/weekly/2026-W39.md"
   ],
   "comm": "Sentinel AI by Cody Nunn | Nunn Cloud",
   "authority_created": false,

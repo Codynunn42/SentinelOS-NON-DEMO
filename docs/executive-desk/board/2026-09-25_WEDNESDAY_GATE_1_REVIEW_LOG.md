@@ -7,7 +7,7 @@
 
 ## Review Inputs
 
-- Warning-flow quick-win commit: `7301cf3`
+- Warning-flow quick-win commit: `d1348f1`
 - Warning review artifact: `docs/executive-desk/2026-09-25_SENTINEL_AI_WARNING_REVIEW_AND_FIX_RECOMMENDATIONS.md`
 - Formatting policy approval packet: `docs/executive-desk/2026-09-25_EXECUTIVE_DESK_FORMATTING_POLICY_APPROVAL_PACKET.md`
 - EV-RUN owner assignment record: `docs/executive-desk/2026-09-25_EV-RUN-002-001_METADATA_OWNER_ASSIGNMENT_RECORD.md`
@@ -19,8 +19,9 @@
    - Weekly generator and executive template include warnings review/processing handling.
 2. **Approval boundary for policy-changing fixes:** PASS
    - Formatting policy mutation held behind owner approval packet.
-3. **EV-RUN metadata owner assignment:** PASS
-   - Interim/generic owner labels replaced in live EV-RUN-002-001 nexus artifacts.
+3. **EV-RUN metadata owner assignment:** PASS_WITH_REMEDIATION
+   - Interim owner labels were remediated in core owner fields.
+   - Additional team-level owner-bearing fields require a broader follow-up normalization pass.
 4. **GBP evidence-link integrity:** PASS
    - Local markdown links in `docs/GBP` resolved with no missing link targets.
 5. **Source status drift check (code paths):** PASS
@@ -32,6 +33,11 @@
   - Owner: Cody Nunn
   - Due: 2026-09-26
   - Closure evidence: approved decision values populated in packet + follow-on implementation decision.
+
+- **R2 (Open):** Expand owner-field normalization across EV-RUN-002-001 owner-bearing tables and metadata fields.
+  - Owner: Cody Nunn
+  - Due: 2026-09-26
+  - Closure evidence: owner-field scan output covering `Owner`, `owner`, and `operationalOwner` style fields with resulting assignment updates.
 
 ## Gate Outcome
 

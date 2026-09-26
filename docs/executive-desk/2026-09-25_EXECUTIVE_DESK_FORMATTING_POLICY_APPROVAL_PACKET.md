@@ -70,5 +70,5 @@ Any approved execution must satisfy all guardrails:
 
 ## Current State Snapshot
 
-- Quick-win warning workflow updates are committed in `7301cf3`.
+- Quick-win warning workflow updates are committed in `d1348f1`.
 - Gated formatting policy remains intentionally deferred pending owner decision.

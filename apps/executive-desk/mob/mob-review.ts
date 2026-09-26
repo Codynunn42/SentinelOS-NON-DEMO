@@ -33,10 +33,11 @@ async function loadAlignmentProfile(
     context: CommandContext,
 ): Promise<{ profile: AlignmentProfile; warnings: string[]; source?: string }> {
     const source = path.join(context.docsRoot, 'mob', 'alignment-profile.json');
+    const portableSource = path.relative(context.repoRoot, source).replace(/\\/g, '/');
     try {
         const raw = await readFile(source, 'utf8');
         const parsed = JSON.parse(raw) as AlignmentProfile;
-        return { profile: parsed, warnings: [], source };
+        return { profile: parsed, warnings: [], source: portableSource };
     } catch (error: unknown) {
         const detail = error instanceof Error ? error.message : String(error);
         return {

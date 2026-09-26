@@ -1,6 +1,6 @@
 # EV-RUN-002-001 Metadata Owner Assignment Record — 2026-09-25
 
-**Status:** `completed_today`  
+**Status:** `completed_with_followup`  
 **Evidence ID:** `EV-RUN-002-001`  
 **Owner assignment authority:** Cody Nunn
 
@@ -13,9 +13,9 @@ Validate EV-RUN-002-001 metadata placeholders and assign replacement owners in l
 - Placeholder token scan on live nexus artifacts (excluding templates and repo-review snapshots):
   - `rg -n "<EXACT|\[paste exact value\]|\bTBD\b|\bTODO\b|\bREPLACE\b|PENDING_OWNER" apps/executive-desk/evidence/EV-RUN-002-001/nexus --glob '!**/*TEMPLATE*' --glob '!**/repo-review/**'`
   - Result: no unresolved strict placeholder tokens found.
-- Interim/generic owner scan on live nexus artifacts:
+- Interim/generic owner scan on live nexus artifacts (targeted canonical owner-label patterns):
   - `rg -n "Interim|\*\*Owner:\*\* Executive Desk|Owner: Executive Desk|owner: Executive Desk" apps/executive-desk/evidence/EV-RUN-002-001/nexus --glob '!**/*TEMPLATE*' --glob '!**/repo-review/**'`
-  - Result after replacement pass: no remaining interim/generic owner labels in live artifacts.
+  - Result after replacement pass: no remaining matches for targeted canonical owner-label patterns.
 
 ## Replacement Owner Assignment (Effective 2026-09-25)
 
@@ -31,4 +31,5 @@ Validate EV-RUN-002-001 metadata placeholders and assign replacement owners in l
 
 - Template files (`*TEMPLATE*`) were not mutated in this pass.
 - Historical repo-review snapshots were not mutated in this pass.
+- Team-level owner-bearing fields (for example `operationalOwner` and tabular `Owner` entries) require a broader normalization follow-up pass.
 - This action updates current operational owner metadata without changing evidence claims or approval posture.

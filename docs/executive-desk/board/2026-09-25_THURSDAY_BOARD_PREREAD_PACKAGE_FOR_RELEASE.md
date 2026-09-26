@@ -7,7 +7,7 @@
 ## Package Artifact
 
 - Package path: `artifacts/thursday-board-preread-release-package-2026-09-25.zip`
-- SHA-256: `8ae93a3663bc0036d3e508186dc924d5425db0289ede7d1d39928eae132768b0`
+- SHA-256: `50bb6da257e92242b0214289a3d15c5c44a980faa822ecdd9319e9158a6d7746`
 
 ## Included Documents
 
