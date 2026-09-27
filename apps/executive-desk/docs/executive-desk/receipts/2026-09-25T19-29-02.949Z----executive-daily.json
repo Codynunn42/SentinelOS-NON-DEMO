@@ -1,0 +1,18 @@
+{
+  "status": "blocked",
+  "command": "-- executive daily",
+  "execution_mode": "local_repository_only",
+  "generated_at": "2026-09-25T19:29:02.949Z",
+  "what_if": false,
+  "summary": "Unsupported command. Run help for usage.",
+  "warnings": [],
+  "blockers": [
+    "unsupported_command"
+  ],
+  "generated_artifacts": [],
+  "comm": "Sentinel AI by Cody Nunn | Nunn Cloud",
+  "authority_created": false,
+  "operational_mutation": false,
+  "external_claims_authorized": false,
+  "generated_by": "Local SentinelOS Executive Desk"
+}

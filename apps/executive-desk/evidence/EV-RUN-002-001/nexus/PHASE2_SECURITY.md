@@ -1,4 +1,5 @@
 # NEXUS Phase 2 — Security Baseline
+
 **Track:** 2 of 5 — Security
 **Evidence ID:** EV-RUN-002-001
 **Baseline Timestamp:** 2026-08-02T12:15:00Z
@@ -11,7 +12,7 @@
 ## 1. Identity & Access Model
 
 | Principal | Access Method | Scope | Credential Source |
-|-----------|--------------|-------|-------------------|
+| ----------- | -------------- | ------- | ------------------- |
 | Executive Desk (human) | `x-api-key` header | All routes | `.env` → `SENTINEL_API_KEY` |
 | NEXUS automated verification | `x-api-key` header | `/health`, `/faceplane/openai/execute` | `.env` → `SENTINEL_API_KEY` |
 | Cloudflare tunnel | TLS termination | Public ingress only | Tunnel certificate |
@@ -26,7 +27,7 @@
 ## 2. Threat Boundaries
 
 | Boundary | Threat | Mitigation | Status |
-|----------|--------|------------|--------|
+| ---------- | -------- | ------------ | -------- |
 | Public internet → Cloudflare | Unauthorized access | TLS + Cloudflare WAF | Active |
 | Cloudflare → localhost:3000 | Tunnel bypass | Tunnel bound to localhost only | Active |
 | API key exposure | Credential leak | Key stored in `.env`, not committed | Required — verify `.gitignore` |
@@ -40,7 +41,7 @@
 ## 3. Evidence Requirements
 
 | Control | Evidence Required | Retention Location | Review Trigger |
-|---------|------------------|--------------------|----------------|
+| --------- | ------------------ | -------------------- | ---------------- |
 | Auth policy enforcement | Bridge response with `auditEntry.hash` | `nexus/` decision records | Each C-gate run |
 | Key rotation | `.env` change log or secret manager rotation record | Outside NEXUS scope — flag for ops | Quarterly or on breach |
 | Audit chain integrity | `previousHash` value in consecutive bridge calls | Bridge response logs | On drift alert |
@@ -52,7 +53,7 @@
 ## 4. Review Cadence
 
 | Review Type | Frequency | Owner | Trigger |
-|-------------|-----------|-------|---------|
+| ------------- | ----------- | ------- | --------- |
 | Auth policy review | Quarterly | Executive Desk | Calendar or on key rotation |
 | Threat boundary review | On scope change | Executive Desk | New route, new principal, new environment |
 | Audit chain spot-check | Monthly | Executive Desk Automated | Scheduled or on `riskIndex > 0.7` |
@@ -64,7 +65,7 @@
 ## 5. Open Items
 
 | ID | Item | Risk | Owner | Resolution |
-|----|------|------|-------|------------|
+| ---- | ------ | ------ | ------- | ------------ |
 | SEC-001 | `.env` not confirmed in `.gitignore` | High — key exposure | Executive Desk | Verify before next push |
 | SEC-002 | `GET /health` exposes `tier`, `mode`, `sovereign` fields | Low | Executive Desk | Assess sensitivity; mask if needed |
 | SEC-003 | API key rotation process not documented | Medium | Executive Desk | Document in ops runbook |
@@ -73,9 +74,11 @@
 ---
 
 ## Constitutional Attestation
+
 This baseline strengthens institutional capability, preserves existing investment value, improves governance clarity, and maintains auditable evidence continuity.
 
 ## Status
+
 Security baseline: **COMPLETE**
 Open items: 4 (SEC-001 through SEC-004)
 Next track: Runtime (deployment topology, health checks, operational controls, rollback/recovery)
