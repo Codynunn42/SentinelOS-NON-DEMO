@@ -10,12 +10,21 @@ import { getDateParts, wrapGovernedReport } from '../cadence/cadence-engine';
 import { writeMarkdownArtifact } from '../reporting/markdown-reporter';
 
 async function hasMobArtifacts(context: CommandContext): Promise<boolean> {
-    try {
-        await access(path.join(context.repoRoot, 'docs', 'MOB_NEXT_STEPS_TEMPLATE_2026-07-05.md'));
-        return true;
-    } catch {
-        return false;
+    const candidatePaths = [
+        path.join(context.repoRoot, 'docs', 'GBP', 'assessments', 'MOB_NEXT_STEPS_TEMPLATE_2026-07-05.md'),
+        path.join(context.repoRoot, 'docs', 'MOB_NEXT_STEPS_TEMPLATE_2026-07-05.md'),
+    ];
+
+    for (const candidatePath of candidatePaths) {
+        try {
+            await access(candidatePath);
+            return true;
+        } catch {
+            continue;
+        }
     }
+
+    return false;
 }
 
 type AlignmentProfile = Partial<Record<MobAlignmentRequirement, string>>;
@@ -24,10 +33,11 @@ async function loadAlignmentProfile(
     context: CommandContext,
 ): Promise<{ profile: AlignmentProfile; warnings: string[]; source?: string }> {
     const source = path.join(context.docsRoot, 'mob', 'alignment-profile.json');
+    const portableSource = path.relative(context.repoRoot, source).replace(/\\/g, '/');
     try {
         const raw = await readFile(source, 'utf8');
         const parsed = JSON.parse(raw) as AlignmentProfile;
-        return { profile: parsed, warnings: [], source };
+        return { profile: parsed, warnings: [], source: portableSource };
     } catch (error: unknown) {
         const detail = error instanceof Error ? error.message : String(error);
         return {

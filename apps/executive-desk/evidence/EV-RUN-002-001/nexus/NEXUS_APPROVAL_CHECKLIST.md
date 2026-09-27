@@ -1,6 +1,6 @@
 # NEXUS Approval Checklist
 **Evidence ID:** EV-RUN-002-001
-**Owner:** Executive Desk
+**Owner:** Cody Nunn (Owner, Executive Desk)
 **Standard:** White Glove Service Agreement
 
 ## Pre-Gate Checklist

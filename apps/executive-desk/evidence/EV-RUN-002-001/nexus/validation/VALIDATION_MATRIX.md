@@ -1,5 +1,5 @@
 # Validation Matrix — NEXUS Capability Adoption
-Owner: Cody Nunn (Interim, role: Executive Desk)
+Owner: Cody Nunn (Owner, role: Executive Desk)
 
 | Domain | Test | Method | Pass Criteria | Evidence Artifact |
 |---|---|---|---|---|

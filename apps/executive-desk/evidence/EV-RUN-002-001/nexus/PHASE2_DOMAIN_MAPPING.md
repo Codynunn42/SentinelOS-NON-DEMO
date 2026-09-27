@@ -2,7 +2,7 @@
 **Track:** 1 of 5 — Domain Mapping
 **Evidence ID:** EV-RUN-002-001
 **Baseline Timestamp:** 2026-08-02T12:10:00Z
-**Owner:** Cody Nunn (Interim, Executive Desk)
+**Owner:** Cody Nunn (Owner, Executive Desk)
 **Approval Authority:** Executive Desk
 
 ---
@@ -26,7 +26,7 @@
 
 | Domain | Owner | Role | Evidence Reference |
 |--------|-------|------|--------------------|
-| Executive Desk | Cody Nunn | Interim Executive Desk | `C2.2_DECISION_RECORD.md` |
+| Executive Desk | Cody Nunn | Executive Desk Owner | `C2.2_DECISION_RECORD.md` |
 | NEXUS Integration Pack | Executive Desk | Oversight authority | `OVERSIGHT_OPERATING_DIRECTIVE.md` |
 | Sentinel API runtime | Executive Desk | Operational owner | `CAPABILITY_REGISTRY_v1.yaml` — NEXUS-OPS-001 |
 | Evidence Traceability | Executive Desk | Governance owner | `CAPABILITY_REGISTRY_v1.yaml` — NEXUS-GOV-001 |

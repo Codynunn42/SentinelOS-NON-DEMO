@@ -1,6 +1,6 @@
 metadata:
   bridgeId: NEXUS-BRIDGE-001
-  owner: "Cody Nunn (Interim, role: Executive Desk)"
+  owner: "Cody Nunn (Owner, role: Executive Desk)"
   status: Active
 service:
   sourceSystem: SentinelOS

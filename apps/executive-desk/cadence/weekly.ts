@@ -9,10 +9,23 @@ import {
 } from './cadence-engine';
 import { writeMarkdownArtifact } from '../reporting/markdown-reporter';
 
+function buildWarningsSectionLines(warnings: string[]): string[] {
+    if (warnings.length === 0) {
+        return ['No warnings observed in this weekly generation run.'];
+    }
+
+    return warnings.map((warning) => `Observed warning: ${warning}`);
+}
+
 export async function runWeeklyCadence(context: CommandContext): Promise<CommandExecutionResult> {
     const date = getDateParts(context);
     const targetPath = path.join(context.docsRoot, 'weekly', `${date.week}.md`);
     const completion = await buildSentinelCompletionState(context);
+    const observedWarnings: string[] = [];
+
+    if (completion.verified.some((item) => item.includes('not_behavior_verified'))) {
+        observedWarnings.push('verified_evidence_requires_behavior_verification_followup');
+    }
 
     const markdown = wrapGovernedReport(
         [
@@ -44,6 +57,10 @@ export async function runWeeklyCadence(context: CommandContext): Promise<Command
             buildSection('Risk Assessment', [
                 'Risk posture remains controlled by read-only internal execution.',
                 'No external mutation command executed.',
+            ]),
+            '',
+            buildSection('Warnings Review and Processing', [
+                ...buildWarningsSectionLines(observedWarnings),
             ]),
             '',
             buildSection('Action Register', [
@@ -106,7 +123,7 @@ export async function runWeeklyCadence(context: CommandContext): Promise<Command
         command: 'executive weekly',
         summary: 'Weekly Executive Operations Report generated.',
         artifacts: [artifact],
-        warnings: [],
+        warnings: observedWarnings,
         blockers: [],
     };
 }
