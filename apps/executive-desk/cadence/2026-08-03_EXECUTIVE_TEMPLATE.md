@@ -80,6 +80,23 @@ Remaining posture:
   - Mitigation: Publish the GPT and apply the live enforcement settings before reporting the production path complete.
   - Owner: Cody Nunn (Interim, role: Executive Desk)
 
+## 5A. Warnings Review and Processing
+
+- Record any lint, runtime, scan, or generation warnings that appear during executive-template processing.
+- Classify each warning as one of:
+  - resolved_in_run
+  - accepted_for_manual_processing
+  - deferred_with_owner
+- For each warning captured, include:
+  - warning source
+  - affected artifact or file
+  - operational impact
+  - disposition
+  - owner
+  - required follow-up, if any
+- Warnings that do not change authority, status, or evidence posture may be processed during template refinement and closed in the same operating cycle.
+- Warnings that affect evidence integrity, governance claims, or execution posture must be escalated into the decisions/approvals lane before closure.
+
 ## 6. Decisions and Approvals
 
 - Decision: Keep the operational posture as ON TRACK with bounded live-environment blockers.

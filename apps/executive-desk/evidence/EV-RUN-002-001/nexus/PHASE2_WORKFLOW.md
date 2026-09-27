@@ -2,7 +2,7 @@
 **Track:** 4 of 5 — Workflow
 **Evidence ID:** EV-RUN-002-001
 **Baseline Timestamp:** 2026-08-02T12:25:00Z
-**Owner:** Cody Nunn (Interim, Executive Desk)
+**Owner:** Cody Nunn (Owner, Executive Desk)
 **Approval Authority:** Executive Desk
 **Inherits:** PHASE2_DOMAIN_MAPPING.md, PHASE2_SECURITY.md, PHASE2_RUNTIME.md
 

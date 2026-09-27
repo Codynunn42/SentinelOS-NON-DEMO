@@ -1,6 +1,6 @@
 metadata:
   registryId: SENTINELOS-NEXUS-CAP-REGISTRY
-  owner: "Cody Nunn (Interim, role: Executive Desk)"
+  owner: "Cody Nunn (Owner, role: Executive Desk)"
   version: "v1"
 capabilities:
   - id: NEXUS-OPS-001

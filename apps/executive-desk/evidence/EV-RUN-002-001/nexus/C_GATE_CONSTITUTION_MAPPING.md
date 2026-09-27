@@ -1,6 +1,6 @@
 # C-Gate Constitution Mapping
 Date: 2026-08-02
-Owner: Cody Nunn (Interim, role: Executive Desk)
+Owner: Cody Nunn (Owner, role: Executive Desk)
 
 ## C2.2 (Oversight Model)
 Pass requires:
