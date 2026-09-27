@@ -1,9 +1,11 @@
 # NEXUS Integration Pack — SentinelOS
+
 Owner: Cody Nunn (Owner, role: Executive Desk)
 Status: Active
 Purpose: Make NEXUS a native capability subsystem within SentinelOS.
 
 ## Package Contents
+
 - `CHARTER_NEXUS_CAPABILITY_ADOPTION.md`
 - `api-catalog/API_CATALOG_TEMPLATE.yaml`
 - `capability-registry/CAPABILITY_REGISTRY_TEMPLATE.yaml`
