@@ -171,7 +171,7 @@ jobs:
           az rest \
             --method patch \
             --uri "https://management.azure.com${RESOURCE_ID}?api-version=2025-01-01" \
-            --headers "Content-Type=application/merge-patch+json" \
+            --headers "Content-Type=application/json" \
             --body @/tmp/containerapp-healthfix-patch.json \
             --output none
 
