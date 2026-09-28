@@ -40,6 +40,10 @@ jobs:
         uses: azure/CLI@v2
         with:
           inlineScript: |
+            if [ -z "${SENTINEL_API_KEY:-}" ]; then
+              echo "::error::SENTINEL_API_KEY is empty or not configured for this deployment context."
+              exit 1
+            fi
             az extension add --name containerapp --upgrade
             az containerapp secret set \
               --name ${{ secrets.CONTAINER_APP_NAME }} \
@@ -64,10 +68,18 @@ jobs:
       - name: Set secret and ingress config
         env:
           SENTINEL_API_KEY: ${{ secrets.SENTINEL_API_KEY }}
-          SENTINEL_HMAC_SECRET: ${{ secrets.SENTINEL_HMAC_SECRET }}
+          SENTINEL_HMAC_SECRET: ${{ secrets.SENTINEL_API_HMAC }}
         uses: azure/CLI@v2
         with:
           inlineScript: |
+            if [ -z "${SENTINEL_API_KEY:-}" ]; then
+              echo "::error::SENTINEL_API_KEY is empty or not configured for this deployment context."
+              exit 1
+            fi
+            if [ -z "${SENTINEL_HMAC_SECRET:-}" ]; then
+              echo "::error::SENTINEL_HMAC_SECRET is empty or not configured for this deployment context."
+              exit 1
+            fi
             az extension add --name containerapp --upgrade
             az containerapp secret set \
               --name ${{ secrets.CONTAINER_APP_NAME }} \
@@ -169,8 +181,8 @@ jobs:
         shell: bash
         env:
           EXPECTED_IMAGE: ${{ secrets.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
-          EXPECTED_PORT: '3000'
-          REQUIRED_TRAFFIC_WEIGHT: '100'
+          EXPECTED_PORT: "3000"
+          REQUIRED_TRAFFIC_WEIGHT: "100"
         run: |
           set -euo pipefail
           APP_NAME="${{ secrets.CONTAINER_APP_NAME }}"
@@ -219,8 +231,8 @@ jobs:
         shell: bash
         env:
           EXPECTED_IMAGE: ${{ secrets.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
-          EXPECTED_PORT: '3000'
-          REQUIRED_TRAFFIC_WEIGHT: '100'
+          EXPECTED_PORT: "3000"
+          REQUIRED_TRAFFIC_WEIGHT: "100"
         run: |
           set -euo pipefail
           APP_NAME="${{ secrets.CONTAINER_APP_NAME }}"
@@ -246,7 +258,6 @@ jobs:
           REQUIRED_TRAFFIC_WEIGHT="$REQUIRED_TRAFFIC_WEIGHT" \
           AZURE_DEPLOYMENT_CONTRACT_EXACT_REVISION_PATH=/tmp/sentinel-exact-revision.json \
           node scripts/validate-live-azure-deployment-contract.js /tmp/sentinel-app.json /tmp/sentinel-revisions.json
-
 
       - name: Smoke test live endpoint
         uses: azure/CLI@v2
