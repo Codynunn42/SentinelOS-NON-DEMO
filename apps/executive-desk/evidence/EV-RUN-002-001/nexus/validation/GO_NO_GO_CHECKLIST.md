@@ -1,7 +1,9 @@
 # Go / No-Go Checklist — NEXUS Integration
-Owner: Cody Nunn (Interim, role: Executive Desk)
+
+Owner: Cody Nunn (Owner, role: Executive Desk)
 
 ## Must Pass
+
 - [ ] Capability registry populated for all priority features.
 - [ ] API contracts validated and versioned.
 - [ ] Security controls approved (authN/authZ/secrets/audit).
@@ -12,11 +14,13 @@ Owner: Cody Nunn (Interim, role: Executive Desk)
 - [ ] Validation matrix all green or approved exceptions.
 
 ## Decision
+
 - [ ] GO
 - [ ] CONDITIONAL GO
 - [ ] NO-GO
 
 ## Approval
+
 - Decision Authority:
 - Date:
 - Notes:

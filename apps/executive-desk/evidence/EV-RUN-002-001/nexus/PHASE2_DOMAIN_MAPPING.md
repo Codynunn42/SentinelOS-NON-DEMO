@@ -1,8 +1,9 @@
 # NEXUS Phase 2 — Domain Mapping Baseline
+
 **Track:** 1 of 5 — Domain Mapping
 **Evidence ID:** EV-RUN-002-001
 **Baseline Timestamp:** 2026-08-02T12:10:00Z
-**Owner:** Cody Nunn (Interim, Executive Desk)
+**Owner:** Cody Nunn (Owner, Executive Desk)
 **Approval Authority:** Executive Desk
 
 ---
@@ -10,7 +11,7 @@
 ## 1. Scope Boundary
 
 | Item | Value |
-|------|-------|
+| ------ | ------- |
 | System | SentinelOS-NON-DEMO |
 | Integration Pack | NEXUS |
 | Runtime Boundary | `127.0.0.1:3000` (local); `api.nunncorporation.com` (Cloudflare tunnel); `ca-nc-dev-sentinel.calmhill-388e1d39.eastus2.azurecontainerapps.io` (Azure prod) |
@@ -25,8 +26,8 @@
 ## 2. Ownership Domains
 
 | Domain | Owner | Role | Evidence Reference |
-|--------|-------|------|--------------------|
-| Executive Desk | Cody Nunn | Interim Executive Desk | `C2.2_DECISION_RECORD.md` |
+| -------- | ------- | ------ | -------------------- |
+| Executive Desk | Cody Nunn | Executive Desk Owner | `C2.2_DECISION_RECORD.md` |
 | NEXUS Integration Pack | Executive Desk | Oversight authority | `OVERSIGHT_OPERATING_DIRECTIVE.md` |
 | Sentinel API runtime | Executive Desk | Operational owner | `CAPABILITY_REGISTRY_v1.yaml` — NEXUS-OPS-001 |
 | Evidence Traceability | Executive Desk | Governance owner | `CAPABILITY_REGISTRY_v1.yaml` — NEXUS-GOV-001 |
@@ -38,7 +39,7 @@
 ## 3. System Relationships
 
 | From | To | Relationship | Protocol | Auth |
-|------|----|--------------|----------|------|
+| ------ | ---- | -------------- | ---------- | ------ |
 | Executive Desk | Sentinel API | Governance oversight | HTTP | `x-api-key: SENTINEL_API_KEY` |
 | Sentinel API | Faceplane (OpenAI) | Workflow execution | Internal | `gaasTier: internal_governance_lab` |
 | Sentinel API | Audit log | Chain-of-custody | Internal | `auditLogEnabled: true` |
@@ -52,7 +53,7 @@
 ## 4. Control Ownership
 
 | Control | Owner | Gate Verified | Evidence |
-|---------|-------|---------------|----------|
+| --------- | ------- | --------------- | ---------- |
 | fail-closed enforcement | Sentinel API / Executive Desk | C2.3 | `C2.3_DECISION_RECORD.md` |
 | Idempotency | Sentinel API | C2.3 | `C2.3_DECISION_RECORD.md` |
 | Auth policy (x-api-key) | Executive Desk | C2.3 | `SERVICE_BRIDGE_SPEC_v1.yaml` |
@@ -68,6 +69,7 @@
 ## 5. Inheritance Rule for Remaining Phase 2 Tracks
 
 All Phase 2 templates (Security, Runtime, Workflow, AI Knowledge) inherit:
+
 - Scope boundary as defined in Section 1 above
 - Ownership model as defined in Section 2 above
 - Control ownership as defined in Section 4 above
@@ -78,5 +80,6 @@ Any deviation from inherited scope or ownership requires an explicit override re
 ---
 
 ## Status
+
 Domain mapping baseline: **COMPLETE**
 Next track: Security (identity/access model, threat boundaries, evidence requirements, review cadence)

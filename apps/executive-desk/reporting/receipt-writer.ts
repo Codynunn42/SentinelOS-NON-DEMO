@@ -19,6 +19,11 @@ export type LocalExecutionReceipt = {
     generated_by: string;
 };
 
+function toPortableArtifactPath(repoRoot: string, artifactPath: string): string {
+    const relative = path.relative(repoRoot, artifactPath).replace(/\\/g, '/');
+    return relative.startsWith('..') ? artifactPath : relative;
+}
+
 export async function writeExecutionReceipt(
     context: CommandContext,
     result: CommandExecutionResult,
@@ -40,7 +45,7 @@ export async function writeExecutionReceipt(
         summary: result.summary,
         warnings: result.warnings,
         blockers: result.blockers,
-        generated_artifacts: result.artifacts.map((item) => item.path),
+        generated_artifacts: result.artifacts.map((item) => toPortableArtifactPath(context.repoRoot, item.path)),
         comm: context.governance.comm,
         authority_created: false,
         operational_mutation: false,

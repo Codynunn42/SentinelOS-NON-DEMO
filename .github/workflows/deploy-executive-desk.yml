@@ -1,0 +1,355 @@
+name: Deploy Executive Desk to Azure Container Apps
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install pnpm
+        run: npm install --global pnpm@10.33.4
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run Executive Desk API route suite
+        run: pnpm run check:executive-desk:api
+
+      - name: Run TypeScript checks
+        run: pnpm run check:executive-desk:types
+
+      - name: Run Executive Desk end-to-end check
+        run: pnpm run check:executive-desk:e2e
+
+      - name: Build container image
+        run: docker build --tag executive-desk:deploy-check .
+
+  deploy:
+    needs: validate
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+
+    env:
+      IMAGE_NAME: executive-desk
+      IMAGE_TAG: ${{ github.sha }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Log in to Azure Container Registry
+        run: |
+          ACR_NAME="${{ secrets.ACR_LOGIN_SERVER }}"
+          ACR_NAME="${ACR_NAME%%.*}"
+          az acr login --name "$ACR_NAME"
+
+      - name: Build and push Executive Desk image
+        run: |
+          docker build \
+            -t ${{ secrets.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }} \
+            -t ${{ secrets.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:latest \
+            .
+          docker push ${{ secrets.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+          docker push ${{ secrets.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:latest
+
+      - name: Deploy Executive Desk revision to Azure Container Apps
+        uses: azure/CLI@v2
+        with:
+          inlineScript: |
+            az extension add --name containerapp --upgrade
+
+            APP_NAME="${{ secrets.EXECUTIVE_DESK_CONTAINER_APP_NAME }}"
+            RESOURCE_GROUP="${{ secrets.AZURE_RESOURCE_GROUP }}"
+            IMAGE_URI="${{ secrets.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}"
+            SHORT_SHA="$(printf '%s' "$GITHUB_SHA" | cut -c1-7)"
+            REVISION_SUFFIX="execdesk-${SHORT_SHA}-${GITHUB_RUN_NUMBER}"
+            RESOURCE_ID="$(az containerapp show \
+              --name "$APP_NAME" \
+              --resource-group "$RESOURCE_GROUP" \
+              --query id \
+              --output tsv)"
+
+            az containerapp show \
+              --name "$APP_NAME" \
+              --resource-group "$RESOURCE_GROUP" \
+              --query properties.template.containers \
+              --output json > containers.json
+
+            python3 - "$IMAGE_URI" "$REVISION_SUFFIX" <<'PY'
+            import json
+            import sys
+
+            image_uri, revision_suffix = sys.argv[1:3]
+            with open("containers.json", encoding="utf-8") as source:
+                containers = json.load(source)
+
+            if not containers:
+                raise SystemExit("Container App has no containers to update")
+
+            primary = next(
+                (
+                    container
+                    for container in containers
+                    if container.get("name") == "executive-desk"
+                ),
+                containers[0],
+            )
+            primary["image"] = image_uri
+            primary["command"] = [
+                "node",
+                "--import",
+                "tsx",
+                "apps/executive-desk/server.ts",
+            ]
+            primary.pop("args", None)
+
+            governed_env = {
+                "API_HOST": {"value": "0.0.0.0"},
+                "API_PORT": {"value": "3000"},
+                "EXECUTIVE_DESK_TRUST_PROXY_HOPS": {"value": "1"},
+            }
+            env_by_name = {
+                item.get("name"): item
+                for item in primary.setdefault("env", [])
+                if item.get("name")
+            }
+            for name, attributes in governed_env.items():
+                entry = env_by_name.get(name)
+                if entry is None:
+                    entry = {"name": name}
+                    primary["env"].append(entry)
+                entry.pop("value", None)
+                entry.pop("secretRef", None)
+                entry.update(attributes)
+
+            required_probe_types = {"Liveness", "Readiness", "Startup"}
+            aligned_probe_types = set()
+            for probe in primary.get("probes", []):
+                probe_type = probe.get("type")
+                if probe_type in required_probe_types and "httpGet" in probe:
+                    probe["httpGet"]["path"] = "/health"
+                    probe["httpGet"]["port"] = 3000
+                    probe["httpGet"]["scheme"] = "HTTP"
+                    aligned_probe_types.add(probe_type)
+
+            missing = required_probe_types - aligned_probe_types
+            if missing:
+                raise SystemExit(
+                    "Missing HTTP health probes: " + ", ".join(sorted(missing))
+                )
+
+            patch = {
+                "properties": {
+                    "template": {
+                        "revisionSuffix": revision_suffix,
+                        "containers": containers,
+                        "scale": {
+                            "minReplicas": 1,
+                            "maxReplicas": 1,
+                        },
+                    }
+                }
+            }
+            with open("containerapp-patch.json", "w", encoding="utf-8") as target:
+                json.dump(patch, target)
+            PY
+
+            az rest \
+              --method patch \
+              --uri "https://management.azure.com${RESOURCE_ID}?api-version=2025-01-01" \
+              --headers "Content-Type=application/merge-patch+json" \
+              --body @containerapp-patch.json \
+              --output none
+
+            az containerapp ingress update \
+              --name "$APP_NAME" \
+              --resource-group "$RESOURCE_GROUP" \
+              --target-port 3000 \
+              --output none
+
+      - name: Verify Executive Desk revision and rate-limit deployment settings
+        uses: azure/CLI@v2
+        with:
+          inlineScript: |
+            APP_NAME="${{ secrets.EXECUTIVE_DESK_CONTAINER_APP_NAME }}"
+            RESOURCE_GROUP="${{ secrets.AZURE_RESOURCE_GROUP }}"
+            SHORT_SHA="$(printf '%s' "$GITHUB_SHA" | cut -c1-7)"
+            REVISION_SUFFIX="execdesk-${SHORT_SHA}-${GITHUB_RUN_NUMBER}"
+            REVISION_NAME="${APP_NAME}--${REVISION_SUFFIX}"
+            EXPECTED_IMAGE="${{ secrets.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}"
+            FQDN="$(az containerapp show \
+              --name "$APP_NAME" \
+              --resource-group "$RESOURCE_GROUP" \
+              --query properties.configuration.ingress.fqdn \
+              --output tsv)"
+
+            wait_for_deployed_revision() {
+              local attempts=20
+              local sleep_seconds=15
+              local i
+              for i in $(seq 1 "$attempts"); do
+                health_state="$(az containerapp revision show \
+                  --name "$APP_NAME" \
+                  --resource-group "$RESOURCE_GROUP" \
+                  --revision "$REVISION_NAME" \
+                  --query properties.healthState \
+                  --output tsv 2>/dev/null || true)"
+                provisioning_state="$(az containerapp revision show \
+                  --name "$APP_NAME" \
+                  --resource-group "$RESOURCE_GROUP" \
+                  --revision "$REVISION_NAME" \
+                  --query properties.provisioningState \
+                  --output tsv 2>/dev/null || true)"
+                active="$(az containerapp revision show \
+                  --name "$APP_NAME" \
+                  --resource-group "$RESOURCE_GROUP" \
+                  --revision "$REVISION_NAME" \
+                  --query properties.active \
+                  --output tsv 2>/dev/null || true)"
+
+                echo "Revision check ${i}/${attempts}: name=${REVISION_NAME} health=${health_state:-unknown} provisioning=${provisioning_state:-unknown} active=${active:-unknown}"
+                if [ "$health_state" = "Healthy" ] &&
+                   [ "$provisioning_state" = "Provisioned" ] &&
+                   [ "$active" = "true" ]; then
+                  return 0
+                fi
+
+                sleep "$sleep_seconds"
+              done
+
+              echo "Timed out waiting for the deployed revision to become active, Healthy, and Provisioned."
+              return 1
+            }
+
+            request_with_retry() {
+              local label="$1"
+              local url="$2"
+              local expected_codes="$3"
+              local body_file
+              local status
+              local i
+              local attempts=10
+              local sleep_seconds=10
+              body_file="$(mktemp)"
+
+              for i in $(seq 1 "$attempts"); do
+                status="$(curl --show-error --silent --max-time 30 \
+                  --output "$body_file" \
+                  --write-out '%{http_code}' \
+                  "$url" || true)"
+
+                echo "${label} attempt ${i}/${attempts}: HTTP ${status:-000}"
+                case " ${expected_codes} " in
+                  *" ${status} "*)
+                    rm -f "$body_file"
+                    return 0
+                    ;;
+                esac
+
+                sleep "$sleep_seconds"
+              done
+
+              rm -f "$body_file"
+              echo "${label} did not return expected HTTP status: ${expected_codes}"
+              return 1
+            }
+
+            wait_for_deployed_revision
+
+            latest_revision="$(az containerapp show \
+              --name "$APP_NAME" \
+              --resource-group "$RESOURCE_GROUP" \
+              --query properties.latestRevisionName \
+              --output tsv)"
+            latest_traffic="$(az containerapp show \
+              --name "$APP_NAME" \
+              --resource-group "$RESOURCE_GROUP" \
+              --query "properties.configuration.ingress.traffic[?latestRevision == \`true\`].weight | [0]" \
+              --output tsv)"
+
+            az containerapp revision show \
+              --name "$APP_NAME" \
+              --resource-group "$RESOURCE_GROUP" \
+              --revision "$REVISION_NAME" \
+              --query "properties.template" \
+              --output json > revision-template.json
+
+            python3 - "$EXPECTED_IMAGE" <<'PY'
+            import json
+            import sys
+
+            expected_image = sys.argv[1]
+            with open("revision-template.json", encoding="utf-8") as source:
+                template = json.load(source)
+
+            container = template["containers"][0]
+            if container.get("image") != expected_image:
+                raise SystemExit("Deployed Executive Desk image does not match expected image")
+
+            expected_command = [
+                "node",
+                "--import",
+                "tsx",
+                "apps/executive-desk/server.ts",
+            ]
+            if container.get("command") != expected_command:
+                raise SystemExit("Executive Desk container command is not set to the Executive Desk server")
+
+            env_by_name = {
+                item.get("name"): item.get("value")
+                for item in container.get("env", [])
+                if item.get("name")
+            }
+            if env_by_name.get("EXECUTIVE_DESK_TRUST_PROXY_HOPS") != "1":
+                raise SystemExit("EXECUTIVE_DESK_TRUST_PROXY_HOPS is not pinned to 1")
+
+            scale = template.get("scale") or {}
+            if scale.get("minReplicas") != 1 or scale.get("maxReplicas") != 1:
+                raise SystemExit("Executive Desk scale is not pinned to one replica")
+            PY
+
+            test "$latest_revision" = "$REVISION_NAME"
+            test "$latest_traffic" = "100"
+            echo "Provenance verified: revision=${REVISION_NAME} image-tag=${GITHUB_SHA} traffic=100 command=executive-desk-server maxReplicas=1 trustProxyHops=1"
+
+            request_with_retry \
+              "health" \
+              "https://${FQDN}/health" \
+              "200"
+
+            request_with_retry \
+              "executive-ui" \
+              "https://${FQDN}/executive" \
+              "200 302"
+
+            az containerapp revision show \
+              --name "$APP_NAME" \
+              --resource-group "$RESOURCE_GROUP" \
+              --revision "$REVISION_NAME" \
+              --query "[name,properties.healthState,properties.provisioningState,properties.active,properties.template.scale.maxReplicas,properties.template.containers[0].command]" \
+              --output table
+
+      - name: Show Executive Desk deployment target
+        run: |
+          echo "Deployed image: ${{ secrets.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}"
+          echo "Updated latest: ${{ secrets.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:latest"
+          echo "Container App: ${{ secrets.EXECUTIVE_DESK_CONTAINER_APP_NAME }}"
