@@ -40,6 +40,10 @@ jobs:
         uses: azure/CLI@v2
         with:
           inlineScript: |
+            if [ -z "${SENTINEL_API_KEY:-}" ]; then
+              echo "::error::SENTINEL_API_KEY is empty or not configured for this deployment context."
+              exit 1
+            fi
             az extension add --name containerapp --upgrade
             az containerapp secret set \
               --name ${{ secrets.CONTAINER_APP_NAME }} \
@@ -64,10 +68,18 @@ jobs:
       - name: Set secret and ingress config
         env:
           SENTINEL_API_KEY: ${{ secrets.SENTINEL_API_KEY }}
-          SENTINEL_HMAC_SECRET: ${{ secrets.SENTINEL_HMAC_SECRET }}
+          SENTINEL_HMAC_SECRET: ${{ secrets.SENTINEL_API_HMAC }}
         uses: azure/CLI@v2
         with:
           inlineScript: |
+            if [ -z "${SENTINEL_API_KEY:-}" ]; then
+              echo "::error::SENTINEL_API_KEY is empty or not configured for this deployment context."
+              exit 1
+            fi
+            if [ -z "${SENTINEL_HMAC_SECRET:-}" ]; then
+              echo "::error::SENTINEL_HMAC_SECRET is empty or not configured for this deployment context."
+              exit 1
+            fi
             az extension add --name containerapp --upgrade
             az containerapp secret set \
               --name ${{ secrets.CONTAINER_APP_NAME }} \
