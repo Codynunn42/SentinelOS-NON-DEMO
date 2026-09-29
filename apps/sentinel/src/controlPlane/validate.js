@@ -1,23 +1,131 @@
 const { hasText, isRecord } = require('../shared/validation');
 
-function validateControlInput(input = {}) {
-  if (!hasText(input.intent)) throw new Error('Missing intent');
-  if (!hasText(input.entity)) throw new Error('Missing entity');
-  if (!hasText(input.action)) throw new Error('Missing action');
-  if (!input.actor || !hasText(input.actor.role)) throw new Error('Missing actor role');
-  if (!hasText(input.tenantId)) throw new Error('Missing tenantId');
+function normalizeControlInput(input = {}, principal = {}) {
+  const source = input && typeof input === 'object' ? input : {};
+  const commandValue = hasText(source.command) ? source.command.trim() : '';
+  const commandName = commandValue || (hasText(source.intent) ? source.intent.trim() : '');
+  const explicitEntity = hasText(source.entity) ? source.entity.trim() : '';
+  const explicitAction = hasText(source.action) ? source.action.trim() : '';
+  const explicitIntent = hasText(source.intent) ? source.intent.trim() : '';
 
-  const normalizedIntent = input.intent.trim();
-  const expectedIntent = `${input.entity.trim()}.${input.action.trim()}`;
+  let entity = explicitEntity || 'system';
+  let action = explicitAction || '';
+  let intent = explicitIntent || '';
+
+  if (!hasText(intent) && commandName) {
+    if (commandName.includes('.')) {
+      const parts = commandName.split('.').map((part) => part.trim()).filter(Boolean);
+      if (parts.length >= 2) {
+        const derivedEntity = explicitEntity || parts.slice(0, -1).join('.');
+        const derivedAction = explicitAction || parts[parts.length - 1];
+        entity = derivedEntity;
+        action = derivedAction;
+        intent = `${entity}.${action}`;
+      }
+    } else if (!hasText(explicitEntity) && !hasText(explicitAction)) {
+      action = commandName;
+      entity = 'system';
+      intent = `${entity}.${action}`;
+    }
+  }
+
+  if (hasText(explicitEntity) && !hasText(entity)) {
+    entity = explicitEntity;
+  }
+  if (hasText(explicitAction) && !hasText(action)) {
+    action = explicitAction;
+  }
+  if (hasText(explicitIntent) && !hasText(intent)) {
+    intent = explicitIntent;
+  }
+
+  if (!hasText(intent) && hasText(entity) && hasText(action)) {
+    intent = `${entity}.${action}`;
+  }
+
+  const actorSource = source.actor && typeof source.actor === 'object' ? source.actor : {};
+  const actorIsExplicit = Object.prototype.hasOwnProperty.call(source, 'actor') && source.actor !== undefined && source.actor !== null;
+  const metadataSource = source.metadata && typeof source.metadata === 'object' ? source.metadata : {};
+  const actor = {
+    role: hasText(actorSource.role) ? actorSource.role.trim() : hasText(metadataSource.role) ? metadataSource.role.trim() : (!actorIsExplicit && hasText(principal.role)) ? principal.role.trim() : '',
+    userId: hasText(actorSource.userId) ? actorSource.userId.trim() : hasText(actorSource.id) ? actorSource.id.trim() : hasText(metadataSource.actor) ? metadataSource.actor.trim() : (!actorIsExplicit && hasText(principal.actor)) ? principal.actor.trim() : 'unknown'
+  };
+
+  const normalized = {
+    ...source,
+    tenantId: hasText(source.tenantId) ? source.tenantId.trim() : hasText(source.tenant) ? source.tenant.trim() : hasText(principal.tenant) ? principal.tenant.trim() : '',
+    entity,
+    action,
+    intent,
+    actor,
+    context: isRecord(source.context) ? source.context : isRecord(source.payload) ? source.payload : {},
+    metadata: {
+      ...(isRecord(metadataSource) ? metadataSource : {}),
+      ...(isRecord(source.metadata) ? source.metadata : {}),
+      actor: actor.userId,
+      role: actor.role,
+      ...((hasText(principal.tenant) && !hasText(source.tenantId) && !hasText(source.tenant)) ? { tenantId: principal.tenant } : {})
+    }
+  };
+
+  if (!hasText(normalized.intent) && hasText(normalized.entity) && hasText(normalized.action)) {
+    normalized.intent = `${normalized.entity}.${normalized.action}`;
+  }
+
+  return normalized;
+}
+
+function validateControlInput(input = {}, principal = {}) {
+  const source = input && typeof input === 'object' ? input : {};
+  const explicitEntity = hasText(source.entity) ? source.entity.trim() : '';
+  const explicitAction = hasText(source.action) ? source.action.trim() : '';
+  const explicitIntent = hasText(source.intent) ? source.intent.trim() : '';
+  const explicitCommand = hasText(source.command) ? source.command.trim() : '';
+  const actorSource = source.actor && typeof source.actor === 'object' ? source.actor : {};
+
+  if (hasText(explicitIntent) && hasText(explicitEntity) && hasText(explicitAction) && explicitIntent !== `${explicitEntity}.${explicitAction}`) {
+    throw new Error(`Intent contract mismatch: expected ${explicitEntity}.${explicitAction}`);
+  }
+
+  if (hasText(explicitCommand) && hasText(explicitIntent)) {
+    const bareActionAllowed = explicitCommand === explicitAction || explicitCommand === explicitIntent.split('.').pop();
+    const fullyQualifiedAllowed = explicitCommand === explicitIntent || explicitCommand === `${explicitEntity}.${explicitAction}`;
+    if (!bareActionAllowed && !fullyQualifiedAllowed) {
+      throw new Error(`Command contract mismatch: expected ${explicitIntent}`);
+    }
+  }
+
+  if (hasText(explicitCommand) && hasText(explicitEntity) && hasText(explicitAction) && explicitCommand !== `${explicitEntity}.${explicitAction}` && explicitCommand !== explicitAction) {
+    throw new Error(`Command contract mismatch: expected ${explicitEntity}.${explicitAction}`);
+  }
+
+  const normalized = normalizeControlInput(input, principal);
+
+  if (!hasText(normalized.intent)) throw new Error('Missing intent');
+  if (!hasText(normalized.entity)) throw new Error('Missing entity');
+  if (!hasText(normalized.action)) throw new Error('Missing action');
+  if (!normalized.actor || !hasText(normalized.actor.role)) throw new Error('Missing actor role');
+  if (!hasText(normalized.tenantId)) throw new Error('Missing tenantId');
+
+  if (Object.prototype.hasOwnProperty.call(source, 'actor') && source.actor !== undefined && source.actor !== null && (!actorSource || typeof actorSource !== 'object')) {
+    throw new Error('Malformed actor payload');
+  }
+
+  if (Object.prototype.hasOwnProperty.call(source, 'actor') && source.actor !== undefined && source.actor !== null && (!hasText(actorSource.role) || (!hasText(actorSource.userId) && !hasText(actorSource.id)))) {
+    throw new Error('Missing actor role');
+  }
+
+  const normalizedIntent = normalized.intent.trim();
+  const expectedIntent = `${normalized.entity.trim()}.${normalized.action.trim()}`;
   if (normalizedIntent !== expectedIntent) {
     throw new Error(`Intent contract mismatch: expected ${expectedIntent}`);
   }
 
-  if (input.context !== undefined && !isRecord(input.context)) {
+  if (normalized.context !== undefined && !isRecord(normalized.context)) {
     throw new Error('Context must be an object');
   }
 
-  if (input.metadata !== undefined && !isRecord(input.metadata)) {
+  if (normalized.metadata !== undefined && !isRecord(normalized.metadata)) {
     throw new Error('Metadata must be an object');
   }
 
@@ -25,5 +133,6 @@ function validateControlInput(input = {}) {
 }
 
 module.exports = {
+  normalizeControlInput,
   validateControlInput
 };
