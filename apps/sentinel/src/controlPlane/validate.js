@@ -31,13 +31,13 @@ function normalizeControlInput(input = {}, principal = {}) {
   if (source.actor !== undefined && source.actor !== null && (typeof source.actor !== 'object' || Array.isArray(source.actor))) {
     throw new Error('Malformed actor payload');
   }
-  if (source.metadata !== undefined && source.metadata !== null && (typeof source.metadata !== 'object' || Array.isArray(source.metadata))) {
+  if (source.metadata !== undefined && !isRecord(source.metadata)) {
     throw new Error('Metadata must be an object');
   }
-  if (source.context !== undefined && source.context !== null && !isRecord(source.context)) {
+  if (source.context !== undefined && !isRecord(source.context)) {
     throw new Error('Context must be an object');
   }
-  if (source.payload !== undefined && source.payload !== null && !isRecord(source.payload)) {
+  if (source.payload !== undefined && !isRecord(source.payload)) {
     throw new Error('Context must be an object');
   }
 
@@ -106,13 +106,13 @@ function validateControlInput(input = {}, principal = {}) {
   if (source.actor !== undefined && source.actor !== null && (typeof source.actor !== 'object' || Array.isArray(source.actor))) {
     throw new Error('Malformed actor payload');
   }
-  if (source.metadata !== undefined && source.metadata !== null && (typeof source.metadata !== 'object' || Array.isArray(source.metadata))) {
+  if (source.metadata !== undefined && !isRecord(source.metadata)) {
     throw new Error('Metadata must be an object');
   }
-  if (source.context !== undefined && source.context !== null && !isRecord(source.context)) {
+  if (source.context !== undefined && !isRecord(source.context)) {
     throw new Error('Context must be an object');
   }
-  if (source.payload !== undefined && source.payload !== null && !isRecord(source.payload)) {
+  if (source.payload !== undefined && !isRecord(source.payload)) {
     throw new Error('Context must be an object');
   }
 
