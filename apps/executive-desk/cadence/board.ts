@@ -19,8 +19,8 @@ export async function runBoardCadence(context: CommandContext): Promise<CommandE
             `# Executive Board Packet — ${date.monthKey}`,
             '',
             buildSection('Executive Summary', [
-                'Executive Desk is operating in governed local-only mode.',
-                'Government-first readiness remains the lead execution lane.',
+                'Overall Executive Desk posture is unverified by this report; refresh repository, runtime, and governance evidence before making a readiness claim.',
+                'Azure PostgreSQL exists and local migrations pass; the active blocker is an approved Executive Desk production workload with database binding, gateway/WAF enforcement, and rollout evidence.',
             ]),
             '',
             renderSentinelCompletionMarkdown(completion),
