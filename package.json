@@ -19,6 +19,7 @@
     "check:control-ui": "node scripts/check-control-ui.js",
     "check:control-ui-route": "node scripts/check-control-ui-route.js",
     "check:docking": "node scripts/check-docking-protocol.js",
+    "check:clarity-docking": "node scripts/check-clarity-docking.js",
     "check:proof-ui-flow": "node scripts/check-proof-ui-flow.js",
     "check:approvals": "node scripts/check-approval-access.js",
     "check:idempotency": "node scripts/check-idempotency.js",
@@ -95,6 +96,9 @@
     "check:ownerfi-ai-financial-manifest": "node scripts/verify-manifest-checksums.js",
     "check:white-glove-support-request": "node scripts/check-white-glove-support-request.js",
     "generate:executive-calendar": "node scripts/generate-execution-calendar.js",
+    "generate:executive-board-deck": "node apps/executive-desk/cadence/generate-board-deck-pptx.cjs",
+    "generate:executive-board-deck:doe": "node apps/executive-desk/cadence/generate-board-deck-pptx.cjs --doe",
+    "generate:executive-board-deck:doe:canary": "node apps/executive-desk/cadence/generate-board-deck-pptx.cjs --doe --canary",
     "release:anchor": "node scripts/generate-system-release-anchor.js",
     "generate:brand-manifest": "node scripts/generate-brand-manifest.js --fail-if-empty",
     "check:brand-package": "node scripts/validate-brand-package.js",
@@ -118,6 +122,7 @@
     "@types/supertest": "^7.2.0",
     "c8": "^11.0.0",
     "mocha": "^12.0.1",
+    "pptxgenjs": "^4.0.1",
     "supertest": "^7.2.2",
     "tsx": "^4.22.5",
     "typescript": "^6.0.3"
@@ -129,4 +134,3 @@
     }
   }
 }
-
