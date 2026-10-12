@@ -94,8 +94,19 @@ Stage 3 execution note (Day 7 hardening progress):
 - Added gateway/WAF and rate-limiting guidance to `.env.example` and `README.md` so `/proxy/command` is deployed behind the production enforcement point.
 - Exposed `pnpm run db:executive-desk:setup` as the operator path for applying the receipts migration and delegation migration.
 - Added `pnpm run db:executive-desk:smoke` as the operator follow-up to confirm the receipts table is reachable after setup.
-- Final smoke verification is blocked in this workspace until a live `DATABASE_URL` is provided.
+- Local setup and smoke verification passed on 2026-08-27 against the Compose PostgreSQL service; both migrations and required tables were confirmed.
+- A durable receipt write/read/signature round trip also passed after correcting PostgreSQL timestamp parsing and deterministic signature verification.
+- Production smoke verification remains blocked until a managed live `DATABASE_URL` is provided.
 - Remaining for Stage 3 closure: turn on the production environment values, move receipts to postgres in the live deployment, and complete gateway/WAF deployment implementation in the live stack.
+
+Stage 3 Azure inventory note (2026-08-28 UTC):
+
+- Verified the enabled historical subscription and `rg-nc-dev-sentinel` inventory through Azure Resource Graph.
+- `psql-nc-dev-sentinel` exists and reports `Ready`; both current SentinelOS Container Apps receive `DATABASE_URL` through secret references.
+- The current root container image starts `apps/api/server.js` only. It does not mount or run Executive Desk, so the existing database binding does not close Executive Desk receipt persistence.
+- No API Management, Front Door, Application Gateway, or WAF resource was found across accessible subscriptions.
+- The PostgreSQL server is development-grade (`Standard_B1ms`, public network and password auth enabled, no private network, Entra auth, HA, or geo-redundant backup). It must not be represented as a hardened production database.
+- Stage 3 now requires an approved Executive Desk deployment target, a production-grade database/network decision, gateway/WAF provisioning, and deployment evidence.
 
 ### Sentinel AI Remote Connector
 
@@ -104,6 +115,21 @@ Stage 3 execution note (Day 7 hardening progress):
 - [ ] Use `/api/executive/sentinel-ai/status` to verify endpoint reachability and connection posture.
 - [ ] Use `/api/executive/sentinel-ai/scan` to collect the current course, hardening paths, and local posture signals.
 - [ ] Keep the hosted Sentinel AI connection separate from any local process assumptions.
+
+Local restart and docking evidence (2026-08-19):
+
+- [x] Started the governed local signing proxy on `127.0.0.1:3001` and the operator-facing Executive Desk on `127.0.0.1:3000`.
+- [x] Verified both health endpoints and confirmed Executive Desk reports the local Sentinel AI proxy as configured and reachable.
+- [x] Executed `repo.control.workflow.diagnose` through the proxy in read-only mode; audit reference `66938a63-ab7a-4611-bf8d-d5ee6af08639`.
+- [x] Preserved the pre-redock baseline: SSAI healthy and independent, Sentinel AI offline for canary testing, and the canary denied before authorization context restoration.
+- [x] Re-ran the explicit local dock canary with tenant `nunncloud`, an identified principal, and the allowlisted read-only command; authority and risk gates passed with trust score `0.95` and audit reference `5a5fccee-5322-4226-a2eb-5dd0fee9b06f`.
+- [x] Re-ran authenticated Executive Desk status and scan checks; the dependency was configured and reachable with HTTP 200 at `2026-08-19T22:26:56Z`.
+- [ ] Reconcile D1 evidence against the preserved baseline before changing D1 from `pending/evidence-gated` to `verified`.
+- [x] Evaluated the bounded Clarity manifest through the signed SentinelOS `docking.evaluate` path as `TIER_0`, low risk, read-only, and `DOCKABLE`.
+- [ ] Confirm the authoritative Clarity source and access contract before enabling a connector or treating Clarity as a runtime source of truth.
+- [ ] Repeat the connector evidence against the approved hosted Sentinel AI endpoint with production authentication and durable receipts.
+
+This local evidence does not close D1 or the hosted connector checklist and does not authorize Clarity writes, privileged execution, production access, or external claims.
 
 ## Production Hardening Checklist
 
