@@ -4,11 +4,13 @@
   "execution_mode": "local_repository_only",
   "generated_at": "2026-08-28T00:29:41.346Z",
   "what_if": false,
-  "summary": "Daily Executive Snapshot generated.",
-  "warnings": [],
+  "summary": "Historical daily snapshot generated; current posture was not verified.",
+  "warnings": [
+    "Receipt records local report generation only; it does not validate the snapshot contents or current live system state."
+  ],
   "blockers": [],
   "generated_artifacts": [
-    "/workspaces/SentinelOS-NON-DEMO/docs/executive-desk/daily/2026-08-27.md"
+    "docs/executive-desk/daily/2026-08-27.md"
   ],
   "comm": "Sentinel AI by Cody Nunn | Nunn Cloud",
   "authority_created": false,
