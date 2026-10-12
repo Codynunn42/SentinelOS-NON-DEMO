@@ -129,6 +129,12 @@ Local restart and docking evidence (2026-08-19):
 - [ ] Confirm the authoritative Clarity source and access contract before enabling a connector or treating Clarity as a runtime source of truth.
 - [ ] Repeat the connector evidence against the approved hosted Sentinel AI endpoint with production authentication and durable receipts.
 
+### Clarity Docking Validation Script
+
+`pnpm run check:clarity-docking` performs pure manifest evaluation by default. It does not reset passport state or dispatch a governed command.
+
+The optional sandbox dispatch requires both `NODE_ENV=test` and `SENTINEL_CLARITY_DOCKING_SANDBOX=1`. That branch resets in-memory passport replay state and dispatches `docking.evaluate` with a synthetic platform-administrator principal. Run it only in an isolated test process; it is not evidence of hosted authentication, production authorization, or a live connector.
+
 This local evidence does not close D1 or the hosted connector checklist and does not authorize Clarity writes, privileged execution, production access, or external claims.
 
 ## Production Hardening Checklist
