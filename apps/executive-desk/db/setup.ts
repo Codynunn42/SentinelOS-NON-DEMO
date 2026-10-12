@@ -15,6 +15,8 @@ import path from 'path';
 import { Pool } from 'pg';
 
 const DATABASE_URL = process.env.DATABASE_URL;
+const CONNECT_ATTEMPTS = 10;
+const CONNECT_RETRY_DELAY_MS = 1000;
 
 if (!DATABASE_URL) {
     console.error('ERROR: DATABASE_URL environment variable not set');
@@ -22,9 +24,26 @@ if (!DATABASE_URL) {
     process.exit(1);
 }
 
+async function connectWithRetry(pool: Pool) {
+    let lastError: unknown;
+
+    for (let attempt = 1; attempt <= CONNECT_ATTEMPTS; attempt += 1) {
+        try {
+            return await pool.connect();
+        } catch (error) {
+            lastError = error;
+            if (attempt < CONNECT_ATTEMPTS) {
+                await new Promise((resolve) => setTimeout(resolve, CONNECT_RETRY_DELAY_MS));
+            }
+        }
+    }
+
+    throw lastError;
+}
+
 async function runMigrations(): Promise<void> {
     const pool = new Pool({ connectionString: DATABASE_URL });
-    const client = await pool.connect();
+    const client = await connectWithRetry(pool);
 
     try {
         console.log('🔧 Receipt Ledger Database Setup\n');

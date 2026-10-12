@@ -312,6 +312,36 @@ function buildPublicFrontDoorVerificationTemplate() {
     };
 }
 
+function buildDoeSbirsttrReadinessTemplate() {
+    return {
+        focus: 'doe_sbirsttr_readiness',
+        currentPosture: 'pre_application_readiness_active_alignment',
+        ownerReported: [
+            'SAM.gov registration information reported correct by owner; current active status documentary verification pending',
+            'CAGE assignment pending',
+            'SBA Company Registry reported complete; documentary reverification pending'
+        ],
+        blockedUntilEvidence: [
+            'CAGE assignment and SAM evidence archive',
+            'SBA documentation submission or acceptance record',
+            'DOE SBIR/STTR Application Hub confirmation',
+            'topic-specific Phase I hypothesis and milestone table'
+        ],
+        preparationActions: [
+            'reverify SBA documentation against the September 7 request',
+            'complete DOE Application Hub registration and retain confirmation',
+            'select one DOE topic and reject any weak fit',
+            'prepare a bounded Phase I concept, budget, team, and commercialization plan'
+        ],
+        reviewRequired: [
+            'owner review of registration evidence',
+            'legal review of IP, data rights, and disclosures',
+            'human approval before any external submission or claim of application readiness'
+        ],
+        externalExecution: 'not_authorized'
+    };
+}
+
 function buildLightQuantitativeNextStepsResult(payload = {}, context = {}) {
     const customerScopeFieldsComplete = normalizeBoolean(payload.customerScopeFieldsComplete, false);
     const ownerIntentAfterScope = normalizeBoolean(payload.ownerIntentAfterScope, true);
@@ -361,6 +391,15 @@ function buildLightQuantitativeNextStepsResult(payload = {}, context = {}) {
             output: buildPublicFrontDoorVerificationTemplate()
         }
     ];
+
+    if (normalizeString(payload.focus).toLowerCase() === 'doe_sbirsttr') {
+        lanes.push({
+            lane: 'doe_sbirsttr_readiness',
+            score: scoreGate({ evidence: 62, risk: 30, reversibility: 90, authority: 72 }),
+            decision: 'prepare_owner_review_packet',
+            output: buildDoeSbirsttrReadinessTemplate()
+        });
+    }
 
     return {
         command: COMMANDS.LIGHT_QUANTITATIVE_NEXT_STEPS,
