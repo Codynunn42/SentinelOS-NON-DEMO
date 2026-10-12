@@ -43,10 +43,9 @@ export async function runDailyCadence(context: CommandContext): Promise<CommandE
             ]),
             '',
             buildSection('Active Priorities', [
-                'Approve an Executive Desk production workload and bind it to a hardened PostgreSQL connection through Key Vault.',
-                'Complete final Stage 2 GPT publish and Stage 3 gateway/WAF enforcement controls.',
-                'Maintain evidence-based weekly cadence and board status while the live rollout items close.',
-                'Keep the government-facing narrative tightly bounded to repo health and environment execution blockers.',
+                'Review current priorities against dated owner and approval records; this generator does not establish that any item remains active.',
+                'If still applicable, verify the Executive Desk workload, PostgreSQL binding, Stage 2 GPT publish, and Stage 3 gateway/WAF controls using current evidence.',
+                'Record a source, observation time, and reviewer for each priority carried into the report.',
             ]),
             '',
             buildSection('Government Package Standard', [
@@ -61,9 +60,9 @@ export async function runDailyCadence(context: CommandContext): Promise<CommandE
             ]),
             '',
             buildSection('Outstanding Approvals', [
-                'Executive Desk production workload and database binding: pending',
-                'Production Postgres setup and smoke verification: pending',
-                'Stage 2/3 production controls: pending',
+                'Approval status is not observed by this generator; check current approval records for the Executive Desk workload and database binding.',
+                'Approval and verification status for PostgreSQL setup/smoke checks and Stage 2/3 controls must be confirmed from dated source records.',
+                'Do not infer pending or approved status from this report.',
             ]),
             '',
             buildSection('Government Deployment Readiness', [
@@ -86,9 +85,8 @@ export async function runDailyCadence(context: CommandContext): Promise<CommandE
             ]),
             '',
             buildSection('Risks and Blockers', [
-                'The integration checklist records that the live database binding and deployed Executive Desk workload require verification.',
-                'No API gateway, Front Door, Application Gateway, or WAF resource is provisioned for Stage 3 enforcement.',
-                'Final rollout remains pending until the Stage 2 publish action and Stage 3 deployment controls are completed.',
+                'Review the integration checklist and current deployment inventory; this generator does not inspect live database binding, deployed workloads, gateways, Front Door, Application Gateway, WAF, or rollout status.',
+                'Record each verified risk or blocker with its source, observation time, and reviewer; otherwise report it as unverified.',
             ]),
             '',
             renderSentinelCompletionMarkdown(completion),

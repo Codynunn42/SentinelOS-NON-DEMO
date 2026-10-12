@@ -639,10 +639,10 @@ function renderBriefing() {
   });
 
   items.push({
-    title: 'Live blocker: DATABASE_URL + rollout enforcement',
+    title: 'Infrastructure evidence review required',
     severity: 'warn',
-    summary: 'Azure PostgreSQL exists and local migrations pass. The active blocker is an approved Executive Desk production workload with database binding and Stage 2/3 gateway, WAF, and rollout enforcement.',
-    source: 'environment-execution',
+    summary: 'This dashboard render does not query Azure, database migrations, workload binding, gateway/WAF, or rollout status. Attach current dated evidence before reporting any of these as verified or blocked; the render timestamp is not an observation timestamp.',
+    source: 'evidence-review',
     timestamp: new Date().toISOString()
   });
 

@@ -20,7 +20,7 @@ export async function runBoardCadence(context: CommandContext): Promise<CommandE
             '',
             buildSection('Executive Summary', [
                 'Overall Executive Desk posture is unverified by this report; refresh repository, runtime, and governance evidence before making a readiness claim.',
-                'Azure PostgreSQL exists and local migrations pass; the active blocker is an approved Executive Desk production workload with database binding, gateway/WAF enforcement, and rollout evidence.',
+                'This generator does not inspect Azure, database migrations, workload binding, gateway/WAF, or rollout status. Attach current source evidence with observation timestamps before reporting any of these as verified or blocked.',
             ]),
             '',
             renderSentinelCompletionMarkdown(completion),

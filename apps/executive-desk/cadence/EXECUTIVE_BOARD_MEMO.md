@@ -25,7 +25,7 @@ Completed:
 
 - Governance file review and control alignment
 - Daily cadence and support triage updates recorded and retained
-- Repo health validation across the relevant governance and runtime surfaces
+- Historical repo health validation record present; current validation is required
 - Evidence-backed executive posture maintained without unsupported production claims
 
 Not yet complete:
