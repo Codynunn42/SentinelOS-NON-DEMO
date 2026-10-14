@@ -119,7 +119,16 @@ Receipt Ledger PostgreSQL setup
 - From the repo root: `pnpm run db:executive-desk:setup`
 - Follow it with `pnpm run db:executive-desk:smoke` to confirm the receipts table is reachable and queryable.
 - Set `DATABASE_URL` first, then `RECEIPT_LEDGER_BACKEND=postgres` for production or durable test environments.
-- The setup command applies `apps/executive-desk/db/migrations/001-receipt-ledger.sql` and the delegation migration already present in the same folder.
+- The setup command applies the SQL migrations in filename order, including `003-receipt-signature-v2.sql`. Run migrations only against an explicitly authorized database.
+
+Receipt integrity and evidence provenance
+
+- New PostgreSQL receipts use signature version 2: a canonical JSON SHA-256 digest covering the receipt, signature version, and authority/delegation fields. These fields and the exact timestamp text persist across reloads. This is an unkeyed integrity checksum, not authenticated signer proof.
+- Migration 003 labels existing receipts version 1 without rewriting their digests or inventing authority metadata. Unknown signature versions fail verification.
+- Legacy verification is conservative: receipts with authority metadata or nonempty objects in signed JSONB fields fail verification because the original serialization cannot be safely reconstructed. A failed check does not by itself prove tampering. Authentic historical compatibility remains unverified until an authorized historical export with its original digest, signed values, serialization, and provenance is tested. Synthetic regression vectors are not historical proof.
+- Daily reports distinguish artifact presence observed in the run from required evidence not collected; artifact presence does not verify live infrastructure or blocker status.
+- DOE readiness accepts `payload.doeEvidence` with `samRegistration`, `cageAssignment`, and `sbaCompanyRegistry` entries. Each entry needs nonempty `status` and `sourceReference`, a valid `observationDate` (calendar date or timezone-qualified ISO timestamp), and `provenanceClassification` set to `owner_reported` or `documentary_reference`. Valid entries remain caller-reported, not independently verified; malformed/missing entries remain unknown/unverified. External execution remains unauthorized.
+- Opt-in persistence tests require `RECEIPT_LEDGER_TEST_DATABASE_URL` pointing to an isolated disposable database whose name includes a `test`, `testing`, or `ci` segment. With application database variables unset, run `pnpm exec mocha --require tsx apps/executive-desk/db/__tests__/receipt-ledger-pg.test.ts` from the repository root. The tests exercise additive migration of a synthetic row and real receipt persistence; they do not establish historical compatibility.
 
 Production proxy auth
 
