@@ -231,7 +231,7 @@ Canonical status may be updated only after the evidence is reviewed, an authoriz
 
 October 12, 2026 was the agreed review date. A completed checkpoint disposition is not established from inspected records; do not infer that the checkpoint occurred or completed successfully.
 
-On October 13, Cody Nunn selected: "Cody as interim coordinator; October 14 review; technical owners and reviewers remain TBD." This records coordination and a follow-up date only. It does not appoint a technical verifier, establish independent-review eligibility, or approve a governance disposition.
+The October 13 direction is recorded in [Cody Nunn's October 14 PR comment](https://github.com/Codynunn42/SentinelOS-NON-DEMO/pull/46#issuecomment-6158617193): Cody is interim coordinator for these three work items, with an October 14 review; technical owners, verifiers, and eligible reviewers remain TBD. This records coordination and a follow-up date only. It does not appoint a technical verifier, establish independent-review eligibility, or approve a governance disposition.
 
 Next review: October 14, 2026 (America/Phoenix); time not assigned.
 
