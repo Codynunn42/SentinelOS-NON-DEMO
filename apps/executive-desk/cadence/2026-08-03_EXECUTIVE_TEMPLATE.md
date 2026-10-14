@@ -1,5 +1,7 @@
 # Executive Weekly Template
 
+> Historical reporting boundary: the August sections below preserve the original weekly narrative. Their green, Pass, approval, readiness, and dated next-action statements are not current governance dispositions. The October 12 checkpoint and October 13 follow-up below retain unresolved work-item statuses pending evidence review and authorized disposition.
+
 Week of: 2026-08-03 to 2026-08-09
 Prepared by: Executive Desk
 
@@ -197,72 +199,87 @@ Phase 2 completion criteria:
 
 ---
 
-## Accumulated Executive Checkpoint — 2026-10-12
+## Accumulated Executive Checkpoint -- 2026-10-12
 
-Purpose: surface the October 12 governance disposition checkpoint in the Executive Template so dated evidence, decision requirements, and carry-forward conditions accumulate in one executive view. This section is a review agenda and evidence record; it does not itself approve, close, deploy, merge, or change a governance gate.
+Purpose: retain the October 12 governance review agenda, evidence requirements, and unresolved carry-forward in one executive view. This section does not approve, close, deploy, merge, or change a governance gate.
+
+### Record identity and checkpoint order
+
+These are [Nunn Corporation Operations Register work items](https://docs.google.com/spreadsheets/d/1Y9YL3H_ML4trGeU83oVoLXVPJA_3ZluLaPm5G7TblUw/edit), reviewed in this order:
+
+1. Operations Register work item GOV-006 -- container hardening
+2. Operations Register work item GOV-001 -- EV-RUN-002-001 approval basis
+3. Operations Register work item GOV-002 -- September 6 execution outcome
+
+Operations Register work item GOV-001 refers to PR #16 / EV-RUN-002-001 approval-basis reconciliation. It is distinct from repository certification gate GOV-001, "Governance Path Execution," defined in [GATE_CERTIFICATION_PATH.md](../gates/GATE_CERTIFICATION_PATH.md) and emitted by the repository certification runner. This section maps the approval item to its Operations Register record; it does not rename either canonical ID or transfer any status or disposition between the two records. A work-item status in this section is not an automated certification-gate result.
 
 ### Executive disposition objective
 
-Every open governance item must leave the checkpoint with either:
+The checkpoint requires either an attributable, evidence-backed authorized disposition or an explicitly documented unresolved evidence gap, accountable coordination owner, next action, and next review date. The October 12 completed disposition is not established from inspected records.
 
-- an attributable, evidence-backed disposition; or
-- an explicitly documented evidence gap with a named owner and next review date.
+Canonical status may be updated only after the evidence is reviewed, an authorized disposition is recorded, and the current canonical row is re-read. Documentation readiness, passing CI, authorized governance disposition, and current live-runtime evidence are separate assessments.
 
-Canonical status may be updated only after the evidence is reviewed, an authorized disposition is recorded, and the current canonical row is re-read.
+### Disposition requirements
 
-### Checkpoint order
+| Operations Register work item | Last recorded status retained pending evidence review | Decision question | Required attributable evidence | Reviewer / authority required | Permitted disposition if supported and authorized |
+| --- | --- | --- | --- | --- | --- |
+| GOV-006 -- container hardening | Verification -- open; no final PASS | What exact runtime artifact was verified, what tests were performed, by whom, and what did each finding establish? | Exact revision/image provenance; writable-persistence evidence; truthful runtime-image inventory scope and completeness; PR #20 finding map; PR #30 remediation evidence; remaining findings | Independent technical verifier plus eligible governance/repository reviewer and confirmed disposition authority | PASS/CLOSED only after required evidence and authority; otherwise CONDITIONAL or OPEN |
+| GOV-001 -- EV-RUN-002-001 approval basis; Operations Register record, not certification gate GOV-001 | Conditional -- no final PASS | Can all eight checklist requirements and PR #16 findings be traced to accepted evidence and an authorized disposition? | Completed and filed eight-item checklist; requirement/finding map; source artifacts; evidence dates and owners; results; reviewer attribution; recorded decision and conditions | Eligible reviewer and confirmed disposition authority | PASS/CLOSED only after all required checklist evidence and authorization; otherwise CONDITIONAL |
+| GOV-002 -- September 4 Gate Council request for September 6 workflow execution | HOLD -- outcome unknown/unverified | What primary attributable record establishes execution or non-execution of the specified workflow request? | Gate Council message; exact repository/workflow/action identity; primary run or non-execution record with source, date/time, actor/system, action, and outcome | Named source custodian and eligible reviewer plus confirmed disposition authority | CLOSED -- executed or CLOSED -- not executed only with attributable evidence and authorization; otherwise HOLD |
 
-1. GOV-006 — container hardening
-2. GOV-001 — approval basis
-3. GOV-002 — execution outcome
+### October 12 checkpoint status -- follow-up recorded October 13
 
-### Disposition record
+October 12, 2026 was the agreed review date. A completed checkpoint disposition is not established from inspected records; do not infer that the checkpoint occurred or completed successfully.
 
-| Governance item | Current status entering 2026-10-12 | Decision question | Required attributable evidence | Reviewer / authority required | Allowed outcome | If unresolved |
+On October 13, Cody Nunn selected: "Cody as interim coordinator; October 14 review; technical owners and reviewers remain TBD." This records coordination and a follow-up date only. It does not appoint a technical verifier, establish independent-review eligibility, or approve a governance disposition.
+
+Next review: October 14, 2026 (America/Phoenix); time not assigned.
+
+| Operations Register work item | Interim coordinator | Technical owner / verifier | Eligible reviewer / disposition authority | Exact carried-forward gap | Next action | Next review |
 | --- | --- | --- | --- | --- | --- | --- |
-| GOV-006 | Verification — open | What exact runtime artifact was verified, what tests were performed, by whom, and what did each finding establish? | Exact revision/image; writable-persistence evidence; runtime-image scan results and completeness; PR #20 evidence; remaining findings | Independent technical verifier plus authorized governance/repository reviewer | PASS/CLOSED, CONDITIONAL, or OPEN | Keep open; name missing evidence/owner; set next review date |
-| GOV-001 | Conditional — no final PASS | Can all eight checklist requirements and PR #16 findings be traced to evidence and an authorized disposition? | Requirement/finding map; source artifact; evidence date; evidence owner; result; reviewer; disposition | Eligible reviewer/disposition authority | PASS/CLOSED only if authorized; otherwise CONDITIONAL | Preserve Conditional; identify exact remaining gap and owner |
-| GOV-002 | Hold — outcome unknown/unverified | What primary record establishes whether the September 6 action actually executed? | Primary attributable record showing source, date/time, actor/system, action, and outcome; or attributable non-execution record | Source custodian and authorized disposition owner | CLOSED — executed; CLOSED — not executed; or HOLD — insufficient evidence | Preserve Hold; document evidence gap and next review date |
+| GOV-006 -- container hardening | Cody Nunn | TBD | Reviewer TBD; confirm authorized disposition authority | Finding-by-finding accepted runtime evidence, exact artifact provenance, writable persistence, truthful runtime-image inventory scope, and independent technical disposition remain to reconcile | Link PR #20 findings to PR #30 remediation; assemble exact-artifact evidence; request named technical owner/verifier and eligible reviewer | 2026-10-14 |
+| GOV-001 -- EV-RUN-002-001 approval basis; Operations Register record, not certification gate GOV-001 | Cody Nunn | TBD where technical verification is needed | Eligible reviewer TBD; confirm authorized disposition authority | Accepted eight-item checklist and source-linked PR #16 finding dispositions are not established by reported reconciliation alone | Assemble requirement/finding evidence map; attribute any prior reconciliation; preserve Conditional until evidence and authorized disposition support a change | 2026-10-14 |
+| GOV-002 -- September 6 workflow execution outcome | Cody Nunn | Named SentinelOS Engineering owner/source custodian TBD | Eligible reviewer TBD; confirm authorized disposition authority | Primary execution/non-execution evidence and exact Sentinel deployment workflow identity remain unresolved | Trace the September 4 Gate Council request to exact workflow IDs and primary run records; retain HOLD if identity or outcome cannot be established | 2026-10-14 |
 
-### Current source observations carried into the checkpoint
+Cody's interim coordination assignment does not replace a technical owner, verifier, or independent reviewer. Historical role assignments remain traceable; no new technical delegation is asserted.
 
-- GOV-006: PR #20 was merged, but its review recorded three material concerns: privileged-port binding under non-root execution, writable runtime persistence, and incomplete repository-scan inputs. Current main now uses port 3000, directs mutable data to `SENTINEL_DATA_DIR`, mounts `sentinel_data`, and labels repository scan scope as `runtime_image`. These are source-level remediation signals only; runtime verification and independent technical disposition are still required.
-- GOV-001: PR #16 recorded a conditional approval, but review comments identified an unchecked eight-item approval checklist, contradictory pending-action language, and an unsupported Aug 7 readiness premise. Reconciliation may be complete without creating final PASS; the evidence map and authorized disposition still control.
-- GOV-002: the September 4 Stargate Gate Council message established a September 6 execution window and required preservation of workflow links, timestamps, results, and failure details. That communication established posture and evidence requirements, not the September 6 execution outcome itself. Absent primary execution or non-execution evidence, Hold remains.
+### Source observations carried into the checkpoint
+
+- Operations Register work item GOV-006: [PR #20](https://github.com/Codynunn42/SentinelOS-NON-DEMO/pull/20) is the original findings source for privileged-port binding under non-root execution, writable runtime persistence, and incomplete repository-scan inputs. The later port/persistence/scan-scope controls were introduced by [PR #30](https://github.com/Codynunn42/SentinelOS-NON-DEMO/pull/30), merge commit [52f1159cdcac153eac0904fb20d0adff9d7b95ed](https://github.com/Codynunn42/SentinelOS-NON-DEMO/commit/52f1159cdcac153eac0904fb20d0adff9d7b95ed), with [Runtime Evidence Remediation -- September 15](https://github.com/Codynunn42/SentinelOS-NON-DEMO/blob/52f1159cdcac153eac0904fb20d0adff9d7b95ed/docs/governance/RUNTIME_EVIDENCE_REMEDIATION_2026-09-15.md). At inspected source baseline [7eb0724c730ac5c6be545d4f30d24ce1f1d4a7cd](https://github.com/Codynunn42/SentinelOS-NON-DEMO/commit/7eb0724c730ac5c6be545d4f30d24ce1f1d4a7cd), the Dockerfile uses port 3000 and `SENTINEL_DATA_DIR`, Compose mounts `sentinel_data`, and repository scan scope is labelled `runtime_image`. These are source-level remediation signals, not accepted runtime verification or independent technical disposition.
+
+- Operations Register work item GOV-001 -- EV-RUN-002-001 approval basis, distinct from repository certification gate GOV-001 "Governance Path Execution": [PR #16](https://github.com/Codynunn42/SentinelOS-NON-DEMO/pull/16) recorded a conditional approval, but review comments identified an unchecked eight-item approval checklist, contradictory pending-action language, and an unsupported August 7 readiness premise. Reconciliation may be reported complete without establishing final PASS; the accepted evidence map, completed and filed checklist, and authorized disposition still control. This observation does not change, rename, or transfer disposition to or from the certification gate.
+
+- Operations Register work item GOV-002: the [September 4 Stargate Gate Council message](https://nexussuperapplication.slack.com/archives/C09K3MHK932/p1788544855055249), channel `C09K3MHK932`, timestamp `1788544855.055249`, established a September 6 evening execution window to review merge status/diffs for [PR #234](https://github.com/Codynunn42/nunncorp-global-mono/pull/234) and [PR #235](https://github.com/Codynunn42/nunncorp-global-mono/pull/235) in `Codynunn42/nunncorp-global-mono`, complete reviewer and approval fields, run the repaired Sentinel deployment and dependency-monitoring workflows, preserve run links/timestamps/results/failure details, and report the verified outcome. PR #234 concerns `.github/workflows/dependency-audit.yml`; PR #235 concerns `monitor-onchainkit-deps-dispatch-v2.yml`. The exact Sentinel deployment workflow is not named in the message and remains an action-identity gap. Both associated PRs were later merged September 13; those merges do not establish September 6 execution. The message establishes posture and evidence requirements, not the execution outcome. Absent primary attributable execution or non-execution evidence, HOLD remains. Do not substitute unrelated date-matched events, including `docs/executive-desk/evidence/merge-42-audit.md`, without an attributable relationship.
 
 ### Required record fields
 
-For each item, capture:
+For each Operations Register work item, capture:
 
-- Governance ID
+- Record system and work-item ID
 - Question
-- Evidence source
-- Evidence date
-- Actor/system
-- Evidence custodian
-- Independent reviewer
-- Finding
-- Authorized disposition
-- Remaining gap
-- Next action
-- Next review date
+- Exact workflow/action or artifact identity
+- Evidence source and evidence date
+- Actor/system and evidence custodian
+- Technical verifier and eligible independent reviewer
+- Finding and remaining gap
+- Authorized disposition, named authority, decision date, decision-record reference, and conditions
+- Accountable coordinator, next action, and next review date
 
 ### Evidence boundaries
 
 - A reconciliation note, summary, proposal, passing check, or reported status does not by itself establish final PASS.
-- GOV-006 requires runtime-specific evidence tied to the exact artifact and independent technical verification before closure.
-- GOV-001 reconciliation may be complete while the gate remains Conditional; reconciliation is not the same as authorized approval.
-- GOV-002 remains Hold unless primary attributable evidence establishes execution or non-execution. A later reconciliation archive that preserves the outcome as unknown is not execution evidence.
-- Missing evidence must remain missing. Do not infer completion from expected behavior, schedule, memory, or intent.
+- Operations Register work item GOV-006 requires accepted runtime-specific evidence tied to the exact artifact and independent technical verification before closure.
+- Operations Register work item GOV-001 may have completed reconciliation while remaining Conditional. Reconciliation is not authorized approval and does not change certification gate GOV-001.
+- Operations Register work item GOV-002 remains HOLD unless primary attributable evidence establishes execution or non-execution of the identified request and an authorized disposition supports a change. An archive preserving an unknown outcome is not execution evidence.
+- Missing evidence and unnamed technical owners/reviewers remain explicit gaps; do not infer them from schedule, memory, expected behavior, or intent.
+- Completed Copilot/Codex review is not independent human sign-off where that is required.
 
-### Executive flow for this checkpoint
+### Executive flow and canonical-update rule
 
-Evidence → significance → finding → authority → disposition → next action.
+Evidence -> significance -> finding -> authority -> disposition -> next action.
 
-### Canonical-update rule
-
-Working packet / Executive Template → evidence review → authorized disposition → re-read current canonical row → update live register or handbook only if the disposition is supported and authorized.
+Working packet / Executive Template -> evidence review -> authorized disposition -> re-read the current canonical row -> update the live register or handbook only if supported and authorized.
 
 ### Carry-forward after the checkpoint
 
-If any item cannot receive an attributable disposition on October 12, the Executive Template must carry forward the exact unresolved evidence gap, accountable owner, and next review date. Do not convert the checkpoint date into a completion promise.
+Carry forward each unresolved gap, coordination owner, next action, and review date. October 14 is a follow-up review date, not a completion promise. No governance gate, canonical record, deployment, or production-readiness state is changed by this template.
