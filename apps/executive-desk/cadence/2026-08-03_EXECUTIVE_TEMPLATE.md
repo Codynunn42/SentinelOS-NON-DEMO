@@ -1,195 +1,109 @@
 # Executive Weekly Template
 
-Week of: 2026-08-03 to 2026-08-09
+Week of: 2026-08-03 to 2026-08-09  
 Prepared by: Executive Desk
 
 ## Current Status
 
-The executive operating posture remains on track. The repo, governance controls, and core evidence chain are green. The remaining work is live environment execution, not a product or governance failure.
+GOV-006 remains **Verification — open** with **no final PASS**.  
+This update records what was directly observed from the signed-in Azure Portal session and separates those observations from still-uncollected runtime evidence.
 
-Completed activities:
+### Evidence collected (observed)
 
-- Executive and board artifact structure reviewed and retained.
-- Governance controls validated against current repo state.
-- Daily cadence and support triage evidence updated for the current operating block.
-- Repo health validation passed for type, API, governance, and frontend checks.
+Capture window (approximate): 2026-10-14 19:23 to 19:31 UTC  
+Primary source: Azure Portal pages for Container Apps in subscription `82bd72d4-00ef-400d-839b-e168e980c510`
 
-Current posture:
+- Container App [ca-nc-dev-sentinel](https://portal.azure.com) showed **Running** and **Ready for traffic**.
+- Active revision observed as `ca-nc-dev-sentinel--sha-7eb0724-61-1` with one healthy replica.
+- Configured image observed as `acrncdevsentinel.azurecr.io/sentinel-api:7eb0724c730ac5c6be545d4f30d24ce1f1d4a7cd` (tag form only).
+- Ingress observed enabled, target port **3000**, with `/health` probes on port **3000** for startup, readiness, and liveness.
+- No volumes and no container volume mounts were visible in the inspected app settings.
 
-- Verified repo health remains green.
-- The main remaining blocker is environment execution: live `DATABASE_URL` is required for the Postgres setup and smoke verification path.
-- The cadence is aligned to evidence-based status, not alarmist or speculative reporting.
+### Evidence not yet collected (required before closure)
 
-Remaining posture:
-
-- Final production rollout items remain: provision live `DATABASE_URL`, complete the database smoke sequence, complete Stage 2 GPT publish, and enforce Stage 3 gateway/WAF controls.
-- These are live environment tasks and should be reported as execution blockers, not unresolved core product defects.
-
-## Owner Confirmation (2026-07-27)
-
-- Authorized collector of named owners: COO / Chief of Staff.
-- Interim assignment rule: where named owners are not yet collected, Cody Nunn is assigned as interim owner.
+- Immutable ACR manifest digest tied to the active revision.
+- Direct process-level confirmation of effective runtime user and live listener in the running replica.
+- Explicit revision traffic allocation percentage.
+- Durable-write behavior across restart/replacement.
 
 ## 1. Executive Summary
 
-- Overall status: Active; cadence reset complete; operational execution is on track.
-- Top 3 outcomes this week:
-  - Repository health and governance checks are verified green.
-  - Executive cadence and support triage are aligned to evidence rather than concern.
-  - Remaining work is bounded to live environment execution and rollout closures.
-- Leadership decision needed: Confirm the immediate path for live `DATABASE_URL` provisioning and deployment enforcement before final production move.
+- Overall status: **Verification in progress; not closed**
+- Primary outcome this cycle: Runtime configuration observations were captured without changing Azure resources.
+- Leadership signal: Continue read-only evidence collection; do not issue final GOV-006 PASS.
+- Decision boundary: No restart, deployment, image push, secret mutation, or gate-status change authorized from this record.
 
 ## 2. Last Week Closeout
 
-- Planned outcomes completed: Governance file review, daily triage cadence, repo health verification, and evidence-backed executive status updates.
-- Planned outcomes not completed: Final live database wiring and Stage 2/3 deployment completion items.
-- Root cause of misses: Live environment bootstrap requirements are still external to the repo and must be provisioned before the database and rollout sequence can pass.
-- Approved carry-forward items: Live `DATABASE_URL` provisioning, Postgres setup and smoke validation, public GPT publish, and final gateway/WAF enforcement.
+- Completed this cycle:
+  - Read-only capture of active revision identity, probe configuration, ingress target port, and storage configuration.
+  - Confirmation that observed runtime/probe configuration aligns on port 3000.
+- Not completed this cycle:
+  - Immutable digest-to-revision linkage.
+  - Process-level user/listener proof from console session output.
+  - Durability proof across restart/replacement.
+- Constraint note:
+  - Portal sign-in succeeded, but CLI/MCP auth remained unavailable in-session for ACR evidence extraction.
 
 ## 3. Current Week Objectives
 
-1. Objective: Complete the live environment execution path for `DATABASE_URL` and Postgres readiness.
+1. Objective: Close immutable image provenance for the active revision.
    - Owner: Cody Nunn (Interim, role: Executive Desk)
-   - Due date: 2026-08-12
-   - Success signal: `DATABASE_URL` is available in the runtime environment and the Postgres setup/smoke path passes.
-2. Objective: Maintain weekly and monthly cadence integrity while the live rollout items complete.
+   - Success signal: ACR digest evidence is captured and tied to the exact running revision.
+
+2. Objective: Capture process-level runtime identity/listener evidence safely.
    - Owner: Cody Nunn (Interim, role: COO / Chief of Staff)
-   - Due date: 2026-08-12
-   - Success signal: Weekly and monthly cadence views remain evidence-based and aligned to the current blocker list.
-3. Objective: Complete the board and executive template alignment for live operational status.
+   - Success signal: Read-only console output confirms effective user and active listener details for the selected replica.
+
+3. Objective: Preserve governance hold boundaries while evidence completes.
    - Owner: Cody Nunn (Interim, role: Chief of Staff)
-   - Due date: 2026-08-12
-   - Success signal: The templates reflect current repo status and the bounded live-environment blockers accurately.
+   - Success signal: GOV-006 remains Verification — open until all required runtime evidence is complete and reviewed.
 
 ## 4. KPI and Gate Review
 
-- Governance gate: Pass — governance controls remain in place and validated.
-- Evidence integrity gate: Pass — repo health, cadence records, and supporting artifacts are present.
-- Trust and approval gate: Pass-in-progress for live rollout actions; no unsupported claims are being made.
-- Operational readiness gate: Pass-in-progress — repo is green, but live environment execution remains outstanding for `DATABASE_URL` and rollout enforcement.
+- Governance gate: **Open (verification evidence incomplete)**
+- Evidence integrity gate: **Open (digest and process-level runtime evidence pending)**
+- Trust and approval gate: **Open (no final disposition authority recorded)**
+- Operational readiness gate: **Open (runtime closure evidence incomplete)**
 
 ## 5. Risks and Mitigations
 
-- Risk: Missing live `DATABASE_URL` prevents the Postgres setup and smoke validation path.
-  - Impact: Database readiness verification and final rollout cannot proceed in the live environment.
-  - Mitigation: Provision the live or staging `DATABASE_URL`, rerun `db:executive-desk:setup`, and complete the smoke sequence before any final launch claim.
-  - Owner: Cody Nunn (Interim, role: Executive Desk)
+- Risk: Revision can be described by tag without immutable digest proof.
+  - Impact: Runtime review may be tied to the wrong artifact.
+  - Mitigation: Capture digest from an authoritative source and bind it to the active revision record.
 
-- Risk: Stage 2/3 deployment controls are not fully enforced until runtime values and gateway/WAF rules are in place.
-  - Impact: Final live rollout could be incomplete without explicit enforcement controls.
-  - Mitigation: Publish the GPT and apply the live enforcement settings before reporting the production path complete.
-  - Owner: Cody Nunn (Interim, role: Executive Desk)
+- Risk: Configuration-level health does not prove process-level runtime identity.
+  - Impact: Effective user/listener claims remain inferential.
+  - Mitigation: Capture read-only console evidence for the selected replica.
 
-## 5A. Warnings Review and Processing
-
-- Record any lint, runtime, scan, or generation warnings that appear during executive-template processing.
-- Classify each warning as one of:
-  - resolved_in_run
-  - accepted_for_manual_processing
-  - deferred_with_owner
-- For each warning captured, include:
-  - warning source
-  - affected artifact or file
-  - operational impact
-  - disposition
-  - owner
-  - required follow-up, if any
-- Warnings that do not change authority, status, or evidence posture may be processed during template refinement and closed in the same operating cycle.
-- Warnings that affect evidence integrity, governance claims, or execution posture must be escalated into the decisions/approvals lane before closure.
+- Risk: No configured volume mount does not prove runtime durability behavior.
+  - Impact: Restart/replacement persistence claims remain unsupported.
+  - Mitigation: Run approved non-destructive durability evidence checks and record outcomes with timestamp/source.
 
 ## 6. Decisions and Approvals
 
-- Decision: Keep the operational posture as ON TRACK with bounded live-environment blockers.
+- Decision: Keep GOV-006 as **Verification — open**.
 - Decision owner: Cody Nunn (Interim, role: COO / Chief of Staff)
-- Due by: 2026-08-12
-- Approval status: Active — evidence-backed, live execution remains in progress
-- Approval record: Current daily cadence and support triage files in the cadence folder
+- Approval status: No final PASS authorized.
+- Required for closure: Digest provenance, process-level runtime evidence, durability evidence, and eligible review sign-off.
 
 ## 7. Board-Ready Notes
 
-- Narrative headline: The Executive Desk remains on track, with green repo health and bounded live-environment blockers that are being handled explicitly.
-- Evidence-backed claim: The repo health checks, governance controls, and cadence artifacts remain validated and current.
-- Confidence level: High for operational readiness; live environment completion remains an external dependency before final production closure.
+- Current statement: Runtime evidence collection is active and partially complete.
+- Boundary statement: Historical CI/source remediation does not substitute for current Azure runtime closure evidence.
+- Confidence statement: Maintain hold until remaining evidence is captured and independently reviewed.
 
-## 7A. GBP Status Checkpoint
+## 8. Immediate Next Steps
 
-- Owner: Cody Nunn (Interim, role: COO / Chief of Staff)
-- Status: Completed (Audience + identity lock published)
-- Evidence: government-readiness/governance/IDENTITY_ASSIGNMENT_AND_Q1_TARGET_LOCK_2026-07-18.md
-- Source: NUNN_CORP_2030_EXECUTION_WORKBOOK.md
+1. Capture immutable digest evidence for the active revision image.
+2. Retry read-only console capture for effective user/listener on the selected replica.
+3. Record explicit traffic allocation and any related revision metadata from source of truth.
+4. Execute approved non-destructive durability evidence collection.
+5. Keep PR #47 on HOLD until separate receipt/evidence validation closure criteria are met.
 
-- Owner: Cody Nunn (Interim, role: Chief of Staff)
-- Status: Completed
-- Evidence: government-readiness/executive-briefings/BOARD_PACKET_VALIDATION_CHECKLIST_2026-07-18.md
-- Source: NUNN_CORP_2030_EXECUTION_WORKBOOK.md
+## 9. Open Items Register
 
-## 8. Next Week Preview
-
-- Expected carry-forward: Live environment completion for `DATABASE_URL`, Postgres smoke validation, Stage 2 publish, and Stage 3 enforcement.
-- New proposed priorities: Maintain evidence-backed weekly and monthly cadence reviews while the deployment path closes.
-- Dependencies to clear now: Live environment variables, database readiness, and enforcement of rollout controls.
-
-## 9. Sentinel AI Orchestration Plan (Phases 1 and 2)
-
-Execution mode: Sentinel AI coordinates sequence, ownership handoff, gate checks, and evidence capture through Executive Desk.
-
-### Phase 1: Control and Evidence Lock (Mon-Wed)
-
-1. Step: Kickoff lock on owners, scope, and success criteria.
-   - Owner: Cody Nunn (Interim, role: Executive Desk)
-   - Due: 2026-07-27
-   - Output: Locked weekly execution scope and gate schedule.
-2. Step: Complete exact-value metadata lock for EV-RUN-002-001 evidence set.
-   - Owner: Cody Nunn (Interim, role: Executive Desk)
-   - Due: 2026-07-29
-   - Output: All placeholder fields replaced with source-verified values.
-3. Step: Verify and document GBP completed controls with source and evidence links.
-   - Owner: Cody Nunn (Interim, role: COO / Chief of Staff)
-   - Due: 2026-07-29
-   - Output: Completed status attested for identity lock and board packet checklist controls.
-4. Step: Run governance/trust pre-gate review.
-   - Owner: Cody Nunn (Interim, role: Chief of Staff)
-   - Due: 2026-07-30
-   - Output: Gate review notes with pass or remediation actions.
-
-Phase 1 completion criteria:
-
-- Metadata exact-value lock complete.
-- GBP status attested and source-linked.
-- Governance and trust pre-gate review passed.
-
-### Phase 2: Executive and Board Completion (Thu-Fri)
-
-1. Step: Produce executive synthesis packet with gate statuses and decision asks.
-   - Owner: Cody Nunn (Interim, role: Executive Desk)
-   - Due: 2026-07-30
-   - Output: Final executive packet draft ready for review.
-2. Step: Publish board pre-read package and motion language.
-   - Owner: Cody Nunn (Interim, role: Chief of Staff)
-   - Due: 2026-07-30
-   - Output: Board-facing packet with evidence-backed narrative.
-3. Step: Execute final EV-RUN-002-001 disposition decision.
-   - Owner: Cody Nunn (Interim, role: COO / Chief of Staff)
-   - Due: 2026-07-31
-   - Output: Recorded approval or documented defer disposition.
-4. Step: Complete weekly closeout and next-week carry-forward lock.
-   - Owner: Cody Nunn (Interim, role: Executive Desk)
-   - Due: 2026-07-31
-   - Output: Signed weekly closeout summary and carry-forward list.
-
-Phase 2 completion criteria:
-
-- Board pre-read published on schedule.
-- Final disposition recorded.
-- Weekly closeout signed with next-step carry-forward.
-
-### Immediate Next Steps (Start Now)
-
-1. Validate EV-RUN-002-001 metadata placeholders and assign replacement owners today.
-2. Run GBP evidence-link verification and confirm no source status drift.
-3. Hold Wednesday Gate 1 review and log pass or remediation actions.
-4. Prepare Thursday board pre-read package for release.
-
-### Scheduling Reference
-
-- Weekly ICS schedule file: cadence/2026-07-27_SENTINEL_ORCHESTRATION_DELIVERABLES.ics
+- GOV-006 runtime closure: **Open**
+- ACT-019 final disposition authority: **Open**
+- Verifier / eligible reviewer assignment: **Open**
+- Canonical October handoff and executive-closeout artifacts in this checkout: **Not present; pending operator-provided source files**
