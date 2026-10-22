@@ -17,6 +17,10 @@ jobs:
     needs: validate
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    # Human deployment authorization: configure required reviewers on this
+    # environment (Settings > Environments > production) so every deploy waits
+    # for an attributable approval before touching Azure.
+    environment: production
     permissions:
       contents: read
       id-token: write
@@ -65,6 +69,20 @@ jobs:
           docker push ${{ secrets.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
           docker push ${{ secrets.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:latest
 
+      - name: Resolve immutable image digest
+        run: |
+          set -euo pipefail
+          ACR_NAME="${{ secrets.ACR_LOGIN_SERVER }}"
+          ACR_NAME="${ACR_NAME%%.*}"
+          IMAGE_DIGEST="$(az acr repository show --name "$ACR_NAME" --image "${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}" --query digest -o tsv)"
+          case "$IMAGE_DIGEST" in
+            sha256:*) ;;
+            *) echo "::error::Could not resolve sha256 digest for ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}"; exit 1 ;;
+          esac
+          echo "IMAGE_DIGEST=${IMAGE_DIGEST}" >> "$GITHUB_ENV"
+          echo "IMAGE_REF=${{ secrets.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}@${IMAGE_DIGEST}" >> "$GITHUB_ENV"
+          echo "Deploying ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }} pinned to ${IMAGE_DIGEST}" | tee -a "$GITHUB_STEP_SUMMARY"
+
       - name: Set secret and ingress config
         env:
           SENTINEL_API_KEY: ${{ secrets.SENTINEL_API_KEY }}
@@ -90,7 +108,7 @@ jobs:
       - name: Patch exact-suffix revision template
         shell: bash
         env:
-          EXPECTED_IMAGE: ${{ secrets.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+          EXPECTED_IMAGE: ${{ env.IMAGE_REF }}
         run: |
           set -euo pipefail
           APP_NAME="${{ secrets.CONTAINER_APP_NAME }}"
@@ -121,6 +139,7 @@ jobs:
           env_items = sentinel.setdefault('env', [])
           env_map = {entry.get('name'): entry for entry in env_items if isinstance(entry, dict) and entry.get('name')}
           env_map['PORT'] = {'name': 'PORT', 'value': '3000'}
+          env_map['GIT_SHA'] = {'name': 'GIT_SHA', 'value': os.environ['GITHUB_SHA']}
           env_map['SENTINEL_HMAC_SECRET'] = {'name': 'SENTINEL_HMAC_SECRET', 'secretRef': 'sentinel-hmac-secret'}
           env_map['SENTINEL_API_KEY'] = {'name': 'SENTINEL_API_KEY', 'secretRef': 'sentinel-api-key'}
           env_map['SENTINEL_API_KEY_TENANT'] = {'name': 'SENTINEL_API_KEY_TENANT', 'value': 'nunncloud'}
@@ -180,7 +199,7 @@ jobs:
       - name: Wait for exact revision health
         shell: bash
         env:
-          EXPECTED_IMAGE: ${{ secrets.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+          EXPECTED_IMAGE: ${{ env.IMAGE_REF }}
           EXPECTED_PORT: "3000"
           REQUIRED_TRAFFIC_WEIGHT: "100"
         run: |
@@ -230,7 +249,7 @@ jobs:
       - name: Verify live deployment contract
         shell: bash
         env:
-          EXPECTED_IMAGE: ${{ secrets.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+          EXPECTED_IMAGE: ${{ env.IMAGE_REF }}
           EXPECTED_PORT: "3000"
           REQUIRED_TRAFFIC_WEIGHT: "100"
         run: |
@@ -309,5 +328,6 @@ jobs:
       - name: Show deployment target
         run: |
           echo "Deployed image: ${{ secrets.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}"
+          echo "Pinned image reference: ${{ env.IMAGE_REF }}"
           echo "Updated latest: ${{ secrets.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:latest"
           echo "Container App: ${{ secrets.CONTAINER_APP_NAME }}"

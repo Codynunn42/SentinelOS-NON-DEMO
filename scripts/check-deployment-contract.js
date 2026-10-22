@@ -22,12 +22,18 @@ const checks = [
       'if [[ "$UNAUTH_STATUS" != "401" && "$UNAUTH_STATUS" != "403" ]]; then',
       'echo "Testing authenticated protected route"',
       'if [[ "$AUTH_STATUS" != "200" ]]; then',
-      'x-api-key: ${{ secrets.SENTINEL_API_KEY }}'
+      'x-api-key: ${{ secrets.SENTINEL_API_KEY }}',
+      'environment: production',
+      'name: Resolve immutable image digest',
+      'IMAGE_REF=${{ secrets.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}@${IMAGE_DIGEST}',
+      'EXPECTED_IMAGE: ${{ env.IMAGE_REF }}',
+      "env_map['GIT_SHA'] = {'name': 'GIT_SHA', 'value': os.environ['GITHUB_SHA']}"
     ],
     forbidden: [
-      'az containerapp ingress update'
+      'az containerapp ingress update',
+      'EXPECTED_IMAGE: ${{ secrets.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}'
     ],
-    message: 'Deploy workflow must validate the exact SHA, coordinate ingress with the revision patch, and verify the live security boundary by rejecting unauthenticated access and accepting authenticated access.'
+    message: 'Deploy workflow must wait for production environment approval, deploy the immutable sha256 digest with GIT_SHA provenance, validate the exact SHA, coordinate ingress with the revision patch, and verify the live security boundary by rejecting unauthenticated access and accepting authenticated access.'
   },
   {
     file: ciWorkflowPath,
