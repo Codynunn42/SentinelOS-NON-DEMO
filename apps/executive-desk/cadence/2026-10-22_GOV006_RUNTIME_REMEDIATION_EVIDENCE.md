@@ -69,8 +69,9 @@ Code-level durability findings (repo at `7eb0724`):
 |---|---|
 | Candidate | `ca-nc-dev-sentinel--sha-c1aece8-60-1`: inactive, last state Healthy / Provisioned, created 2026-09-28T20:32:31Z, image tag `c1aece8f4b73…` → digest `sha256:c424aad744e3…` (present in ACR) |
 | Lineage | `c1aece8` **is an ancestor** of `7eb0724` (main). The delta is 5 commits from PR #44 touching only `apps/sentinel/src/controlPlane/validate.js` and its test: no schema, migration, dependency or config change. **Schema-compatible rollback.** |
-| Revision mode | **Single.** `az containerapp revision activate` on an old revision makes it the only active revision and shifts **100 % of production traffic** to it. |
-| Rehearsal | **Not executed.** It was authorized only as "activate at 0 % traffic, no traffic shift", which Single mode cannot do. A safe rehearsal needs either a temporary switch to Multiple mode with explicit 100/0 weights, or a disposable clone app. Both need a new authorization. |
+| Revision mode | **Single**, ingress traffic `latestRevision: true, weight 100` (re-read 2026-10-22T23:25:22Z). Microsoft documents per-revision activation control only for Multiple mode ([Revisions in Azure Container Apps](https://learn.microsoft.com/azure/container-apps/revisions)). Activating an old revision in Single mode therefore **may** make it the sole active revision and move production traffic; no zero-traffic guarantee exists. |
+| Pre-check (read-only, 2026-10-22T23:25:22–25Z) | Serving revision `…sha-7eb0724-61-1` active, Running, 100 % traffic, app provisioning `Succeeded`. Candidate `…sha-c1aece8-60-1` inactive; image tag `c1aece8f4b73…`; scale min 1 / max 2; all 7 referenced secrets exist on the app. Capture SHA-256: app `7f8e6bd7…b452`, candidate `71a19c2b…e2c`. |
+| Rehearsal | **Not executed — blocked by Single mode.** It was authorized as "activate at 0 % traffic, no traffic shift", which Single mode cannot guarantee. On 2026-10-22 (~23:30Z) Cody was offered a temporary Multiple-mode switch (current revision pinned 100 % by name, then restored to Single) and **declined (Option B: no Azure change)**. No Azure write was made. A future rehearsal needs a new authorization for either the mode switch or a disposable clone app. Note: the candidate shares the production Postgres database, so any activation may run startup schema checks or its scheduler alongside production. |
 
 Documented rollback procedure (requires Cody's explicit authorization at the time of use):
 ```bash
@@ -78,7 +79,7 @@ Documented rollback procedure (requires Cody's explicit authorization at the tim
 az containerapp update -n ca-nc-dev-sentinel -g rg-nc-dev-sentinel \
   --image acrncdevsentinel.azurecr.io/sentinel-api@sha256:c424aad744e3ae7e806874c1fe23ff5319a11e930b4a4458269dcb54f4304728 \
   --revision-suffix rollback-c1aece8-<yyyymmdd>
-# Option 2 — reactivate the retained revision (shifts 100% traffic immediately in Single mode)
+# Option 2 — reactivate the retained revision (in Single mode, expect it to take production traffic)
 az containerapp revision activate -n ca-nc-dev-sentinel -g rg-nc-dev-sentinel \
   --revision ca-nc-dev-sentinel--sha-c1aece8-60-1
 # Verify after either option
@@ -87,7 +88,7 @@ az containerapp revision list -n ca-nc-dev-sentinel -g rg-nc-dev-sentinel \
   --query "[?properties.trafficWeight>\`0\`].{n:name,w:properties.trafficWeight,h:properties.healthState}" -o table
 ```
 
-**Assessment: improved, still FAIL.** The target, lineage, compatibility and procedure are now documented. The rehearsal and a named approver remain open.
+**Assessment: improved, still FAIL.** The target, lineage, compatibility and procedure are now documented. The rehearsal (declined 2026-10-22 as out of the authorized scope) and a named approver remain open.
 
 ## 4. Criterion D — Deployment governance
 
@@ -117,7 +118,7 @@ az containerapp revision list -n ca-nc-dev-sentinel -g rg-nc-dev-sentinel \
 | 2 | Redeploy through the gated workflow so the serving revision is digest-pinned with `GIT_SHA` set | A for the new revision | Azure write |
 | 3 | Durability: run the heartbeat in-process or as a Container Apps job; mount Azure Files at `/var/lib/sentinelos` or move ledgers to Postgres; seed `lastAuditHash` and audit reads from Postgres on startup | B | Code + Azure |
 | 4 | Durability proof: create a test receipt, restart the replica, resolve the receipt by ID afterwards | B | Azure write |
-| 5 | Rollback rehearsal: Multiple mode with explicit weights, or a disposable clone app | C | Azure write |
+| 5 | Rollback rehearsal: Multiple mode with explicit weights, or a disposable clone app (mode switch declined 2026-10-22) | C | Azure write |
 | 6 | Postgres resilience decision: HA, geo-redundant backup, retention beyond 7 days | B | Azure write / cost |
 
 ## 7. Carry-forward
