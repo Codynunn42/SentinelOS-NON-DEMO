@@ -5,3 +5,4 @@ coverage/
 aws-footprint.txt
 apps/executive-desk/docs/SENTINEL_BRIDGE_DISCOVERY_*.md
 contract_reclamation-incubator/
+evidence-staging/
