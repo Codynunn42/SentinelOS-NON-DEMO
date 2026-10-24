@@ -1,6 +1,38 @@
 # Rollback readiness assessment
 
-Status: Read-only assessment only; not approved for deployment
+Status: Planning/documentation only; not approved for deployment
+
+## Key Vault / managed-identity verification planning
+
+Status: Draft prepared for review; resource creation, spending, access changes,
+test execution, rehearsal and deployment are not authorized.
+
+Prepare a documentation-only verification plan against review target
+`36e690649a070f3f1b2fa4b77ea696528d369f7d`, including its implementation
+ancestry. The documentation-only deliverable is
+[the Key Vault / managed-identity verification plan](../apps/executive-desk/cadence/2026-10-24_GOV006_KEY_VAULT_MI_VERIFICATION_PLAN.md).
+It records proposed resources, custom read/sign and read-only roles,
+private-endpoint isolation, acceptance/failure tests, costs and cleanup.
+
+Cody confirmed the prior subscription
+`82bd72d4-00ef-400d-839b-e168e980c510`, `eastus2`, and Standard software EC
+P-256 for pricing/planning only. Read-only checks found the subscription
+accessible, Key Vault registered with region support, the proposed test
+group absent and proposed vault name available. These are not write-access,
+quota/capacity, complete resource-availability or execution approvals.
+
+The combined four-hour planning estimate is approximately USD 16.71,
+including prior option-A dependencies and this plan's USD 1.17 rounded-up
+increment with contingency. Prior dependency rates/allowances still require
+execution-stage repricing and closure; storage-retention sensitivity reaches
+approximately USD 27.59, above the still-proposed USD 25 ceiling.
+
+Network allocation/image delivery, effective privileges, capacity, reviewed
+Azure harness, immutable image/provenance, independent reviewer and separate
+execution/cleanup authorization remain unresolved. No new application code,
+infrastructure templates or executable deployment/cleanup commands were
+generated. No resources, keys or permissions were created/changed. Do not
+advance to Ready for Validation or execution. Historical assessment follows.
 
 ## Scope
 
