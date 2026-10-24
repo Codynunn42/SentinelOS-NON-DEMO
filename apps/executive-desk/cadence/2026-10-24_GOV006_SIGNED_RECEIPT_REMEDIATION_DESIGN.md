@@ -1,8 +1,8 @@
 # GOV-006 signed receipt and authority-binding remediation design
 
-**Prepared:** October 24, 2026  
+**Prepared:** October 24, 2026
 **Status:** Design decisions recorded; remediation code is being implemented in
-the current worktree. This is not deployment approval or execution authority.  
+the current worktree. This is not deployment approval or execution authority.
 **Disposition source:** Cody's explicit decision in this conversation.
 
 ## 1. Recorded disposition
@@ -254,13 +254,62 @@ The code implementation is in progress in the current worktree. It includes
 the signed receipt helpers and Key Vault adapter, additive schema/migration,
 durable execution journal, dispatch/API integration, and legacy receipt
 labeling. Focused unit tests cover signature integrity, retained key-version
-lookup and journal transitions. PostgreSQL round-trip, full API,
-process-replacement, deployment, production key configuration and new-image
-evidence are not yet verified. No resources, credentials, access assignments
-or runtime were changed. The isolated procedure remains non-executable until
-remediation and the other isolation, cost, timing, reviewer and
-execution-approval conditions are closed.
+lookup and journal transitions. A dedicated PostgreSQL integration check using
+a disposable PostgreSQL 16 instance passed for concurrent duplicate claims,
+payload/command conflicts, tenant scoping, signed receipt and authority
+round-trip in a separate reader process, and fail-closed behavior after
+simulated signing or persistence failure following handler start. This does not
+verify the full HTTP API, Azure Key Vault/managed identity, a deployed image, or
+production key configuration. No production resources, credentials, access
+assignments or runtime were changed. The isolated procedure remains
+non-executable until full remediation evidence and the other isolation, cost,
+timing, reviewer and execution-approval conditions are closed.
 
 **GOV-006 remains Verification / Technical HOLD.** GOV-001 remains Conditional;
 GOV-002 remains HOLD. Historical Freddie findings remain preserved; a future
 independent reviewer is unassigned.
+
+## 9. Local follow-up test evidence
+
+**Tested source baseline:** `8b18d39fb94e9606f35c2fba50c1030a9ae7c3e8`.
+The follow-up commit adds the PostgreSQL integration runner and this test
+record; it does not claim a deployed-image test.
+
+Commands and recorded results:
+
+| Command | Result |
+| --- | --- |
+| `pnpm test` | 133 passing |
+| `pnpm exec mocha apps/sentinel/src/receipts/__tests__/signedReceipt.test.js apps/sentinel/src/db/__tests__/executionJournal.test.js apps/sentinel/src/audit/__tests__/auditLogger.test.js apps/sentinel/src/commands/__tests__/dispatch.test.js` | 13 passing |
+| `pnpm run check:idempotency` | `Idempotency fail-closed check passed` |
+| `pnpm run check:customerops` | Exit 0; durable journal unavailable requests were rejected |
+| `pnpm run check:product-commands` | `Product command fail-closed check passed` |
+| `pnpm run check:receipts` | `Receipt lookup check passed` |
+| `SENTINEL_TEST_DATABASE_URL=<dedicated-disposable-PostgreSQL-URL> pnpm run check:execution-journal-postgres` | Passed against local PostgreSQL 16; test output recorded below |
+| `node --check scripts/check-execution-journal-postgres.js`, `git diff --check`, `git diff HEAD^ --check` | Passed after removal of the five trailing-space lines from the two review documents |
+
+PostgreSQL integration output:
+
+```text
+Disposable PostgreSQL test target: database=sentinel_it, server=16.15
+PostgreSQL replacement-process read and signature verification passed
+PostgreSQL journal concurrency, signed persistence, failure, and retry checks passed
+```
+
+The database server was a disposable local `postgres:16-alpine` container,
+bound only to `127.0.0.1:15432`, with a synthetic `sentinel_it` database and
+ephemeral test credentials. The runner created a uniquely named
+`receipt_it_*` schema, applied `schema.sql` and the additive migration, and
+dropped the schema in its cleanup. The container was stopped after the run.
+The test used ephemeral ES256 keys and synthetic records; no production
+database, Azure resource, Key Vault, managed identity, or credentials were
+used. The command intentionally requires `SENTINEL_TEST_DATABASE_URL` and
+refuses database names outside a test/integration naming pattern.
+
+The PostgreSQL tests cover concurrent duplicate claims, one handler-start,
+payload and command conflicts, tenant isolation, signed receipt plus authority
+round-trip and verification in a separate Node process, and signing/write
+failure after a synthetic side effect with subsequent automatic-retry
+blocking. They do not exercise the complete authenticated HTTP flow,
+Azure Key Vault/managed identity, a built image, or independent review. Those
+remain acceptance prerequisites; GOV-006 remains on HOLD.

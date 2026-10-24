@@ -1,8 +1,8 @@
 # GOV-006 isolated rehearsal procedure — review draft
 
-**Packet:** GOV006-ROLLBACK-ISOLATED-20261024-R2  
-**Drafted:** October 24, 2026  
-**Status:** Design/procedure review only. **Not executable; NOT approved.**  
+**Packet:** GOV006-ROLLBACK-ISOLATED-20261024-R2
+**Drafted:** October 24, 2026
+**Status:** Design/procedure review only. **Not executable; NOT approved.**
 **Selected planning scope:** isolated Azure Container Apps (ACA), by Cody's
 planning-only selection. This does not authorize spending, provisioning,
 deployment or rehearsal.
