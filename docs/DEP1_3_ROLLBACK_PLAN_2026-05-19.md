@@ -119,3 +119,11 @@ rollback result must be verified and preserved as audit evidence
 ## Non-Authorization Clause
 
 This rollback plan is evidence only. It does not authorize rollback execution, deployment, runtime mutation, command execution, live Azure query execution, direct env value restoration, secret value access, secret value disclosure, endpoint publication, pilot activation, tenant activation, held-standard promotion, push, tool grants, certification claims, autonomous execution, or destructive cleanup.
+
+## October 23 documentation-only addendum
+
+The [October 23 rollback plan update](../apps/executive-desk/cadence/2026-10-23_ROLLBACK_PLAN_UPDATE_REVIEW_ONLY.md)
+links the later candidate/procedure, evidence gaps, proposed changes, and
+reported administrative reconciliation. It does not change this historical
+plan's findings or authorize runtime changes, rollback, deployment, or a gate
+change.

@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "sentinelos-read-only": {
+      "command": "node",
+      "args": ["${workspaceFolder}/tools/sentinel-cursor-mcp.mjs"],
+      "envFile": "${workspaceFolder}/.env.cursor"
+    }
+  }
+}

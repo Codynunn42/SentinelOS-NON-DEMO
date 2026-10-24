@@ -3,6 +3,7 @@
 Get from a Dataverse question to useful evidence in a few minutes.
 
 ## Environment
+
 1. Open the Command Palette
 2. Run: DV Quick Run: Add Environment
 3. Come back here and click "Run Query" above one of the examples below
@@ -10,13 +11,16 @@ Get from a Dataverse question to useful evidence in a few minutes.
 ## 1. Choose how you want to start
 
 ### Prompt Library
+
 Use a guided prompt when you know the outcome you want but not the DV Quick Run tool or workflow.
 Open: DV Quick Run: Open Prompt Library
 
 ### Query in the editor
+
 Start with a small OData or FetchXML query, run it, then refine from the Result Viewer.
 
 ### DV Quick Run Hub
+
 Use the Hub when you want to explore metadata, relationships, capabilities, current investigation context, snapshots or professional investigation workflows.
 Open: DV Quick Run: Open Hub
 
@@ -34,6 +38,7 @@ A typical DV Quick Run investigation grows only as far as the problem requires:
 query → Result Viewer → relationships / runtime / profile → snapshots or investigation → readiness / Mini RCA → handoff
 
 Useful next surfaces:
+
 - Guided Traversal: discover and test relationship paths
 - Operational Profile: understand bounded entity-level operational context
 - Execution Insights: inspect available runtime participation evidence
@@ -56,25 +61,28 @@ az login --allow-no-subscriptions
 ## A few useful things to try
 
 ### Explain a query
+
 👉 Click "Explain" above this line
 accounts?$select=name,revenue&$filter=statecode eq 0&$top=10
 
 ### Try FetchXML
+
 👉 Click "Run FetchXML" above the <fetch line
+
+```xml
 <fetch top="5">
   <entity name="account">
     <attribute name="name" />
-    <attribute name="accountnumber" />
-  </entity>
-</fetch>
+    <attribute name="accountnumber" />### Explore relationships
 
-### Explore relationships
 Run: DV Quick Run: Guided Traversal
 
 ### Discover Custom APIs
+
 Run: DV Quick Run: Open Capability Explorer
 
 ### Inspect Access Context
+
 Run: DV Quick Run: Investigate Access Context
 Access Context covers users, application users, teams, roles, and business units without treating DVQR as RBAC simulation or security administration tooling.
 

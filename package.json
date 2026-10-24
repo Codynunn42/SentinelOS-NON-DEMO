@@ -5,6 +5,8 @@
   "packageManager": "pnpm@10.33.4",
   "description": "SentinelOS NON-DEMO client operating repository",
   "dependencies": {
+    "@azure/identity": "^4.10.2",
+    "@azure/keyvault-keys": "^4.10.0",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "express-rate-limit": "^8.7.0",
@@ -63,6 +65,7 @@
     "scan:executive-desk:sentinel-status": "pnpm --dir apps/executive-desk run api:sentinel-status",
     "scan:executive-desk:sentinel-oauth-fix": "pnpm --dir apps/executive-desk run api:sentinel-scan:oauth-fix",
     "test": "mocha --require tsx \"apps/executive-desk/**/__tests__/**/*.test.ts\" \"apps/executive-desk/**/*.test.ts\" \"apps/sentinel/**/__tests__/**/*.test.js\" \"apps/sentinel/**/*.test.js\"",
+    "test:cursor-mcp": "node --test tests/sentinel-cursor-mcp.test.mjs",
     "test:coverage": "c8 --all --src apps/executive-desk --exclude \"apps/executive-desk/public/**\" --exclude \"apps/executive-desk/**/__tests__/**\" --exclude \"apps/executive-desk/**/*.test.ts\" --exclude \"apps/executive-desk/**/*.md\" --reporter=text-summary --reporter=lcov pnpm run test",
     "test:coverage:check": "c8 check-coverage --lines 80 --statements 80 --functions 80 --branches 75",
     "check:policy": "node scripts/check-policy-engine.js",
@@ -115,6 +118,7 @@
     "node": ">=20"
   },
   "devDependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.1",
     "@types/express": "^5.0.6",
     "@types/mocha": "^10.0.10",
     "@types/node": "^26.1.0",
@@ -125,7 +129,8 @@
     "pptxgenjs": "^4.0.1",
     "supertest": "^7.2.2",
     "tsx": "^4.22.5",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "zod": "^4.6.7"
   },
   "pnpm": {
     "overrides": {

@@ -1,13 +1,15 @@
 const assert = require('assert');
-const { server } = require('../apps/api/server');
 
 const TEST_KEY = 'customerops-command-test-secret';
 
+process.env.DATABASE_URL = '';
 process.env.SENTINEL_API_KEY = TEST_KEY;
 process.env.SENTINEL_HMAC_SECRET = process.env.SENTINEL_HMAC_SECRET || 'customerops-passport-secret';
 process.env.SENTINEL_API_KEY_TENANT = 'ownerfi';
 process.env.SENTINEL_API_KEY_ACTOR = 'support-agent@nunncloud.local';
 process.env.SENTINEL_API_KEY_ROLE = 'agent';
+
+const { server } = require('../apps/api/server');
 
 function listen() {
   return new Promise((resolve, reject) => {
@@ -50,10 +52,8 @@ async function main() {
       }
     });
 
-    assert.strictEqual(ticket.response.status, 201);
-    assert.strictEqual(ticket.payload.status, 'executed');
-    assert.strictEqual(ticket.payload.result.status, 'created');
-    assert(ticket.payload.receipt.receiptId);
+    assert.strictEqual(ticket.response.status, 503);
+    assert.strictEqual(ticket.payload.error, 'EXECUTION_JOURNAL_UNAVAILABLE');
 
     const refund = await postCommand(base, {
       commandId: 'customerops_refund_test_1',
@@ -70,10 +70,8 @@ async function main() {
       }
     });
 
-    assert.strictEqual(refund.response.status, 403);
-    assert.strictEqual(refund.payload.status, 'blocked');
-    assert.strictEqual(refund.payload.error, 'APPROVAL_REQUIRED');
-    assert.strictEqual(refund.payload.approvalRequired, true);
+    assert.strictEqual(refund.response.status, 503);
+    assert.strictEqual(refund.payload.error, 'EXECUTION_JOURNAL_UNAVAILABLE');
   } finally {
     await new Promise((resolve) => server.close(resolve));
   }

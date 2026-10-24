@@ -1,7 +1,6 @@
 const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
-const { server } = require('../apps/api/server');
 
 const TEST_KEY = 'product-command-test-secret';
 const PRODUCT_DOC = 'docs/DEAL_EXECUTION_ENGINE_POSITIONING.md';
@@ -12,10 +11,14 @@ const STATEFUL_FILES = [
 ];
 
 process.env.SENTINEL_API_KEY = TEST_KEY;
+process.env.DATABASE_URL = '';
 process.env.SENTINEL_HMAC_SECRET = process.env.SENTINEL_HMAC_SECRET || 'product-command-passport-secret';
 process.env.SENTINEL_API_KEY_TENANT = 'nunncloud';
 process.env.SENTINEL_API_KEY_ACTOR = 'product-operator@nunncloud.local';
 process.env.SENTINEL_API_KEY_ROLE = 'platform';
+
+const { server } = require('../apps/api/server');
+let requestNumber = 0;
 
 function listen() {
   return new Promise((resolve, reject) => {
@@ -32,6 +35,7 @@ async function postCommand(base, command, payload = {}) {
       authorization: `Bearer ${TEST_KEY}`
     },
     body: JSON.stringify({
+      commandId: `product-check-${++requestNumber}`,
       tenant: 'nunncloud',
       command,
       payload
@@ -85,9 +89,8 @@ async function main() {
         Workflow: 'Deal Flow'
       }
     });
-    assert.strictEqual(reframe.response.status, 200);
-    assert.strictEqual(reframe.body.status, 'executed');
-    assert.strictEqual(reframe.body.product.productName, 'SentinelOS Deal Execution Engine');
+    assert.strictEqual(reframe.response.status, 503);
+    assert.strictEqual(reframe.body.error, 'EXECUTION_JOURNAL_UNAVAILABLE');
 
     const ui = await postCommand(base, 'ui.sync.labels', {
       labelMap: {
@@ -97,9 +100,8 @@ async function main() {
         workflowBoard: 'Deal Flow'
       }
     });
-    assert.strictEqual(ui.response.status, 200);
-    assert.strictEqual(ui.body.result.status, 'success');
-    assert.strictEqual(ui.body.result.labelCount, 4);
+    assert.strictEqual(ui.response.status, 503);
+    assert.strictEqual(ui.body.error, 'EXECUTION_JOURNAL_UNAVAILABLE');
 
     const repo = await postCommand(base, 'repo.update.structure', {
       actions: [
@@ -129,22 +131,18 @@ async function main() {
         }
       ]
     });
-    assert.strictEqual(repo.response.status, 200);
-    assert.strictEqual(repo.body.result.status, 'success');
-    assert(fs.existsSync(path.join(process.cwd(), PRODUCT_DOC)));
+    assert.strictEqual(repo.response.status, 503);
+    assert.strictEqual(repo.body.error, 'EXECUTION_JOURNAL_UNAVAILABLE');
 
     const demo = await postCommand(base, 'dealFlow.run.demo');
-    assert.strictEqual(demo.response.status, 200);
-    assert.strictEqual(demo.body.result.product, 'SentinelOS Deal Execution Engine');
-    assert(demo.body.flow.some((step) => step.label === 'Decision Score'));
-    assert(demo.body.flow.some((step) => step.label === 'Risk Alert'));
+    assert.strictEqual(demo.response.status, 503);
+    assert.strictEqual(demo.body.error, 'EXECUTION_JOURNAL_UNAVAILABLE');
 
     const validate = await postCommand(base, 'system.validate.integrity', {
       checks: ['trust-score']
     });
-    assert.strictEqual(validate.response.status, 200);
-    assert.strictEqual(validate.body.result.status, 'success');
-    assert.strictEqual(validate.body.result.results['trust-score'].status, 'passed');
+    assert.strictEqual(validate.response.status, 503);
+    assert.strictEqual(validate.body.error, 'EXECUTION_JOURNAL_UNAVAILABLE');
 
     const audit = await fetch(`${base}/v1/audit?tenant=nunncloud`, {
       headers: {
@@ -153,10 +151,11 @@ async function main() {
     });
     const auditBody = await audit.json();
     assert.strictEqual(audit.status, 200);
-    assert(auditBody.entries.some((entry) => entry.command === 'system.reframe.product'));
-    assert(auditBody.entries.some((entry) => entry.command === 'dealFlow.run.demo'));
+    assert(!auditBody.entries.some((entry) => entry.command === 'system.reframe.product'));
+    assert(!auditBody.entries.some((entry) => entry.command === 'dealFlow.run.demo'));
+    assert.deepStrictEqual(snapshotFiles(STATEFUL_FILES), fileSnapshot);
 
-    console.log('Product command routing check passed');
+    console.log('Product command fail-closed check passed');
   } finally {
     server.close();
     restoreFiles(fileSnapshot);

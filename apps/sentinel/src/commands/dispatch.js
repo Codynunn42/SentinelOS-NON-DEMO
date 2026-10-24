@@ -13,6 +13,19 @@ const { emitSNCSEvidence } = require('../evidence/sncs');
 const { emitAIRoutingEvidence } = require('../evidence/ai');
 const { routeAIRequest } = require('../modules/ai-operations/modelBroker');
 const { completeTrace, createTrace, recordStage } = require('../audit/executionTrace');
+const {
+  claimExecution,
+  completeExecution,
+  markFailedBeforeMutation,
+  markHandlerStarted,
+  markReconciliationNeeded
+} = require('../db/executionJournal');
+const { getReceiptSigner } = require('../receipts/receiptRuntime');
+const {
+  canonicalize,
+  signReceipt,
+  verifySignedReceipt
+} = require('../receipts/signedReceipt');
 const crypto = require('crypto');
 
 function getSigningKey() {
@@ -427,11 +440,326 @@ async function dispatchCommand(body, context) {
   });
 }
 
+function buildFallbackReceipt(envelope, result) {
+  const response = result && result.data && typeof result.data === 'object' ? result.data : {};
+  return {
+    receiptId: `rcpt_${crypto.randomUUID()}`,
+    auditId: `audit_${crypto.randomUUID()}`,
+    tenantId: envelope.tenant,
+    command: envelope.command,
+    status: 'executed',
+    entity: {
+      type: 'command_execution',
+      id: envelope.commandId || envelope.correlationId
+    },
+    outcome: {
+      statusCode: result.statusCode || 200,
+      resultHash: crypto.createHash('sha256').update(JSON.stringify(response)).digest('hex')
+    },
+    timestamp: new Date().toISOString()
+  };
+}
+
+function hashDispatchResult(result) {
+  const data = result && result.data && typeof result.data === 'object'
+    ? { ...result.data }
+    : {};
+  delete data.receipt;
+  const serialized = JSON.stringify({ ...result, data });
+  return crypto.createHash('sha256')
+    .update(canonicalize(JSON.parse(serialized)), 'utf8')
+    .digest('hex');
+}
+
+function bindDispatchResultHash(receipt, result) {
+  const priorOutcome = receipt.outcome && typeof receipt.outcome === 'object' && !Array.isArray(receipt.outcome)
+    ? receipt.outcome
+    : { priorOutcome: receipt.outcome === undefined ? null : receipt.outcome };
+  return {
+    ...receipt,
+    outcome: {
+      ...priorOutcome,
+      dispatchResultHash: hashDispatchResult(result)
+    }
+  };
+}
+
+async function verifyCompletedResult(result, signer) {
+  const receipt = result && result.data && result.data.receipt;
+  const verification = await verifySignedReceipt(receipt, signer.getPublicKey);
+  if (!verification.ok || receipt.outcome.dispatchResultHash !== hashDispatchResult(result)) {
+    throw new Error(verification.ok ? 'EXECUTION_RESULT_SIGNATURE_BINDING_MISMATCH' : verification.status);
+  }
+  return {
+    ...result,
+    data: {
+      ...result.data,
+      receipt: {
+        ...receipt,
+        verification_status: verification.status,
+        verified: verification.verified
+      }
+    }
+  };
+}
+
+function buildReceiptAuthority(envelope, context, governance) {
+  const principal = context.principal;
+  const policyContext = governance.policyContext || {};
+  const policy = governance.policy || {};
+  if (!principal || !principal.keyId || !principal.actor || !principal.role) {
+    throw new Error('RECEIPT_PRINCIPAL_CONTEXT_REQUIRED');
+  }
+
+  return {
+    tenant: envelope.tenant,
+    actor: principal.actor,
+    apiKeyId: principal.keyId,
+    effectiveRole: policyContext.role || principal.role,
+    effectiveScopes: policyContext.scopes || principal.scopes,
+    decision: {
+      decisionId: envelope.correlationId,
+      result: 'allow',
+      state: policy.state || null,
+      riskLevel: policy.riskLevel || null,
+      requiredScope: policyContext.requiredScope || null,
+      approvalId: policy.approvalId || null,
+      policyVersion: policy.policyVersion || null,
+      decidedAt: new Date().toISOString()
+    }
+  };
+}
+
+async function startDurableExecution(envelope, context) {
+  if (!context.requireDurableExecution) {
+    return { required: false };
+  }
+
+  const metadataKey =
+    envelope.metadata && typeof envelope.metadata.idempotencyKey === 'string'
+      ? envelope.metadata.idempotencyKey.trim()
+      : '';
+  const idempotencyKey = metadataKey || envelope.commandId;
+  if (typeof idempotencyKey !== 'string' || !idempotencyKey.trim()) {
+    return {
+      response: {
+        success: false,
+        statusCode: 400,
+        error: 'IDEMPOTENCY_KEY_REQUIRED',
+        data: { retryable: false }
+      }
+    };
+  }
+
+  let claim;
+  try {
+    claim = await claimExecution({
+      tenant: envelope.tenant,
+      command: envelope.command,
+      payload: envelope.payload || {},
+      idempotencyKey,
+      actor: context.principal && context.principal.actor,
+      apiKeyId: context.principal && context.principal.keyId
+    });
+  } catch (error) {
+    console.error('Execution journal admission failed:', error);
+    return {
+      response: {
+        success: false,
+        statusCode: 503,
+        error: 'EXECUTION_JOURNAL_UNAVAILABLE',
+        data: { retryable: true }
+      }
+    };
+  }
+
+  if (claim.kind === 'conflict') {
+    return {
+      response: {
+        success: false,
+        statusCode: 409,
+        error: 'IDEMPOTENCY_KEY_PAYLOAD_CONFLICT',
+        data: { retryable: false }
+      }
+    };
+  }
+  if (claim.kind === 'completed') {
+    try {
+      const signer = context.receiptSigner || getReceiptSigner();
+      if (!claim.signedReceipt || !claim.result || !claim.result.data) {
+        throw new Error('COMPLETED_EXECUTION_RECEIPT_MISSING');
+      }
+      const replayResult = {
+        ...claim.result,
+        data: {
+          ...claim.result.data,
+          receipt: claim.signedReceipt
+        }
+      };
+      return {
+        required: true,
+        completedResult: {
+          ...await verifyCompletedResult(replayResult, signer),
+          idempotentReplay: true,
+        }
+      };
+    } catch (error) {
+      console.error('Completed execution receipt verification failed:', error);
+      return {
+        response: {
+          success: false,
+          statusCode: 503,
+          error: 'SIGNED_RECEIPT_REPLAY_VERIFICATION_FAILED',
+          details: {
+            cause: error instanceof Error ? error.message : 'Unknown receipt verification failure'
+          },
+          data: { retryable: false }
+        }
+      };
+    }
+  }
+  if (claim.kind === 'unresolved') {
+    return {
+      response: {
+        success: false,
+        statusCode: 409,
+        error: 'EXECUTION_OUTCOME_UNRESOLVED',
+        details: {
+          executionState: claim.state,
+          failureCode: claim.failureCode,
+          handlerStarted: claim.handlerStarted
+        },
+        data: { retryable: false }
+      }
+    };
+  }
+
+  const journal = { required: true, journalId: claim.journalId, handlerStarted: false };
+  try {
+    journal.signer = context.receiptSigner || getReceiptSigner();
+    if (typeof journal.signer.ensureReady !== 'function') {
+      throw new Error('RECEIPT_SIGNER_READINESS_CHECK_REQUIRED');
+    }
+    await journal.signer.ensureReady();
+  } catch (error) {
+    let executionState = 'pending';
+    let retryable = false;
+    try {
+      await markFailedBeforeMutation(journal.journalId, 'RECEIPT_SIGNER_UNAVAILABLE');
+      executionState = 'failed_before_mutation';
+      retryable = true;
+    } catch (journalError) {
+      console.error('Unable to persist pre-mutation signer failure:', journalError);
+    }
+    return {
+      response: {
+        success: false,
+        statusCode: 503,
+        error: 'RECEIPT_SIGNER_UNAVAILABLE',
+        details: {
+          executionState,
+          journalId: journal.journalId,
+          cause: error instanceof Error ? error.message : 'Unknown signing failure'
+        },
+        data: { retryable }
+      }
+    };
+  }
+
+  try {
+    await markHandlerStarted(journal.journalId);
+    journal.handlerStarted = true;
+  } catch (error) {
+    let executionState = 'pending';
+    let retryable = false;
+    try {
+      await markFailedBeforeMutation(journal.journalId, 'JOURNAL_START_FAILED');
+      executionState = 'failed_before_mutation';
+      retryable = true;
+    } catch (journalError) {
+      console.error('Unable to persist pre-mutation journal failure:', journalError);
+    }
+    return {
+      response: {
+        success: false,
+        statusCode: 503,
+        error: 'EXECUTION_JOURNAL_START_FAILED',
+        details: {
+          executionState,
+          journalId: journal.journalId
+        },
+        data: { retryable }
+      }
+    };
+  }
+
+  return journal;
+}
+
+async function markExecutionReconciliation(journal, cause) {
+  if (!journal || !journal.required || !journal.handlerStarted || journal.completed) {
+    return journal && journal.completed ? 'completed' : 'not_started';
+  }
+  try {
+    await markReconciliationNeeded(
+      journal.journalId,
+      cause instanceof Error ? cause.message.slice(0, 200) : 'EXECUTION_OUTCOME_UNCERTAIN'
+    );
+    return 'reconciliation_needed';
+  } catch (error) {
+    console.error('Unable to persist reconciliation-needed state:', error);
+    return 'pending';
+  }
+}
+
 async function executeHandler({ envelope, context, governance, startTime, handler }) {
   const correlationId = envelope.correlationId || null;
+  const execution = await startDurableExecution(envelope, context);
+  if (execution.response) {
+    return completeDispatchTrace(
+      envelope,
+      execution.response,
+      execution.response.error || 'execution_journal_block',
+      { success: false }
+    );
+  }
+  if (execution.completedResult) {
+    return completeDispatchTrace(envelope, execution.completedResult, 'idempotent_replay');
+  }
+
   recordStage(correlationId, 'execution', { command: envelope.command, tenant: envelope.tenant });
   try {
     const result = await handler();
+    if (result && result.success === false && execution.required) {
+      const state = await markExecutionReconciliation(execution, new Error('HANDLER_REPORTED_FAILURE'));
+      const failure = {
+        ...result,
+        details: {
+          ...(result.details || {}),
+          executionState: state,
+          journalId: execution.journalId,
+          reconciliationRequired: true
+        },
+        data: {
+          ...(result.data || {}),
+          reconciliationRequired: true,
+          retryable: false
+        }
+      };
+      await auditLogger.log({
+        correlationId,
+        tenant: envelope.tenant,
+        command: envelope.command,
+        payload: envelope.payload,
+        result: failure,
+        actor: envelope.metadata && envelope.metadata.actor ? envelope.metadata.actor : undefined,
+        timestamp: new Date().toISOString()
+      });
+      return completeDispatchTrace(envelope, failure, 'execution_reconciliation_required', {
+        success: false
+      });
+    }
+
     const trust = buildTrustScoreResult(buildCommandTrustInput({
       envelope,
       policy: governance.policy,
@@ -499,6 +827,54 @@ async function executeHandler({ envelope, context, governance, startTime, handle
       }
     };
 
+    if (execution.required) {
+      const rawReceipt =
+        enrichedResult.data.receipt && typeof enrichedResult.data.receipt === 'object'
+          ? enrichedResult.data.receipt
+          : buildFallbackReceipt(envelope, enrichedResult);
+      try {
+        const signedReceipt = await signReceipt(
+          bindDispatchResultHash(rawReceipt, enrichedResult),
+          buildReceiptAuthority(envelope, context, governance),
+          execution.signer
+        );
+        enrichedResult.data.receipt = signedReceipt;
+        await completeExecution(
+          execution.journalId,
+          envelope.tenant,
+          signedReceipt,
+          enrichedResult
+        );
+        execution.completed = true;
+      } catch (error) {
+        const state = await markExecutionReconciliation(execution, error);
+        const failure = {
+          success: false,
+          statusCode: 503,
+          error: 'SIGNED_RECEIPT_COMPLETION_FAILED',
+          details: {
+            executionState: state,
+            journalId: execution.journalId,
+            reconciliationRequired: true,
+            cause: error instanceof Error ? error.message : 'Unknown receipt completion failure'
+          },
+          data: { retryable: false, reconciliationRequired: true }
+        };
+        await auditLogger.log({
+          correlationId,
+          tenant: envelope.tenant,
+          command: envelope.command,
+          payload: envelope.payload,
+          result: failure,
+          actor: envelope.metadata && envelope.metadata.actor ? envelope.metadata.actor : undefined,
+          timestamp: new Date().toISOString()
+        });
+        return completeDispatchTrace(envelope, failure, 'signed_receipt_completion_failed', {
+          success: false
+        });
+      }
+    }
+
     await auditLogger.log({
       correlationId,
       tenant: envelope.tenant,
@@ -517,6 +893,7 @@ async function executeHandler({ envelope, context, governance, startTime, handle
     });
     return enrichedResult;
   } catch (error) {
+    const executionState = await markExecutionReconciliation(execution, error);
     const trust = buildTrustScoreResult(buildCommandTrustInput({
       envelope,
       policy: governance.policy,
@@ -530,7 +907,15 @@ async function executeHandler({ envelope, context, governance, startTime, handle
       error: error instanceof Error ? error.message : 'Execution error',
       data: {
         trustScore: trust.trustScore,
-        reasons: trust.reasons
+        reasons: trust.reasons,
+        ...(execution && execution.required
+          ? {
+            executionState,
+            journalId: execution.journalId,
+            reconciliationRequired: executionState !== 'completed',
+            retryable: false
+          }
+          : {})
       }
     };
 
@@ -556,5 +941,8 @@ async function executeHandler({ envelope, context, governance, startTime, handle
 }
 
 module.exports = {
-  dispatchCommand
+  bindDispatchResultHash,
+  dispatchCommand,
+  hashDispatchResult,
+  verifyCompletedResult
 };

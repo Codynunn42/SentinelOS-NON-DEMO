@@ -8,6 +8,18 @@ const path = require('path');
 const { dispatchCommand } = require('../sentinel/src/commands/dispatch');
 const { auditLogger, subscribeAuditEvents } = require('../sentinel/src/audit/auditLogger');
 const { ensureSchema, getDatabaseStatus } = require('../sentinel/src/db/client');
+const {
+  claimExecution,
+  completeExecution,
+  markFailedBeforeMutation,
+  markHandlerStarted,
+  markReconciliationNeeded
+} = require('../sentinel/src/db/executionJournal');
+const { getReceiptSigner } = require('../sentinel/src/receipts/receiptRuntime');
+const {
+  signReceipt,
+  verifySignedReceipt
+} = require('../sentinel/src/receipts/signedReceipt');
 const { governanceCheck } = require('../sentinel/src/governance/preflight');
 const { getSurfaceRegistry } = require('../sentinel/src/commands/registry');
 const { analyzeExecutionHistory } = require('../sentinel/src/learning/engine');
@@ -93,7 +105,6 @@ const STRIPE_COMPLETE_CSS_PATH = path.join(__dirname, 'public', 'stripe-complete
 const RATE_LIMIT_WINDOW_MS = 60 * 1000;
 const RATE_LIMIT_MAX_REQUESTS = 30;
 const commandRateLimits = new Map();
-const commandIdempotencyCache = new Map();
 
 function sendJson(res, statusCode, payload) {
   res.writeHead(statusCode, { 'Content-Type': 'application/json' });
@@ -252,7 +263,8 @@ function buildWorkflowReceipt(command, entity, outcome, tenantId = 'ownerfi') {
     command,
     tenantId: tenantId,
     status: 'executed',
-    verified: true,
+    verification_status: 'unsigned_pending',
+    verified: false,
     entity,
     outcome,
     prevHash: getAuditChainHead(),
@@ -260,7 +272,7 @@ function buildWorkflowReceipt(command, entity, outcome, tenantId = 'ownerfi') {
   };
 }
 
-function buildReceipt(command) {
+function buildReceipt(command, tenantId) {
   const receiptId = `rcpt_${crypto.randomUUID()}`;
   const auditId = `audit_${crypto.randomUUID()}`;
   const now = new Date().toISOString();
@@ -269,16 +281,18 @@ function buildReceipt(command) {
     receiptId,
     auditId,
     comm: 'Sentinel AI by Cody Nunn | Nunn Cloud',
+    tenantId,
     lane: command.lane || 'command',
     op: command.op,
     target: command.target,
-    status: 'executed',
-    verified: true,
+    status: 'issued',
+    verification_status: 'unsigned_pending',
+    verified: false,
     prevHash: getAuditChainHead(),
     timestamp: now,
     outcome: {
-      message: `Operation ${command.op} accepted for target ${command.target}`,
-      simulated: true
+      message: `Command request ${command.op} recorded for target ${command.target}; operation was not executed`,
+      executed: false
     }
   };
 }
@@ -571,91 +585,14 @@ function enforceRateLimit(req, route, res, principal) {
   return true;
 }
 
-function stableStringify(value) {
-  if (Array.isArray(value)) {
-    return `[${value.map(stableStringify).join(',')}]`;
-  }
-
-  if (value && typeof value === 'object') {
-    return `{${Object.keys(value)
-      .sort()
-      .map((key) => `${JSON.stringify(key)}:${stableStringify(value[key])}`)
-      .join(',')}}`;
-  }
-
-  return JSON.stringify(value);
-}
-
-function getIdempotencyKey(envelope, principal) {
-  const rawKey =
-    envelope.commandId ||
-    (envelope.metadata && typeof envelope.metadata.idempotencyKey === 'string'
-      ? envelope.metadata.idempotencyKey
-      : null);
-
-  if (rawKey) {
-    return `${envelope.tenant}:${envelope.command}:${principal.keyId}:${rawKey}`;
-  }
-
-  return null;
-}
-
-function getPayloadHash(envelope) {
-  return crypto
-    .createHash('sha256')
-    .update(stableStringify(envelope.payload || {}))
-    .digest('hex');
-}
-
-function checkIdempotency(envelope, principal) {
-  const idempotencyKey = getIdempotencyKey(envelope, principal);
-
-  if (!idempotencyKey) {
-    return {
-      duplicate: false,
-      idempotencyKey: null,
-      payloadHash: getPayloadHash(envelope)
-    };
-  }
-
-  const payloadHash = getPayloadHash(envelope);
-  const existing = commandIdempotencyCache.get(idempotencyKey);
-
-  if (existing && existing.payloadHash === payloadHash) {
-    return {
-      duplicate: true,
-      idempotencyKey,
-      payloadHash,
-      existing
-    };
-  }
-
-  if (existing && existing.payloadHash !== payloadHash) {
-    return {
-      conflict: true,
-      idempotencyKey,
-      payloadHash,
-      existing
-    };
-  }
-
-  return {
-    duplicate: false,
-    idempotencyKey,
-    payloadHash
-  };
-}
-
-function rememberIdempotency(check, result) {
-  if (!check.idempotencyKey || !result.success) {
-    return;
-  }
-
-  commandIdempotencyCache.set(check.idempotencyKey, {
-    payloadHash: check.payloadHash,
-    result,
-    timestamp: new Date().toISOString()
-  });
+function getStableIdempotencyKey(body) {
+  const metadataKey =
+    body && body.metadata && typeof body.metadata.idempotencyKey === 'string'
+      ? body.metadata.idempotencyKey.trim()
+      : '';
+  const commandId = body && typeof body.commandId === 'string' ? body.commandId.trim() : '';
+  const key = metadataKey || commandId;
+  return key.length >= 8 && key.length <= 200 ? key : null;
 }
 
 function resolvePipelineStage(decision) {
@@ -2023,6 +1960,9 @@ const server = http.createServer(async (req, res) => {
       return;
     }
 
+    const receiptTenant = access.principal.tenant === 'platform'
+      ? tenant || undefined
+      : access.principal.tenant;
     const receiptId = decodeURIComponent(pathname.replace('/v1/receipts/', '')).trim();
 
     if (!receiptId) {
@@ -2032,20 +1972,20 @@ const server = http.createServer(async (req, res) => {
       });
     }
 
-    return auditLogger.getByReceiptId(receiptId, tenant || undefined)
+    return auditLogger.getByReceiptId(receiptId, receiptTenant)
       .then((match) => {
         if (!match) {
           return sendJson(res, 404, {
             status: 'error',
             error: 'Receipt not found',
             receiptId,
-            tenant: tenant || null
+            tenant: receiptTenant || null
           });
         }
 
         return sendJson(res, 200, {
           status: 'ok',
-          tenant: tenant || match.entry.tenant || null,
+          tenant: receiptTenant || match.entry.tenant || null,
           receiptId,
           source: match.source,
           receipt: match.receipt,
@@ -2079,6 +2019,14 @@ const server = http.createServer(async (req, res) => {
         return sendJson(res, 400, {
           status: 'error',
           error: 'Invalid JSON body'
+        });
+      }
+
+      if (!getStableIdempotencyKey(body)) {
+        return sendJson(res, 400, {
+          status: 'error',
+          error: 'IDEMPOTENCY_KEY_REQUIRED',
+          required: 'metadata.idempotencyKey or commandId (8-200 characters)'
         });
       }
 
@@ -2116,34 +2064,15 @@ const server = http.createServer(async (req, res) => {
         });
       }
       const envelope = normalizeCommandEnvelope(requestBody);
-      const idempotency = checkIdempotency(envelope, principal);
-
-      if (idempotency.conflict) {
-        return sendJson(res, 409, {
-          status: 'blocked',
-          error: 'IDEMPOTENCY_CONFLICT',
-          idempotencyKey: idempotency.idempotencyKey
-        });
-      }
-
-      if (idempotency.duplicate) {
-        return sendJson(res, idempotency.existing.result.statusCode || 200, {
-          status: idempotency.existing.result.success ? 'executed' : 'blocked',
-          idempotentReplay: true,
-          idempotencyKey: idempotency.idempotencyKey,
-          ...(idempotency.existing.result.data || {}),
-          ...(idempotency.existing.result.error ? { error: idempotency.existing.result.error } : {})
-        });
-      }
 
       const result = await dispatchCommand(requestBody, {
         buildReceipt: buildWorkflowReceipt,
         emitSecurityEvent,
         principal,
+        requireDurableExecution: true,
         route: '/v1/command',
         source: 'sentinel'
       });
-      rememberIdempotency(idempotency, result);
 
       if (!result.success) {
         return sendJson(res, result.statusCode || 400, {
@@ -2188,6 +2117,14 @@ const server = http.createServer(async (req, res) => {
         });
       }
 
+      if (!getStableIdempotencyKey(body)) {
+        return sendJson(res, 400, {
+          status: 'error',
+          error: 'IDEMPOTENCY_KEY_REQUIRED',
+          required: 'metadata.idempotencyKey or commandId (8-200 characters)'
+        });
+      }
+
       const payload = {
         faceplane: typeof body.faceplane === 'string' ? body.faceplane.trim() : undefined,
         faceplanes: Array.isArray(body.faceplanes) ? body.faceplanes : typeof body.faceplanes === 'string' ? body.faceplanes.split(',').map((item) => item.trim()).filter(Boolean) : undefined,
@@ -2198,10 +2135,16 @@ const server = http.createServer(async (req, res) => {
         telemetryActivityCount: body.telemetryActivityCount,
         scenario: body.scenario || body.driftScenario
       };
+      Object.keys(payload).forEach((key) => {
+        if (payload[key] === undefined) {
+          delete payload[key];
+        }
+      });
 
       let requestBody = {
         tenant: access.principal.tenant === 'platform' ? 'mock' : access.principal.tenant,
         command: 'faceplane.mock.run',
+        commandId: body.commandId,
         payload,
         metadata: {
           ...(body.metadata && typeof body.metadata === 'object' ? body.metadata : {}),
@@ -2231,6 +2174,7 @@ const server = http.createServer(async (req, res) => {
 
       const result = await dispatchCommand(requestBody, {
         principal: access.principal,
+        requireDurableExecution: true,
         source: 'sentinel',
         route: '/v1/faceplane/mock'
       });
@@ -2265,7 +2209,7 @@ const server = http.createServer(async (req, res) => {
       return;
     }
 
-    return readJsonBody(req, (error, body) => {
+    return readJsonBody(req, async (error, body) => {
       if (error) {
         emitSecurityEvent('command.request.invalid_json', {
           route: '/command',
@@ -2295,22 +2239,187 @@ const server = http.createServer(async (req, res) => {
         });
       }
 
-      const receipt = buildReceipt(body);
+      const idempotencyKey = getStableIdempotencyKey(body);
+      if (!idempotencyKey) {
+        return sendJson(res, 400, {
+          status: 'error',
+          error: 'IDEMPOTENCY_KEY_REQUIRED',
+          required: 'metadata.idempotencyKey or commandId (8-200 characters)'
+        });
+      }
 
-      emitSecurityEvent('command.executed', {
-        route: '/command',
-        method: req.method,
-        receiptId: receipt.receiptId,
-        auditId: receipt.auditId,
-        op: receipt.op,
-        target: receipt.target,
-        lane: receipt.lane
-      });
+      const tenant = access.principal.tenant;
+      const command = 'platform.command.request';
+      const lane = typeof body.lane === 'string' && body.lane.trim()
+        ? body.lane.trim()
+        : 'command';
+      const payload = { op, target, lane };
+      let claim;
+      try {
+        claim = await claimExecution({
+          tenant,
+          command,
+          payload,
+          idempotencyKey,
+          actor: access.principal.actor,
+          apiKeyId: access.principal.keyId
+        });
+      } catch (journalError) {
+        console.error('Command receipt journal admission failed:', journalError);
+        return sendJson(res, 503, {
+          status: 'error',
+          error: 'EXECUTION_JOURNAL_UNAVAILABLE',
+          retryable: true
+        });
+      }
 
-      return sendJson(res, 200, {
-        status: 'executed',
-        receipt
-      });
+      if (claim.kind === 'conflict') {
+        return sendJson(res, 409, {
+          status: 'blocked',
+          error: 'IDEMPOTENCY_KEY_PAYLOAD_CONFLICT',
+          retryable: false
+        });
+      }
+      if (claim.kind === 'completed') {
+        const storedReceipt = claim.signedReceipt;
+        try {
+          const verification = await verifySignedReceipt(
+            storedReceipt,
+            getReceiptSigner().getPublicKey
+          );
+          if (!verification.ok) {
+            throw new Error(verification.status);
+          }
+          return sendJson(res, 200, {
+            status: 'issued',
+            idempotentReplay: true,
+            receipt: {
+              ...storedReceipt,
+              verification_status: verification.status,
+              verified: verification.verified
+            }
+          });
+        } catch (verificationError) {
+          console.error('Command receipt replay verification failed:', verificationError);
+          return sendJson(res, 503, {
+            status: 'error',
+            error: 'SIGNED_RECEIPT_REPLAY_VERIFICATION_FAILED',
+            retryable: false
+          });
+        }
+      }
+      if (claim.kind === 'unresolved') {
+        return sendJson(res, 409, {
+          status: 'blocked',
+          error: 'EXECUTION_OUTCOME_UNRESOLVED',
+          executionState: claim.state,
+          failureCode: claim.failureCode,
+          retryable: false
+        });
+      }
+
+      let signer;
+      try {
+        signer = getReceiptSigner();
+        await signer.ensureReady();
+      } catch (signerError) {
+        let executionState = 'pending';
+        let retryable = false;
+        try {
+          await markFailedBeforeMutation(claim.journalId, 'RECEIPT_SIGNER_UNAVAILABLE');
+          executionState = 'failed_before_mutation';
+          retryable = true;
+        } catch (journalError) {
+          console.error('Unable to persist pre-mutation signer failure:', journalError);
+        }
+        return sendJson(res, 503, {
+          status: 'error',
+          error: 'RECEIPT_SIGNER_UNAVAILABLE',
+          executionState,
+          journalId: claim.journalId,
+          retryable
+        });
+      }
+
+      try {
+        await markHandlerStarted(claim.journalId);
+      } catch (journalError) {
+        let executionState = 'pending';
+        let retryable = false;
+        try {
+          await markFailedBeforeMutation(claim.journalId, 'JOURNAL_START_FAILED');
+          executionState = 'failed_before_mutation';
+          retryable = true;
+        } catch (failureError) {
+          console.error('Unable to persist pre-mutation journal failure:', failureError);
+        }
+        return sendJson(res, 503, {
+          status: 'error',
+          error: 'EXECUTION_JOURNAL_START_FAILED',
+          executionState,
+          journalId: claim.journalId,
+          retryable
+        });
+      }
+
+      try {
+        const rawReceipt = buildReceipt({ ...body, op, target, lane }, tenant);
+        const signedReceipt = await signReceipt(rawReceipt, {
+          tenant,
+          actor: access.principal.actor,
+          apiKeyId: access.principal.keyId,
+          effectiveRole: access.policyContext.role || access.principal.role,
+          effectiveScopes: access.policyContext.scopes || access.principal.scopes,
+          decision: {
+            decisionId: claim.journalId,
+            result: 'allow',
+            state: access.policy.state || null,
+            riskLevel: access.policy.riskLevel || null,
+            requiredScope: access.policyContext.requiredScope || null,
+            approvalId: access.policy.approvalId || null,
+            policyVersion: access.policy.policyVersion || null,
+            decidedAt: new Date().toISOString()
+          }
+        }, signer);
+        const result = {
+          success: true,
+          statusCode: 200,
+          data: { receipt: signedReceipt }
+        };
+        await completeExecution(claim.journalId, tenant, signedReceipt, result);
+
+        emitSecurityEvent('command.receipt.issued', {
+          route: '/command',
+          method: req.method,
+          receiptId: signedReceipt.receiptId,
+          auditId: signedReceipt.auditId,
+          op: signedReceipt.op,
+          target: signedReceipt.target,
+          lane: signedReceipt.lane
+        });
+
+        return sendJson(res, 200, {
+          status: 'issued',
+          receipt: signedReceipt
+        });
+      } catch (receiptError) {
+        try {
+          await markReconciliationNeeded(
+            claim.journalId,
+            receiptError instanceof Error ? receiptError.message.slice(0, 200) : 'RECEIPT_ISSUANCE_FAILED'
+          );
+        } catch (journalError) {
+          console.error('Unable to persist receipt issuance reconciliation state:', journalError);
+        }
+        console.error('Command receipt issuance failed:', receiptError);
+        return sendJson(res, 503, {
+          status: 'error',
+          error: 'SIGNED_RECEIPT_ISSUANCE_FAILED',
+          executionState: 'reconciliation_needed',
+          journalId: claim.journalId,
+          retryable: false
+        });
+      }
     });
   }
 

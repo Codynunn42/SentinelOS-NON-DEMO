@@ -1,13 +1,14 @@
 const assert = require('assert');
 const http = require('http');
-const { server } = require('../apps/api/server');
 
 const PORT = 3199;
 const API_KEY = 'idempotency-secret';
+const previousDatabaseUrl = process.env.DATABASE_URL;
 const previousKeys = process.env.SENTINEL_API_KEYS;
 const previousKey = process.env.SENTINEL_API_KEY;
 const previousHmac = process.env.SENTINEL_HMAC_SECRET;
 
+process.env.DATABASE_URL = '';
 process.env.SENTINEL_API_KEY = '';
 process.env.SENTINEL_HMAC_SECRET = process.env.SENTINEL_HMAC_SECRET || 'idempotency-passport-secret';
 process.env.SENTINEL_API_KEYS = JSON.stringify([
@@ -22,6 +23,8 @@ process.env.SENTINEL_API_KEYS = JSON.stringify([
     expiresAt: '2099-01-01T00:00:00.000Z'
   }
 ]);
+
+const { server } = require('../apps/api/server');
 
 function request(path, payload) {
   return new Promise((resolve, reject) => {
@@ -82,15 +85,20 @@ function close() {
     }
   };
 
+  const missingKey = await request('/v1/command', {
+    ...payload,
+    commandId: undefined
+  });
+  assert.strictEqual(missingKey.statusCode, 400);
+  assert.strictEqual(missingKey.body.error, 'IDEMPOTENCY_KEY_REQUIRED');
+
   const first = await request('/v1/command', payload);
-  assert.strictEqual(first.statusCode, 200);
-  assert.strictEqual(first.body.status, 'executed');
+  assert.strictEqual(first.statusCode, 503);
+  assert.strictEqual(first.body.error, 'EXECUTION_JOURNAL_UNAVAILABLE');
 
   const second = await request('/v1/command', payload);
-  assert.strictEqual(second.statusCode, 200);
-  assert.strictEqual(second.body.status, 'executed');
-  assert.strictEqual(second.body.idempotentReplay, true);
-  assert.strictEqual(second.body.receipt.receiptId, first.body.receipt.receiptId);
+  assert.strictEqual(second.statusCode, 503);
+  assert.strictEqual(second.body.error, 'EXECUTION_JOURNAL_UNAVAILABLE');
 
   const conflict = await request('/v1/command', {
     ...payload,
@@ -99,8 +107,8 @@ function close() {
       amount: 23000
     }
   });
-  assert.strictEqual(conflict.statusCode, 409);
-  assert.strictEqual(conflict.body.error, 'IDEMPOTENCY_CONFLICT');
+  assert.strictEqual(conflict.statusCode, 503);
+  assert.strictEqual(conflict.body.error, 'EXECUTION_JOURNAL_UNAVAILABLE');
 
   await close();
 
@@ -122,7 +130,13 @@ function close() {
     process.env.SENTINEL_HMAC_SECRET = previousHmac;
   }
 
-  console.log('Idempotency check passed');
+  if (previousDatabaseUrl === undefined) {
+    delete process.env.DATABASE_URL;
+  } else {
+    process.env.DATABASE_URL = previousDatabaseUrl;
+  }
+
+  console.log('Idempotency fail-closed check passed');
 })().catch(async (error) => {
   await close().catch(() => {});
   console.error(error);
