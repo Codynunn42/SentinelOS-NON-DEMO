@@ -306,10 +306,52 @@ database, Azure resource, Key Vault, managed identity, or credentials were
 used. The command intentionally requires `SENTINEL_TEST_DATABASE_URL` and
 refuses database names outside a test/integration naming pattern.
 
-The PostgreSQL tests cover concurrent duplicate claims, one handler-start,
-payload and command conflicts, tenant isolation, signed receipt plus authority
-round-trip and verification in a separate Node process, and signing/write
-failure after a synthetic side effect with subsequent automatic-retry
-blocking. They do not exercise the complete authenticated HTTP flow,
-Azure Key Vault/managed identity, a built image, or independent review. Those
-remain acceptance prerequisites; GOV-006 remains on HOLD.
+The journal-level PostgreSQL tests cover concurrent duplicate claims, one
+handler-start, payload and command conflicts, tenant isolation, signed receipt
+plus authority round-trip and verification in a separate Node process, and
+signing/write failure after a synthetic side effect with subsequent
+automatic-retry blocking. The complete authenticated HTTP flow is covered
+separately below.
+
+## 10. Authenticated HTTP and PostgreSQL integration
+
+**Tested source:** baseline `9f5e2160102833304282c8a2c58a9feb8ff31056`
+(including parent implementation `8b18d39fb94e9606f35c2fba50c1030a9ae7c3e8`)
+plus the then-uncommitted HTTP runner, package-script registration, and evidence
+updates. The baseline commit alone does not contain this HTTP coverage. The
+follow-up commit containing these three files is the new review target;
+review it together with its baseline and parent implementation.
+
+Command:
+
+```text
+SENTINEL_TEST_DATABASE_URL=<dedicated-disposable-PostgreSQL-URL> pnpm run check:command-http-postgres
+```
+
+Recorded result against local PostgreSQL 16.15:
+
+```text
+Disposable PostgreSQL HTTP test target: database=sentinel_it, server=16.15
+Authenticated HTTP execution, signed PostgreSQL receipt, duplicate/conflict, failure, and pre-handler authorization checks passed
+```
+
+This test starts the actual API server in a separate local process and calls
+`POST /v1/command` with a synthetic API key, a test-only tenant handler, and
+ephemeral ES256 keys. It verifies successful handler execution, signed receipt
+and authority persistence, receipt signature verification against the stored
+receipt, completed duplicate replay without a second handler effect,
+concurrent duplicate requests, conflicting idempotency-key reuse, signing
+failure after the synthetic handler effect, receipt-insert failure after the
+effect, retry rejection in both failure cases, invalid API-key rejection,
+and insufficient-scope denial before any handler effect.
+
+The run used a disposable `postgres:16-alpine` container bound only to
+`127.0.0.1:15433`, a synthetic `sentinel_it` database, and a uniquely named
+`command_http_it_*` schema. The test confirmed the schema was dropped and
+stopped the container. Signing was provided by an ephemeral local test key;
+this does not verify Azure Key Vault or managed identity. No production
+database, Azure resource, or live command handler was used.
+
+This is local integration evidence, not deployed-image or rollout evidence.
+Azure Key Vault/managed-identity verification, immutable-image provenance,
+and independent review remain open. GOV-006 remains on HOLD.
