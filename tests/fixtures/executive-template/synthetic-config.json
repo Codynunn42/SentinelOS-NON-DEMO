@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "register": "synthetic-register.json",
+  "sources": {
+    "review": {
+      "path": "synthetic-review.md",
+      "date": "2031-02-03",
+      "label": "Synthetic review (invented test data)"
+    }
+  },
+  "dispositionSources": ["review"],
+  "dispositions": [
+    {
+      "id": "DEMO-001",
+      "patterns": [
+        { "value": "HOLD", "pattern": "DEMO-001 remains HOLD" },
+        { "value": "PASS", "pattern": "DEMO-001 remains PASS" }
+      ]
+    }
+  ],
+  "verdict": {
+    "patterns": [
+      { "value": "PENDING", "pattern": "Runtime verdict: PENDING" }
+    ]
+  },
+  "sections": { "queue": "review", "personnel": "review" },
+  "summaries": [
+    {
+      "source": "review",
+      "pattern": "Preparation reported complete; acceptance remains open",
+      "text": "Preparation is source-reported complete; acceptance remains open. No execution was approved."
+    }
+  ],
+  "followups": [
+    {
+      "source": "review",
+      "pattern": "Synthetic follow-up remains open",
+      "text": "Synthetic follow-up remains open; accountable role is the fixture coordinator, not an assigned reviewer.",
+      "register": {
+        "sheet": "Actions",
+        "fields": ["Action"],
+        "pattern": "Synthetic follow-up"
+      }
+    }
+  ]
+}

@@ -4,94 +4,39 @@ const fs = require('fs');
 const { spawnSync } = require('child_process');
 
 const args = process.argv.slice(2);
+const getArg = (name) => args.find((arg) => arg.startsWith(`--${name}=`))?.slice(name.length + 3);
+const root = path.resolve(__dirname, '..');
 
-function getArg(name) {
-  const match = args.find((arg) => arg.startsWith(`--${name}=`));
-  return match ? match.split('=').slice(1).join('=') : '';
-}
-
-function hasFlag(name) {
-  return args.includes(`--${name}`);
-}
-
-function fail(message, details = []) {
-  console.error(`❌ Governance flow FAILED: ${message}`);
-  for (const detail of details) {
-    console.error(`   - ${detail}`);
-  }
+function fail(message) {
+  console.error(`Governance flow FAILED: ${message}`);
   process.exit(1);
 }
 
-function runNodeScript(scriptPath, scriptArgs = []) {
-  const result = spawnSync('node', [scriptPath, ...scriptArgs], {
-    cwd: root,
-    encoding: 'utf8',
-    stdio: 'pipe'
-  });
+// Legacy escalation and ledger writers target repository paths, not private output.
+if (!args.includes('--skip-pre-escalation') || !args.includes('--skip-ledger')) {
+  fail('Private reporting requires --skip-pre-escalation --skip-ledger; repository-writing side effects are disabled');
+}
+const configFile = getArg('config');
+if (!configFile) fail('--config=<JSON file> is required');
+let config;
+try {
+  config = JSON.parse(fs.readFileSync(path.resolve(configFile), 'utf8'));
+} catch (error) {
+  fail(`Cannot read configuration: ${error.message}`);
+}
+const output = getArg('output-dir') ?? config.outputDir;
+if (typeof output !== 'string' || !output.trim()) fail('An external output directory is required');
+const outputDir = path.resolve(getArg('output-dir') ? process.cwd() : path.dirname(path.resolve(configFile)), output);
+const date = getArg('date') ?? new Date().toISOString().slice(0, 10);
 
-  if (result.stdout) process.stdout.write(result.stdout);
-  if (result.stderr) process.stderr.write(result.stderr);
-
-  if (result.status !== 0) {
-    fail(`step failed: ${scriptPath}`, scriptArgs);
-  }
+function run(script, scriptArgs) {
+  const result = spawnSync(process.execPath, [path.join(root, script), ...scriptArgs], { stdio: 'inherit' });
+  if (result.error || result.status !== 0) fail(`Step failed: ${script}${result.error ? `: ${result.error.message}` : ''}`);
 }
 
-const root = process.cwd();
-const utcNow = new Date().toISOString();
-const date = getArg('date') || utcNow.slice(0, 10);
-const provider = (getArg('provider') || '').trim().toLowerCase();
-const reason = (getArg('reason') || '').trim();
-const actor = getArg('actor') || 'Cody Dale Nunn';
-const lane = getArg('lane') || 'governance';
-const requestId = getArg('request-id') || `cadence-${utcNow.replace(/[:.]/g, '-')}`;
-const skipPreEscalation = hasFlag('skip-pre-escalation');
-const skipLedger = hasFlag('skip-ledger');
-
-const packetPath = path.resolve(root, `docs/governance/EXECUTIVE_PACKET_${date}.md`);
-const gateDocPath = path.resolve(root, `docs/governance/SUPPORT_ESCALATION_GATE_${date}.md`);
-
-console.log(`▶ Running governance flow for ${date}`);
-console.log(`   requestId: ${requestId}`);
-console.log(`   actor:     ${actor}`);
-console.log(`   lane:      ${lane}`);
-
-runNodeScript('scripts/orchestrate-executive-template.js');
-runNodeScript('scripts/enforce-executive-packet-gate.js', [`--date=${date}`]);
-
-const ledgerFiles = [path.relative(root, packetPath)];
-
-if (!skipPreEscalation) {
-  if (!provider || !reason) {
-    fail('pre-escalation requires provider and reason', [
-      'use --provider=aws|azure|other',
-      'use --reason="..."',
-      'or pass --skip-pre-escalation'
-    ]);
-  }
-
-  runNodeScript('scripts/enforce-pre-escalation-gate.js', [
-    `--date=${date}`,
-    `--provider=${provider}`,
-    `--reason=${reason}`
-  ]);
-
-  if (fs.existsSync(gateDocPath)) {
-    ledgerFiles.push(path.relative(root, gateDocPath));
-  }
-}
-
-if (!skipLedger) {
-  runNodeScript('scripts/record-evidence-ledger.js', [
-    `--actor=${actor}`,
-    `--lane=${lane}`,
-    `--request-id=${requestId}`,
-    `--files=${ledgerFiles.join(',')}`
-  ]);
-}
-
-console.log('✅ Governance flow PASSED');
-console.log(`   packet: ${packetPath}`);
-if (!skipPreEscalation) {
-  console.log(`   gate:   ${gateDocPath}`);
-}
+run('scripts/orchestrate-executive-template.js', args.filter((arg) =>
+  ['--config=', '--date=', '--register=', '--output-dir='].some((prefix) => arg.startsWith(prefix))));
+run('scripts/enforce-executive-packet-gate.js', [
+  `--date=${date}`, `--file=${path.join(outputDir, `EXECUTIVE_PACKET_${date}.md`)}`
+]);
+console.log('Governance reporting flow PASSED; no escalation or evidence-ledger writes performed');
