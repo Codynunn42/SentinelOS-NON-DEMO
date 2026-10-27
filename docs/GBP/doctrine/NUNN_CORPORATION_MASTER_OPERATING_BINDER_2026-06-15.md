@@ -88,6 +88,60 @@ current-direction use. The active steering correction is
 | External contact/share hold | active | cadence and release packet non-authorizations |
 | Daily brief retention | active | `docs/governance/DAILY_BRIEF_RETENTION_RULE.md` |
 
+### October 27, 2026 -- approved GOV-002 HOLD / carry-forward decision
+
+**Authority:** Cody Nunn / Executive Desk, explicit Option 1 approval in the
+October 27 conversation. **Decision date:** 2026-10-27.
+**Scope:** GOV-002 / ACT-003 only. **Canonical decision:** DEC-009.
+
+Retain **GOV-002 HOLD** and **ACT-003 In Progress**. The September 6, 2026
+execution outcome remains **unverified**: the reviewed evidence establishes
+neither execution nor verified non-execution. Carry forward evidence recovery
+and disposition review within existing authority; D1/A7 are not advanced.
+
+**Accountable owner:** Cody Nunn; SentinelOS Engineering supports evidence
+recovery. Preserve **2026-09-06** as ACT-003's historical due date.
+**Formal next review checkpoint:** **2026-10-29**, not a recovery commitment,
+replacement due date, execution window or automatic closure date.
+
+Evidence basis and limitations:
+
+- EVD-003 establishes a planned execution/evidence-preservation instruction,
+  not execution.
+- EVD-022's bounded historical search returned no matching September 6
+  outcome in the queried records. The retained review of 61 listed Sentinel
+  deployment-workflow runs likewise located no September 6 run. Neither
+  establishes non-execution outside the searched scope.
+- The retained log review of [run 34151714096](https://github.com/Codynunn42/SentinelOS-NON-DEMO/actions/runs/34151714096)
+  documents a September 7 attempt failing at secret synchronization before
+  build/deployment/smoke test. That later failure and later successful runs
+  do not establish the September 6 outcome.
+- Missing evidence includes an attributable planned-window outcome, matching
+  deployment/target and authority records, and a complete Gate Council
+  outcome packet. This decision reviews retained evidence; it does not claim
+  a fresh exhaustive external search.
+
+At the checkpoint, assess recovered evidence or document unsuccessful search
+scope, time window/timezone, results, access/retention limitations and
+unsearched routes. If recovery is unsuccessful, the outcome remains
+unverified; do not convert "not located" into "did not occur."
+
+This addendum records the approved decision in the binder. The current live
+Operations Register was read before editing: DEC-001 through DEC-008 were
+present and the next decision row was empty. DEC-009 was added to Decisions;
+GOV-002's Portfolio row and ACT-003's Actions row were synchronized on
+October 27. The historical action due date, owner, HOLD/In Progress states
+and original evidence link were preserved. The older external workbook
+snapshot was not modified and is not represented as the current register.
+
+GOV-006 remains Verification / Technical HOLD; GOV-001 remains Conditional.
+No execution, spending, provisioning, access change or action closure is
+authorized. PR #48 merge remains unauthorized independently of GOV-002:
+GOV-002 closure is not an established merge prerequisite. PR #49 is unchanged.
+The subsequent October 27 instruction authorizes scoped canonical persistence
+and register synchronization; it does not authorize unrelated publication
+or merging PR #48.
+
 ## Enterprise Architecture Record
 
 | Component | Binder Classification | Current Boundary |
