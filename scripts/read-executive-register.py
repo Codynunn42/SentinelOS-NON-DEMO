@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import hashlib
+import io
 import json
 import os
 import posixpath
@@ -70,6 +71,8 @@ def cell_text(cell, shared_strings, date_styles, date1904):
 
     value = cell.find(f"{{{MAIN_NS}}}v")
     if value is None or value.text is None:
+        if cell.find(f"{{{MAIN_NS}}}f") is not None:
+            raise ValueError(f"Formula in {cell.get('r', 'unknown')} has no cached value; recalculate and save the workbook")
         return ""
     if cell_type == "s":
         return shared_strings[int(value.text)]
@@ -104,7 +107,7 @@ def records_for_sheet(rows):
             row
             for row in rows
             if any(
-                value in {
+                value.strip() in {
                     "Work Item ID",
                     "Action ID",
                     "Decision ID",
@@ -118,6 +121,8 @@ def records_for_sheet(rows):
         None,
     )
     if header_row is None:
+        if any(rows):
+            raise ValueError("Populated worksheet has an unrecognized ID header")
         return []
 
     headers = {index: value.strip() for index, value in header_row.items()}
@@ -136,8 +141,8 @@ def records_for_sheet(rows):
     return records
 
 
-def read_workbook(file_path):
-    with zipfile.ZipFile(file_path) as workbook:
+def read_workbook(workbook_bytes):
+    with zipfile.ZipFile(io.BytesIO(workbook_bytes)) as workbook:
         if sum(item.file_size for item in workbook.infolist()) > MAX_ARCHIVE_SIZE:
             fail("Operations Register workbook exceeds the 50 MiB uncompressed size limit.")
 
@@ -210,31 +215,33 @@ def read_workbook(file_path):
 
 def main():
     if len(sys.argv) != 2:
-        fail("Usage: read-executive-register.py <Operations-Register.xlsx>")
-
-    file_path = os.path.abspath(sys.argv[1])
-    if not os.path.isfile(file_path):
-        fail(f"Operations Register workbook does not exist: {file_path}")
+        fail("Usage: read-executive-register.py <Operations-Register.xlsx|->")
 
     try:
-        sheets = read_workbook(file_path)
+        if sys.argv[1] == "-":
+            workbook_bytes = sys.stdin.buffer.read()
+            source = {"fileName": "stdin", "modifiedAt": None}
+        else:
+            file_path = os.path.abspath(sys.argv[1])
+            with open(file_path, "rb") as workbook_file:
+                modified_at = datetime.fromtimestamp(
+                    os.fstat(workbook_file.fileno()).st_mtime, timezone.utc
+                ).isoformat(timespec="seconds")
+                workbook_bytes = workbook_file.read()
+            source = {
+                "path": file_path,
+                "fileName": os.path.basename(file_path),
+                "modifiedAt": modified_at,
+            }
+        sheets = read_workbook(workbook_bytes)
     except (OSError, zipfile.BadZipFile, ElementTree.ParseError, KeyError, ValueError) as error:
         fail(f"Could not read Operations Register workbook: {error}")
 
-    with open(file_path, "rb") as workbook_file:
-        fingerprint = hashlib.sha256(workbook_file.read()).hexdigest()
-    modified_at = datetime.fromtimestamp(
-        os.path.getmtime(file_path), timezone.utc
-    ).isoformat(timespec="seconds")
+    source["sha256"] = hashlib.sha256(workbook_bytes).hexdigest()
     print(
         json.dumps(
             {
-                "source": {
-                    "path": file_path,
-                    "fileName": os.path.basename(file_path),
-                    "sha256": fingerprint,
-                    "modifiedAt": modified_at,
-                },
+                "source": source,
                 "sheets": sheets,
             },
             ensure_ascii=False,

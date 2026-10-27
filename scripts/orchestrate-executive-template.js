@@ -163,22 +163,33 @@ for (const rule of dispositionRules) {
   }
 }
 
+const normalizedId = (value) => String(value ?? '').trim();
 let register = null;
 const registerOption = option('register') ?? config.register;
 if (registerOption !== undefined) {
   requiredString(registerOption, 'register');
   const registerPath = path.resolve(option('register') ? process.cwd() : configDir, registerOption);
   let bytes;
+  let modifiedAt;
+  let descriptor;
   try {
-    bytes = fs.readFileSync(registerPath);
+    descriptor = fs.openSync(registerPath, 'r');
+    modifiedAt = fs.fstatSync(descriptor).mtime.toISOString();
+    bytes = fs.readFileSync(descriptor);
   } catch (error) {
     fail(`Cannot read Operations Register: ${error.message}`);
+  } finally {
+    if (descriptor !== undefined) fs.closeSync(descriptor);
   }
   if (path.extname(registerPath).toLowerCase() === '.json') {
-    register = readJson(registerPath);
+    try {
+      register = JSON.parse(bytes.toString('utf8'));
+    } catch (error) {
+      fail(`Cannot parse Operations Register JSON: ${error.message}`);
+    }
   } else if (path.extname(registerPath).toLowerCase() === '.xlsx') {
-    const result = spawnSync('python3', [path.join(__dirname, 'read-executive-register.py'), registerPath], {
-      encoding: 'utf8', maxBuffer: 8 * 1024 * 1024
+    const result = spawnSync('python3', [path.join(__dirname, 'read-executive-register.py'), '-'], {
+      input: bytes, encoding: 'utf8', maxBuffer: 8 * 1024 * 1024
     });
     if (result.error || result.status !== 0) fail(`Cannot read workbook: ${result.error?.message || result.stderr}`);
     try {
@@ -200,7 +211,7 @@ if (registerOption !== undefined) {
   for (const [sheet, field] of Object.entries(identifierFields)) {
     const seen = new Set();
     for (const row of register.sheets[sheet] || []) {
-      const id = String(row[field] ?? '').trim();
+      const id = normalizedId(row[field]);
       if (!id) continue;
       if (seen.has(id)) fail(`Duplicate controlling ID in ${sheet}: ${field} "${id}"; reports were not written`);
       seen.add(id);
@@ -209,7 +220,7 @@ if (registerOption !== undefined) {
   register.source = {
     fileName: path.basename(registerPath),
     sha256: crypto.createHash('sha256').update(bytes).digest('hex'),
-    modifiedAt: fs.statSync(registerPath).mtime.toISOString()
+    modifiedAt
   };
 }
 const hasSheet = (sheet) => register !== null && Object.hasOwn(register.sheets, sheet);
@@ -263,7 +274,7 @@ function predicateRows(predicate) {
   const expression = pattern(predicate.pattern);
   if (!hasSheet(predicate.sheet)) missingSheets.add(predicate.sheet);
   return records(predicate.sheet).filter((row) =>
-    (!predicate.id || String(row[predicate.idField]) === predicate.id) &&
+    (!predicate.id || normalizedId(row[predicate.idField]) === normalizedId(predicate.id)) &&
     expression.test(fields.map((field) => String(row[field] || '')).join(' ')));
 }
 
@@ -287,7 +298,7 @@ for (const control of config.controls || []) {
   const requiredValue = requiredString(control.requiredValue, 'Required value');
   if (!dispositionIds.has(control.disposition)) fail(`Unknown disposition in control: ${control.disposition}`);
   const rule = dispositionRules.find((item) => item.id === control.disposition);
-  const row = records('Portfolio').find((item) => item['Work Item ID'] === rule.id);
+  const row = records('Portfolio').find((item) => normalizedId(item['Work Item ID']) === normalizedId(rule.id));
   if (predicateRows(control.register).length && (!row || registerValue(rule, row).toLowerCase() !== requiredValue.toLowerCase())) {
     conflicts.push(`CONFLICT - ${control.message}`);
   }
@@ -297,12 +308,12 @@ const dispositions = dispositionRules.map((rule) => {
   const reported = narrative(rule);
   if (!register) return `- ${rule.id}: ${reported.status}; evidence: ${reported.evidence}.`;
   if (!hasSheet('Portfolio')) return `- ${rule.id}: ${missingSheetMessage('Portfolio')} Narrative: ${reported.status}.`;
-  const row = records('Portfolio').find((item) => item['Work Item ID'] === rule.id);
+  const row = records('Portfolio').find((item) => normalizedId(item['Work Item ID']) === normalizedId(rule.id));
   if (!row) return `- ${rule.id}: UNVERIFIED - no Portfolio row in supplied register; narrative: ${reported.status}.`;
   const value = registerValue(rule, row);
   const differs = reported.values.some((item) => item.toLowerCase() !== value.toLowerCase());
-  const status = differs || reported.values.length > 1 ? 'CONFLICT - register/narrative disagree'
-    : !value ? 'UNVERIFIED - register status missing' : `Register-recorded: ${value}`;
+  const status = !value ? 'UNVERIFIED - register status missing'
+    : differs || reported.values.length > 1 ? 'CONFLICT - register/narrative disagree' : `Register-recorded: ${value}`;
   return `- ${rule.id}: ${status}; row ${rowAge(row)}; narrative: ${reported.status}; evidence: ${reported.evidence}.`;
 });
 
@@ -312,11 +323,10 @@ function cell(value) {
 
   return text
     .replace(/\0/g, '')
-    .replace(/\r?\n/g, '<br>')
+    .replace(/\r\n|\r|\n/g, '<br>')
     .replace(/\t/g, '    ')
     .replace(/\\/g, '\\\\')
-    .replace(/\|/g, '\\|')
-    .slice(0, 4000);
+    .replace(/\|/g, '\\|');
 }
 
 function table(headers, rows) {

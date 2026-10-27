@@ -40,6 +40,32 @@ before either report is written. They are not silently changed to another date.
 Conversion reflects cell formatting; it does not independently verify the
 underlying recorded date, refresh an old row, or authorize a status change.
 
+### Input fidelity and review safeguards
+
+The generator captures register bytes once and uses that same buffer for parsing
+and the reported SHA-256, including when passing XLSX bytes to the Python reader.
+Modification time is captured from the opened file descriptor, not a later lookup
+of the input path. Replacement after capture cannot substitute different rows
+under the captured hash. This establishes byte provenance, not factual accuracy
+or workbook currentness; avoid editing a workbook while it is being captured.
+The standalone reader likewise hashes and parses one captured buffer and accepts
+`-` to read XLSX bytes from standard input.
+
+XLSX ID headers tolerate surrounding whitespace. Genuinely empty sheets remain
+empty, but populated sheets without a recognized ID header fail explicitly.
+Formula cells require cached values: the reader cannot evaluate formulas, so a
+missing cache fails generation before reports are written. Recalculate and save
+the workbook in a spreadsheet application first. Cached values are read as saved;
+their presence does not establish that the workbook was recently recalculated.
+
+ID comparisons trim surrounding whitespace consistently for duplicate detection,
+dispositions, controls, and predicates. A missing register status remains
+UNVERIFIED rather than being inferred as a disagreement with a narrative.
+Rendered table cells preserve their full escaped values without a length cutoff.
+CR, LF, and CRLF become `<br>`; backslashes and pipes are escaped in that order.
+The reporting wrapper passes one resolved observation date to both generation
+and packet validation, including when `--date` is omitted across UTC midnight.
+
 ## Private configuration
 
 Use the [synthetic configuration](../../tests/fixtures/executive-template/synthetic-config.json)

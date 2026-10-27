@@ -35,7 +35,8 @@ function run(script, scriptArgs) {
 }
 
 run('scripts/orchestrate-executive-template.js', args.filter((arg) =>
-  ['--config=', '--date=', '--register=', '--output-dir='].some((prefix) => arg.startsWith(prefix))));
+  ['--config=', '--register=', '--output-dir='].some((prefix) => arg.startsWith(prefix)))
+  .concat(`--date=${date}`));
 run('scripts/enforce-executive-packet-gate.js', [
   `--date=${date}`, `--file=${path.join(outputDir, `EXECUTIVE_PACKET_${date}.md`)}`
 ]);

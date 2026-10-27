@@ -355,7 +355,9 @@ test('reporting wrapper rejects repository-writing escalation and ledger steps',
   assert.ok(!fs.existsSync(f.output));
 });
 
-function dateWorkbook(file, { serial = '47882', date1904 = '0', format = 'builtin', text = false } = {}) {
+function dateWorkbook(file, { serial = '47882', date1904 = '0', format = 'builtin', text = false,
+  header = 'Work Item ID', formula = false, formulaColumn = 0, cached = false,
+  empty = false, duplicate = false } = {}) {
   const build = spawnSync('python3', ['-c', `
 import json, sys, zipfile
 from xml.sax.saxutils import escape, quoteattr
@@ -368,24 +370,219 @@ with zipfile.ZipFile(sys.argv[1], 'w') as z:
     numfmt = '14' if fmt == 'builtin' else '0' if fmt == 'general' else '164'
     custom = '<numFmts count="1"><numFmt numFmtId="164" formatCode='+quoteattr(fmt)+'/></numFmts>' if numfmt == '164' else ''
     z.writestr('xl/styles.xml', '<styleSheet xmlns="'+ns+'">'+custom+'<cellXfs count="2"><xf numFmtId="0"/><xf numFmtId="'+numfmt+'"/></cellXfs></styleSheet>')
-    headers = ['Work Item ID', 'Status', 'Last Updated', 'Deadline / Review Date', 'Next Action']
+    headers = [data['header'], 'Status', 'Last Updated', 'Deadline / Review Date', 'Next Action']
     values = ['DEMO-001', 'HOLD', '2031-02-03', '2031-02-03', '47882']
     rows = []
-    for r, row in enumerate([headers, values], 1):
+    for r, row in enumerate([headers, values, values] if data['duplicate'] else [headers, values], 1):
         cells = []
         for c, value in enumerate(row):
             ref = chr(65+c)+str(r)
-            if r == 2 and c in (2, 3) and not data['text']:
+            if r == 2 and c == data['formulaColumn'] and data['formula']:
+                cells.append('<c r="'+ref+'" t="str"><f>"'+escape(value)+'"</f>'+('<v>'+escape(value)+'</v>' if data['cached'] else '')+'</c>')
+            elif r == 2 and c in (2, 3) and not data['text']:
                 cells.append('<c r="'+ref+'" s="1"><v>'+escape(data['serial'])+'</v></c>')
             else:
                 cells.append('<c r="'+ref+'" t="inlineStr"><is><t>'+escape(value)+'</t></is></c>')
         rows.append('<row>'+''.join(cells)+'</row>')
-    z.writestr('xl/worksheets/sheet1.xml', '<worksheet xmlns="'+ns+'"><sheetData>'+''.join(rows)+'</sheetData></worksheet>')
+    z.writestr('xl/worksheets/sheet1.xml', '<worksheet xmlns="'+ns+'"><sheetData>'+('' if data['empty'] else ''.join(rows))+'</sheetData></worksheet>')
 `, file], {
     encoding: 'utf8',
-    input: JSON.stringify({ serial, date1904, format, text })
+    input: JSON.stringify({ serial, date1904, format, text, header, formula, formulaColumn,
+      cached, empty, duplicate })
   });
   passed(build);
+}
+
+test('preserves long cells and combined backslash/pipe escapes without truncating qualifications', (context) => {
+  const f = fixture(context);
+  const file = path.join(f.dir, 'synthetic-register.json');
+  const register = JSON.parse(fs.readFileSync(file, 'utf8'));
+  const text = `${'a'.repeat(3998)}\\|${'b'.repeat(500)} END-QUALIFICATION`;
+  register.sheets.Portfolio[0]['Next Action'] = text;
+  fs.writeFileSync(file, JSON.stringify(register));
+  passed(f.run());
+  assert.ok(f.read().includes(text.replace(/\\/g, '\\\\').replace(/\|/g, '\\|')));
+});
+
+test('normalizes CR, LF and CRLF without allowing cells to create Markdown rows', (context) => {
+  const f = fixture(context);
+  const file = path.join(f.dir, 'synthetic-register.json');
+  const register = JSON.parse(fs.readFileSync(file, 'utf8'));
+  register.sheets.Portfolio[0]['Next Action'] = 'start\rforged\nnext\r\nend\\|';
+  fs.writeFileSync(file, JSON.stringify(register));
+  passed(f.run());
+  assert.ok(f.read().includes('start<br>forged<br>next<br>end\\\\\\|'));
+  assert.ok(!f.read().includes('\r'));
+});
+
+test('reports an empty register status as UNVERIFIED even with a narrative assertion', (context) => {
+  const f = fixture(context);
+  const file = path.join(f.dir, 'synthetic-register.json');
+  const register = JSON.parse(fs.readFileSync(file, 'utf8'));
+  register.sheets.Portfolio[0].Status = '';
+  fs.writeFileSync(file, JSON.stringify(register));
+  passed(f.run());
+  for (const report of [f.read(), f.read('PACKET')]) {
+    assert.match(report, /DEMO-001: UNVERIFIED - register status missing/);
+    assert.doesNotMatch(report, /DEMO-001: CONFLICT - register\/narrative disagree/);
+  }
+});
+
+test('normalizes IDs consistently in disposition, control and predicate matching', (context) => {
+  const f = fixture(context);
+  const file = path.join(f.dir, 'synthetic-register.json');
+  const register = JSON.parse(fs.readFileSync(file, 'utf8'));
+  register.sheets.Portfolio[0]['Work Item ID'] = ' DEMO-001 ';
+  register.sheets.Decisions[0]['Decision ID'] = ' CHOICE-001 ';
+  fs.writeFileSync(file, JSON.stringify(register));
+  f.config.controls = [{
+    disposition: 'DEMO-001', register: { sheet: 'Decisions', fields: ['Disposition'],
+      pattern: 'HOLD', idField: 'Decision ID', id: ' CHOICE-001 ' },
+    requiredValue: 'HOLD', message: 'Unexpected control mismatch'
+  }];
+  f.config.checks = [{
+    register: { sheet: 'Portfolio', fields: ['Status'], pattern: 'HOLD',
+      idField: 'Work Item ID', id: 'DEMO-001' },
+    source: { source: 'review', pattern: 'DEMO-001 remains HOLD' },
+    message: 'Normalized predicate matched'
+  }];
+  passed(f.run());
+  assert.match(f.read(), /DEMO-001: Register-recorded: HOLD/);
+  assert.match(f.read(), /CONFLICT - Normalized predicate matched/);
+  assert.doesNotMatch(f.read(), /CONFLICT - Unexpected control mismatch/);
+});
+
+for (const [label, options, expected] of [
+  ['padded ID header', { header: ' Work Item ID ' }, 'record'],
+  ['unrecognized populated header', { header: 'Work Item Identifier' }, 'error'],
+  ['uncached formula', { formula: true }, 'error'],
+  ['uncached status formula', { formula: true, formulaColumn: 1 }, 'error'],
+  ['uncached date formula', { formula: true, formulaColumn: 2 }, 'error'],
+  ['cached formula', { formula: true, cached: true }, 'record'],
+  ['genuinely empty sheet', { empty: true }, 'empty']
+]) {
+  test(`review regression XLSX schema and formula: ${label}`, (context) => {
+    const f = fixture(context);
+    const xlsx = path.join(f.dir, 'review.xlsx');
+    dateWorkbook(xlsx, options);
+    f.config.register = xlsx;
+    const result = f.run();
+    if (expected === 'error') {
+      assert.notEqual(result.status, 0);
+      assert.match(result.stderr, options.formula ? /formula.*cached/i : /unrecognized.*header/i);
+      assert.ok(!fs.existsSync(f.output));
+    } else {
+      passed(result);
+      if (expected === 'record') assert.match(f.read(), /DEMO-001: Register-recorded: HOLD/);
+      else assert.match(f.read(), /No matching register records/);
+    }
+  });
+}
+
+test('padded XLSX headers do not bypass duplicate-ID rejection', (context) => {
+  const f = fixture(context);
+  const xlsx = path.join(f.dir, 'duplicates.xlsx');
+  dateWorkbook(xlsx, { header: ' Work Item ID ', duplicate: true });
+  f.config.register = xlsx;
+  const result = f.run();
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /Duplicate controlling ID in Portfolio/);
+  assert.ok(!fs.existsSync(f.output));
+});
+
+test('standalone XLSX reader hashes the same bytes via file and stdin', (context) => {
+  const f = fixture(context);
+  const xlsx = path.join(f.dir, 'reader.xlsx');
+  dateWorkbook(xlsx);
+  const bytes = fs.readFileSync(xlsx);
+  const expectedHash = require('node:crypto').createHash('sha256').update(bytes).digest('hex');
+  const fileResult = spawnSync('python3', [path.join(root, 'scripts/read-executive-register.py'), xlsx],
+    { encoding: 'utf8' });
+  const stdinResult = spawnSync('python3', [path.join(root, 'scripts/read-executive-register.py'), '-'],
+    { encoding: 'utf8', input: bytes });
+  passed(fileResult);
+  passed(stdinResult);
+  const fileData = JSON.parse(fileResult.stdout);
+  const stdinData = JSON.parse(stdinResult.stdout);
+  assert.equal(fileData.source.sha256, expectedHash);
+  assert.equal(stdinData.source.sha256, expectedHash);
+  assert.deepEqual(stdinData.sheets, fileData.sheets);
+  assert.equal(stdinData.sheets.Portfolio[0]['Last Updated'], date);
+});
+
+test('wrapper pins its resolved observation date across UTC midnight', (context) => {
+  const f = fixture(context);
+  const preload = path.join(f.dir, 'clock.cjs');
+  fs.writeFileSync(preload, `
+const RealDate = Date;
+global.Date = class extends RealDate {
+  constructor(...args) {
+    super(...(args.length ? args : [process.argv[1].endsWith('run-governance-flow.js')
+      ? '2031-02-03T23:59:59Z' : '2031-02-04T00:00:00Z']));
+  }
+};
+`);
+  const result = spawnSync(process.execPath, [path.join(root, wrapper),
+    `--config=${f.configPath}`, `--output-dir=${f.output}`,
+    '--skip-pre-escalation', '--skip-ledger'], {
+    cwd: f.dir, encoding: 'utf8', env: { ...process.env, NODE_OPTIONS: `--require=${preload}` }
+  });
+  passed(result);
+  assert.match(f.read(), /2031-02-03/);
+  assert.ok(!fs.existsSync(path.join(f.output, 'EXECUTIVE_PACKET_2031-02-04.md')));
+});
+
+for (const format of ['json', 'xlsx']) {
+  test(`hashes and parses a single captured ${format} snapshot despite input replacement`, (context) => {
+    const f = fixture(context);
+    const file = path.join(f.dir, `snapshot.${format}`);
+    const replacement = path.join(f.dir, `replacement.${format}`);
+    if (format === 'json') {
+      fs.copyFileSync(path.join(f.dir, 'synthetic-register.json'), file);
+      const changed = JSON.parse(fs.readFileSync(file, 'utf8'));
+      changed.sheets.Portfolio[0].Status = 'REPLACED';
+      fs.writeFileSync(replacement, JSON.stringify(changed));
+    } else {
+      dateWorkbook(file);
+      dateWorkbook(replacement, { serial: '47883' });
+    }
+    const originalHash = require('node:crypto').createHash('sha256')
+      .update(fs.readFileSync(file)).digest('hex');
+    f.config.register = file;
+    f.save();
+    const preload = path.join(f.dir, 'replace-input.cjs');
+    fs.writeFileSync(preload, `
+const fs = require('node:fs');
+const read = fs.readFileSync;
+const open = fs.openSync;
+let registerDescriptor;
+let changed = false;
+fs.openSync = function(target, ...args) {
+  const descriptor = open.call(this, target, ...args);
+  if (target === ${JSON.stringify(file)}) registerDescriptor = descriptor;
+  return descriptor;
+};
+fs.readFileSync = function(target, ...args) {
+  const bytes = read.call(this, target, ...args);
+  const isRegister = typeof target === 'number' ? target === registerDescriptor : target === ${JSON.stringify(file)};
+  if (!changed && isRegister) {
+    changed = true;
+    fs.copyFileSync(${JSON.stringify(replacement)}, ${JSON.stringify(file)});
+  }
+  return bytes;
+};
+`);
+    const result = spawnSync(process.execPath, [path.join(root, generator),
+      `--config=${f.configPath}`, `--date=${date}`, `--output-dir=${f.output}`], {
+      cwd: f.dir, encoding: 'utf8', env: { ...process.env, NODE_OPTIONS: `--require=${preload}` }
+    });
+    passed(result);
+    assert.notEqual(require('node:crypto').createHash('sha256')
+      .update(fs.readFileSync(file)).digest('hex'), originalHash, 'replacement must actually occur');
+    assert.ok(f.read().includes(`SHA-256 ${originalHash}`));
+    assert.match(f.read(), /DEMO-001: Register-recorded: HOLD/);
+    assert.doesNotMatch(f.read(), /REPLACED|2031-02-04/);
+  });
 }
 
 for (const [label, options] of [
