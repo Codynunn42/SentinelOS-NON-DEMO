@@ -22,6 +22,23 @@ node scripts/run-governance-flow.js \
 All fixture facts are invented. The explicit date makes this smoke test
 repeatable; real builds should select the intended observation/report date.
 The existing packet gate receives the external packet through `--file`.
+The orchestration suite also runs through `pnpm test`, including in PR CI.
+
+### XLSX dates
+
+The reader converts numeric cells with built-in calendar-date formats or custom
+formats containing calendar-date tokens to ISO dates. It respects the workbook's
+`date1904` setting (1900 system by default). Fractional days retain their time as
+an ISO datetime, without assigning a timezone; report freshness and deadlines use
+the calendar date. Text dates remain unchanged. Ordinary numbers, clock-only
+formats, elapsed-time formats, and quoted/escaped date-like literals are not
+converted. Text dates used for freshness should start with `YYYY-MM-DD`.
+
+Negative, nonfinite, out-of-range date serials and serials in the fictitious
+1900-02-29 day (60 through less than 61, in the 1900 system only) fail generation
+before either report is written. They are not silently changed to another date.
+Conversion reflects cell formatting; it does not independently verify the
+underlying recorded date, refresh an old row, or authorize a status change.
 
 ## Private configuration
 

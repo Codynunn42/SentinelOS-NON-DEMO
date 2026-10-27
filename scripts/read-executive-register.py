@@ -3,9 +3,11 @@ import hashlib
 import json
 import os
 import posixpath
+import re
 import sys
 import zipfile
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
+from decimal import Decimal, InvalidOperation
 from xml.etree import ElementTree
 
 
@@ -13,6 +15,39 @@ MAIN_NS = "http://schemas.openxmlformats.org/spreadsheetml/2006/main"
 REL_NS = "http://schemas.openxmlformats.org/officeDocument/2006/relationships"
 PACKAGE_REL_NS = "http://schemas.openxmlformats.org/package/2006/relationships"
 MAX_ARCHIVE_SIZE = 50 * 1024 * 1024
+DATE_FORMAT_IDS = {
+    14, 15, 16, 17, 22, 27, 28, 29, 30, 31, 34, 35, 36,
+    50, 51, 52, 53, 54, 57, 58,
+}
+
+
+def is_date_format(format_code):
+    # Literal text, escapes, locale/color/condition brackets are not date tokens.
+    code = re.sub(r'"[^"]*"|\\.|_.|\*.', "", format_code)
+    if re.search(r"\[(?:h+|m+|s+)\]", code, re.IGNORECASE):
+        return False
+    code = re.sub(r"\[[^\]]*\]", "", code).split(";")[0].lower()
+    return bool(re.search(r"[yd]", code) or (
+        "m" in code and not re.search(r"[hs]", code)
+    ))
+
+
+def excel_date(value, date1904, reference):
+    try:
+        serial = Decimal(value)
+        limit = Decimal("2957004" if date1904 else "2958466")
+        if not serial.is_finite() or serial < 0 or serial >= limit:
+            raise ValueError("serial must be finite and within the supported calendar range")
+        days = int(serial)
+        if not date1904 and days == 60:
+            raise ValueError("serial 60 represents the nonexistent 1900-02-29")
+        epoch = datetime(1904, 1, 1) if date1904 else datetime(1899, 12, 31)
+        adjusted_days = days if date1904 or days < 60 else days - 1
+        microseconds = int((serial - days) * 86400000000)
+        converted = epoch + timedelta(days=adjusted_days, microseconds=microseconds)
+    except (InvalidOperation, ValueError, OverflowError) as error:
+        raise ValueError(f"Invalid Excel date in cell {reference}: {value} ({error})") from error
+    return converted.isoformat() if microseconds else converted.date().isoformat()
 
 
 def fail(message):
@@ -28,7 +63,7 @@ def column_index(cell_reference):
     return value - 1
 
 
-def cell_text(cell, shared_strings):
+def cell_text(cell, shared_strings, date_styles, date1904):
     cell_type = cell.get("t")
     if cell_type == "inlineStr":
         return "".join(node.text or "" for node in cell.iter(f"{{{MAIN_NS}}}t"))
@@ -38,10 +73,16 @@ def cell_text(cell, shared_strings):
         return ""
     if cell_type == "s":
         return shared_strings[int(value.text)]
+    if cell_type in (None, "n") and (date_styles or "s" in cell.attrib):
+        style = int(cell.get("s", "0"))
+        if style < 0 or style >= len(date_styles):
+            raise ValueError(f"Invalid cell style in {cell.get('r')}: {style}")
+        if date_styles[style]:
+            return excel_date(value.text, date1904, cell.get("r", "unknown"))
     return value.text
 
 
-def worksheet_rows(root, shared_strings):
+def worksheet_rows(root, shared_strings, date_styles, date1904):
     rows = []
     sheet_data = root.find(f"{{{MAIN_NS}}}sheetData")
     if sheet_data is None:
@@ -50,7 +91,7 @@ def worksheet_rows(root, shared_strings):
     for row in sheet_data.findall(f"{{{MAIN_NS}}}row"):
         values = {}
         for cell in row.findall(f"{{{MAIN_NS}}}c"):
-            text = cell_text(cell, shared_strings)
+            text = cell_text(cell, shared_strings, date_styles, date1904)
             if text:
                 values[column_index(cell.get("r", ""))] = text
         rows.append(values)
@@ -122,6 +163,31 @@ def read_workbook(file_path):
             )
         }
         workbook_root = ElementTree.fromstring(workbook.read("xl/workbook.xml"))
+        properties = workbook_root.find(f"{{{MAIN_NS}}}workbookPr")
+        date_system = properties.get("date1904", "0") if properties is not None else "0"
+        if date_system not in ("0", "1", "false", "true"):
+            raise ValueError(f"Invalid workbook date1904 setting: {date_system}")
+        date1904 = date_system in ("1", "true")
+        styles_path = "xl/styles.xml"
+        for relationship in relationships:
+            if relationship.get("Type", "").endswith("/styles"):
+                target = relationship.get("Target", "")
+                styles_path = posixpath.normpath(
+                    target.lstrip("/") if target.startswith("/") else posixpath.join("xl", target)
+                )
+        date_styles = []
+        if styles_path in names:
+            styles = ElementTree.fromstring(workbook.read(styles_path))
+            custom_formats = {
+                int(item.get("numFmtId")): item.get("formatCode", "")
+                for item in styles.findall(f"{{{MAIN_NS}}}numFmts/{{{MAIN_NS}}}numFmt")
+            }
+            for style in styles.findall(f"{{{MAIN_NS}}}cellXfs/{{{MAIN_NS}}}xf"):
+                format_id = int(style.get("numFmtId", "0"))
+                date_styles.append(
+                    is_date_format(custom_formats[format_id])
+                    if format_id in custom_formats else format_id in DATE_FORMAT_IDS
+                )
         sheets = {}
 
         for sheet in workbook_root.findall(
@@ -137,7 +203,7 @@ def read_workbook(file_path):
                 fail(f"Workbook references a missing worksheet: {worksheet_path}")
             worksheet = ElementTree.fromstring(workbook.read(worksheet_path))
             sheets[sheet.get("name", "")] = records_for_sheet(
-                worksheet_rows(worksheet, shared_strings)
+                worksheet_rows(worksheet, shared_strings, date_styles, date1904)
             )
         return sheets
 

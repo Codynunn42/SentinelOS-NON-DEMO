@@ -355,6 +355,102 @@ test('reporting wrapper rejects repository-writing escalation and ledger steps',
   assert.ok(!fs.existsSync(f.output));
 });
 
+function dateWorkbook(file, { serial = '47882', date1904 = '0', format = 'builtin', text = false } = {}) {
+  const build = spawnSync('python3', ['-c', `
+import json, sys, zipfile
+from xml.sax.saxutils import escape, quoteattr
+data = json.loads(sys.stdin.read())
+ns = 'http://schemas.openxmlformats.org/spreadsheetml/2006/main'
+with zipfile.ZipFile(sys.argv[1], 'w') as z:
+    z.writestr('xl/workbook.xml', '<workbook xmlns="'+ns+'" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><workbookPr date1904='+quoteattr(data['date1904'])+'/><sheets><sheet name="Portfolio" sheetId="1" r:id="r1"/></sheets></workbook>')
+    z.writestr('xl/_rels/workbook.xml.rels', '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="r1" Target="worksheets/sheet1.xml"/><Relationship Id="styles" Target="styles.xml"/></Relationships>')
+    fmt = data['format']
+    numfmt = '14' if fmt == 'builtin' else '0' if fmt == 'general' else '164'
+    custom = '<numFmts count="1"><numFmt numFmtId="164" formatCode='+quoteattr(fmt)+'/></numFmts>' if numfmt == '164' else ''
+    z.writestr('xl/styles.xml', '<styleSheet xmlns="'+ns+'">'+custom+'<cellXfs count="2"><xf numFmtId="0"/><xf numFmtId="'+numfmt+'"/></cellXfs></styleSheet>')
+    headers = ['Work Item ID', 'Status', 'Last Updated', 'Deadline / Review Date', 'Next Action']
+    values = ['DEMO-001', 'HOLD', '2031-02-03', '2031-02-03', '47882']
+    rows = []
+    for r, row in enumerate([headers, values], 1):
+        cells = []
+        for c, value in enumerate(row):
+            ref = chr(65+c)+str(r)
+            if r == 2 and c in (2, 3) and not data['text']:
+                cells.append('<c r="'+ref+'" s="1"><v>'+escape(data['serial'])+'</v></c>')
+            else:
+                cells.append('<c r="'+ref+'" t="inlineStr"><is><t>'+escape(value)+'</t></is></c>')
+        rows.append('<row>'+''.join(cells)+'</row>')
+    z.writestr('xl/worksheets/sheet1.xml', '<worksheet xmlns="'+ns+'"><sheetData>'+''.join(rows)+'</sheetData></worksheet>')
+`, file], {
+    encoding: 'utf8',
+    input: JSON.stringify({ serial, date1904, format, text })
+  });
+  passed(build);
+}
+
+for (const [label, options] of [
+  ['1900 built-in', {}],
+  ['1904 built-in', { serial: '46420', date1904: '1' }],
+  ['1904 boolean/custom', { serial: '46420', date1904: 'true', format: 'yyyy-mm-dd' }],
+  ['1900 custom with literals', { format: '[Red][$-409]yyyy" year "mm\\-dd' }],
+  ['ISO text', { text: true }],
+  ['1904 fractional date', { serial: '46420.5', date1904: '1' }],
+  ['fractional date', { serial: '47882.5', format: 'yyyy-mm-dd hh:mm:ss' }]
+]) {
+  test(`native XLSX date reporting preserves freshness and deadlines: ${label}`, (context) => {
+    const f = fixture(context);
+    const xlsx = path.join(f.dir, 'dates.xlsx');
+    dateWorkbook(xlsx, options);
+    f.config.register = xlsx;
+    passed(f.run(['--skip-pre-escalation', '--skip-ledger'], wrapper));
+    for (const report of [f.read(), f.read('PACKET')]) {
+      assert.match(report, /2031-02-03; 0 days old/);
+      assert.doesNotMatch(report, /UNVERIFIED - date missing\/invalid/);
+    }
+    assert.match(f.read(), /2031-02-03(?:T12:00:00)?; date is today/);
+    assert.match(f.read(), /47882/, 'ordinary text numbers remain unchanged');
+    if (options.serial === '47882.5') assert.match(f.read(), /2031-02-03T12:00:00/);
+  });
+}
+
+for (const [label, options, expected] of [
+  ['before leap bug', { serial: '59' }, '1900-02-28'],
+  ['after leap bug', { serial: '61' }, '1900-03-01'],
+  ['1904 epoch', { serial: '0', date1904: '1' }, '1904-01-01'],
+  ['1900 first day', { serial: '1' }, '1900-01-01'],
+  ['1904 real leap day', { serial: '60', date1904: '1' }, '1904-03-01'],
+  ['1900 zero', { serial: '0' }, '1899-12-31'],
+  ['last supported day', { serial: '2958465' }, '9999-12-31'],
+  ['1904 last supported day', { serial: '2957003', date1904: '1' }, '9999-12-31'],
+  ['general numeric', { format: 'general' }, '47882'],
+  ['quoted date tokens', { format: '0 "days"' }, '47882'],
+  ['escaped date tokens', { format: '0 \\d' }, '47882'],
+  ['elapsed time', { serial: '47882.5', format: '[h]:mm:ss' }, '47882.5'],
+  ['clock time', { serial: '0.5', format: 'hh:mm:ss' }, '0.5']
+]) {
+  test(`XLSX reader date boundary and numeric preservation: ${label}`, (context) => {
+    const f = fixture(context);
+    const xlsx = path.join(f.dir, 'dates.xlsx');
+    dateWorkbook(xlsx, options);
+    const result = spawnSync('python3', [path.join(root, 'scripts/read-executive-register.py'), xlsx], { encoding: 'utf8' });
+    passed(result);
+    assert.equal(JSON.parse(result.stdout).sheets.Portfolio[0]['Last Updated'], expected);
+  });
+}
+
+for (const serial of ['60', '60.5', '-1', 'NaN', 'Infinity', '999999999']) {
+  test(`invalid native Excel date ${serial} rejects generation before output`, (context) => {
+    const f = fixture(context);
+    const xlsx = path.join(f.dir, 'dates.xlsx');
+    dateWorkbook(xlsx, { serial });
+    f.config.register = xlsx;
+    const result = f.run();
+    assert.notEqual(result.status, 0);
+    assert.match(result.stderr, /Invalid Excel date/);
+    assert.ok(!fs.existsSync(f.output));
+  });
+}
+
 test('reads synthetic XLSX rows with the standard-library reader and validates the generated packet', (context) => {
   const f = fixture(context);
   const xlsx = path.join(f.dir, 'synthetic.xlsx');
