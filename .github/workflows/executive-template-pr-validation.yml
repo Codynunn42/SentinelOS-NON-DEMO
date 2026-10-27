@@ -1,0 +1,122 @@
+name: Executive Template PR check review
+run-name: Review PR 48 checks at ${{ inputs.expected_head_sha }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      expected_head_sha:
+        description: Exact 40-character head commit SHA shown on PR #48
+        required: true
+        type: string
+      validation_scope:
+        description: Read-only check inventory to report for the pinned PR head
+        required: true
+        type: choice
+        options:
+          - current-pr-checks
+      confirm_read_only:
+        description: Confirm this run only reads PR metadata and check results; it will not change the PR
+        required: true
+        type: boolean
+        default: false
+
+permissions:
+  checks: read
+  pull-requests: read
+
+jobs:
+  validate:
+    name: Report checks for exact PR head
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Require the trusted workflow ref and explicit confirmation
+        env:
+          WORKFLOW_REF: ${{ github.ref }}
+          CONFIRM_READ_ONLY: ${{ inputs.confirm_read_only }}
+        run: |
+          set -euo pipefail
+          if [[ "$WORKFLOW_REF" != "refs/heads/main" ]]; then
+            echo "Run this workflow from main so its definition is the reviewed default-branch version." >&2
+            exit 1
+          fi
+          if [[ "$CONFIRM_READ_ONLY" != "true" ]]; then
+            echo "Confirm the read-only scope before starting validation." >&2
+            exit 1
+          fi
+
+      - name: Confirm PR #48 head and report its checks
+        id: target
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EXPECTED_HEAD_SHA: ${{ inputs.expected_head_sha }}
+          VALIDATION_SCOPE: ${{ inputs.validation_scope }}
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs');
+
+          async function main() {
+            const expectedSha = process.env.EXPECTED_HEAD_SHA;
+            if (!/^[0-9a-f]{40}$/.test(expectedSha || '')) {
+              throw new Error('Expected head SHA must be exactly 40 lowercase hexadecimal characters.');
+            }
+            if (process.env.VALIDATION_SCOPE !== 'current-pr-checks') {
+              throw new Error('Unsupported check-review scope.');
+            }
+
+            const apiHeaders = new Headers({
+              accept: 'application/vnd.github+json',
+              'x-github-api-version': '2022-11-28'
+            });
+            apiHeaders.set('authorization', 'Bearer ' + process.env.GH_TOKEN);
+            const apiBase = `${process.env.GITHUB_API_URL}/repos/${process.env.GITHUB_REPOSITORY}`;
+            async function getJson(url, label) {
+              const response = await fetch(url, { headers: apiHeaders });
+              if (!response.ok) throw new Error(`Could not read ${label} (HTTP ${response.status}).`);
+              return response.json();
+            }
+
+            const pr = await getJson(`${apiBase}/pulls/48`, 'PR #48 metadata');
+            if (pr.state !== 'open') throw new Error('PR #48 is not open.');
+            if (pr.base?.ref !== 'main') throw new Error('PR #48 no longer targets main.');
+            if (pr.head?.repo?.full_name !== process.env.GITHUB_REPOSITORY) {
+              throw new Error('PR #48 head is not in this repository; fork code is not run by this pilot.');
+            }
+            if (pr.head?.sha !== expectedSha) {
+              throw new Error(`PR #48 head moved. Expected ${expectedSha}; current head is ${pr.head?.sha || 'unknown'}. Review the new head before retrying.`);
+            }
+
+            const checkRuns = [];
+            let totalCount = null;
+            for (let page = 1; page <= 10; page += 1) {
+              const url = `${apiBase}/commits/${expectedSha}/check-runs?per_page=100&page=${page}`;
+              const result = await getJson(url, `PR #48 checks for ${expectedSha}`);
+              if (!Array.isArray(result.check_runs) || !Number.isInteger(result.total_count)) {
+                throw new Error('GitHub returned an invalid check-run response.');
+              }
+              totalCount = result.total_count;
+              checkRuns.push(...result.check_runs);
+              if (checkRuns.length >= totalCount) break;
+            }
+            if (checkRuns.length !== totalCount) {
+              throw new Error(`Could not retrieve the complete check set (${checkRuns.length} of ${totalCount}).`);
+            }
+            if (checkRuns.length === 0) throw new Error('No checks are recorded for the pinned PR head.');
+
+            const checkSummary = JSON.stringify(checkRuns.map(({ name, status, conclusion }) => ({
+              name: name || 'unnamed check',
+              status: status || 'unknown',
+              conclusion: conclusion || 'pending'
+            })), null, 2);
+            const longestBacktickRun = Math.max(2, ...[...checkSummary.matchAll(/`+/g)].map((match) => match[0].length));
+            const fence = '`'.repeat(longestBacktickRun + 1);
+            fs.appendFileSync(process.env.GITHUB_OUTPUT, `head_sha=${pr.head.sha}\n`);
+            fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY,
+              `## Read-only Executive Template check review\n\n- Target: [PR #48](${pr.html_url})\n- Pinned head: \`${pr.head.sha}\`\n- Checks found: ${checkRuns.length}\n- This run reports existing check results only; PR CI runs the tests. Check statuses do not constitute review acceptance.\n\n${fence}json\n${checkSummary}\n${fence}\n`);
+          }
+
+          main().catch((error) => {
+            console.error(error.message);
+            process.exitCode = 1;
+          });
+          NODE
