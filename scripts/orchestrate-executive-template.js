@@ -308,12 +308,15 @@ const dispositions = dispositionRules.map((rule) => {
 
 function cell(value) {
   const text = String(value ?? '').trim();
+  if (!text) return '-';
+
   return text
-    ? text
-        .replace(/\r?\n/g, '<br>')
-        .replace(/\\/g, '\\\\')
-        .replace(/\|/g, '\\|')
-    : '-';
+    .replace(/\0/g, '')
+    .replace(/\r?\n/g, '<br>')
+    .replace(/\t/g, '    ')
+    .replace(/\\/g, '\\\\')
+    .replace(/\|/g, '\\|')
+    .slice(0, 4000);
 }
 
 function table(headers, rows) {
