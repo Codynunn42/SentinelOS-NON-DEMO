@@ -1,5 +1,5 @@
-name: Executive Template PR validation
-run-name: Validate PR 48 at ${{ inputs.expected_head_sha }}
+name: Executive Template PR check review
+run-name: Review PR 48 checks at ${{ inputs.expected_head_sha }}
 
 on:
   workflow_dispatch:
@@ -9,26 +9,26 @@ on:
         required: true
         type: string
       validation_scope:
-        description: Read-only validation to run on the pinned PR head
+        description: Read-only check inventory to report for the pinned PR head
         required: true
         type: choice
         options:
-          - focused-orchestration-suite
+          - current-pr-checks
       confirm_read_only:
-        description: Confirm this run only reads PR metadata and runs tests; it will not change the PR
+        description: Confirm this run only reads PR metadata and check results; it will not change the PR
         required: true
         type: boolean
         default: false
 
 permissions:
-  contents: read
+  checks: read
   pull-requests: read
 
 jobs:
   validate:
-    name: Validate exact PR head
+    name: Report checks for exact PR head
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 5
     steps:
       - name: Require the trusted workflow ref and explicit confirmation
         env:
@@ -45,7 +45,7 @@ jobs:
             exit 1
           fi
 
-      - name: Confirm PR #48 is open at the expected head
+      - name: Confirm PR #48 head and report its checks
         id: target
         env:
           GH_TOKEN: ${{ github.token }}
@@ -60,24 +60,23 @@ jobs:
             if (!/^[0-9a-f]{40}$/.test(expectedSha || '')) {
               throw new Error('Expected head SHA must be exactly 40 lowercase hexadecimal characters.');
             }
-            if (process.env.VALIDATION_SCOPE !== 'focused-orchestration-suite') {
-              throw new Error('Unsupported validation scope.');
+            if (process.env.VALIDATION_SCOPE !== 'current-pr-checks') {
+              throw new Error('Unsupported check-review scope.');
             }
 
-            const url = `${process.env.GITHUB_API_URL}/repos/${process.env.GITHUB_REPOSITORY}/pulls/48`;
-            const headers = new Headers({
+            const apiHeaders = new Headers({
               accept: 'application/vnd.github+json',
               'x-github-api-version': '2022-11-28'
             });
-            headers.set('authorization', 'Bearer ' + process.env.GH_TOKEN);
-            const response = await fetch(url, {
-              headers
-            });
-            if (!response.ok) {
-              throw new Error(`Could not read PR #48 metadata (HTTP ${response.status}).`);
+            apiHeaders.set('authorization', 'Bearer ' + process.env.GH_TOKEN);
+            const apiBase = `${process.env.GITHUB_API_URL}/repos/${process.env.GITHUB_REPOSITORY}`;
+            async function getJson(url, label) {
+              const response = await fetch(url, { headers: apiHeaders });
+              if (!response.ok) throw new Error(`Could not read ${label} (HTTP ${response.status}).`);
+              return response.json();
             }
 
-            const pr = await response.json();
+            const pr = await getJson(`${apiBase}/pulls/48`, 'PR #48 metadata');
             if (pr.state !== 'open') throw new Error('PR #48 is not open.');
             if (pr.base?.ref !== 'main') throw new Error('PR #48 no longer targets main.');
             if (pr.head?.repo?.full_name !== process.env.GITHUB_REPOSITORY) {
@@ -87,9 +86,33 @@ jobs:
               throw new Error(`PR #48 head moved. Expected ${expectedSha}; current head is ${pr.head?.sha || 'unknown'}. Review the new head before retrying.`);
             }
 
+            const checkRuns = [];
+            let totalCount = null;
+            for (let page = 1; page <= 10; page += 1) {
+              const url = `${apiBase}/commits/${expectedSha}/check-runs?per_page=100&page=${page}`;
+              const result = await getJson(url, `PR #48 checks for ${expectedSha}`);
+              if (!Array.isArray(result.check_runs) || !Number.isInteger(result.total_count)) {
+                throw new Error('GitHub returned an invalid check-run response.');
+              }
+              totalCount = result.total_count;
+              checkRuns.push(...result.check_runs);
+              if (checkRuns.length >= totalCount) break;
+            }
+            if (checkRuns.length !== totalCount) {
+              throw new Error(`Could not retrieve the complete check set (${checkRuns.length} of ${totalCount}).`);
+            }
+            if (checkRuns.length === 0) throw new Error('No checks are recorded for the pinned PR head.');
+
+            const checkSummary = JSON.stringify(checkRuns.map(({ name, status, conclusion }) => ({
+              name: name || 'unnamed check',
+              status: status || 'unknown',
+              conclusion: conclusion || 'pending'
+            })), null, 2);
+            const longestBacktickRun = Math.max(2, ...[...checkSummary.matchAll(/`+/g)].map((match) => match[0].length));
+            const fence = '`'.repeat(longestBacktickRun + 1);
             fs.appendFileSync(process.env.GITHUB_OUTPUT, `head_sha=${pr.head.sha}\n`);
             fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY,
-              `## Read-only Executive Template validation\n\n- Target: [PR #48](${pr.html_url})\n- Pinned head: \`${pr.head.sha}\`\n- Scope: \`${process.env.VALIDATION_SCOPE}\`\n- Effects: metadata read, checkout, and tests only; no PR, branch, or repository writes.\n\n`);
+              `## Read-only Executive Template check review\n\n- Target: [PR #48](${pr.html_url})\n- Pinned head: \`${pr.head.sha}\`\n- Checks found: ${checkRuns.length}\n- This run reports existing check results only; PR CI runs the tests. Check statuses do not constitute review acceptance.\n\n${fence}json\n${checkSummary}\n${fence}\n`);
           }
 
           main().catch((error) => {
@@ -97,47 +120,3 @@ jobs:
             process.exitCode = 1;
           });
           NODE
-
-      - name: Checkout the verified PR commit
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ steps.target.outputs.head_sha }}
-          path: target
-          persist-credentials: false
-          fetch-depth: 1
-
-      - name: Verify the checked-out commit
-        env:
-          EXPECTED_HEAD_SHA: ${{ steps.target.outputs.head_sha }}
-        run: |
-          set -euo pipefail
-          actual="$(git -C target rev-parse HEAD)"
-          if [[ "$actual" != "$EXPECTED_HEAD_SHA" ]]; then
-            echo "Checkout SHA does not match the verified PR head." >&2
-            exit 1
-          fi
-          echo "Verified checkout at $actual"
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Run the focused Executive Template suite
-        id: tests
-        working-directory: target
-        run: npm run test:executive-template-orchestration
-
-      - name: Record validation outcome
-        if: always()
-        env:
-          HEAD_SHA: ${{ steps.target.outputs.head_sha }}
-          TEST_OUTCOME: ${{ steps.tests.outcome }}
-        run: |
-          {
-            echo "## Validation result"
-            echo
-            echo "- Pinned PR head: \`${HEAD_SHA:-not validated}\`"
-            echo "- Focused suite: \`${TEST_OUTCOME:-not run}\`"
-            echo "- No commits, pushes, PR updates, merges, or deployments were performed."
-          } >> "$GITHUB_STEP_SUMMARY"
