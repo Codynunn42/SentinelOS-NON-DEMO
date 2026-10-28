@@ -256,19 +256,19 @@ export class PostgresReceiptLedger {
                 try {
                     await client.query('BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY');
                     transactionStarted = true;
-                    let cursor: { timestamp: Date; id: string } | undefined;
+                    let cursor: { timestamp: string; id: string } | undefined;
 
                     while (true) {
                         const result = cursor
                             ? await client.query(
-                                `SELECT * FROM receipts
+                                `SELECT *, "timestamp"::text AS cursor_timestamp FROM receipts
                                  WHERE ("timestamp", id) < ($1, $2)
                                  ORDER BY "timestamp" DESC, id DESC
                                  LIMIT $3`,
                                 [cursor.timestamp, cursor.id, batchSize],
                             )
                             : await client.query(
-                                `SELECT * FROM receipts
+                                `SELECT *, "timestamp"::text AS cursor_timestamp FROM receipts
                                  ORDER BY "timestamp" DESC, id DESC
                                  LIMIT $1`,
                                 [batchSize],
@@ -281,9 +281,7 @@ export class PostgresReceiptLedger {
                         }
                         const lastRow = result.rows[result.rows.length - 1];
                         cursor = {
-                            timestamp: lastRow.timestamp instanceof Date
-                                ? lastRow.timestamp
-                                : new Date(lastRow.timestamp),
+                            timestamp: lastRow.cursor_timestamp,
                             id: lastRow.id,
                         };
                     }
