@@ -1,5 +1,10 @@
 const { query, getDatabaseStatus } = require('../db/client');
 const { evaluateGovernanceSignals } = require('../governance/governanceSignals');
+const { getReceiptSigner } = require('../receipts/receiptRuntime');
+const {
+  markUnsignedLegacy,
+  verifySignedReceipt
+} = require('../receipts/signedReceipt');
 const crypto = require('crypto');
 
 const auditLog = [];
@@ -74,6 +79,25 @@ function getReceipt(entry) {
   }
 
   return null;
+}
+
+function replaceReceipt(entry, receipt) {
+  if (entry.result && entry.result.receipt) {
+    return {
+      ...entry,
+      result: { ...entry.result, receipt }
+    };
+  }
+  if (entry.result && entry.result.data && entry.result.data.receipt) {
+    return {
+      ...entry,
+      result: {
+        ...entry.result,
+        data: { ...entry.result.data, receipt }
+      }
+    };
+  }
+  return entry;
 }
 
 function publishAuditEvent(entry) {
@@ -237,6 +261,57 @@ const auditLogger = {
   },
 
   async getByReceiptId(receiptId, tenant) {
+    const signedResult = await query(
+      `SELECT receipt_id, tenant_id, signed_receipt, signature_algorithm, key_id, signature, created_at
+       FROM signed_receipts
+       WHERE receipt_id = $1
+         AND ($2::text IS NULL OR tenant_id = $2)
+       LIMIT 1`,
+      [receiptId, tenant || null]
+    );
+    const signedRow = signedResult && signedResult.rows && signedResult.rows[0]
+      ? signedResult.rows[0]
+      : null;
+    if (signedRow) {
+      const storedReceipt = signedRow.signed_receipt;
+      let verification = { ok: false, status: 'verification_key_unavailable', verified: false };
+      try {
+        const signer = getReceiptSigner();
+        verification = await verifySignedReceipt(storedReceipt, signer.getPublicKey);
+      } catch (error) {
+        console.error('Signed receipt verification unavailable:', error);
+      }
+      const storageMetadataMatches = Boolean(storedReceipt && typeof storedReceipt === 'object') &&
+        storedReceipt.receiptId === signedRow.receipt_id &&
+        storedReceipt.tenantId === signedRow.tenant_id &&
+        storedReceipt.signature &&
+        storedReceipt.signature.algorithm === signedRow.signature_algorithm &&
+        storedReceipt.signature.keyId === signedRow.key_id &&
+        storedReceipt.signature.value === signedRow.signature;
+      if (!storageMetadataMatches) {
+        verification = { ok: false, status: 'storage_metadata_mismatch', verified: false };
+      }
+      const receipt = {
+        ...storedReceipt,
+        verification_status: verification.status,
+        verified: verification.ok
+      };
+      return {
+        receipt,
+        entry: {
+          tenant: signedRow.tenant_id,
+          command: storedReceipt.command,
+          payload: {},
+          result: { receipt },
+          actor: storedReceipt.authority && storedReceipt.authority.actor,
+          timestamp: signedRow.created_at instanceof Date
+            ? signedRow.created_at.toISOString()
+            : signedRow.created_at
+        },
+        source: 'database'
+      };
+    }
+
     const memoryEntry = auditLog.find((entry) => {
       if (tenant && entry.tenant !== tenant) {
         return false;
@@ -247,9 +322,24 @@ const auditLogger = {
     });
 
     if (memoryEntry) {
+      const memoryReceipt = getReceipt(memoryEntry);
+      let receipt = markUnsignedLegacy(memoryReceipt);
+      if (memoryReceipt && memoryReceipt.schemaVersion === 'sentinel-receipt/v1') {
+        let verification = { ok: false, status: 'verification_key_unavailable', verified: false };
+        try {
+          verification = await verifySignedReceipt(memoryReceipt, getReceiptSigner().getPublicKey);
+        } catch (error) {
+          console.error('In-memory signed receipt verification unavailable:', error);
+        }
+        receipt = {
+          ...memoryReceipt,
+          verification_status: verification.status,
+          verified: verification.ok
+        };
+      }
       return {
-        receipt: getReceipt(memoryEntry),
-        entry: memoryEntry,
+        receipt,
+        entry: replaceReceipt(memoryEntry, receipt),
         source: 'memory'
       };
     }
@@ -277,10 +367,12 @@ const auditLogger = {
     }
 
     const entry = fromAuditRow(row);
+    const legacyReceipt = getReceipt(entry);
+    const receipt = legacyReceipt ? markUnsignedLegacy(legacyReceipt) : legacyReceipt;
 
     return {
-      receipt: getReceipt(entry),
-      entry,
+      receipt,
+      entry: receipt ? replaceReceipt(entry, receipt) : entry,
       source: 'database'
     };
   }

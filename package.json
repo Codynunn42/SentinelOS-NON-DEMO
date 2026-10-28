@@ -5,6 +5,8 @@
   "packageManager": "pnpm@10.33.4",
   "description": "SentinelOS NON-DEMO client operating repository",
   "dependencies": {
+    "@azure/identity": "^4.10.2",
+    "@azure/keyvault-keys": "^4.10.0",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "express-rate-limit": "^8.7.0",
