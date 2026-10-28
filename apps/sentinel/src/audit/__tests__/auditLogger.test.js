@@ -1,20 +1,52 @@
 const assert = require('assert');
 const crypto = require('crypto');
+const path = require('path');
+const os = require('os');
+const fs = require('fs/promises');
+const { Pool } = require('pg');
 const { auditLogger, createAuditLogger } = require('../auditLogger');
+const { readFileSync } = require('fs');
+
+const createdLoggers = [];
+const itWithPostgres =
+  process.env.AUDIT_OUTBOX_TEST_DATABASE_URL || process.env.RECEIPT_LEDGER_TEST_DATABASE_URL
+    ? it
+    : it.skip;
+
+function createTestLogger(options = {}) {
+  const spoolDirectory =
+    options.spoolDirectory || path.join(os.tmpdir(), `sentinel-audit-${crypto.randomUUID()}`);
+  const logger = createAuditLogger({
+    spoolDirectory,
+    loadAnchor: async () => null,
+    ...options
+  });
+  createdLoggers.push({ logger, spoolDirectory });
+  return logger;
+}
+
+afterEach(async () => {
+  const entries = createdLoggers.splice(0);
+  await Promise.all(entries.map(({ logger }) => logger.close()));
+  await Promise.all(
+    [...new Set(entries.map(({ spoolDirectory }) => spoolDirectory))]
+      .map((spoolDirectory) => fs.rm(spoolDirectory, { recursive: true, force: true }))
+  );
+});
 
 describe('audit persistence reconciliation', () => {
   it('keeps failures in the hash chain and persists them in order during reconciliation', async () => {
     let failNextWrite = true;
     let failReconciliationMarker = true;
     const persistedEvents = [];
-    const logger = createAuditLogger({
+    const logger = createTestLogger({
       persistQuery: async (_sql, parameters) => {
-        const persistedResult = JSON.parse(parameters[3]);
+        const persistedResult = JSON.parse(parameters[5]);
         if (failNextWrite) {
           failNextWrite = false;
           throw new Error('synthetic persistence failure');
         }
-        if (parameters[1] === 'system.audit.persist_reconciled' && failReconciliationMarker) {
+        if (parameters[3] === 'system.audit.persist_reconciled' && failReconciliationMarker) {
           failReconciliationMarker = false;
           throw new Error('synthetic reconciliation marker failure');
         }
@@ -83,9 +115,9 @@ describe('audit persistence reconciliation', () => {
   it('does not persist later entries ahead of unresolved audit entries', async () => {
     const persistedEvents = [];
     let failNextWrite = true;
-    const logger = createAuditLogger({
+    const logger = createTestLogger({
       persistQuery: async (_sql, parameters) => {
-        const persistedResult = JSON.parse(parameters[3]);
+        const persistedResult = JSON.parse(parameters[5]);
         if (failNextWrite) {
           failNextWrite = false;
           throw new Error('database unavailable');
@@ -113,6 +145,170 @@ describe('audit persistence reconciliation', () => {
     assert.equal(logger.getPersistenceStatus().status, 'clear');
     assert.deepEqual(logger.verifyChain(), { valid: true, checked: 4 });
     assert.equal(second.eventId, entries[3].eventId);
+  });
+
+  it('fails explicitly when the durable outbox reaches its configured capacity', async () => {
+    const logger = createTestLogger({
+      maxSpoolBytes: 1,
+      databaseStatus: () => 'synthetic-test-database'
+    });
+
+    await assert.rejects(
+      logger.log({ command: 'synthetic.capacity', payload: {}, result: {} }),
+      /AUDIT_OUTBOX_CAPACITY_EXCEEDED/
+    );
+    assert.equal(logger.getPersistenceStatus().status, 'failed');
+    assert.equal(logger.getPersistenceStatus().pendingCount, 0);
+    assert.equal(
+      logger.getPersistenceStatus().lastError,
+      'AUDIT_OUTBOX_CAPACITY_EXCEEDED'
+    );
+  });
+
+  itWithPostgres('recovers in order after restart and suppresses duplicate replay after a lost acknowledgement', async () => {
+    const databaseUrl =
+      process.env.AUDIT_OUTBOX_TEST_DATABASE_URL || process.env.RECEIPT_LEDGER_TEST_DATABASE_URL;
+
+    const targetUrl = new URL(databaseUrl);
+    const databaseName = decodeURIComponent(targetUrl.pathname.slice(1));
+    assert.match(databaseName, /^sentinel_test$/);
+    const adminUrl = new URL(databaseUrl);
+    adminUrl.pathname = '/postgres';
+    const adminPool = new Pool({ connectionString: adminUrl.toString() });
+    const spoolDirectory = path.join(os.tmpdir(), `sentinel-audit-db-${crypto.randomUUID()}`);
+    const schema = readFileSync(path.resolve(__dirname, '../../db/schema.sql'), 'utf8');
+    let databasePool = new Pool({ connectionString: databaseUrl, max: 1 });
+    const databasePoolErrors = [];
+    databasePool.on('error', (error) => databasePoolErrors.push(error));
+    let outageStarted = false;
+    let logger;
+
+    try {
+      await databasePool.query(schema);
+      const createDatabaseLogger = (
+        pool,
+        persistQuery = (text, params) => pool.query(text, params),
+        retryOptions = {}
+      ) =>
+        createTestLogger({
+          spoolDirectory,
+          databaseStatus: () => 'enabled',
+          loadAnchor: async () => {
+            const result = await pool.query(
+              `SELECT result->>'auditHash' AS audit_hash
+               FROM audit_logs
+               WHERE result ? 'auditHash'
+               ORDER BY id DESC
+               LIMIT 1`
+            );
+            return result.rows[0] ? result.rows[0].audit_hash : null;
+          },
+          persistQuery,
+          ...retryOptions
+        });
+
+      logger = createDatabaseLogger(databasePool);
+      const baselineEntry = await logger.log({
+        command: 'test.audit.baseline',
+        payload: {},
+        result: { ok: true }
+      });
+      assert.equal(logger.getPersistenceStatus().pendingCount, 0);
+
+      await adminPool.query(`ALTER DATABASE "${databaseName}" WITH ALLOW_CONNECTIONS false`);
+      outageStarted = true;
+      await adminPool.query(
+        `SELECT pg_terminate_backend(pid)
+         FROM pg_stat_activity
+         WHERE datname = $1 AND pid <> pg_backend_pid()`,
+        [databaseName]
+      );
+
+      const outageEntry = await logger.log({
+        command: 'test.audit.during_outage',
+        payload: {},
+        result: { ok: true }
+      });
+      assert.equal(logger.getPersistenceStatus().pendingCount, 2);
+      assert.deepEqual(logger.verifyChain(), { valid: true, checked: 3 });
+      assert.ok(databasePoolErrors.some((error) => /terminating connection/i.test(error.message)));
+      await logger.close();
+      await databasePool.end();
+      databasePool = null;
+
+      await adminPool.query(`ALTER DATABASE "${databaseName}" WITH ALLOW_CONNECTIONS true`);
+      outageStarted = false;
+
+      databasePool = new Pool({ connectionString: databaseUrl, max: 1 });
+      let loseFirstAcknowledgement = true;
+      logger = createDatabaseLogger(databasePool, async (text, params) => {
+        const result = await databasePool.query(text, params);
+        if (loseFirstAcknowledgement && text.includes('INSERT INTO audit_logs')) {
+          loseFirstAcknowledgement = false;
+          throw new Error('simulated lost database acknowledgement');
+        }
+        return result;
+      });
+
+      await logger.initialize();
+      assert.equal((await logger.reconcilePending()).status, 'pending');
+      assert.deepEqual(logger.verifyChain(), { valid: true, checked: 2 });
+      await logger.close();
+
+      let loseRestartAcknowledgement = true;
+      logger = createDatabaseLogger(
+        databasePool,
+        async (text, params) => {
+          const result = await databasePool.query(text, params);
+          if (loseRestartAcknowledgement && text.includes('INSERT INTO audit_logs')) {
+            loseRestartAcknowledgement = false;
+            throw new Error('simulated lost acknowledgement after restart');
+          }
+          return result;
+        },
+        { retryIntervalMs: 25, maxRetryIntervalMs: 50 }
+      );
+      await logger.initialize();
+      assert.deepEqual(logger.verifyChain(), { valid: true, checked: 2 });
+      assert.equal((await logger.reconcilePending()).status, 'pending');
+      const retryDeadline = Date.now() + 2000;
+      while (
+        logger.getPersistenceStatus().pendingCount > 0 &&
+        Date.now() < retryDeadline
+      ) {
+        await new Promise((resolve) => setTimeout(resolve, 10));
+      }
+      assert.equal(logger.getPersistenceStatus().pendingCount, 0);
+      assert.deepEqual(logger.verifyChain(), { valid: true, checked: 3 });
+
+      const eventIds = [
+        baselineEntry.eventId,
+        ...logger.getAll().map((entry) => entry.eventId)
+      ];
+      const persisted = await databasePool.query(
+        `SELECT event_id, chain_sequence
+         FROM audit_logs
+         WHERE event_id = ANY($1::text[])
+         ORDER BY chain_sequence`,
+        [eventIds]
+      );
+      assert.deepEqual(
+        persisted.rows.map((row) => row.event_id),
+        eventIds
+      );
+      const duplicateCount = await databasePool.query(
+        'SELECT COUNT(*)::int AS count FROM audit_logs WHERE event_id = $1',
+        [outageEntry.eventId]
+      );
+      assert.equal(duplicateCount.rows[0].count, 1);
+    } finally {
+      if (logger) await logger.close();
+      if (databasePool) await databasePool.end();
+      if (outageStarted) {
+        await adminPool.query(`ALTER DATABASE "${databaseName}" WITH ALLOW_CONNECTIONS true`);
+      }
+      await adminPool.end();
+    }
   });
 });
 

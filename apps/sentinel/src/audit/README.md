@@ -1,14 +1,41 @@
 # Sentinel audit logger
 
-`auditLogger.log()` adds each event to the in-memory hash chain before attempting
-database persistence. If persistence fails, it adds a `system.audit.persist_failed`
-event to that same chain and queues both entries for ordered reconciliation.
-`verifyChain()` verifies the complete in-memory chain, including the previous-hash
-link. `getPersistenceStatus()` exposes whether entries remain pending, and
-`reconcilePending()` retries them in order before recording a
-`system.audit.persist_reconciled` event.
+`auditLogger.log()` fsyncs each event to a local outbox before it acknowledges
+the event to its caller. The outbox is stored at `SENTINEL_AUDIT_SPOOL_DIR`, or
+under `SENTINEL_DATA_DIR/audit-spool` when that setting is present; otherwise it
+uses `.data/audit-spool` in the current working directory. Production
+deployments must place this directory on persistent storage. The Docker Compose
+deployment mounts `SENTINEL_DATA_DIR` on the `sentinel_data` volume.
 
-Writes are serialized. While an earlier persistence failure remains unresolved,
-later events cannot be persisted ahead of the pending events. The pending queue
-is process-local; a process restart before reconciliation can lose events that
-were not persisted. This logger does not provide a durable outbox.
+The outbox has one writer lock, a 100 MiB default pending-size limit
+(`SENTINEL_AUDIT_SPOOL_MAX_BYTES`), and a hash-anchored, ordered sequence of
+entry files. PostgreSQL writes use the event ID as an idempotency key. A
+checkpoint is fsynced after the database write and before deleting the spool
+entry. A crash before checkpointing therefore replays the entry. PostgreSQL
+suppresses a duplicate event ID; the logger verifies the stored chain sequence
+and hashes and rejects a conflicting event. Startup retries the outbox before
+the API begins listening.
+
+If PostgreSQL is unavailable, entries remain on disk and `getPersistenceStatus()`
+reports their count, byte size, IDs, and configured limit. Calls to
+`reconcilePending()` retry entries in order and append a
+`system.audit.persist_reconciled` event after recovery. The API logs a pending
+recovery result and last persistence error at startup. When the spool reaches
+its limit, is corrupt, or cannot be safely reconciled, logging fails explicitly;
+do not delete or edit spool files to clear the condition. Preserve the volume
+and spool, restore PostgreSQL, and the logger retries with a bounded exponential
+delay (five seconds initially, capped at one minute). A database mode change on
+an existing spool is rejected and requires operator-led recovery rather than
+silently reattaching the chain.
+
+`verifyChain()` verifies the loaded in-memory chain from its persisted database
+anchor, including previous-hash links. Existing `audit_logs` rows are migrated
+by adding nullable event IDs and chain sequence values; legacy IDs are copied
+from their JSON result where available. No database rows are rewritten during
+replay.
+
+The disk outbox survives process/container restarts only when its directory is
+on storage that survives those restarts. It is not replicated or protected
+against loss of the host or volume, filesystem corruption, or simultaneous
+mounting by multiple machines. It is a bounded recovery queue, not a
+replacement for backups or multi-host durable messaging.

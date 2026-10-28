@@ -4070,13 +4070,19 @@ if (require.main === module) {
   enforceSovereignBoot();
 
   ensureSchema()
-    .then(() => {
+    .then(async () => {
+      const recovery = await auditLogger.reconcilePending();
+      if (recovery.status === 'pending') {
+        console.error(
+          `Audit outbox recovery is pending (${recovery.pendingCount} entries): ${recovery.error}`
+        );
+      }
       server.listen(PORT, () => {
         console.log(`Sentinel API running on port ${PORT}`);
       });
     })
     .catch((error) => {
-      console.error(`Database bootstrap failed: ${error.message}`);
+      console.error(`API bootstrap failed: ${error.message}`);
       process.exit(1);
     });
 }

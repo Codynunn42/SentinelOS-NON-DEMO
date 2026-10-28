@@ -5,7 +5,11 @@ const {
   markUnsignedLegacy,
   verifySignedReceipt
 } = require('../receipts/signedReceipt');
+const { createDurableAuditOutbox } = require('./durableAuditOutbox');
 const crypto = require('crypto');
+
+const DEFAULT_RETRY_INTERVAL_MS = 5000;
+const MAX_RETRY_INTERVAL_MS = 60000;
 
 function stableStringify(value) {
   if (Array.isArray(value)) {
@@ -106,13 +110,13 @@ function publishAuditEvent(entry, subscribers) {
   }
 }
 
-function verifyAuditChain(entries) {
+function verifyAuditChain(entries, initialHash = null) {
   const normalizedEntries = Array.isArray(entries) ? entries : [];
   if (!normalizedEntries.length) {
     return { valid: true, checked: 0 };
   }
 
-  let previousHash = null;
+  let previousHash = initialHash;
   for (let index = 0; index < normalizedEntries.length; index += 1) {
     const entry = normalizedEntries[index];
     const expectedHash = hashAuditEntry(entry, previousHash);
@@ -127,30 +131,86 @@ function verifyAuditChain(entries) {
 
 function createAuditLogger({
   persistQuery = query,
-  databaseStatus = getDatabaseStatus
+  databaseStatus = getDatabaseStatus,
+  spoolDirectory,
+  maxSpoolBytes,
+  loadAnchor,
+  retryIntervalMs = DEFAULT_RETRY_INTERVAL_MS,
+  maxRetryIntervalMs = MAX_RETRY_INTERVAL_MS
 } = {}) {
+  if (
+    !Number.isSafeInteger(retryIntervalMs) ||
+    retryIntervalMs < 1 ||
+    !Number.isSafeInteger(maxRetryIntervalMs) ||
+    maxRetryIntervalMs < retryIntervalMs
+  ) {
+    throw new TypeError('Audit retry intervals must be positive safe integers and maximum >= initial');
+  }
   const auditLog = [];
   const subscribers = new Set();
-  const pendingPersistence = [];
-  let lastAuditHash = null;
+  let chainAnchorHash = null;
+  let initialized = false;
+  let closed = false;
+  let retryTimer;
+  let nextRetryIntervalMs = retryIntervalMs;
   let writeQueue = Promise.resolve();
 
-  function appendHashedEntry(entry) {
-    const prevHash = lastAuditHash;
-    const auditHash = hashAuditEntry(entry, prevHash);
-    const hashedEntry = { ...entry, prevHash, auditHash };
-    lastAuditHash = auditHash;
+  const outbox = createDurableAuditOutbox({
+    ...(spoolDirectory ? { directory: spoolDirectory } : {}),
+    ...(maxSpoolBytes !== undefined ? { maxBytes: maxSpoolBytes } : {}),
+    databaseStatus,
+    loadAnchor: loadAnchor || (async () => {
+      if (databaseStatus() !== 'enabled') return null;
+      const result = await persistQuery(
+        `SELECT result->>'auditHash' AS audit_hash
+         FROM audit_logs
+         WHERE result ? 'auditHash'
+         ORDER BY id DESC
+         LIMIT 1`
+      );
+      if (!result || !Array.isArray(result.rows)) {
+        throw new Error('AUDIT_OUTBOX_DATABASE_UNAVAILABLE');
+      }
+      return result.rows[0] ? result.rows[0].audit_hash : null;
+    })
+  });
+
+  async function ensureInitialized() {
+    if (closed) {
+      throw new Error('AUDIT_LOGGER_CLOSED');
+    }
+    if (initialized) return;
+    await outbox.initialize({
+      verifyEntry: (entry, prevHash) =>
+        entry.prevHash === prevHash && entry.auditHash === hashAuditEntry(entry, prevHash)
+    });
+    chainAnchorHash = outbox.initialAnchorHash;
+    auditLog.push(...outbox.pendingEntries);
+    initialized = true;
+  }
+
+  async function appendHashedEntry(entry) {
+    const { entry: hashedEntry } = await outbox.append(entry, (value, prevHash) => ({
+      ...value,
+      prevHash,
+      auditHash: hashAuditEntry(value, prevHash)
+    }));
     auditLog.push(hashedEntry);
     publishAuditEvent(hashedEntry, subscribers);
     return hashedEntry;
   }
 
-  async function persistEntry(entry) {
-    await persistQuery(
-      `INSERT INTO audit_logs (tenant_id, command, payload, result, actor)
-       VALUES ($1, $2, $3::jsonb, $4::jsonb, $5)`,
+  async function persistEntry(entry, sequence) {
+    const result = await persistQuery(
+      `INSERT INTO audit_logs
+         (event_id, chain_sequence, tenant_id, command, payload, result, actor)
+       VALUES ($1, $2, $3, $4, $5::jsonb, $6::jsonb, $7)
+       ON CONFLICT (event_id) DO NOTHING
+       RETURNING event_id`,
       [
-        entry.tenant || null,
+        entry.eventId,
+        sequence,
+        entry.tenant || 'ownerfi',
         entry.command,
         JSON.stringify(entry.payload || {}),
         JSON.stringify({
@@ -162,31 +222,40 @@ function createAuditLogger({
         entry.actor || null
       ]
     );
+    if (result === null) {
+      throw new Error('AUDIT_OUTBOX_DATABASE_UNAVAILABLE');
+    }
+    if (result && result.rowCount === 0) {
+      const existing = await persistQuery(
+        `SELECT chain_sequence, result->>'prevHash' AS prev_hash,
+                result->>'auditHash' AS audit_hash
+         FROM audit_logs
+         WHERE event_id = $1`,
+        [entry.eventId]
+      );
+      const row = existing && existing.rows && existing.rows[0];
+      if (
+        !row ||
+        Number(row.chain_sequence) !== sequence ||
+        row.prev_hash !== entry.prevHash ||
+        row.audit_hash !== entry.auditHash
+      ) {
+        throw new Error('AUDIT_OUTBOX_IDEMPOTENCY_CONFLICT');
+      }
+    }
   }
 
   async function reconcilePendingInternal() {
-    if (pendingPersistence.length === 0) {
+    await ensureInitialized();
+    if (outbox.pendingCount === 0) {
       return { status: 'clear', pendingCount: 0 };
     }
 
-    const reconciledEventIds = [];
-    while (pendingPersistence.length > 0) {
-      const pendingEntry = pendingPersistence[0];
-      try {
-        await persistEntry(pendingEntry);
-      } catch (error) {
-        return {
-          status: 'pending',
-          pendingCount: pendingPersistence.length,
-          failedEventId: pendingEntry.eventId,
-          error: error instanceof Error ? error.message : 'Unknown database write failure'
-        };
-      }
-      pendingPersistence.shift();
-      reconciledEventIds.push(pendingEntry.eventId);
-    }
+    const reconciledEventIds = outbox.pendingEntries.map((entry) => entry.eventId);
+    const pendingResult = await outbox.flush(persistEntry);
+    if (pendingResult.status === 'pending') return pendingResult;
 
-    const reconciledEntry = appendHashedEntry({
+    await appendHashedEntry({
       eventId: crypto.randomUUID(),
       command: 'system.audit.persist_reconciled',
       payload: { reconciledEventIds },
@@ -197,18 +266,44 @@ function createAuditLogger({
       actor: 'system',
       timestamp: new Date().toISOString()
     });
-    try {
-      await persistEntry(reconciledEntry);
-      return { status: 'reconciled', pendingCount: 0, reconciledCount: reconciledEventIds.length };
-    } catch (error) {
-      pendingPersistence.push(reconciledEntry);
-      return {
-        status: 'pending',
-        pendingCount: pendingPersistence.length,
-        failedEventId: reconciledEntry.eventId,
-        error: error instanceof Error ? error.message : 'Unknown database write failure'
-      };
+    const markerResult = await outbox.flush(persistEntry);
+    if (markerResult.status === 'pending') return markerResult;
+    return { status: 'reconciled', pendingCount: 0, reconciledCount: reconciledEventIds.length };
+  }
+
+  function clearScheduledRetry() {
+    if (retryTimer) {
+      clearTimeout(retryTimer);
+      retryTimer = undefined;
     }
+    nextRetryIntervalMs = retryIntervalMs;
+  }
+
+  function scheduleRetry() {
+    if (closed || retryTimer || outbox.pendingCount === 0) return;
+    const delay = nextRetryIntervalMs;
+    nextRetryIntervalMs = Math.min(nextRetryIntervalMs * 2, maxRetryIntervalMs);
+    retryTimer = setTimeout(() => {
+      retryTimer = undefined;
+      if (closed) return;
+      serializeWrite(async () => {
+        const result = await reconcilePendingWithRetry();
+        return result;
+      }).catch((error) => {
+        console.error(`Scheduled audit outbox retry failed: ${error.message}`);
+      });
+    }, delay);
+    if (typeof retryTimer.unref === 'function') retryTimer.unref();
+  }
+
+  async function reconcilePendingWithRetry() {
+    const result = await reconcilePendingInternal();
+    if (result.status === 'pending') {
+      scheduleRetry();
+    } else {
+      clearScheduledRetry();
+    }
+    return result;
   }
 
   function serializeWrite(action) {
@@ -218,8 +313,9 @@ function createAuditLogger({
   }
 
   async function logInternal(entry) {
-    if (pendingPersistence.length > 0) {
-      await reconcilePendingInternal();
+    await ensureInitialized();
+    if (outbox.pendingCount > 0) {
+      await reconcilePendingWithRetry();
     }
 
     const result = entry.result && typeof entry.result === 'object' ? entry.result : {};
@@ -244,30 +340,29 @@ function createAuditLogger({
         governanceSignals
       }
     };
-    const hashedEntry = appendHashedEntry(signaledEntry);
+    const hashedEntry = await appendHashedEntry(signaledEntry);
 
-    if (pendingPersistence.length > 0) {
-      pendingPersistence.push(hashedEntry);
-      appendPersistenceFailureEntry(
+    if (outbox.pendingCount > 1) {
+      await appendPersistenceFailureEntry(
         entry,
         hashedEntry.eventId,
         new Error('AUDIT_PERSISTENCE_RECONCILIATION_PENDING')
       );
+      scheduleRetry();
       return hashedEntry;
     }
 
-    try {
-      await persistEntry(hashedEntry);
-    } catch (error) {
-      pendingPersistence.push(hashedEntry);
-      appendPersistenceFailureEntry(entry, hashedEntry.eventId, error);
+    const persistenceResult = await outbox.flush(persistEntry);
+    if (persistenceResult.status === 'pending') {
+      await appendPersistenceFailureEntry(entry, hashedEntry.eventId, new Error(persistenceResult.error));
+      scheduleRetry();
     }
 
     return hashedEntry;
   }
 
-  function appendPersistenceFailureEntry(originalEntry, originalEventId, error) {
-    const failureEntry = appendHashedEntry({
+  async function appendPersistenceFailureEntry(originalEntry, originalEventId, error) {
+    await appendHashedEntry({
       eventId: crypto.randomUUID(),
       command: 'system.audit.persist_failed',
       payload: {
@@ -283,28 +378,36 @@ function createAuditLogger({
       actor: 'system',
       timestamp: new Date().toISOString()
     });
-    pendingPersistence.push(failureEntry);
   }
 
   return {
   verifyChain() {
-    return verifyAuditChain(auditLog);
+    return verifyAuditChain(auditLog, chainAnchorHash);
   },
 
   log(entry) {
     return serializeWrite(() => logInternal(entry));
   },
 
+  initialize() {
+    return serializeWrite(ensureInitialized);
+  },
+
   reconcilePending() {
-    return serializeWrite(reconcilePendingInternal);
+    return serializeWrite(reconcilePendingWithRetry);
   },
 
   getPersistenceStatus() {
-    return {
-      status: pendingPersistence.length === 0 ? 'clear' : 'pending_reconciliation',
-      pendingCount: pendingPersistence.length,
-      pendingEventIds: pendingPersistence.map((entry) => entry.eventId)
-    };
+    return outbox.getStatus();
+  },
+
+  close() {
+    return serializeWrite(async () => {
+      closed = true;
+      clearScheduledRetry();
+      initialized = false;
+      await outbox.close();
+    });
   },
 
   subscribe(callback) {
