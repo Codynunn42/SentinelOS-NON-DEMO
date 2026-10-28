@@ -24,6 +24,7 @@ export interface PrincipalContext {
 
 export interface ReceiptEntry {
     id: string;
+    signatureVersion?: number;
     command: string;
     tenant: string;
     executor: string;
