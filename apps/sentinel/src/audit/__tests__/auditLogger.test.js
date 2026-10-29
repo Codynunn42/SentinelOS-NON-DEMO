@@ -593,7 +593,7 @@ describe('audit persistence reconciliation', () => {
       assert.equal((await logger.reconcilePending()).status, 'pending');
       const retryDeadline = Date.now() + 2000;
       while (
-        logger.getPersistenceStatus().pendingCount > 0 &&
+        (logger.getPersistenceStatus().pendingCount > 0 || logger.getAll().length < 3) &&
         Date.now() < retryDeadline
       ) {
         await new Promise((resolve) => setTimeout(resolve, 10));
