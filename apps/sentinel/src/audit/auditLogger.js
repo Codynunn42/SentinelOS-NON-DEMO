@@ -30,6 +30,64 @@ function hashPayload(payload) {
   return crypto.createHash('sha256').update(stableStringify(payload || {})).digest('hex');
 }
 
+function normalizeAuditEntry(entry) {
+  let serialized;
+  try {
+    serialized = JSON.stringify(entry);
+  } catch (error) {
+    throw new Error(
+      `AUDIT_ENTRY_SERIALIZATION_FAILED: ${error instanceof Error ? error.message : 'Unable to serialize audit entry'}`
+    );
+  }
+
+  if (typeof serialized !== 'string') {
+    throw new Error('AUDIT_ENTRY_SERIALIZATION_FAILED: audit entry must serialize to a JSON object');
+  }
+
+  let snapshot;
+  try {
+    snapshot = JSON.parse(serialized);
+  } catch (error) {
+    throw new Error(
+      `AUDIT_ENTRY_SERIALIZATION_FAILED: ${error instanceof Error ? error.message : 'Unable to parse serialized audit entry'}`
+    );
+  }
+
+  if (!snapshot || typeof snapshot !== 'object' || Array.isArray(snapshot)) {
+    throw new Error('AUDIT_ENTRY_INVALID: audit entry must be an object');
+  }
+  if (typeof snapshot.command !== 'string' || snapshot.command.trim() === '') {
+    throw new Error('AUDIT_ENTRY_INVALID: command must be a non-empty string');
+  }
+  if (snapshot.eventId !== undefined && (typeof snapshot.eventId !== 'string' || !snapshot.eventId)) {
+    throw new Error('AUDIT_ENTRY_INVALID: eventId must be a non-empty string');
+  }
+  if (snapshot.eventId !== undefined && !/^[0-9a-f-]{36}$/i.test(snapshot.eventId)) {
+    throw new Error('AUDIT_ENTRY_INVALID: eventId must be a UUID');
+  }
+  if (snapshot.timestamp !== undefined && (typeof snapshot.timestamp !== 'string' || !snapshot.timestamp)) {
+    throw new Error('AUDIT_ENTRY_INVALID: timestamp must be a non-empty string');
+  }
+
+  const existingResult =
+    snapshot.result && typeof snapshot.result === 'object' && !Array.isArray(snapshot.result)
+      ? snapshot.result
+      : {};
+  snapshot.eventId = snapshot.eventId === undefined ? crypto.randomUUID() : snapshot.eventId;
+  snapshot.correlationId = snapshot.correlationId || null;
+  snapshot.inputPayloadHash = hashPayload(snapshot.payload);
+  snapshot.signatureVersion = existingResult.signatureVersion || 'unsigned';
+  snapshot.timestamp =
+    snapshot.timestamp === undefined ? new Date().toISOString() : snapshot.timestamp;
+  snapshot.payload = snapshot.payload || {};
+  snapshot.result = existingResult;
+  return snapshot;
+}
+
+function cloneAuditEntry(entry) {
+  return JSON.parse(JSON.stringify(entry));
+}
+
 function hashAuditEntry(entry, prevHash) {
   return crypto
     .createHash('sha256')
@@ -103,7 +161,7 @@ function replaceReceipt(entry, receipt) {
 function publishAuditEvent(entry, subscribers) {
   for (const subscriber of subscribers) {
     try {
-      subscriber(entry);
+      subscriber(cloneAuditEntry(entry));
     } catch (_) {
       subscribers.delete(subscriber);
     }
@@ -190,11 +248,11 @@ function createAuditLogger({
   }
 
   async function appendHashedEntry(entry) {
-    const { entry: hashedEntry } = await outbox.append(entry, (value, prevHash) => ({
-      ...value,
-      prevHash,
-      auditHash: hashAuditEntry(value, prevHash)
-    }));
+    const { entry: hashedEntry } = await outbox.append(entry, (value, prevHash) => {
+      value.prevHash = prevHash;
+      value.auditHash = hashAuditEntry(value, prevHash);
+      return value;
+    });
     auditLog.push(hashedEntry);
     publishAuditEvent(hashedEntry, subscribers);
     return hashedEntry;
@@ -328,53 +386,36 @@ function createAuditLogger({
     return operation;
   }
 
-  async function logInternal(entry) {
+  async function logInternal(snapshot) {
     await ensureInitialized();
     if (outbox.pendingCount > 0) {
       await reconcilePendingWithRetry();
     }
 
-    const result = entry.result && typeof entry.result === 'object' ? entry.result : {};
-    const signatureVersion = result.signatureVersion || 'unsigned';
-    const timestampedEntry = {
-      ...entry,
-      eventId: entry.eventId || crypto.randomUUID(),
-      correlationId: entry.correlationId || null,
-      inputPayloadHash: hashPayload(entry.payload),
-      signatureVersion,
-      timestamp: entry.timestamp || new Date().toISOString()
-    };
-    const governanceSignals = evaluateGovernanceSignals(timestampedEntry);
-    const existingResult =
-      timestampedEntry.result && typeof timestampedEntry.result === 'object'
-        ? timestampedEntry.result
-        : {};
-    const signaledEntry = {
-      ...timestampedEntry,
-      result: {
-        ...existingResult,
-        governanceSignals
-      }
-    };
-    const hashedEntry = await appendHashedEntry(signaledEntry);
+    snapshot.result.governanceSignals = evaluateGovernanceSignals(snapshot);
+    const hashedEntry = await appendHashedEntry(snapshot);
 
     if (outbox.pendingCount > 1) {
       await appendPersistenceFailureEntry(
-        entry,
+        snapshot,
         hashedEntry.eventId,
         new Error('AUDIT_PERSISTENCE_RECONCILIATION_PENDING')
       );
       scheduleRetry();
-      return hashedEntry;
+      return cloneAuditEntry(hashedEntry);
     }
 
     const persistenceResult = await outbox.flush(persistEntry);
     if (persistenceResult.status === 'pending') {
-      await appendPersistenceFailureEntry(entry, hashedEntry.eventId, new Error(persistenceResult.error));
+      await appendPersistenceFailureEntry(
+        snapshot,
+        hashedEntry.eventId,
+        new Error(persistenceResult.error)
+      );
       scheduleRetry();
     }
 
-    return hashedEntry;
+    return cloneAuditEntry(hashedEntry);
   }
 
   async function appendPersistenceFailureEntry(originalEntry, originalEventId, error) {
@@ -402,7 +443,13 @@ function createAuditLogger({
   },
 
   log(entry) {
-    return serializeWrite(() => logInternal(entry));
+    let snapshot;
+    try {
+      snapshot = normalizeAuditEntry(entry);
+    } catch (error) {
+      return Promise.reject(error);
+    }
+    return serializeWrite(() => logInternal(snapshot));
   },
 
   initialize() {
@@ -432,11 +479,13 @@ function createAuditLogger({
   },
 
   getAll() {
-    return auditLog;
+    return auditLog.map(cloneAuditEntry);
   },
 
   getByTenant(tenant) {
-    return auditLog.filter((entry) => entry && entry.tenant === tenant);
+    return auditLog
+      .filter((entry) => entry && entry.tenant === tenant)
+      .map(cloneAuditEntry);
   },
 
   getByApplicationId(applicationId, tenant) {
@@ -473,7 +522,7 @@ function createAuditLogger({
         resultApplicationId === applicationId ||
         receiptOutcomeApplicationId === applicationId
       );
-    });
+    }).map(cloneAuditEntry);
   },
 
   async getByReceiptId(receiptId, tenant) {
@@ -554,8 +603,8 @@ function createAuditLogger({
         };
       }
       return {
-        receipt,
-        entry: replaceReceipt(memoryEntry, receipt),
+        receipt: cloneAuditEntry(receipt),
+        entry: cloneAuditEntry(replaceReceipt(memoryEntry, receipt)),
         source: 'memory'
       };
     }

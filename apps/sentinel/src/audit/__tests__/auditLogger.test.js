@@ -13,6 +13,19 @@ const itWithPostgres =
     ? it
     : it.skip;
 
+function stableStringify(value) {
+  if (Array.isArray(value)) {
+    return `[${value.map(stableStringify).join(',')}]`;
+  }
+  if (value && typeof value === 'object') {
+    return `{${Object.keys(value)
+      .sort()
+      .map((key) => `${JSON.stringify(key)}:${stableStringify(value[key])}`)
+      .join(',')}}`;
+  }
+  return JSON.stringify(value);
+}
+
 function createTestLogger(options = {}) {
   const spoolDirectory =
     options.spoolDirectory || path.join(os.tmpdir(), `sentinel-audit-${crypto.randomUUID()}`);
@@ -35,6 +48,209 @@ afterEach(async () => {
 });
 
 describe('audit persistence reconciliation', () => {
+  it('continues to verify existing valid spool entries without changing their hashes', async () => {
+    const spoolDirectory = path.join(os.tmpdir(), `sentinel-audit-${crypto.randomUUID()}`);
+    const eventId = crypto.randomUUID();
+    const entry = {
+      eventId,
+      tenant: 'synthetic-tenant',
+      command: 'synthetic.preexisting',
+      payload: { nested: { value: 'persisted' } },
+      result: { ok: true },
+      actor: 'test',
+      timestamp: '2026-10-28T05:00:00.000Z',
+      prevHash: null
+    };
+    entry.auditHash = crypto.createHash('sha256').update(stableStringify({
+      eventId: entry.eventId,
+      tenant: entry.tenant,
+      command: entry.command,
+      payload: entry.payload,
+      result: entry.result,
+      actor: entry.actor,
+      timestamp: entry.timestamp,
+      prevHash: entry.prevHash
+    })).digest('hex');
+    await fs.mkdir(spoolDirectory, { recursive: true });
+    const fileName = `00000000000000000001-${eventId}.json`;
+    const entryFile = path.join(spoolDirectory, fileName);
+    const originalRecord = `${JSON.stringify({ sequence: 1, entry })}\n`;
+    await fs.writeFile(entryFile, originalRecord);
+    await fs.writeFile(path.join(spoolDirectory, 'state.json'), `${JSON.stringify({
+      version: 1,
+      databaseMode: 'synthetic-test-database',
+      checkpointSequence: 0,
+      checkpointHash: null,
+      lastSequence: 1,
+      lastHash: entry.auditHash
+    })}\n`);
+
+    const logger = createTestLogger({
+      spoolDirectory,
+      databaseStatus: () => 'synthetic-test-database'
+    });
+    await logger.initialize();
+
+    assert.deepEqual(logger.verifyChain(), { valid: true, checked: 1 });
+    assert.equal(logger.getAll()[0].auditHash, entry.auditHash);
+    assert.equal(await fs.readFile(entryFile, 'utf8'), originalRecord);
+  });
+
+  it('normalizes once and replays the same JSON snapshot after restart', async () => {
+    const spoolDirectory = path.join(os.tmpdir(), `sentinel-audit-${crypto.randomUUID()}`);
+    const persistedEntries = [];
+    const eventId = crypto.randomUUID();
+    let toJSONCalls = 0;
+    const input = {
+      eventId,
+      timestamp: '2026-10-29T05:00:00.000Z',
+      tenant: 'synthetic-tenant',
+      command: 'synthetic.normalized',
+      payload: {
+        nested: { kept: true, omitted: undefined },
+        values: [undefined, { omitted: undefined, date: new Date('2026-01-02T03:04:05.000Z') }],
+        date: new Date('2026-02-03T04:05:06.000Z'),
+        nonFinite: Infinity,
+        serialized: {
+          toJSON() {
+            toJSONCalls += 1;
+            return 'serialized';
+          }
+        }
+      },
+      result: { ok: true, omitted: undefined }
+    };
+    const firstLogger = createTestLogger({
+      spoolDirectory,
+      databaseStatus: () => 'synthetic-test-database',
+      persistQuery: async () => {
+        throw new Error('synthetic database outage');
+      }
+    });
+
+    const appended = await firstLogger.log(input);
+    const normalizedPayload = {
+      nested: { kept: true },
+      values: [null, { date: '2026-01-02T03:04:05.000Z' }],
+      date: '2026-02-03T04:05:06.000Z',
+      nonFinite: null,
+      serialized: 'serialized'
+    };
+    assert.equal(toJSONCalls, 1);
+    assert.equal(appended.eventId, input.eventId);
+    assert.equal(appended.timestamp, input.timestamp);
+    assert.deepEqual(appended.payload, normalizedPayload);
+    assert.deepEqual(appended.result, { ok: true, governanceSignals: [] });
+    const originalHash = appended.auditHash;
+    await firstLogger.close();
+
+    const restartedLogger = createTestLogger({
+      spoolDirectory,
+      databaseStatus: () => 'synthetic-test-database',
+      persistQuery: async (sql, parameters) => {
+        if (sql.includes('INSERT INTO audit_logs')) {
+          persistedEntries.push({
+            eventId: parameters[0],
+            payload: JSON.parse(parameters[4]),
+            result: JSON.parse(parameters[5])
+          });
+        }
+        return { rowCount: 1, rows: [] };
+      }
+    });
+
+    await restartedLogger.initialize();
+    assert.deepEqual(restartedLogger.verifyChain(), { valid: true, checked: 2 });
+    const recovered = restartedLogger.getAll().find((entry) => entry.eventId === appended.eventId);
+    assert.deepEqual(recovered, appended);
+    assert.equal(recovered.auditHash, originalHash);
+
+    const replay = await restartedLogger.reconcilePending();
+    assert.equal(replay.status, 'reconciled');
+    const persistedOriginal = persistedEntries.find((entry) => entry.eventId === appended.eventId);
+    assert.deepEqual(persistedOriginal.payload, normalizedPayload);
+    assert.equal(persistedOriginal.result.auditHash, originalHash);
+    assert.equal(persistedOriginal.result.prevHash, appended.prevHash);
+    assert.equal(persistedOriginal.result.auditTimestamp, input.timestamp);
+    assert.deepEqual(restartedLogger.verifyChain(), { valid: true, checked: 3 });
+  });
+
+  it('rejects unserializable entries without changing sequence, checkpoint, or pending records', async () => {
+    const spoolDirectory = path.join(os.tmpdir(), `sentinel-audit-${crypto.randomUUID()}`);
+    const logger = createTestLogger({
+      spoolDirectory,
+      databaseStatus: () => 'synthetic-test-database',
+      persistQuery: async () => {
+        throw new Error('synthetic database outage');
+      }
+    });
+    await logger.log({ command: 'synthetic.pending', payload: {}, result: {} });
+
+    const readSpool = async () => {
+      const state = JSON.parse(await fs.readFile(path.join(spoolDirectory, 'state.json'), 'utf8'));
+      const files = (await fs.readdir(spoolDirectory))
+        .filter((name) => name.endsWith('.json') && name !== 'state.json')
+        .sort();
+      const records = await Promise.all(
+        files.map(async (name) => ({
+          name,
+          content: await fs.readFile(path.join(spoolDirectory, name), 'utf8')
+        }))
+      );
+      return { state, records, status: logger.getPersistenceStatus(), entries: logger.getAll() };
+    };
+    const before = await readSpool();
+
+    const circular = { value: 'cycle' };
+    circular.self = circular;
+    await assert.rejects(
+      logger.log({ command: 'synthetic.circular', payload: circular, result: {} }),
+      /AUDIT_ENTRY_SERIALIZATION_FAILED/
+    );
+    await assert.rejects(
+      logger.log({ command: 'synthetic.bigint', payload: { value: 1n }, result: {} }),
+      /AUDIT_ENTRY_SERIALIZATION_FAILED/
+    );
+
+    const after = await readSpool();
+    assert.deepEqual(after, before);
+  });
+
+  it('keeps retained replay evidence isolated from input, subscriber, and returned-object mutations', async () => {
+    let persistedPayload;
+    const input = {
+      command: 'synthetic.mutation',
+      payload: { nested: { value: 'original' } },
+      result: { data: { value: 'original' } }
+    };
+    const logger = createTestLogger({
+      persistQuery: async (sql, parameters) => {
+        if (sql.includes('INSERT INTO audit_logs')) {
+          persistedPayload = JSON.parse(parameters[4]);
+        }
+        return { rowCount: 1, rows: [] };
+      }
+    });
+    logger.subscribe((entry) => {
+      entry.payload.nested.value = 'subscriber mutation';
+    });
+
+    const logging = logger.log(input);
+    input.payload.nested.value = 'caller mutation';
+    input.result.data.value = 'caller mutation';
+    const returned = await logging;
+    returned.payload.nested.value = 'return mutation';
+    returned.result.data.value = 'return mutation';
+    const exposed = logger.getAll();
+    exposed[0].payload.nested.value = 'getAll mutation';
+
+    const retained = logger.getAll()[0];
+    assert.equal(retained.payload.nested.value, 'original');
+    assert.equal(retained.result.data.value, 'original');
+    assert.deepEqual(persistedPayload, { nested: { value: 'original' } });
+    assert.deepEqual(logger.verifyChain(), { valid: true, checked: 1 });
+  });
+
   it('keeps failures in the hash chain and persists them in order during reconciliation', async () => {
     let failNextWrite = true;
     let failReconciliationMarker = true;
@@ -70,29 +286,31 @@ describe('audit persistence reconciliation', () => {
     assert.equal(logger.getPersistenceStatus().pendingCount, 2);
 
     const reconciliation = await logger.reconcilePending();
+    const entriesAfterMarker = logger.getAll();
     assert.deepEqual(reconciliation, {
       status: 'pending',
       pendingCount: 1,
-      failedEventId: entries[2].eventId,
+      failedEventId: entriesAfterMarker[2].eventId,
       error: 'synthetic reconciliation marker failure'
     });
     assert.equal(logger.getPersistenceStatus().status, 'pending_reconciliation');
     assert.deepEqual(logger.verifyChain(), { valid: true, checked: 3 });
 
     const markerRecovery = await logger.reconcilePending();
+    const entriesAfterRecovery = logger.getAll();
     assert.deepEqual(markerRecovery, {
       status: 'reconciled',
       pendingCount: 0,
       reconciledCount: 1
     });
     assert.deepEqual(persistedEvents, [
-      entries[0].eventId,
-      entries[1].eventId,
-      entries[2].eventId,
-      entries[3].eventId
+      entriesAfterRecovery[0].eventId,
+      entriesAfterRecovery[1].eventId,
+      entriesAfterRecovery[2].eventId,
+      entriesAfterRecovery[3].eventId
     ]);
-    assert.equal(entries[2].command, 'system.audit.persist_reconciled');
-    assert.equal(entries[3].command, 'system.audit.persist_reconciled');
+    assert.equal(entriesAfterRecovery[2].command, 'system.audit.persist_reconciled');
+    assert.equal(entriesAfterRecovery[3].command, 'system.audit.persist_reconciled');
     assert.deepEqual(logger.verifyChain(), { valid: true, checked: 4 });
     assert.equal(logger.getPersistenceStatus().status, 'clear');
 
@@ -103,10 +321,10 @@ describe('audit persistence reconciliation', () => {
       result: { ok: true }
     });
     assert.deepEqual(persistedEvents, [
-      entries[0].eventId,
-      entries[1].eventId,
-      entries[2].eventId,
-      entries[3].eventId,
+      entriesAfterRecovery[0].eventId,
+      entriesAfterRecovery[1].eventId,
+      entriesAfterRecovery[2].eventId,
+      entriesAfterRecovery[3].eventId,
       subsequent.eventId
     ]);
     assert.deepEqual(logger.verifyChain(), { valid: true, checked: 5 });

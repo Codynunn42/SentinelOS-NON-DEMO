@@ -7,6 +7,13 @@ uses `.data/audit-spool` in the current working directory. Production
 deployments must place this directory on persistent storage. The Docker Compose
 deployment mounts `SENTINEL_DATA_DIR` on the `sentinel_data` volume.
 
+Entries are normalized once using JSON serialization before hashing. This
+matches persisted JSON behavior: undefined object properties are omitted,
+undefined array elements become `null`, Dates become ISO strings, and
+non-finite numbers (`NaN`, `Infinity`, and `-Infinity`) become `null`.
+Circular references and BigInt values are rejected before the outbox sequence
+or pending records are changed.
+
 The outbox has one writer lock, a 100 MiB default pending-size limit
 (`SENTINEL_AUDIT_SPOOL_MAX_BYTES`), and a hash-anchored, ordered sequence of
 entry files. PostgreSQL writes use the event ID as an idempotency key. A
