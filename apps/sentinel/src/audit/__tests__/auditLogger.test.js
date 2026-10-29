@@ -147,6 +147,108 @@ describe('audit persistence reconciliation', () => {
     assert.equal(second.eventId, entries[3].eventId);
   });
 
+  it('retains the spool and reports a conflict when duplicate event contents differ', async () => {
+    for (const alteredField of ['payload', 'command', 'result']) {
+      let storedRow;
+      const spoolDirectory = path.join(os.tmpdir(), `sentinel-audit-${crypto.randomUUID()}`);
+      const logger = createTestLogger({
+        spoolDirectory,
+        databaseStatus: () => 'synthetic-test-database',
+        persistQuery: async (sql, parameters) => {
+          if (sql.includes('INSERT INTO audit_logs')) {
+            storedRow = {
+              event_id: parameters[0],
+              chain_sequence: parameters[1],
+              tenant_id: parameters[2],
+              command: parameters[3],
+              payload: JSON.parse(parameters[4]),
+              result: JSON.parse(parameters[5]),
+              actor: parameters[6],
+              created_at: new Date('2000-01-01T00:00:00.000Z')
+            };
+            if (alteredField === 'payload') {
+              storedRow.payload = { value: 'altered' };
+            } else if (alteredField === 'command') {
+              storedRow.command = 'altered.command';
+            } else {
+              storedRow.result = { ...storedRow.result, ok: false };
+            }
+            return { rowCount: 0, rows: [] };
+          }
+          return { rows: [storedRow] };
+        }
+      });
+
+      const replayed = await logger.log({
+        tenant: 'synthetic-tenant',
+        command: 'synthetic.command',
+        payload: { value: 'original' },
+        result: { ok: true }
+      });
+
+      assert.equal(logger.getPersistenceStatus().lastError, 'AUDIT_OUTBOX_RECONCILIATION_CONFLICT');
+      assert.equal(logger.getPersistenceStatus().pendingCount, 2);
+      const state = JSON.parse(await fs.readFile(path.join(spoolDirectory, 'state.json'), 'utf8'));
+      assert.equal(state.checkpointSequence, 0);
+      const entryFiles = (await fs.readdir(spoolDirectory)).filter(
+        (name) => name.endsWith('.json') && name !== 'state.json'
+      );
+      assert.equal(entryFiles.length, 2);
+      const records = await Promise.all(
+        entryFiles.map(async (name) =>
+          JSON.parse(await fs.readFile(path.join(spoolDirectory, name), 'utf8'))
+        )
+      );
+      const retained = records.find((record) => record.entry.eventId === replayed.eventId);
+      assert.ok(retained);
+      assert.equal(retained.entry.timestamp, replayed.timestamp);
+      assert.equal(retained.entry.auditHash, storedRow.result.auditHash);
+      assert.equal(storedRow.result.prevHash, replayed.prevHash);
+      assert.equal(storedRow.result.auditHash, replayed.auditHash);
+    }
+  });
+
+  it('accepts a duplicate replay when stored event contents match despite a different insertion timestamp', async () => {
+    let storedRow;
+    const spoolDirectory = path.join(os.tmpdir(), `sentinel-audit-${crypto.randomUUID()}`);
+    const logger = createTestLogger({
+      spoolDirectory,
+      databaseStatus: () => 'synthetic-test-database',
+      persistQuery: async (sql, parameters) => {
+        if (sql.includes('INSERT INTO audit_logs')) {
+          storedRow = {
+            event_id: parameters[0],
+            chain_sequence: parameters[1],
+            tenant_id: parameters[2],
+            command: parameters[3],
+            payload: JSON.parse(parameters[4]),
+            result: JSON.parse(parameters[5]),
+            actor: parameters[6],
+            created_at: new Date('2000-01-01T00:00:00.000Z')
+          };
+          return { rowCount: 0, rows: [] };
+        }
+        return { rows: [storedRow] };
+      }
+    });
+
+    const replayed = await logger.log({
+      tenant: 'synthetic-tenant',
+      command: 'synthetic.command',
+      payload: { value: 'original' },
+      result: { ok: true }
+    });
+
+    assert.equal(storedRow.result.auditTimestamp, replayed.timestamp);
+    assert.notEqual(storedRow.created_at.toISOString(), replayed.timestamp);
+    assert.equal(logger.getPersistenceStatus().status, 'clear');
+    assert.equal(logger.getPersistenceStatus().pendingCount, 0);
+    const entryFiles = (await fs.readdir(spoolDirectory)).filter(
+      (name) => name.endsWith('.json') && name !== 'state.json'
+    );
+    assert.deepEqual(entryFiles, []);
+  });
+
   it('fails explicitly when the durable outbox reaches its configured capacity', async () => {
     const logger = createTestLogger({
       maxSpoolBytes: 1,

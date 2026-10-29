@@ -217,7 +217,8 @@ function createAuditLogger({
           ...(entry.result || {}),
           eventId: entry.eventId,
           prevHash: entry.prevHash,
-          auditHash: entry.auditHash
+          auditHash: entry.auditHash,
+          auditTimestamp: entry.timestamp
         }),
         entry.actor || null
       ]
@@ -227,20 +228,35 @@ function createAuditLogger({
     }
     if (result && result.rowCount === 0) {
       const existing = await persistQuery(
-        `SELECT chain_sequence, result->>'prevHash' AS prev_hash,
-                result->>'auditHash' AS audit_hash
+        `SELECT event_id, chain_sequence, tenant_id, command, payload, result, actor
          FROM audit_logs
          WHERE event_id = $1`,
         [entry.eventId]
       );
       const row = existing && existing.rows && existing.rows[0];
+      const expectedPayload = JSON.parse(JSON.stringify(entry.payload || {}));
+      const expectedResult = JSON.parse(JSON.stringify({
+        ...(entry.result || {}),
+        eventId: entry.eventId,
+        prevHash: entry.prevHash,
+        auditHash: entry.auditHash,
+        auditTimestamp: entry.timestamp
+      }));
       if (
         !row ||
+        row.event_id !== entry.eventId ||
         Number(row.chain_sequence) !== sequence ||
-        row.prev_hash !== entry.prevHash ||
-        row.audit_hash !== entry.auditHash
+        row.tenant_id !== (entry.tenant || 'ownerfi') ||
+        row.command !== entry.command ||
+        stableStringify(row.payload) !== stableStringify(expectedPayload) ||
+        stableStringify(row.result) !== stableStringify(expectedResult) ||
+        row.actor !== (entry.actor || null) ||
+        !row.result ||
+        row.result.auditTimestamp !== entry.timestamp ||
+        row.result.prevHash !== entry.prevHash ||
+        row.result.auditHash !== entry.auditHash
       ) {
-        throw new Error('AUDIT_OUTBOX_IDEMPOTENCY_CONFLICT');
+        throw new Error('AUDIT_OUTBOX_RECONCILIATION_CONFLICT');
       }
     }
   }
