@@ -46,3 +46,10 @@ on storage that survives those restarts. It is not replicated or protected
 against loss of the host or volume, filesystem corruption, or simultaneous
 mounting by multiple machines. It is a bounded recovery queue, not a
 replacement for backups or multi-host durable messaging.
+
+The writer lock uses the operating system's `flock` utility and kernel advisory
+locks. The spool filesystem must provide exclusive `flock(2)` semantics across
+all processes that can access the directory; the utility and lock support must
+be available or logger initialization fails closed. Keep the lock file in place:
+the kernel lock, not file contents, identifies the current writer. The runtime
+helper releases the lock when its owning process exits, including an abrupt exit.

@@ -1,7 +1,7 @@
 const fs = require('fs/promises');
 const path = require('path');
-const os = require('os');
 const crypto = require('crypto');
+const { spawn } = require('child_process');
 
 const STATE_FILE = 'state.json';
 const LOCK_FILE = 'writer.lock';
@@ -34,7 +34,8 @@ function createDurableAuditOutbox({
   const pending = [];
   let state;
   let pendingBytes = 0;
-  let lockHandle;
+  let lockProcess;
+  let lockLostError;
   let initialized = false;
   let fatalError;
   let lastError = null;
@@ -42,6 +43,9 @@ function createDurableAuditOutbox({
   function assertUsable() {
     if (fatalError) {
       throw fatalError;
+    }
+    if (lockLostError) {
+      throw lockLostError;
     }
     if (!initialized) {
       throw new Error('AUDIT_OUTBOX_NOT_INITIALIZED');
@@ -100,54 +104,67 @@ function createDurableAuditOutbox({
 
   async function acquireLock() {
     await fs.mkdir(spoolDirectory, { recursive: true, mode: 0o700 });
-    for (let attempt = 0; attempt < 2; attempt += 1) {
-      const temporaryPath = `${lockPath}.${process.pid}.${crypto.randomUUID()}.tmp`;
-      let temporaryHandle;
-      try {
-        temporaryHandle = await fs.open(temporaryPath, 'wx', 0o600);
-        await temporaryHandle.writeFile(JSON.stringify({
-          pid: process.pid,
-          hostname: os.hostname()
-        }), 'utf8');
-        await temporaryHandle.sync();
-        await fs.link(temporaryPath, lockPath);
-        lockHandle = temporaryHandle;
-        temporaryHandle = undefined;
-        await fs.unlink(temporaryPath);
-        await syncDirectory();
-        return;
-      } catch (error) {
-        if (temporaryHandle) await temporaryHandle.close();
-        try {
-          await fs.unlink(temporaryPath);
-        } catch (cleanupError) {
-          if (!cleanupError || cleanupError.code !== 'ENOENT') throw cleanupError;
-        }
-        if (!error || error.code !== 'EEXIST') throw error;
-        let owner;
-        try {
-          owner = JSON.parse(await fs.readFile(lockPath, 'utf8'));
-        } catch {
-          throw new Error('AUDIT_OUTBOX_WRITER_LOCK_INVALID');
-        }
-        if (
-          owner.hostname !== os.hostname() ||
-          !Number.isSafeInteger(owner.pid) ||
-          owner.pid < 1
-        ) {
-          throw new Error('AUDIT_OUTBOX_WRITER_LOCKED');
-        }
-        try {
-          process.kill(owner.pid, 0);
-          throw new Error('AUDIT_OUTBOX_WRITER_LOCKED');
-        } catch (probeError) {
-          if (probeError && probeError.code !== 'ESRCH') throw probeError;
-        }
-        await fs.unlink(lockPath);
-        await syncDirectory();
+    const lockFile = await fs.open(lockPath, 'a', 0o600);
+    try {
+      if (!(await lockFile.stat()).isFile()) {
+        throw new Error('AUDIT_OUTBOX_LOCK_UNSUPPORTED');
       }
+    } finally {
+      await lockFile.close();
     }
-    throw new Error('AUDIT_OUTBOX_WRITER_LOCKED');
+
+    await new Promise((resolve, reject) => {
+      const acquiredMessage = 'AUDIT_OUTBOX_LOCK_ACQUIRED';
+      const child = spawn('flock', [
+        '-n',
+        lockPath,
+        'sh',
+        '-c',
+        `printf '%s\\n' '${acquiredMessage}'; exec cat >/dev/null`
+      ], { stdio: ['pipe', 'pipe', 'pipe'] });
+      child.unref();
+      child.stdin.unref();
+      child.stderr.unref();
+      let output = '';
+      let diagnostics = '';
+      let acquired = false;
+      lockProcess = child;
+
+      child.stdout.setEncoding('utf8');
+      child.stdout.on('data', (chunk) => {
+        output += chunk;
+        if (!acquired && output.split(/\r?\n/).includes(acquiredMessage)) {
+          acquired = true;
+          lockLostError = undefined;
+          child.stdout.unref();
+          resolve();
+        }
+      });
+      child.stderr.setEncoding('utf8');
+      child.stderr.on('data', (chunk) => {
+        diagnostics += chunk;
+      });
+      child.once('error', () => {
+        lockProcess = undefined;
+        reject(new Error('AUDIT_OUTBOX_LOCK_UNSUPPORTED'));
+      });
+      child.once('exit', (code) => {
+        if (!acquired) {
+          child.stdout.unref();
+          lockProcess = undefined;
+          reject(new Error(
+            diagnostics.trim()
+              ? 'AUDIT_OUTBOX_LOCK_UNSUPPORTED'
+              : 'AUDIT_OUTBOX_WRITER_LOCKED'
+          ));
+          return;
+        }
+        if (lockProcess === child) {
+          lockProcess = undefined;
+          lockLostError = new Error('AUDIT_OUTBOX_WRITER_LOCK_LOST');
+        }
+      });
+    });
   }
 
   async function listEntryFiles() {
@@ -364,16 +381,15 @@ function createDurableAuditOutbox({
   }
 
   async function releaseLock() {
-    if (lockHandle) {
-      await lockHandle.close();
-      lockHandle = undefined;
-      try {
-        await fs.unlink(lockPath);
-        await syncDirectory();
-      } catch (error) {
-        if (!error || error.code !== 'ENOENT') throw error;
+    if (lockProcess) {
+      const child = lockProcess;
+      lockProcess = undefined;
+      if (child.exitCode === null && child.signalCode === null) {
+        child.stdin.end();
+        await new Promise((resolve) => child.once('exit', resolve));
       }
     }
+    lockLostError = undefined;
   }
 
   function getStatus() {

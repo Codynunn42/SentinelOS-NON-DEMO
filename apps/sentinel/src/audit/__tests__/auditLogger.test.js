@@ -3,11 +3,16 @@ const crypto = require('crypto');
 const path = require('path');
 const os = require('os');
 const fs = require('fs/promises');
+const { spawn } = require('child_process');
 const { Pool } = require('pg');
 const { auditLogger, createAuditLogger } = require('../auditLogger');
+const { createDurableAuditOutbox } = require('../durableAuditOutbox');
 const { readFileSync } = require('fs');
 
 const createdLoggers = [];
+const createdProcesses = new Set();
+const createdSpoolDirectories = new Set();
+const TEST_AUDIT_HASH = 'a'.repeat(64);
 const itWithPostgres =
   process.env.AUDIT_OUTBOX_TEST_DATABASE_URL || process.env.RECEIPT_LEDGER_TEST_DATABASE_URL
     ? it
@@ -38,13 +43,304 @@ function createTestLogger(options = {}) {
   return logger;
 }
 
+function createTestOutbox(directory, overrides = {}) {
+  return createDurableAuditOutbox({
+    directory,
+    databaseStatus: () => 'disabled',
+    loadAnchor: async () => null,
+    ...overrides
+  });
+}
+
+function createSpoolDirectory(label) {
+  const directory = path.join(os.tmpdir(), `sentinel-audit-${label}-${crypto.randomUUID()}`);
+  createdSpoolDirectories.add(directory);
+  return directory;
+}
+
+function testEntry() {
+  return {
+    eventId: crypto.randomUUID(),
+    command: 'test.audit.locking',
+    payload: { retained: true },
+    result: {},
+    actor: 'test',
+    timestamp: new Date().toISOString()
+  };
+}
+
+function verifyTestEntry(entry, previousHash) {
+  return entry.prevHash === previousHash && entry.auditHash === TEST_AUDIT_HASH;
+}
+
+function hashTestEntry(entry, previousHash) {
+  return { ...entry, prevHash: previousHash, auditHash: TEST_AUDIT_HASH };
+}
+
+function startOutboxProcess(directory, { append = false } = {}) {
+  const outboxPath = path.resolve(__dirname, '../durableAuditOutbox');
+  const script = `
+    const { createDurableAuditOutbox } = require(${JSON.stringify(outboxPath)});
+    const outbox = createDurableAuditOutbox({
+      directory: process.env.AUDIT_TEST_SPOOL,
+      databaseStatus: () => 'disabled',
+      loadAnchor: async () => null
+    });
+    const verifyEntry = (entry, previousHash) =>
+      entry.prevHash === previousHash && entry.auditHash === '${TEST_AUDIT_HASH}';
+    (async () => {
+      await outbox.initialize({ verifyEntry });
+      let eventId = '';
+      if (process.env.AUDIT_TEST_APPEND === '1') {
+        const { entry } = await outbox.append({
+          eventId: require('crypto').randomUUID(),
+          command: 'test.audit.locking',
+          payload: { retained: true },
+          result: {},
+          actor: 'test',
+          timestamp: new Date().toISOString()
+        }, (value, previousHash) => ({
+          ...value,
+          prevHash: previousHash,
+          auditHash: '${TEST_AUDIT_HASH}'
+        }));
+        eventId = entry.eventId;
+      }
+      process.stdout.write('READY ' + eventId + String.fromCharCode(10));
+      process.stdin.once('end', () => {
+        outbox.close().catch((error) => {
+          process.stderr.write(error.message + String.fromCharCode(10));
+          process.exitCode = 2;
+        });
+      });
+      process.stdin.resume();
+    })().catch((error) => {
+      process.stderr.write(error.message + String.fromCharCode(10));
+      process.exitCode = 2;
+    });
+  `;
+  const child = spawn(process.execPath, ['-e', script], {
+    env: {
+      ...process.env,
+      AUDIT_TEST_SPOOL: directory,
+      AUDIT_TEST_APPEND: append ? '1' : '0'
+    },
+    stdio: ['pipe', 'pipe', 'pipe']
+  });
+  createdProcesses.add(child);
+  child.once('exit', () => createdProcesses.delete(child));
+  let stdout = '';
+  let stderr = '';
+  child.stdout.setEncoding('utf8');
+  child.stderr.setEncoding('utf8');
+  child.stdout.on('data', (chunk) => {
+    stdout += chunk;
+  });
+  child.stderr.on('data', (chunk) => {
+    stderr += chunk;
+  });
+  return {
+    child,
+    get output() {
+      return { stdout, stderr };
+    },
+    waitForStartup() {
+      return new Promise((resolve, reject) => {
+        const onData = () => {
+          const readyLine = stdout.split(/\r?\n/).find((line) => line.startsWith('READY '));
+          if (readyLine) {
+            child.stdout.off('data', onData);
+            resolve({ ready: true, eventId: readyLine.slice('READY '.length) });
+          }
+        };
+        child.stdout.on('data', onData);
+        child.once('error', reject);
+        child.once('exit', (code) => {
+          if (!stdout.split(/\r?\n/).some((line) => line.startsWith('READY '))) {
+            resolve({ ready: false, code, stdout, stderr });
+          }
+        });
+        onData();
+      });
+    },
+    waitForExit() {
+      if (child.exitCode !== null || child.signalCode !== null) return Promise.resolve();
+      return new Promise((resolve) => child.once('exit', resolve));
+    }
+  };
+}
+
+async function initializeAfterLockRelease(directory) {
+  for (let attempt = 0; attempt < 100; attempt += 1) {
+    const outbox = createTestOutbox(directory);
+    try {
+      await outbox.initialize({ verifyEntry: verifyTestEntry });
+      return outbox;
+    } catch (error) {
+      await outbox.close();
+      if (!/AUDIT_OUTBOX_WRITER_LOCKED/.test(error.message)) throw error;
+      await new Promise((resolve) => setTimeout(resolve, 10));
+    }
+  }
+  throw new Error('Timed out waiting for outbox writer lock release');
+}
+
 afterEach(async () => {
+  const processes = [...createdProcesses];
+  for (const child of processes) {
+    child.kill('SIGKILL');
+  }
+  await Promise.all(processes.map((child) =>
+    child.exitCode !== null || child.signalCode !== null
+      ? Promise.resolve()
+      : new Promise((resolve) => child.once('exit', resolve))
+  ));
   const entries = createdLoggers.splice(0);
   await Promise.all(entries.map(({ logger }) => logger.close()));
   await Promise.all(
-    [...new Set(entries.map(({ spoolDirectory }) => spoolDirectory))]
+    [...new Set([
+      ...entries.map(({ spoolDirectory }) => spoolDirectory),
+      ...createdSpoolDirectories
+    ])]
       .map((spoolDirectory) => fs.rm(spoolDirectory, { recursive: true, force: true }))
   );
+  createdSpoolDirectories.clear();
+});
+
+describe('durable audit outbox writer locking', () => {
+  it('does not let a second live logger in the same process take the writer lock', async () => {
+    const spoolDirectory = createSpoolDirectory('lock');
+    const first = createTestLogger({
+      spoolDirectory,
+      databaseStatus: () => 'disabled'
+    });
+    const second = createTestLogger({
+      spoolDirectory,
+      databaseStatus: () => 'disabled'
+    });
+
+    await first.initialize();
+    await assert.rejects(second.initialize(), /AUDIT_OUTBOX_WRITER_LOCKED/);
+    await first.close();
+    await second.initialize();
+    assert.equal(second.getPersistenceStatus().status, 'clear');
+  });
+
+  it('admits only one of simultaneous process recovery attempts', async function () {
+    const spoolDirectory = createSpoolDirectory('race');
+    const contenders = [
+      startOutboxProcess(spoolDirectory),
+      startOutboxProcess(spoolDirectory)
+    ];
+    const outcomes = await Promise.all(contenders.map((contender) => contender.waitForStartup()));
+
+    assert.equal(outcomes.filter((outcome) => outcome.ready).length, 1);
+    assert.equal(outcomes.filter((outcome) => !outcome.ready).length, 1);
+    assert.match(outcomes.find((outcome) => !outcome.ready).stderr, /AUDIT_OUTBOX_WRITER_LOCKED/);
+
+    const winner = contenders[outcomes.findIndex((outcome) => outcome.ready)];
+    winner.child.stdin.end();
+    await Promise.all(contenders.map((contender) => contender.waitForExit()));
+
+    const reacquired = createTestOutbox(spoolDirectory);
+    await reacquired.initialize({ verifyEntry: verifyTestEntry });
+    await reacquired.close();
+    await fs.rm(spoolDirectory, { recursive: true, force: true });
+  }).timeout(10000);
+
+  it('recovers retained spool entries after the writer process dies abruptly', async () => {
+    const spoolDirectory = createSpoolDirectory('crash');
+    const writer = startOutboxProcess(spoolDirectory, { append: true });
+    const startup = await writer.waitForStartup();
+    assert.equal(startup.ready, true);
+    assert.ok(startup.eventId);
+
+    writer.child.kill('SIGKILL');
+    await writer.waitForExit();
+
+    const recovered = await initializeAfterLockRelease(spoolDirectory);
+    assert.equal(recovered.pendingCount, 1);
+    assert.equal(recovered.pendingEntries[0].eventId, startup.eventId);
+    await recovered.close();
+    await fs.rm(spoolDirectory, { recursive: true, force: true });
+  });
+
+  it('ignores stale lock metadata from a different hostname and a reused PID', async () => {
+    const spoolDirectory = createSpoolDirectory('restart');
+    await fs.mkdir(spoolDirectory, { recursive: true });
+    const staleMetadata = JSON.stringify({
+      pid: process.pid,
+      hostname: 'previous-container-host'
+    });
+    await fs.writeFile(path.join(spoolDirectory, 'writer.lock'), staleMetadata);
+
+    const outbox = createTestOutbox(spoolDirectory);
+    await outbox.initialize({ verifyEntry: verifyTestEntry });
+    assert.equal(await fs.readFile(path.join(spoolDirectory, 'writer.lock'), 'utf8'), staleMetadata);
+    await outbox.close();
+    await fs.rm(spoolDirectory, { recursive: true, force: true });
+  });
+
+  it('fails closed when the filesystem lock utility is unavailable', async () => {
+    const spoolDirectory = createSpoolDirectory('unsupported');
+    const originalPath = process.env.PATH;
+    const emptyPath = await fs.mkdtemp(path.join(os.tmpdir(), 'sentinel-no-flock-'));
+    process.env.PATH = emptyPath;
+    try {
+      const outbox = createTestOutbox(spoolDirectory);
+      await assert.rejects(
+        outbox.initialize({ verifyEntry: verifyTestEntry }),
+        /AUDIT_OUTBOX_LOCK_UNSUPPORTED/
+      );
+    } finally {
+      if (originalPath === undefined) delete process.env.PATH;
+      else process.env.PATH = originalPath;
+      await fs.rm(emptyPath, { recursive: true, force: true });
+    }
+
+    const recovered = createTestOutbox(spoolDirectory);
+    await recovered.initialize({ verifyEntry: verifyTestEntry });
+    await recovered.close();
+    await fs.rm(spoolDirectory, { recursive: true, force: true });
+  });
+
+  it('releases the lock after initialization failure without changing the spool', async () => {
+    const spoolDirectory = createSpoolDirectory('init');
+    const initial = createTestOutbox(spoolDirectory);
+    await initial.initialize({ verifyEntry: verifyTestEntry });
+    await initial.append(testEntry(), hashTestEntry);
+    await initial.close();
+    const filesBeforeFailure = (await fs.readdir(spoolDirectory)).sort();
+
+    const failing = createTestOutbox(spoolDirectory, {
+      databaseStatus: () => {
+        throw new Error('synthetic initialization failure');
+      }
+    });
+    await assert.rejects(failing.initialize({ verifyEntry: verifyTestEntry }), /synthetic initialization failure/);
+    assert.deepEqual((await fs.readdir(spoolDirectory)).sort(), filesBeforeFailure);
+
+    const recovered = createTestOutbox(spoolDirectory);
+    await recovered.initialize({ verifyEntry: verifyTestEntry });
+    assert.equal(recovered.pendingCount, 1);
+    await recovered.close();
+    await fs.rm(spoolDirectory, { recursive: true, force: true });
+  });
+
+  it('preserves pending entries across clean shutdown and lock reacquisition', async () => {
+    const spoolDirectory = createSpoolDirectory('shutdown');
+    const first = createTestOutbox(spoolDirectory);
+    await first.initialize({ verifyEntry: verifyTestEntry });
+    const appended = await first.append(testEntry(), hashTestEntry);
+    await first.close();
+
+    const second = createTestOutbox(spoolDirectory);
+    await second.initialize({ verifyEntry: verifyTestEntry });
+    assert.equal(second.pendingCount, 1);
+    assert.equal(second.pendingEntries[0].eventId, appended.entry.eventId);
+    await second.close();
+    await fs.rm(spoolDirectory, { recursive: true, force: true });
+  });
 });
 
 describe('audit persistence reconciliation', () => {
