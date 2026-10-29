@@ -4065,23 +4065,61 @@ const server = http.createServer(async (req, res) => {
 });
 
 if (require.main === module) {
+  let shutdownRequested = false;
+  let shutdownPromise;
+
+  function shutdown() {
+    shutdownRequested = true;
+    if (shutdownPromise) return shutdownPromise;
+
+    shutdownPromise = new Promise((resolve) => {
+      const closeAuditLogger = async () => {
+        try {
+          await auditLogger.close();
+        } catch (error) {
+          console.error(`Audit logger shutdown failed: ${error.message}`);
+        } finally {
+          resolve();
+        }
+      };
+
+      if (server.listening) {
+        server.close((error) => {
+          if (error) {
+            console.error(`API shutdown failed: ${error.message}`);
+          }
+          closeAuditLogger();
+        });
+      } else {
+        closeAuditLogger();
+      }
+    });
+    return shutdownPromise;
+  }
+
+  process.once('SIGINT', shutdown);
+  process.once('SIGTERM', shutdown);
+
   requireAuthoritySecret();
   enforceProductionBoundary();
   enforceSovereignBoot();
 
   ensureSchema()
     .then(async () => {
+      if (shutdownRequested) return;
       const recovery = await auditLogger.reconcilePending();
       if (recovery.status === 'pending') {
         console.error(
           `Audit outbox recovery is pending (${recovery.pendingCount} entries): ${recovery.error}`
         );
       }
+      if (shutdownRequested) return;
       server.listen(PORT, () => {
         console.log(`Sentinel API running on port ${PORT}`);
       });
     })
     .catch((error) => {
+      if (shutdownRequested) return;
       console.error(`API bootstrap failed: ${error.message}`);
       process.exit(1);
     });
