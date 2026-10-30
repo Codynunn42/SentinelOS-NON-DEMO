@@ -41,6 +41,17 @@ by adding nullable event IDs and chain sequence values; legacy IDs are copied
 from their JSON result where available. No database rows are rewritten during
 replay.
 
+Startup may advance the checkpoint over a retained prefix already present in
+PostgreSQL after a lost acknowledgement. Before advancing, it compares every
+prefix event's stored identity, sequence, tenant, command, payload, result, actor,
+audit timestamp, and hashes using the same validation as duplicate replay.
+It durably publishes the recovered checkpoint before deleting any prefix files.
+If publication fails, those files remain available for the next recovery attempt.
+If deletion is interrupted, the published checkpoint permits cleanup on restart.
+`getAll()` and the `checked` count cover only the loaded in-memory chain; database
+prefix inventory must be checked separately. Neither API re-verifies the entire
+database-backed history.
+
 The disk outbox survives process/container restarts only when its directory is
 on storage that survives those restarts. It is not replicated or protected
 against loss of the host or volume, filesystem corruption, or simultaneous

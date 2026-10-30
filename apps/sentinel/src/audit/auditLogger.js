@@ -240,7 +240,8 @@ function createAuditLogger({
     if (initialized) return;
     await outbox.initialize({
       verifyEntry: (entry, prevHash) =>
-        entry.prevHash === prevHash && entry.auditHash === hashAuditEntry(entry, prevHash)
+        entry.prevHash === prevHash && entry.auditHash === hashAuditEntry(entry, prevHash),
+      verifyPersistedEntry
     });
     chainAnchorHash = outbox.initialAnchorHash;
     auditLog.push(...outbox.pendingEntries);
@@ -285,37 +286,41 @@ function createAuditLogger({
       throw new Error('AUDIT_OUTBOX_DATABASE_UNAVAILABLE');
     }
     if (result && result.rowCount === 0) {
-      const existing = await persistQuery(
-        `SELECT event_id, chain_sequence, tenant_id, command, payload, result, actor
-         FROM audit_logs
-         WHERE event_id = $1`,
-        [entry.eventId]
-      );
-      const row = existing && existing.rows && existing.rows[0];
-      const expectedPayload = JSON.parse(JSON.stringify(entry.payload || {}));
-      const expectedResult = JSON.parse(JSON.stringify({
-        ...(entry.result || {}),
-        eventId: entry.eventId,
-        prevHash: entry.prevHash,
-        auditHash: entry.auditHash,
-        auditTimestamp: entry.timestamp
-      }));
-      if (
-        !row ||
-        row.event_id !== entry.eventId ||
-        Number(row.chain_sequence) !== sequence ||
-        row.tenant_id !== (entry.tenant || 'ownerfi') ||
-        row.command !== entry.command ||
-        stableStringify(row.payload) !== stableStringify(expectedPayload) ||
-        stableStringify(row.result) !== stableStringify(expectedResult) ||
-        row.actor !== (entry.actor || null) ||
-        !row.result ||
-        row.result.auditTimestamp !== entry.timestamp ||
-        row.result.prevHash !== entry.prevHash ||
-        row.result.auditHash !== entry.auditHash
-      ) {
-        throw new Error('AUDIT_OUTBOX_RECONCILIATION_CONFLICT');
-      }
+      await verifyPersistedEntry(entry, sequence);
+    }
+  }
+
+  async function verifyPersistedEntry(entry, sequence) {
+    const existing = await persistQuery(
+      `SELECT event_id, chain_sequence, tenant_id, command, payload, result, actor
+       FROM audit_logs
+       WHERE event_id = $1`,
+      [entry.eventId]
+    );
+    const row = existing && existing.rows && existing.rows[0];
+    const expectedPayload = JSON.parse(JSON.stringify(entry.payload || {}));
+    const expectedResult = JSON.parse(JSON.stringify({
+      ...(entry.result || {}),
+      eventId: entry.eventId,
+      prevHash: entry.prevHash,
+      auditHash: entry.auditHash,
+      auditTimestamp: entry.timestamp
+    }));
+    if (
+      !row ||
+      row.event_id !== entry.eventId ||
+      Number(row.chain_sequence) !== sequence ||
+      row.tenant_id !== (entry.tenant || 'ownerfi') ||
+      row.command !== entry.command ||
+      stableStringify(row.payload) !== stableStringify(expectedPayload) ||
+      stableStringify(row.result) !== stableStringify(expectedResult) ||
+      row.actor !== (entry.actor || null) ||
+      !row.result ||
+      row.result.auditTimestamp !== entry.timestamp ||
+      row.result.prevHash !== entry.prevHash ||
+      row.result.auditHash !== entry.auditHash
+    ) {
+      throw new Error('AUDIT_OUTBOX_RECONCILIATION_CONFLICT');
     }
   }
 

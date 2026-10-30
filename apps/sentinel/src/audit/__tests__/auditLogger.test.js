@@ -245,7 +245,13 @@ describe('durable audit outbox writer locking', () => {
       databaseStatus: () => 'enabled',
       loadAnchor: async () => appended.entry.auditHash
     });
-    await recovered.initialize({ verifyEntry: verifyTestEntry });
+    await recovered.initialize({
+      verifyEntry: verifyTestEntry,
+      verifyPersistedEntry: async (entry, sequence) => {
+        assert.deepEqual(entry, appended.entry);
+        assert.equal(sequence, appended.sequence);
+      }
+    });
     assert.equal(recovered.pendingCount, 0);
     assert.equal(recovered.initialAnchorHash, appended.entry.auditHash);
     assert.equal(recovered.lastHash, appended.entry.auditHash);
@@ -956,6 +962,7 @@ describe('audit persistence reconciliation', () => {
       });
       assert.equal(logger.getPersistenceStatus().pendingCount, 2);
       assert.deepEqual(logger.verifyChain(), { valid: true, checked: 3 });
+      const failureEntry = logger.getAll()[2];
       assert.ok(databasePoolErrors.some((error) => /terminating connection/i.test(error.message)));
       await logger.close();
       await databasePool.end();
@@ -994,21 +1001,27 @@ describe('audit persistence reconciliation', () => {
         { retryIntervalMs: 25, maxRetryIntervalMs: 50 }
       );
       await logger.initialize();
-      assert.deepEqual(logger.verifyChain(), { valid: true, checked: 2 });
+      assert.deepEqual(logger.getAll().map((entry) => entry.eventId), [failureEntry.eventId]);
+      assert.deepEqual(logger.verifyChain(), { valid: true, checked: 1 });
       assert.equal((await logger.reconcilePending()).status, 'pending');
       const retryDeadline = Date.now() + 2000;
       while (
-        (logger.getPersistenceStatus().pendingCount > 0 || logger.getAll().length < 3) &&
+        (logger.getPersistenceStatus().pendingCount > 0 || logger.getAll().length < 2) &&
         Date.now() < retryDeadline
       ) {
         await new Promise((resolve) => setTimeout(resolve, 10));
       }
       assert.equal(logger.getPersistenceStatus().pendingCount, 0);
-      assert.deepEqual(logger.verifyChain(), { valid: true, checked: 3 });
+      assert.deepEqual(logger.verifyChain(), { valid: true, checked: 2 });
+      const marker = logger.getAll()[1];
+      assert.equal(marker.command, 'system.audit.persist_reconciled');
+      assert.deepEqual(marker.payload.reconciledEventIds, [failureEntry.eventId]);
 
       const eventIds = [
         baselineEntry.eventId,
-        ...logger.getAll().map((entry) => entry.eventId)
+        outageEntry.eventId,
+        failureEntry.eventId,
+        marker.eventId
       ];
       const persisted = await databasePool.query(
         `SELECT event_id, chain_sequence

@@ -228,7 +228,7 @@ function createDurableAuditOutbox({
     await syncDirectory();
   }
 
-  async function initialize({ verifyEntry } = {}) {
+  async function initialize({ verifyEntry, verifyPersistedEntry } = {}) {
     if (initialized) return;
     await acquireLock();
 
@@ -300,6 +300,7 @@ function createDurableAuditOutbox({
         expectedHash = item.entry.auditHash;
       }
 
+      let persistedPending = [];
       if (databaseAnchor !== state.checkpointHash) {
         const persistedPendingIndex = pending.findIndex(
           (item) => item.entry.auditHash === databaseAnchor
@@ -307,17 +308,18 @@ function createDurableAuditOutbox({
         if (persistedPendingIndex < 0) {
           throw new Error('AUDIT_OUTBOX_DATABASE_ANCHOR_MISMATCH');
         }
-        const persistedPending = pending.slice(0, persistedPendingIndex + 1);
+        persistedPending = pending.slice(0, persistedPendingIndex + 1);
+        if (typeof verifyPersistedEntry !== 'function') {
+          throw new Error('AUDIT_OUTBOX_PERSISTED_VERIFIER_REQUIRED');
+        }
+        for (const item of persistedPending) {
+          await verifyPersistedEntry(item.entry, item.sequence);
+        }
         state = {
           ...state,
           checkpointSequence: persistedPending[persistedPending.length - 1].sequence,
           checkpointHash: databaseAnchor
         };
-        for (const item of persistedPending) {
-          await removeEntryFile(item.fileName);
-          pendingBytes -= item.bytes;
-        }
-        pending.splice(0, persistedPending.length);
       }
 
       const recoveredSequence = expectedSequence - 1;
@@ -335,6 +337,11 @@ function createDurableAuditOutbox({
         throw new Error('AUDIT_OUTBOX_CAPACITY_EXCEEDED');
       }
       await writeState(state);
+      for (const item of persistedPending) {
+        await removeEntryFile(item.fileName);
+        pendingBytes -= item.bytes;
+      }
+      pending.splice(0, persistedPending.length);
       initialized = true;
     } catch (error) {
       await releaseLock();
