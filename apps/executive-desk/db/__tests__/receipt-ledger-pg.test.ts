@@ -1,5 +1,5 @@
 import { strict as assert } from 'node:assert';
-import { createHash } from 'node:crypto';
+import { createHash, createHmac } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import { before, describe, it } from 'mocha';
 import { Pool } from 'pg';
@@ -53,42 +53,84 @@ const baseReceipt: ReceiptEntry = {
     reasons: [],
     signature: '629afdc6afa97b949712969f21b63c3fabf67bd84a8d9d70181ccb59e7259c60',
 };
+const signingKey = 'synthetic-executive-desk-receipt-hmac-key-v1';
 
 describe('PostgresReceiptLedger signatures', () => {
-    it('verifies the legacy serializer digest vector only when its JSONB values are reconstructible', async () => {
+    it('preserves version 2 timestamp text while keeping the receipt unsigned legacy', async () => {
         const ledger = new PostgresReceiptLedger('postgres://localhost/unused_test');
+        const originalTimestamp = '2026-10-30T09:15:27.123456-07:00';
         try {
-            assert.equal(ledger.verify(baseReceipt), true);
-            assert.equal(ledger.verify({ ...baseReceipt, payload: { nested: { value: 1 } } }), false);
-            assert.equal(ledger.verify({
+            const mapped = ledger['mapRow']({
                 ...baseReceipt,
-                principalContext: { id: 'operator' },
-            }), false);
+                signature_version: 2,
+                timestamp: new Date('2026-10-30T16:15:27.123Z'),
+                timestamp_text: originalTimestamp,
+            });
+
+            assert.equal(mapped.timestamp, originalTimestamp);
+            assert.deepEqual(ledger.verifyDetailed(mapped), {
+                verified: false,
+                status: 'unsigned_legacy',
+            });
+            assert.equal(mapped.verificationStatus, 'unsigned_legacy');
+            assert.equal(mapped.verified, false);
         } finally {
             await ledger.close();
         }
     });
 
-    it('verifies version 2 and rejects authority tampering and unknown versions', async () => {
+    it('labels legacy digest receipts unsigned, including a recomputed tampered digest', async () => {
         const ledger = new PostgresReceiptLedger('postgres://localhost/unused_test');
+        try {
+            assert.deepEqual(ledger.verifyDetailed(baseReceipt), {
+                verified: false,
+                status: 'unsigned_legacy',
+            });
+
+            const forgedPayload = {
+                ...baseReceipt,
+                signatureVersion: 2,
+                payload: { nested: { value: 'tampered' } },
+            };
+            const forgedReceipt = {
+                ...forgedPayload,
+                signature: v2Digest(forgedPayload),
+            };
+            assert.deepEqual(ledger.verifyDetailed(forgedReceipt), {
+                verified: false,
+                status: 'unsigned_legacy',
+            });
+        } finally {
+            await ledger.close();
+        }
+    });
+
+    it('authenticates version 3 with HMAC and rejects tampering or an unavailable/wrong key', async () => {
+        const ledger = new PostgresReceiptLedger('postgres://localhost/unused_test', signingKey);
         const receiptWithoutSignature: Omit<ReceiptEntry, 'signature'> = {
             ...baseReceipt,
-            signatureVersion: 2,
+            signatureVersion: 3,
             principalContext: { id: 'operator', roles: ['reviewer'] },
             delegatedBy: 'admin',
             delegationExpiresAt: '2026-02-01T00:00:00+00:00',
         };
         const receipt: ReceiptEntry = {
             ...receiptWithoutSignature,
-            signature: v2Digest(receiptWithoutSignature),
+            signature: v3Signature(receiptWithoutSignature, signingKey),
         };
 
         try {
-            assert.equal(ledger.verify(receipt), true);
-            assert.equal(ledger.verify({
+            assert.deepEqual(ledger.verifyDetailed(receipt), {
+                verified: true,
+                status: 'verified',
+            });
+            assert.deepEqual(ledger.verifyDetailed({
                 ...receipt,
                 principalContext: { id: 'attacker', roles: ['reviewer'] },
-            }), false);
+            }), {
+                verified: false,
+                status: 'signature_mismatch',
+            });
             assert.equal(ledger.verify({ ...receipt, delegatedBy: 'attacker' }), false);
             assert.equal(ledger.verify({
                 ...receipt,
@@ -96,12 +138,81 @@ describe('PostgresReceiptLedger signatures', () => {
             }), false);
             const { delegatedBy, ...withoutDelegation } = receipt;
             assert.equal(ledger.verify(withoutDelegation), false);
-            assert.equal(ledger.verify({ ...receipt, signatureVersion: 3 }), false);
+            assert.equal(ledger.verify({ ...receipt, signatureVersion: 4 }), false);
+
+            const missingKeyLedger = new PostgresReceiptLedger('postgres://localhost/unused_test');
+            try {
+                assert.deepEqual(missingKeyLedger.verifyDetailed(receipt), {
+                    verified: false,
+                    status: 'key_unavailable',
+                });
+            } finally {
+                await missingKeyLedger.close();
+            }
+
+            const wrongKeyLedger = new PostgresReceiptLedger(
+                'postgres://localhost/unused_test',
+                'different-synthetic-executive-desk-key',
+            );
+            try {
+                assert.deepEqual(wrongKeyLedger.verifyDetailed(receipt), {
+                    verified: false,
+                    status: 'signature_mismatch',
+                });
+            } finally {
+                await wrongKeyLedger.close();
+            }
+        } finally {
+            await ledger.close();
+        }
+    });
+
+    it('requires a sufficiently strong configured key before signing', async () => {
+        const ledger = new PostgresReceiptLedger('postgres://localhost/unused_test');
+        try {
+            assert.throws(() => new PostgresReceiptLedger(
+                'postgres://localhost/unused_test',
+                'too-short',
+            ), /at least 32 bytes/);
+            assert.deepEqual(ledger.verifyDetailed({
+                ...baseReceipt,
+                signatureVersion: 3,
+                signature: 'a'.repeat(64),
+            }), {
+                verified: false,
+                status: 'key_unavailable',
+            });
+            await assert.rejects(
+                ledger.record(baseReceipt),
+                /EXECUTIVE_DESK_RECEIPT_HMAC_KEY_REQUIRED_FOR_SIGNING/,
+            );
         } finally {
             await ledger.close();
         }
     });
 });
+
+function v3Signature(receipt: Omit<ReceiptEntry, 'signature'>, key: string): string {
+    const payload = {
+        signatureVersion: 3,
+        command: receipt.command,
+        tenant: receipt.tenant,
+        executor: receipt.executor,
+        timestamp: receipt.timestamp,
+        status: receipt.status,
+        payload: receipt.payload,
+        authorityCheckResult: receipt.authorityCheckResult,
+        riskGateOutcome: receipt.riskGateOutcome,
+        reasons: receipt.reasons ?? [],
+        principalContext: receipt.principalContext ?? null,
+        delegatedBy: receipt.delegatedBy ?? null,
+        delegationExpiresAt: receipt.delegationExpiresAt ?? null,
+        id: receipt.id,
+    };
+    return createHmac('sha256', key)
+        .update(JSON.stringify(canonicalize(payload)))
+        .digest('hex');
+}
 
 const testDatabaseUrl = process.env.RECEIPT_LEDGER_TEST_DATABASE_URL;
 const postgresDescribe = testDatabaseUrl ? describe : describe.skip;
@@ -138,6 +249,11 @@ postgresDescribe('PostgresReceiptLedger isolated persistence round trip', () => 
             );
             await client.query(migration);
             await client.query(migration);
+            const authenticatedMigration = await readFile(
+                'apps/executive-desk/db/migrations/004-receipt-authenticated-hmac-v3.sql', 'utf8',
+            );
+            await client.query(authenticatedMigration);
+            await client.query(authenticatedMigration);
             const result = await client.query('SELECT * FROM receipts');
             assert.deepEqual(result.rows, [{
                 id: baseReceipt.id,
@@ -149,8 +265,9 @@ postgresDescribe('PostgresReceiptLedger isolated persistence round trip', () => 
                 delegated_by: null,
                 delegation_expires_at: null,
             }]);
+            await client.query('UPDATE receipts SET signature_version = 3');
             await assert.rejects(client.query(
-                'UPDATE receipts SET signature_version = 3',
+                'UPDATE receipts SET signature_version = 4',
             ), /receipts_signature_version_check/);
         } finally {
             await client.query('ROLLBACK');
@@ -160,7 +277,7 @@ postgresDescribe('PostgresReceiptLedger isolated persistence round trip', () => 
     });
 
     it('persists and maps signature version and authority fields without changing signed bytes', async () => {
-        const ledger = new PostgresReceiptLedger(testDatabaseUrl);
+        const ledger = new PostgresReceiptLedger(testDatabaseUrl, signingKey);
         try {
             await ledger.initialize();
             const recorded = await ledger.record({
@@ -180,13 +297,15 @@ postgresDescribe('PostgresReceiptLedger isolated persistence round trip', () => 
             const loaded = await ledger.getById(recorded.id);
 
             assert.ok(loaded);
-            assert.equal(loaded.signatureVersion, 2);
+            assert.equal(loaded.signatureVersion, 3);
             assert.deepEqual(loaded.principalContext, recorded.principalContext);
             assert.equal(loaded.delegatedBy, recorded.delegatedBy);
             assert.equal(loaded.delegationExpiresAt, recorded.delegationExpiresAt);
             assert.equal(loaded.timestamp, recorded.timestamp);
             assert.deepEqual(loaded.payload, recorded.payload);
             assert.equal(ledger.verify(loaded), true);
+            assert.equal(loaded.verificationStatus, 'verified');
+            assert.equal(loaded.verified, true);
             assert.equal(ledger.verify({ ...loaded, delegatedBy: 'attacker' }), false);
             assert.equal(ledger.verify({
                 ...loaded,
@@ -198,7 +317,7 @@ postgresDescribe('PostgresReceiptLedger isolated persistence round trip', () => 
     });
 
     it('preserves absent and empty delegation fields across reloads', async () => {
-        const ledger = new PostgresReceiptLedger(testDatabaseUrl);
+        const ledger = new PostgresReceiptLedger(testDatabaseUrl, signingKey);
         try {
             await ledger.initialize();
             for (const delegation of [{}, { delegatedBy: '', delegationExpiresAt: '' }]) {
@@ -219,6 +338,59 @@ postgresDescribe('PostgresReceiptLedger isolated persistence round trip', () => 
                 assert.equal(loaded.delegationExpiresAt, recorded.delegationExpiresAt);
                 assert.equal(ledger.verify(loaded), true);
             }
+        } finally {
+            await ledger.close();
+        }
+    });
+
+    it('exports a stable snapshot without skipping or duplicating rows inserted between batches', async () => {
+        const ledger = new PostgresReceiptLedger(testDatabaseUrl, signingKey);
+        const exportCommand = `stable-export-${Date.now()}`;
+        const seedIds = new Set<string>();
+        try {
+            await ledger.initialize();
+            for (let index = 0; index < 3; index += 1) {
+                const recorded = await ledger.record({
+                    command: exportCommand,
+                    tenant: 'test-tenant',
+                    executor: 'test-operator',
+                    timestamp: '2026-01-01T00:00:00.123456Z',
+                    status: 'executed',
+                    payload: { index },
+                    authorityCheckResult: { allowed: true },
+                    riskGateOutcome: { level: 'low' },
+                });
+                seedIds.add(recorded.id);
+            }
+
+            const iterator = (await ledger.exportAll(2))[Symbol.asyncIterator]();
+            const first = await iterator.next();
+            assert.equal(first.done, false);
+
+            const insertedDuringExport = await ledger.record({
+                command: exportCommand,
+                tenant: 'test-tenant',
+                executor: 'test-operator',
+                timestamp: '2027-01-01T00:00:00.000Z',
+                status: 'executed',
+                payload: { insertedDuringExport: true },
+                authorityCheckResult: { allowed: true },
+                riskGateOutcome: { level: 'low' },
+            });
+
+            const exported = [first.value!];
+            while (true) {
+                const next = await iterator.next();
+                if (next.done) break;
+                exported.push(next.value);
+            }
+
+            const exportedSeedIds = exported
+                .filter((receipt) => seedIds.has(receipt.id))
+                .map((receipt) => receipt.id);
+            assert.deepEqual(new Set(exportedSeedIds), seedIds);
+            assert.equal(exportedSeedIds.length, seedIds.size);
+            assert.equal(exported.some((receipt) => receipt.id === insertedDuringExport.id), false);
         } finally {
             await ledger.close();
         }

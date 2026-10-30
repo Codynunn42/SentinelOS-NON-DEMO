@@ -283,32 +283,34 @@ function buildReceipt(command) {
   };
 }
 
-function auditRoutePolicy(route, principal, policy, policyContext) {
-  auditLogger.log({
-    tenant: policyContext.tenant || (principal ? principal.tenant : null),
-    command: 'policy.route',
-    payload: {
-      route,
-      command: policyContext.command,
-      requiredScope: policyContext.requiredScope || null
-    },
-    result: {
-      success: policy.allowed,
-      decision: policy.decision,
-      state: policy.state,
-      riskLevel: policy.riskLevel,
-      reason: policy.reason || null,
-      approvalRequired: policy.approvalRequired,
-      receiptRequired: policy.receiptRequired
-    },
-    actor: policyContext.actor || (principal ? principal.actor : undefined),
-    timestamp: new Date().toISOString()
-  }).catch((error) => {
+async function auditRoutePolicy(route, principal, policy, policyContext) {
+  try {
+    await auditLogger.log({
+      tenant: policyContext.tenant || (principal ? principal.tenant : null),
+      command: 'policy.route',
+      payload: {
+        route,
+        command: policyContext.command,
+        requiredScope: policyContext.requiredScope || null
+      },
+      result: {
+        success: policy.allowed,
+        decision: policy.decision,
+        state: policy.state,
+        riskLevel: policy.riskLevel,
+        reason: policy.reason || null,
+        approvalRequired: policy.approvalRequired,
+        receiptRequired: policy.receiptRequired
+      },
+      actor: policyContext.actor || (principal ? principal.actor : undefined),
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
     emitSecurityEvent('policy.audit_failed', {
       route,
       error: error instanceof Error ? error.message : 'Unknown policy audit failure'
     });
-  });
+  }
 }
 
 function authenticateCommand(req, route, res) {
@@ -354,7 +356,7 @@ function authenticateCommand(req, route, res) {
   return resolved.principal;
 }
 
-function authorizeRoute(req, res, route, options = {}) {
+async function authorizeRoute(req, res, route, options = {}) {
   const principal = authenticateCommand(req, route, res);
 
   if (!principal) {
@@ -369,7 +371,7 @@ function authorizeRoute(req, res, route, options = {}) {
   });
   const policy = evaluatePolicy(policyContext);
 
-  auditRoutePolicy(route, principal, policy, policyContext);
+  await auditRoutePolicy(route, principal, policy, policyContext);
 
   if (!policy.allowed) {
     emitSecurityEvent('policy.route.blocked', {
@@ -966,9 +968,9 @@ async function retrieveStripeCheckoutSession(sessionId) {
   };
 }
 
-function sendAuditEvents(req, res, route, requestUrl) {
+async function sendAuditEvents(req, res, route, requestUrl) {
   const tenant = requestUrl.searchParams.get('tenant');
-  const access = authorizeRoute(req, res, route, {
+  const access = await authorizeRoute(req, res, route, {
     tenant: tenant || undefined,
     command: 'audit.read',
     requiredScope: 'audit:read'
@@ -1613,7 +1615,7 @@ const server = http.createServer(async (req, res) => {
   }
 
   if (pathname === '/governance/status' && req.method === 'GET') {
-    const access = authorizeRoute(req, res, '/governance/status', {
+    const access = await authorizeRoute(req, res, '/governance/status', {
       command: 'audit.read',
       requiredScope: 'audit:read'
     });
@@ -1838,7 +1840,7 @@ const server = http.createServer(async (req, res) => {
   }
 
   if ((pathname === '/anchors/system-release/external' || pathname === '/v1/anchors/system-release/external') && req.method === 'POST') {
-    const access = authorizeRoute(req, res, pathname, {
+    const access = await authorizeRoute(req, res, pathname, {
       command: 'platform.admin',
       requiredScope: 'platform:admin'
     });
@@ -1909,7 +1911,7 @@ const server = http.createServer(async (req, res) => {
 
   if (pathname === '/v1/metrics' && req.method === 'GET') {
     const tenant = requestUrl.searchParams.get('tenant');
-    const access = authorizeRoute(req, res, '/v1/metrics', {
+    const access = await authorizeRoute(req, res, '/v1/metrics', {
       tenant: tenant || undefined,
       command: 'audit.read',
       requiredScope: 'audit:read'
@@ -1934,7 +1936,7 @@ const server = http.createServer(async (req, res) => {
 
   if (pathname === '/v1/alerts' && req.method === 'GET') {
     const tenant = requestUrl.searchParams.get('tenant');
-    const access = authorizeRoute(req, res, '/v1/alerts', {
+    const access = await authorizeRoute(req, res, '/v1/alerts', {
       tenant: tenant || undefined,
       command: 'audit.read',
       requiredScope: 'audit:read'
@@ -1969,7 +1971,7 @@ const server = http.createServer(async (req, res) => {
 
   if (pathname.startsWith('/v1/audit/') && req.method === 'GET') {
     const tenant = requestUrl.searchParams.get('tenant');
-    const access = authorizeRoute(req, res, '/v1/audit/:applicationId', {
+    const access = await authorizeRoute(req, res, '/v1/audit/:applicationId', {
       tenant: tenant || undefined,
       command: 'audit.read',
       requiredScope: 'audit:read'
@@ -2013,7 +2015,7 @@ const server = http.createServer(async (req, res) => {
 
   if (pathname.startsWith('/v1/receipts/') && req.method === 'GET') {
     const tenant = requestUrl.searchParams.get('tenant');
-    const access = authorizeRoute(req, res, '/v1/receipts/:receiptId', {
+    const access = await authorizeRoute(req, res, '/v1/receipts/:receiptId', {
       tenant: tenant || undefined,
       command: 'receipt.read',
       requiredScope: 'receipt:read'
@@ -2162,7 +2164,7 @@ const server = http.createServer(async (req, res) => {
   }
 
   if (pathname === '/v1/faceplane/mock' && req.method === 'POST') {
-    const access = authorizeRoute(req, res, '/v1/faceplane/mock', {
+    const access = await authorizeRoute(req, res, '/v1/faceplane/mock', {
       command: 'faceplane.mock.run',
       requiredScope: 'platform:admin'
     });
@@ -2252,7 +2254,7 @@ const server = http.createServer(async (req, res) => {
   }
 
   if (pathname === '/command' && req.method === 'POST') {
-    const access = authorizeRoute(req, res, '/command', {
+    const access = await authorizeRoute(req, res, '/command', {
       command: 'platform.admin',
       requiredScope: 'platform:admin'
     });
@@ -2315,7 +2317,7 @@ const server = http.createServer(async (req, res) => {
   }
 
   if (pathname === '/policy/evaluate' && req.method === 'POST') {
-    const access = authorizeRoute(req, res, '/policy/evaluate', {
+    const access = await authorizeRoute(req, res, '/policy/evaluate', {
       command: 'policy.evaluate',
       requiredScope: 'policy:evaluate'
     });
@@ -2394,7 +2396,7 @@ const server = http.createServer(async (req, res) => {
   }
 
   if (pathname === '/operator/escalations' && req.method === 'GET') {
-    const access = authorizeRoute(req, res, '/operator/escalations', {
+    const access = await authorizeRoute(req, res, '/operator/escalations', {
       command: 'approval.read',
       requiredScope: 'approval:read'
     });
@@ -2413,7 +2415,7 @@ const server = http.createServer(async (req, res) => {
   }
 
   if (pathname === '/v1/workflow/init' && req.method === 'POST') {
-    const access = authorizeRoute(req, res, '/v1/workflow/init', {
+    const access = await authorizeRoute(req, res, '/v1/workflow/init', {
       command: 'task.template.orchestrate',
       requiredScope: 'task:orchestrate'
     });
@@ -2467,7 +2469,7 @@ const server = http.createServer(async (req, res) => {
   }
 
   if (pathname === '/v1/workflow/execute' && req.method === 'POST') {
-    const access = authorizeRoute(req, res, '/v1/workflow/execute', {
+    const access = await authorizeRoute(req, res, '/v1/workflow/execute', {
       command: 'task.template.execute',
       requiredScope: 'task:execute'
     });
@@ -2489,7 +2491,7 @@ const server = http.createServer(async (req, res) => {
   }
 
   if ((pathname === '/v1/approvals/resolve' || pathname === '/approvals/resolve') && req.method === 'POST') {
-    const access = authorizeRoute(req, res, pathname, {
+    const access = await authorizeRoute(req, res, pathname, {
       command: 'approval.review',
       requiredScope: 'approval:review'
     });
@@ -2512,7 +2514,7 @@ const server = http.createServer(async (req, res) => {
 
   if (pathname === '/task-templates/runs' && req.method === 'GET') {
     const tenant = requestUrl.searchParams.get('tenant');
-    const access = authorizeRoute(req, res, '/task-templates/runs', {
+    const access = await authorizeRoute(req, res, '/task-templates/runs', {
       tenant: tenant || undefined,
       command: 'task.template.read',
       requiredScope: 'task:read'
@@ -2548,7 +2550,7 @@ const server = http.createServer(async (req, res) => {
       });
     }
 
-    const access = authorizeRoute(req, res, '/task-templates/runs/:runId', {
+    const access = await authorizeRoute(req, res, '/task-templates/runs/:runId', {
       command: 'task.template.read',
       requiredScope: 'task:read'
     });
@@ -2585,7 +2587,7 @@ const server = http.createServer(async (req, res) => {
       });
     }
 
-    const access = authorizeRoute(req, res, '/task-templates/runs/:runId/steps/:taskId/xe-packet', {
+    const access = await authorizeRoute(req, res, '/task-templates/runs/:runId/steps/:taskId/xe-packet', {
       command: 'task.template.read',
       requiredScope: 'task:read'
     });
@@ -2636,7 +2638,7 @@ const server = http.createServer(async (req, res) => {
       });
     }
 
-    const access = authorizeRoute(req, res, '/task-templates/runs/:runId/steps/:taskId/xe-intent', {
+    const access = await authorizeRoute(req, res, '/task-templates/runs/:runId/steps/:taskId/xe-intent', {
       command: 'task.template.execute',
       requiredScope: 'task:execute'
     });
@@ -2763,7 +2765,7 @@ const server = http.createServer(async (req, res) => {
       });
     }
 
-    const access = authorizeRoute(req, res, '/task-templates/runs/:runId/steps/:taskId/xe-execute', {
+    const access = await authorizeRoute(req, res, '/task-templates/runs/:runId/steps/:taskId/xe-execute', {
       command: 'task.template.execute',
       requiredScope: 'task:execute'
     });
@@ -2970,7 +2972,7 @@ const server = http.createServer(async (req, res) => {
       });
     }
 
-    const access = authorizeRoute(req, res, '/task-templates/runs/:runId/steps/:taskId/execute', {
+    const access = await authorizeRoute(req, res, '/task-templates/runs/:runId/steps/:taskId/execute', {
       command: 'task.template.execute',
       requiredScope: 'task:execute'
     });
@@ -3035,7 +3037,7 @@ const server = http.createServer(async (req, res) => {
   }
 
   if (pathname === '/task-templates/ingest' && req.method === 'POST') {
-    const access = authorizeRoute(req, res, '/task-templates/ingest', {
+    const access = await authorizeRoute(req, res, '/task-templates/ingest', {
       command: 'task.template.orchestrate',
       requiredScope: 'task:orchestrate'
     });
@@ -3109,7 +3111,7 @@ const server = http.createServer(async (req, res) => {
 
   if ((pathname === '/telemetry/harmonize' || pathname === '/v1/telemetry/harmonize') && req.method === 'POST') {
     const routeName = pathname === '/v1/telemetry/harmonize' ? '/v1/telemetry/harmonize' : '/telemetry/harmonize';
-    const access = authorizeRoute(req, res, routeName, {
+    const access = await authorizeRoute(req, res, routeName, {
       command: 'telemetry.metric.write',
       requiredScope: 'telemetry:write'
     });
@@ -3171,7 +3173,7 @@ const server = http.createServer(async (req, res) => {
 
   if (pathname === '/faceplane/openai/gpt-actions/connection' && req.method === 'GET') {
     const tenantId = requestUrl.searchParams.get('tenantId');
-    const access = authorizeRoute(req, res, '/faceplane/openai/gpt-actions/connection', {
+    const access = await authorizeRoute(req, res, '/faceplane/openai/gpt-actions/connection', {
       tenant: tenantId || undefined,
       command: 'openai.faceplane.read',
       requiredScope: 'openai:read'
@@ -3207,7 +3209,7 @@ const server = http.createServer(async (req, res) => {
 
   if (pathname === '/faceplane/openai/config' && req.method === 'GET') {
     const tenantId = requestUrl.searchParams.get('tenantId');
-    const access = authorizeRoute(req, res, '/faceplane/openai/config', {
+    const access = await authorizeRoute(req, res, '/faceplane/openai/config', {
       tenant: tenantId || undefined,
       command: 'openai.faceplane.read',
       requiredScope: 'openai:read'
@@ -3234,7 +3236,7 @@ const server = http.createServer(async (req, res) => {
 
   if (pathname === '/faceplane/openai/status' && req.method === 'GET') {
     const tenantId = requestUrl.searchParams.get('tenantId');
-    const access = authorizeRoute(req, res, '/faceplane/openai/status', {
+    const access = await authorizeRoute(req, res, '/faceplane/openai/status', {
       tenant: tenantId || undefined,
       command: 'openai.faceplane.read',
       requiredScope: 'openai:read'
@@ -3280,7 +3282,7 @@ const server = http.createServer(async (req, res) => {
         });
       }
 
-      const access = authorizeRoute(req, res, '/faceplane/openai/execute', {
+      const access = await authorizeRoute(req, res, '/faceplane/openai/execute', {
         tenant: body.tenantId,
         command: 'openai.faceplane.execute',
         requiredScope: 'openai:execute'
@@ -3350,7 +3352,7 @@ const server = http.createServer(async (req, res) => {
       });
     }
 
-    const access = authorizeRoute(req, res, '/operator/escalations/:workflowId', {
+    const access = await authorizeRoute(req, res, '/operator/escalations/:workflowId', {
       command: 'approval.read',
       requiredScope: 'approval:read'
     });
@@ -3385,7 +3387,7 @@ const server = http.createServer(async (req, res) => {
       });
     }
 
-    const access = authorizeRoute(req, res, '/operator/escalations/:workflowId/decision', {
+    const access = await authorizeRoute(req, res, '/operator/escalations/:workflowId/decision', {
       command: 'approval.review',
       requiredScope: 'approval:review'
     });
@@ -3444,7 +3446,7 @@ const server = http.createServer(async (req, res) => {
   }
 
   if (pathname === '/agent/run' && req.method === 'POST') {
-    const access = authorizeRoute(req, res, '/agent/run', {
+    const access = await authorizeRoute(req, res, '/agent/run', {
       command: 'platform.admin',
       requiredScope: 'platform:admin'
     });
@@ -3502,7 +3504,7 @@ const server = http.createServer(async (req, res) => {
 
   if (pathname === '/learning/suggestions' && req.method === 'GET') {
     const tenant = requestUrl.searchParams.get('tenant');
-    const access = authorizeRoute(req, res, '/learning/suggestions', {
+    const access = await authorizeRoute(req, res, '/learning/suggestions', {
       tenant: tenant || undefined,
       command: 'learning.read',
       requiredScope: 'learning:read'
@@ -3595,7 +3597,7 @@ const server = http.createServer(async (req, res) => {
   }
 
   if (pathname === '/approvals' && req.method === 'GET') {
-    const access = authorizeRoute(req, res, '/approvals', {
+    const access = await authorizeRoute(req, res, '/approvals', {
       command: 'approval.read',
       requiredScope: 'approval:read'
     });
@@ -3656,7 +3658,7 @@ const server = http.createServer(async (req, res) => {
       });
     }
 
-    const access = authorizeRoute(req, res, '/approvals/:id', {
+    const access = await authorizeRoute(req, res, '/approvals/:id', {
       command: 'approval.read',
       requiredScope: 'approval:read'
     });
@@ -3704,7 +3706,7 @@ const server = http.createServer(async (req, res) => {
       });
     }
 
-    const access = authorizeRoute(req, res, `/approvals/:id/${action}`, {
+    const access = await authorizeRoute(req, res, `/approvals/:id/${action}`, {
       command: 'approval.review',
       requiredScope: 'approval:review'
     });
@@ -3772,7 +3774,7 @@ const server = http.createServer(async (req, res) => {
   }
 
   if (pathname === '/events/security' && req.method === 'POST') {
-    const access = authorizeRoute(req, res, '/events/security', {
+    const access = await authorizeRoute(req, res, '/events/security', {
       command: 'security.write',
       requiredScope: 'security:write'
     });
@@ -3892,7 +3894,7 @@ const server = http.createServer(async (req, res) => {
 
   if (pathname === '/drift/analyze' && req.method === 'GET') {
     const tenant = requestUrl.searchParams.get('tenant');
-    const access = authorizeRoute(req, res, '/drift/analyze', {
+    const access = await authorizeRoute(req, res, '/drift/analyze', {
       tenant: tenant || undefined,
       command: 'learning.read',
       requiredScope: 'learning:read'
@@ -3934,7 +3936,7 @@ const server = http.createServer(async (req, res) => {
   }
 
   if (pathname === '/learning/events' && req.method === 'POST') {
-    const access = authorizeRoute(req, res, '/learning/events', {
+    const access = await authorizeRoute(req, res, '/learning/events', {
       command: 'learning.write',
       requiredScope: 'learning:write'
     });
@@ -3999,7 +4001,7 @@ const server = http.createServer(async (req, res) => {
   }
 
   if (pathname === '/drift/recommendations' && req.method === 'GET') {
-    const access = authorizeRoute(req, res, '/drift/recommendations', {
+    const access = await authorizeRoute(req, res, '/drift/recommendations', {
       command: 'learning.read',
       requiredScope: 'learning:read'
     });
@@ -4021,7 +4023,7 @@ const server = http.createServer(async (req, res) => {
   }
 
   if (pathname === '/v1/traces' && req.method === 'GET') {
-    const access = authorizeRoute(req, res, '/v1/traces', {
+    const access = await authorizeRoute(req, res, '/v1/traces', {
       command: 'audit.read',
       requiredScope: 'audit:read'
     });
@@ -4041,7 +4043,7 @@ const server = http.createServer(async (req, res) => {
   }
 
   if (pathname.startsWith('/v1/traces/') && req.method === 'GET') {
-    const access = authorizeRoute(req, res, '/v1/traces/:correlationId', {
+    const access = await authorizeRoute(req, res, '/v1/traces/:correlationId', {
       command: 'audit.read',
       requiredScope: 'audit:read'
     });
@@ -4065,18 +4067,62 @@ const server = http.createServer(async (req, res) => {
 });
 
 if (require.main === module) {
+  let shutdownRequested = false;
+  let shutdownPromise;
+
+  function shutdown() {
+    shutdownRequested = true;
+    if (shutdownPromise) return shutdownPromise;
+
+    shutdownPromise = new Promise((resolve) => {
+      const closeAuditLogger = async () => {
+        try {
+          await auditLogger.close();
+        } catch (error) {
+          console.error(`Audit logger shutdown failed: ${error.message}`);
+        } finally {
+          resolve();
+        }
+      };
+
+      if (server.listening) {
+        server.close((error) => {
+          if (error) {
+            console.error(`API shutdown failed: ${error.message}`);
+          }
+          closeAuditLogger();
+        });
+      } else {
+        closeAuditLogger();
+      }
+    });
+    return shutdownPromise;
+  }
+
+  process.once('SIGINT', shutdown);
+  process.once('SIGTERM', shutdown);
+
   requireAuthoritySecret();
   enforceProductionBoundary();
   enforceSovereignBoot();
 
   ensureSchema()
-    .then(() => {
+    .then(async () => {
+      if (shutdownRequested) return;
+      const recovery = await auditLogger.reconcilePending();
+      if (recovery.status === 'pending') {
+        console.error(
+          `Audit outbox recovery is pending (${recovery.pendingCount} entries): ${recovery.error}`
+        );
+      }
+      if (shutdownRequested) return;
       server.listen(PORT, () => {
         console.log(`Sentinel API running on port ${PORT}`);
       });
     })
     .catch((error) => {
-      console.error(`Database bootstrap failed: ${error.message}`);
+      if (shutdownRequested) return;
+      console.error(`API bootstrap failed: ${error.message}`);
       process.exit(1);
     });
 }
