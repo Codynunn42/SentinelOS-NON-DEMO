@@ -6,6 +6,7 @@ const { spawn } = require('child_process');
 const STATE_FILE = 'state.json';
 const LOCK_FILE = 'writer.lock';
 const ENTRY_FILE_PATTERN = /^(\d{20})-([0-9a-f-]{36})\.json$/i;
+const TEMP_FILE_PATTERN = /^(?:state\.json|\d{20}-[0-9a-f-]{36}\.json)\.\d+\.[0-9a-f-]{36}\.tmp$/i;
 const DEFAULT_MAX_BYTES = 100 * 1024 * 1024;
 
 function parsePositiveInteger(value, name) {
@@ -61,17 +62,41 @@ function createDurableAuditOutbox({
     }
   }
 
-  async function atomicWrite(filePath, contents) {
+  async function atomicWrite(filePath, contents, { exclusive = false } = {}) {
     const temporaryPath = `${filePath}.${process.pid}.${crypto.randomUUID()}.tmp`;
-    const handle = await fs.open(temporaryPath, 'wx', 0o600);
+    let temporaryExists = false;
     try {
-      await handle.writeFile(contents, 'utf8');
-      await handle.sync();
-    } finally {
-      await handle.close();
+      const handle = await fs.open(temporaryPath, 'wx', 0o600);
+      temporaryExists = true;
+      try {
+        await handle.writeFile(contents, 'utf8');
+        await handle.sync();
+      } finally {
+        await handle.close();
+      }
+      if (exclusive) {
+        await fs.link(temporaryPath, filePath);
+        await fs.unlink(temporaryPath);
+      } else {
+        await fs.rename(temporaryPath, filePath);
+      }
+      temporaryExists = false;
+      await syncDirectory();
+    } catch (error) {
+      if (temporaryExists) {
+        try {
+          await fs.unlink(temporaryPath);
+        } catch (cleanupError) {
+          if (!cleanupError || cleanupError.code !== 'ENOENT') {
+            throw new AggregateError(
+              [error, cleanupError],
+              'AUDIT_OUTBOX_ATOMIC_WRITE_CLEANUP_FAILED'
+            );
+          }
+        }
+      }
+      throw error;
     }
-    await fs.rename(temporaryPath, filePath);
-    await syncDirectory();
   }
 
   async function writeState(nextState) {
@@ -184,6 +209,20 @@ function createDurableAuditOutbox({
       .sort((left, right) => left.sequence - right.sequence);
   }
 
+  async function removeAbandonedTemporaryFiles() {
+    const files = await fs.readdir(spoolDirectory, { withFileTypes: true });
+    let removed = false;
+    for (const file of files) {
+      if (file.isFile() && TEMP_FILE_PATTERN.test(file.name)) {
+        await fs.unlink(path.join(spoolDirectory, file.name));
+        removed = true;
+      }
+    }
+    if (removed) {
+      await syncDirectory();
+    }
+  }
+
   async function removeEntryFile(fileName) {
     await fs.unlink(path.join(spoolDirectory, fileName));
     await syncDirectory();
@@ -196,22 +235,23 @@ function createDurableAuditOutbox({
     try {
       const currentDatabaseMode = databaseStatus();
       let loadedState = await readState();
+      await removeAbandonedTemporaryFiles();
       const files = await listEntryFiles();
+      const databaseAnchor = currentDatabaseMode !== 'disabled'
+        ? await loadAnchor()
+        : null;
+      if (databaseAnchor !== null && !/^[a-f0-9]{64}$/.test(databaseAnchor)) {
+        throw new Error('AUDIT_OUTBOX_DATABASE_ANCHOR_INVALID');
+      }
 
       if (!loadedState) {
-        const anchor = currentDatabaseMode !== 'disabled'
-          ? await loadAnchor()
-          : null;
-        if (anchor !== null && !/^[a-f0-9]{64}$/.test(anchor)) {
-          throw new Error('AUDIT_OUTBOX_DATABASE_ANCHOR_INVALID');
-        }
         loadedState = {
           version: 1,
           databaseMode: currentDatabaseMode,
           checkpointSequence: 0,
-          checkpointHash: anchor,
+          checkpointHash: databaseAnchor,
           lastSequence: 0,
-          lastHash: anchor
+          lastHash: databaseAnchor
         };
       } else if (loadedState.databaseMode !== currentDatabaseMode) {
         throw new Error('AUDIT_OUTBOX_DATABASE_MODE_CHANGED');
@@ -260,6 +300,26 @@ function createDurableAuditOutbox({
         expectedHash = item.entry.auditHash;
       }
 
+      if (databaseAnchor !== state.checkpointHash) {
+        const persistedPendingIndex = pending.findIndex(
+          (item) => item.entry.auditHash === databaseAnchor
+        );
+        if (persistedPendingIndex < 0) {
+          throw new Error('AUDIT_OUTBOX_DATABASE_ANCHOR_MISMATCH');
+        }
+        const persistedPending = pending.slice(0, persistedPendingIndex + 1);
+        state = {
+          ...state,
+          checkpointSequence: persistedPending[persistedPending.length - 1].sequence,
+          checkpointHash: databaseAnchor
+        };
+        for (const item of persistedPending) {
+          await removeEntryFile(item.fileName);
+          pendingBytes -= item.bytes;
+        }
+        pending.splice(0, persistedPending.length);
+      }
+
       const recoveredSequence = expectedSequence - 1;
       if (state.lastSequence > recoveredSequence) {
         throw new Error('AUDIT_OUTBOX_PENDING_ENTRY_MISSING');
@@ -297,14 +357,7 @@ function createDurableAuditOutbox({
 
     const filePath = path.join(spoolDirectory, fileName);
     try {
-      const handle = await fs.open(filePath, 'wx', 0o600);
-      try {
-        await handle.writeFile(content, 'utf8');
-        await handle.sync();
-      } finally {
-        await handle.close();
-      }
-      await syncDirectory();
+      await atomicWrite(filePath, content, { exclusive: true });
 
       const nextState = {
         ...state,

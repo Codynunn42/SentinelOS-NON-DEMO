@@ -56,6 +56,29 @@ const baseReceipt: ReceiptEntry = {
 const signingKey = 'synthetic-executive-desk-receipt-hmac-key-v1';
 
 describe('PostgresReceiptLedger signatures', () => {
+    it('preserves version 2 timestamp text while keeping the receipt unsigned legacy', async () => {
+        const ledger = new PostgresReceiptLedger('postgres://localhost/unused_test');
+        const originalTimestamp = '2026-10-30T09:15:27.123456-07:00';
+        try {
+            const mapped = ledger['mapRow']({
+                ...baseReceipt,
+                signature_version: 2,
+                timestamp: new Date('2026-10-30T16:15:27.123Z'),
+                timestamp_text: originalTimestamp,
+            });
+
+            assert.equal(mapped.timestamp, originalTimestamp);
+            assert.deepEqual(ledger.verifyDetailed(mapped), {
+                verified: false,
+                status: 'unsigned_legacy',
+            });
+            assert.equal(mapped.verificationStatus, 'unsigned_legacy');
+            assert.equal(mapped.verified, false);
+        } finally {
+            await ledger.close();
+        }
+    });
+
     it('labels legacy digest receipts unsigned, including a recomputed tampered digest', async () => {
         const ledger = new PostgresReceiptLedger('postgres://localhost/unused_test');
         try {

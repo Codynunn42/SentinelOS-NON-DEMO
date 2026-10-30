@@ -392,6 +392,8 @@ export class PostgresReceiptLedger {
             executor: row.executor,
             timestamp: Number(row.signature_version ?? LEGACY_SIGNATURE_VERSION) === CURRENT_SIGNATURE_VERSION
                 ? row.timestamp_text ?? ''
+                : Number(row.signature_version ?? LEGACY_SIGNATURE_VERSION) === PREVIOUS_SIGNATURE_VERSION
+                    ? row.timestamp_text ?? timestamp.toISOString()
                 : timestamp.toISOString(),
             status: row.status,
             payload: row.payload,

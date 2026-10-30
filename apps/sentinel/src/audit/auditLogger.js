@@ -419,7 +419,7 @@ function createAuditLogger({
   }
 
   async function appendPersistenceFailureEntry(originalEntry, originalEventId, error) {
-    await appendHashedEntry({
+    const failureEntry = {
       eventId: crypto.randomUUID(),
       command: 'system.audit.persist_failed',
       payload: {
@@ -434,7 +434,9 @@ function createAuditLogger({
       },
       actor: 'system',
       timestamp: new Date().toISOString()
-    });
+    };
+    failureEntry.result.governanceSignals = evaluateGovernanceSignals(failureEntry);
+    await appendHashedEntry(failureEntry);
   }
 
   return {

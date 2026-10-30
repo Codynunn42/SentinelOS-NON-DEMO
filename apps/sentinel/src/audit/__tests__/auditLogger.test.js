@@ -208,6 +208,112 @@ afterEach(async () => {
 });
 
 describe('durable audit outbox writer locking', () => {
+  it('rejects a database tail that no longer matches the persisted outbox checkpoint', async () => {
+    const spoolDirectory = createSpoolDirectory('stale-anchor');
+    const originalDatabaseAnchor = 'b'.repeat(64);
+    const outbox = createTestOutbox(spoolDirectory, {
+      databaseStatus: () => 'enabled',
+      loadAnchor: async () => originalDatabaseAnchor
+    });
+    await outbox.initialize({ verifyEntry: verifyTestEntry });
+    await outbox.append(testEntry(), hashTestEntry);
+    await outbox.flush(async () => {});
+    await outbox.close();
+
+    const restoredDatabase = createTestOutbox(spoolDirectory, {
+      databaseStatus: () => 'enabled',
+      loadAnchor: async () => 'c'.repeat(64)
+    });
+    await assert.rejects(
+      restoredDatabase.initialize({ verifyEntry: verifyTestEntry }),
+      /AUDIT_OUTBOX_DATABASE_ANCHOR_MISMATCH/
+    );
+    await restoredDatabase.close();
+  });
+
+  it('advances the checkpoint when the database already contains a pending spool entry', async () => {
+    const spoolDirectory = createSpoolDirectory('persisted-before-checkpoint');
+    const first = createTestOutbox(spoolDirectory, {
+      databaseStatus: () => 'enabled',
+      loadAnchor: async () => 'b'.repeat(64)
+    });
+    await first.initialize({ verifyEntry: verifyTestEntry });
+    const appended = await first.append(testEntry(), hashTestEntry);
+    await first.close();
+
+    const recovered = createTestOutbox(spoolDirectory, {
+      databaseStatus: () => 'enabled',
+      loadAnchor: async () => appended.entry.auditHash
+    });
+    await recovered.initialize({ verifyEntry: verifyTestEntry });
+    assert.equal(recovered.pendingCount, 0);
+    assert.equal(recovered.initialAnchorHash, appended.entry.auditHash);
+    assert.equal(recovered.lastHash, appended.entry.auditHash);
+    assert.deepEqual(
+      (await fs.readdir(spoolDirectory)).filter((name) => name.includes(appended.entry.eventId)),
+      []
+    );
+    await recovered.close();
+  });
+
+  it('does not leave a partial final spool entry after an interrupted write', async () => {
+    const spoolDirectory = createSpoolDirectory('interrupted-entry');
+    const outbox = createTestOutbox(spoolDirectory);
+    await outbox.initialize({ verifyEntry: verifyTestEntry });
+    const entry = testEntry();
+    const originalOpen = fs.open;
+    fs.open = async (...args) => {
+      const handle = await originalOpen(...args);
+      if (!String(args[0]).includes(`${entry.eventId}.json`)) return handle;
+      return new Proxy(handle, {
+        get(target, property) {
+          if (property === 'writeFile') {
+            return async () => {
+              throw new Error('synthetic interrupted spool write');
+            };
+          }
+          const value = Reflect.get(target, property, target);
+          return typeof value === 'function' ? value.bind(target) : value;
+        }
+      });
+    };
+
+    try {
+      await assert.rejects(
+        outbox.append(entry, hashTestEntry),
+        /synthetic interrupted spool write/
+      );
+    } finally {
+      fs.open = originalOpen;
+    }
+
+    assert.deepEqual(
+      (await fs.readdir(spoolDirectory)).filter((name) => name.includes(`${entry.eventId}.json`)),
+      []
+    );
+    await outbox.close();
+  });
+
+  it('removes abandoned atomic-write temporary files during locked recovery', async () => {
+    const spoolDirectory = createSpoolDirectory('orphaned-temp');
+    const initial = createTestOutbox(spoolDirectory);
+    await initial.initialize({ verifyEntry: verifyTestEntry });
+    await initial.close();
+    const abandonedFiles = [
+      `state.json.${process.pid}.${crypto.randomUUID()}.tmp`,
+      `00000000000000000001-${crypto.randomUUID()}.json.${process.pid}.${crypto.randomUUID()}.tmp`
+    ];
+    await Promise.all(abandonedFiles.map((name) =>
+      fs.writeFile(path.join(spoolDirectory, name), 'incomplete')
+    ));
+
+    const recovered = createTestOutbox(spoolDirectory);
+    await recovered.initialize({ verifyEntry: verifyTestEntry });
+    const remaining = await fs.readdir(spoolDirectory);
+    assert.ok(abandonedFiles.every((name) => !remaining.includes(name)));
+    await recovered.close();
+  });
+
   it('does not let a second live logger in the same process take the writer lock', async () => {
     const spoolDirectory = createSpoolDirectory('lock');
     const first = createTestLogger({
@@ -577,6 +683,9 @@ describe('audit persistence reconciliation', () => {
     assert.equal(entries.length, 2);
     assert.equal(entries[1].command, 'system.audit.persist_failed');
     assert.equal(entries[1].payload.originalEventId, original.eventId);
+    assert.ok(entries[1].result.governanceSignals.some((signal) =>
+      signal.type === 'audit_persistence_failure' && signal.severity === 'high'
+    ));
     assert.deepEqual(logger.verifyChain(), { valid: true, checked: 2 });
     assert.deepEqual(logger.getPersistenceStatus().status, 'pending_reconciliation');
     assert.equal(logger.getPersistenceStatus().pendingCount, 2);
