@@ -533,14 +533,21 @@ function createAuditLogger({
   },
 
   async getByReceiptId(receiptId, tenant) {
-    const signedResult = await persistQuery(
-      `SELECT receipt_id, tenant_id, signed_receipt, signature_algorithm, key_id, signature, created_at
-       FROM signed_receipts
-       WHERE receipt_id = $1
-         AND ($2::text IS NULL OR tenant_id = $2)
-       LIMIT 1`,
-      [receiptId, tenant || null]
-    );
+    let signedResult = null;
+    try {
+      signedResult = await persistQuery(
+        `SELECT receipt_id, tenant_id, signed_receipt, signature_algorithm, key_id, signature, created_at
+         FROM signed_receipts
+         WHERE receipt_id = $1
+           AND ($2::text IS NULL OR tenant_id = $2)
+         LIMIT 1`,
+        [receiptId, tenant || null]
+      );
+    } catch (error) {
+      if (!error || error.code !== '42P01') {
+        throw error;
+      }
+    }
     const signedRow = signedResult && signedResult.rows && signedResult.rows[0]
       ? signedResult.rows[0]
       : null;

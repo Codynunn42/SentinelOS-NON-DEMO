@@ -114,7 +114,7 @@
     "check:gpt-action-connector": "node scripts/check-gpt-action-connector.js"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "devDependencies": {
     "@types/express": "^5.0.6",

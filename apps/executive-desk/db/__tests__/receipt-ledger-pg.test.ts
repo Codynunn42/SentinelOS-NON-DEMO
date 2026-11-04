@@ -7,6 +7,7 @@ import { PostgresReceiptLedger, ReceiptEntry } from '../../services/receipt-ledg
 
 function canonicalize(value: unknown): unknown {
     if (Array.isArray(value)) return value.map(canonicalize);
+    if (value instanceof Date) return value.toJSON();
     if (value && typeof value === 'object') {
         return Object.fromEntries(
             Object.entries(value as Record<string, unknown>)
@@ -56,6 +57,29 @@ const baseReceipt: ReceiptEntry = {
 const signingKey = 'synthetic-executive-desk-receipt-hmac-key-v1';
 
 describe('PostgresReceiptLedger signatures', () => {
+    it('authenticates Date payloads identically before and after JSON persistence', async () => {
+        const ledger = new PostgresReceiptLedger('postgres://localhost/unused_test', signingKey);
+        const receiptWithoutSignature: Omit<ReceiptEntry, 'signature'> = {
+            ...baseReceipt,
+            signatureVersion: 3,
+            payload: { observedAt: new Date('2026-11-04T00:00:00.000Z') },
+        };
+        const receipt: ReceiptEntry = {
+            ...receiptWithoutSignature,
+            signature: v3Signature(receiptWithoutSignature, signingKey),
+        };
+        try {
+            assert.equal(ledger.verify(receipt), true);
+            assert.equal(ledger.verify(JSON.parse(JSON.stringify(receipt))), true);
+            assert.equal(ledger.verify({
+                ...receipt,
+                payload: { observedAt: new Date('2026-11-05T00:00:00.000Z') },
+            }), false);
+        } finally {
+            await ledger.close();
+        }
+    });
+
     it('preserves version 2 timestamp text while keeping the receipt unsigned legacy', async () => {
         const ledger = new PostgresReceiptLedger('postgres://localhost/unused_test');
         const originalTimestamp = '2026-10-30T09:15:27.123456-07:00';

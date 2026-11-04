@@ -1051,6 +1051,45 @@ describe('audit persistence reconciliation', () => {
 });
 
 describe('receipt lookup compatibility', () => {
+  it('falls back to legacy receipts when the signed receipts table is absent', async () => {
+    const logger = createTestLogger({
+      databaseStatus: () => 'disabled',
+      persistQuery: async (sql) => {
+        if (sql.includes('FROM signed_receipts')) {
+          const error = new Error('relation "signed_receipts" does not exist');
+          error.code = '42P01';
+          throw error;
+        }
+        return { rows: [] };
+      }
+    });
+    const receiptId = `rcpt-legacy-${crypto.randomUUID()}`;
+    await logger.log({
+      tenant: 'legacy-test-tenant',
+      command: 'legacy.receipt.test',
+      payload: {},
+      result: { receipt: { receiptId, tenantId: 'legacy-test-tenant' } }
+    });
+    const match = await logger.getByReceiptId(receiptId, 'legacy-test-tenant');
+    assert.ok(match);
+    assert.strictEqual(match.source, 'memory');
+    assert.strictEqual(match.receipt.receiptId, receiptId);
+  });
+
+  it('propagates database errors other than a missing signed receipts table', async () => {
+    const logger = createTestLogger({
+      persistQuery: async () => {
+        const error = new Error('database connection failed');
+        error.code = '08006';
+        throw error;
+      }
+    });
+    await assert.rejects(
+      () => logger.getByReceiptId('rcpt-database-error', 'legacy-test-tenant'),
+      (error) => error.code === '08006'
+    );
+  });
+
   it('labels legacy receipts unsigned in both the receipt and embedded audit result', async () => {
     const receiptId = `rcpt-legacy-${crypto.randomUUID()}`;
     const legacyReceipt = {

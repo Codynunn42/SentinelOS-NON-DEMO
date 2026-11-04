@@ -366,6 +366,9 @@ export class PostgresReceiptLedger {
         if (Array.isArray(value)) {
             return value.map((item) => this.canonicalize(item));
         }
+        if (value instanceof Date) {
+            return value.toJSON();
+        }
         if (value && typeof value === 'object') {
             return Object.fromEntries(
                 Object.entries(value as Record<string, unknown>)
