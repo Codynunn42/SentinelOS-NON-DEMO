@@ -310,6 +310,7 @@ async function auditRoutePolicy(route, principal, policy, policyContext) {
       route,
       error: error instanceof Error ? error.message : 'Unknown policy audit failure'
     });
+    throw error;
   }
 }
 
@@ -371,7 +372,12 @@ async function authorizeRoute(req, res, route, options = {}) {
   });
   const policy = evaluatePolicy(policyContext);
 
-  await auditRoutePolicy(route, principal, policy, policyContext);
+  try {
+    await auditRoutePolicy(route, principal, policy, policyContext);
+  } catch {
+    sendJson(res, 503, { status: 'error', error: 'AUDIT_WRITE_FAILED' });
+    return null;
+  }
 
   if (!policy.allowed) {
     emitSecurityEvent('policy.route.blocked', {
@@ -3912,8 +3918,8 @@ const server = http.createServer(async (req, res) => {
       createApprovalRequest: shouldRoute ? createApprovalRequest : null,
       routeApprovals: shouldRoute
     })
-      .then((result) => {
-        auditLogger.log({
+      .then(async (result) => {
+        await auditLogger.log({
           tenant: tenant || null,
           command: 'drift.analyzed',
           payload: { tenant, routeApprovals: shouldRoute },
@@ -3925,7 +3931,7 @@ const server = http.createServer(async (req, res) => {
           },
           actor: access.principal.actor,
           timestamp: new Date().toISOString()
-        }).catch(() => { });
+        });
 
         return sendJson(res, 200, result);
       })

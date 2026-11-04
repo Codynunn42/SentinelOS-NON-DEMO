@@ -48,7 +48,8 @@ describe('API policy audit ordering', () => {
     });
     originalLog = auditLogger.log;
     originalGetAll = auditLogger.getAll;
-    auditLogger.log = () => {
+    auditLogger.log = (entry) => {
+      if (entry.command !== 'policy.route') return Promise.resolve();
       signalAuditStarted();
       return new Promise((resolve) => {
         releaseAudit = resolve;
@@ -64,12 +65,63 @@ describe('API policy audit ordering', () => {
       headers: { 'x-api-key': 'synthetic-api-audit-order-key' }
     });
     await auditStarted;
-    await new Promise((resolve) => setTimeout(resolve, 25));
-    assert.equal(getAllCalled, false);
-
-    releaseAudit();
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 25));
+      assert.equal(getAllCalled, false);
+    } finally { releaseAudit(); }
     const response = await responsePromise;
     assert.equal(response.status, 200);
     assert.equal(getAllCalled, true);
   });
+  it('returns 503 without reading audit data when the policy audit write fails', async () => {
+    originalLog = auditLogger.log;
+    originalGetAll = auditLogger.getAll;
+    let read = false;
+    auditLogger.log = async () => { throw new Error('synthetic write failure'); };
+    auditLogger.getAll = () => { read = true; return []; };
+    const response = await fetch(`http://127.0.0.1:${server.address().port}/drift/analyze?routeApprovals=false`, {
+      headers: { 'x-api-key': 'synthetic-api-audit-order-key' }
+    });
+    assert.equal(response.status, 503);
+    assert.equal((await response.json()).error, 'AUDIT_WRITE_FAILED');
+    assert.equal(read, false);
+  });
+
+  it('waits for the analysis audit write before returning success', async () => {
+    originalLog = auditLogger.log;
+    originalGetAll = auditLogger.getAll;
+    auditLogger.getAll = () => [];
+    let release;
+    let started;
+    const writing = new Promise((resolve) => { started = resolve; });
+    auditLogger.log = (entry) => {
+      if (entry.command !== 'drift.analyzed') return Promise.resolve();
+      started();
+      return new Promise((resolve) => { release = resolve; });
+    };
+    let responded = false;
+    const pending = fetch(`http://127.0.0.1:${server.address().port}/drift/analyze?routeApprovals=false`, {
+      headers: { 'x-api-key': 'synthetic-api-audit-order-key' }
+    }).then((response) => { responded = true; return response; });
+    await writing;
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 25));
+      assert.equal(responded, false);
+    } finally { release(); }
+    assert.equal((await pending).status, 200);
+  });
+
+  it('does not return success when the analysis audit write fails', async () => {
+    originalLog = auditLogger.log;
+    originalGetAll = auditLogger.getAll;
+    auditLogger.getAll = () => [];
+    auditLogger.log = async (entry) => {
+      if (entry.command === 'drift.analyzed') throw new Error('synthetic analysis audit failure');
+    };
+    const response = await fetch(`http://127.0.0.1:${server.address().port}/drift/analyze?routeApprovals=false`, {
+      headers: { 'x-api-key': 'synthetic-api-audit-order-key' }
+    });
+    assert.equal(response.status, 500);
+  });
+
 });
