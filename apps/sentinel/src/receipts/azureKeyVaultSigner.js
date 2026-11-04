@@ -38,7 +38,12 @@ function publicKeyFromJwk(jwk) {
   }
 
   return crypto.createPublicKey({
-    key: { kty: jwk.kty, crv: jwk.crv, x: jwk.x, y: jwk.y },
+    key: {
+      kty: jwk.kty,
+      crv: jwk.crv,
+      x: typeof jwk.x === 'string' ? jwk.x : Buffer.from(jwk.x).toString('base64url'),
+      y: typeof jwk.y === 'string' ? jwk.y : Buffer.from(jwk.y).toString('base64url')
+    },
     format: 'jwk'
   });
 }
