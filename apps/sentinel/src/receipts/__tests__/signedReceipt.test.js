@@ -170,6 +170,62 @@ describe('versioned signed receipts', () => {
     );
   });
 
+  it('uses the Azure SDK signature result for readiness, signing and verification', async () => {
+    const signingKey = crypto.generateKeyPairSync('ec', { namedCurve: 'prime256v1' });
+    const keyId = 'https://receipt-test.vault.azure.net/keys/signing/version-1';
+    const probe = Buffer.from('SentinelOS receipt signer readiness v1', 'utf8');
+    const data = Buffer.from('Azure Key Vault signing test');
+    const signatures = new Map([
+      [crypto.createHash('sha256').update(probe).digest('hex'), crypto.sign('sha256', probe, {
+        key: signingKey.privateKey,
+        dsaEncoding: 'ieee-p1363'
+      })],
+      [crypto.createHash('sha256').update(data).digest('hex'), crypto.sign('sha256', data, {
+        key: signingKey.privateKey,
+        dsaEncoding: 'ieee-p1363'
+      })]
+    ]);
+    const keyClient = {
+      async getKey(name, options) {
+        return {
+          id: `https://receipt-test.vault.azure.net/keys/${name}/${options.version}`,
+          key: signingKey.publicKey.export({ format: 'jwk' })
+        };
+      }
+    };
+    const signer = createAzureKeyVaultReceiptSigner({
+      keyId,
+      credential: {},
+      keyClient,
+      cryptoClient: {
+        async sign(algorithm, digest) {
+          assert.strictEqual(algorithm, 'ES256');
+          return { result: signatures.get(Buffer.from(digest).toString('hex')) };
+        }
+      }
+    });
+
+    await signer.ensureReady();
+    const signature = await signer.sign(data);
+    assert.strictEqual(
+      crypto.verify('sha256', data, {
+        key: signingKey.publicKey,
+        dsaEncoding: 'ieee-p1363'
+      }, signature),
+      true
+    );
+
+    for (const response of [{}, { result: Buffer.alloc(63) }]) {
+      const signerWithInvalidResult = createAzureKeyVaultReceiptSigner({
+        keyId,
+        credential: {},
+        keyClient,
+        cryptoClient: { async sign() { return response; } }
+      });
+      await assert.rejects(signerWithInvalidResult.ensureReady());
+    }
+  });
+
   it('labels legacy records unsigned without signing or mutating their source', () => {
     const legacy = { ...baseReceipt, verified: true };
     const labeled = markUnsignedLegacy(legacy);

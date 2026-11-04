@@ -92,7 +92,7 @@ function createAzureKeyVaultReceiptSigner(options = {}) {
         'sha256',
         probe,
         { key: publicKey, dsaEncoding: 'ieee-p1363' },
-        Buffer.from(result.signature)
+        Buffer.from(result.result)
       );
       if (!valid) {
         throw new Error('SENTINEL_RECEIPT_SIGNER_SELF_CHECK_FAILED');
@@ -102,7 +102,7 @@ function createAzureKeyVaultReceiptSigner(options = {}) {
       await getPublicKey();
       const digest = crypto.createHash('sha256').update(data).digest();
       const result = await cryptoClient.sign('ES256', digest);
-      return Buffer.from(result.signature);
+      return Buffer.from(result.result);
     },
     getPublicKey
   };
