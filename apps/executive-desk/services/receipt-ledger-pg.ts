@@ -54,7 +54,7 @@ export class PostgresReceiptLedger {
           command VARCHAR(255) NOT NULL,
           tenant VARCHAR(255) NOT NULL,
           executor VARCHAR(255) NOT NULL,
-          timestamp TIMESTAMP NOT NULL,
+          "timestamp" TIMESTAMP NOT NULL,
           status VARCHAR(50) NOT NULL CHECK (status IN ('issued', 'executed', 'blocked', 'rejected')),
           payload JSONB NOT NULL,
           authority_check_result JSONB NOT NULL,
@@ -66,7 +66,7 @@ export class PostgresReceiptLedger {
 
         CREATE INDEX IF NOT EXISTS idx_receipts_command ON receipts(command);
         CREATE INDEX IF NOT EXISTS idx_receipts_executor ON receipts(executor);
-        CREATE INDEX IF NOT EXISTS idx_receipts_timestamp ON receipts(timestamp DESC);
+        CREATE INDEX IF NOT EXISTS idx_receipts_timestamp ON receipts("timestamp" DESC);
         CREATE INDEX IF NOT EXISTS idx_receipts_status ON receipts(status);
         CREATE INDEX IF NOT EXISTS idx_receipts_tenant ON receipts(tenant);
       `);
@@ -82,37 +82,41 @@ export class PostgresReceiptLedger {
      */
     async record(entry: Omit<ReceiptEntry, 'id' | 'signature'>): Promise<ReceiptEntry> {
         const id = randomUUID();
-        const receipt: ReceiptEntry = {
+        const receipt = {
             ...entry,
+            reasons: entry.reasons || [],
             id,
-            signature: this.sign({ ...entry, id }),
+        };
+        const signedReceipt: ReceiptEntry = {
+            ...receipt,
+            signature: this.sign(this.signaturePayload(receipt)),
         };
 
         const client = await this.pool.connect();
         try {
             await client.query(
                 `INSERT INTO receipts 
-         (id, command, tenant, executor, timestamp, status, payload, authority_check_result, risk_gate_outcome, signature, reasons)
+         (id, command, tenant, executor, "timestamp", status, payload, authority_check_result, risk_gate_outcome, signature, reasons)
          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
                 [
-                    receipt.id,
-                    receipt.command,
-                    receipt.tenant,
-                    receipt.executor,
-                    receipt.timestamp,
-                    receipt.status,
-                    JSON.stringify(receipt.payload),
-                    JSON.stringify(receipt.authorityCheckResult),
-                    JSON.stringify(receipt.riskGateOutcome),
-                    receipt.signature,
-                    receipt.reasons || [],
+                    signedReceipt.id,
+                    signedReceipt.command,
+                    signedReceipt.tenant,
+                    signedReceipt.executor,
+                    signedReceipt.timestamp,
+                    signedReceipt.status,
+                    JSON.stringify(signedReceipt.payload),
+                    JSON.stringify(signedReceipt.authorityCheckResult),
+                    JSON.stringify(signedReceipt.riskGateOutcome),
+                    signedReceipt.signature,
+                    signedReceipt.reasons,
                 ],
             );
         } finally {
             client.release();
         }
 
-        return receipt;
+        return signedReceipt;
     }
 
     /**
@@ -122,7 +126,7 @@ export class PostgresReceiptLedger {
         const client = await this.pool.connect();
         try {
             const result = await client.query(
-                'SELECT * FROM receipts WHERE command = $1 ORDER BY timestamp DESC OFFSET $2 LIMIT $3',
+                'SELECT * FROM receipts WHERE command = $1 ORDER BY "timestamp" DESC OFFSET $2 LIMIT $3',
                 [command, skip, limit],
             );
             return result.rows.map((row) => this.mapRow(row));
@@ -151,7 +155,7 @@ export class PostgresReceiptLedger {
         const client = await this.pool.connect();
         try {
             const result = await client.query(
-                'SELECT * FROM receipts ORDER BY timestamp DESC OFFSET $1 LIMIT $2',
+                'SELECT * FROM receipts ORDER BY "timestamp" DESC OFFSET $1 LIMIT $2',
                 [skip, limit],
             );
             return result.rows.map((row) => this.mapRow(row));
@@ -164,9 +168,8 @@ export class PostgresReceiptLedger {
      * Verify receipt signature
      */
     verify(receipt: ReceiptEntry): boolean {
-        const { signature, ...payload } = receipt;
-        const expected = this.sign(payload);
-        return signature === expected;
+        const expected = this.sign(this.signaturePayload(receipt));
+        return receipt.signature === expected;
     }
 
     /**
@@ -233,6 +236,21 @@ export class PostgresReceiptLedger {
     private sign(payload: Record<string, unknown>): string {
         const data = JSON.stringify(payload);
         return createHash('sha256').update(data).digest('hex');
+    }
+
+    private signaturePayload(receipt: Omit<ReceiptEntry, 'signature'> | ReceiptEntry): Record<string, unknown> {
+        return {
+            command: receipt.command,
+            tenant: receipt.tenant,
+            executor: receipt.executor,
+            timestamp: receipt.timestamp,
+            status: receipt.status,
+            payload: receipt.payload,
+            authorityCheckResult: receipt.authorityCheckResult,
+            riskGateOutcome: receipt.riskGateOutcome,
+            reasons: receipt.reasons || [],
+            id: receipt.id,
+        };
     }
 
     /**
