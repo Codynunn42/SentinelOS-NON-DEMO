@@ -64,4 +64,32 @@ describe('receipt lookup compatibility', () => {
       require.cache[auditLoggerPath] = originalAuditLoggerModule;
     }
   });
+
+  it('propagates database errors other than a missing signed receipts table', async () => {
+    const auditLoggerPath = require.resolve('../auditLogger');
+    const databaseClientPath = require.resolve('../../db/client');
+    const originalAuditLoggerModule = require.cache[auditLoggerPath];
+    const databaseClientModule = require.cache[databaseClientPath];
+    const originalDatabaseExports = databaseClientModule.exports;
+    databaseClientModule.exports = {
+      ...originalDatabaseExports,
+      query: async () => {
+        const error = new Error('database connection failed');
+        error.code = '08006';
+        throw error;
+      }
+    };
+    delete require.cache[auditLoggerPath];
+
+    try {
+      const { auditLogger: isolatedAuditLogger } = require('../auditLogger');
+      await assert.rejects(
+        () => isolatedAuditLogger.getByReceiptId('rcpt-database-error', 'legacy-test-tenant'),
+        (error) => error.code === '08006'
+      );
+    } finally {
+      databaseClientModule.exports = originalDatabaseExports;
+      require.cache[auditLoggerPath] = originalAuditLoggerModule;
+    }
+  });
 });
