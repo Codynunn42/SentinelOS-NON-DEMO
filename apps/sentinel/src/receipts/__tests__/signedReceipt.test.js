@@ -129,8 +129,13 @@ describe('versioned signed receipts', () => {
   it('loads exact retained key versions for receipt verification', async () => {
     const oldKey = crypto.generateKeyPairSync('ec', { namedCurve: 'prime256v1' });
     const currentKey = crypto.generateKeyPairSync('ec', { namedCurve: 'prime256v1' });
+    const oldJwk = oldKey.publicKey.export({ format: 'jwk' });
     const versions = new Map([
-      ['version-1', oldKey.publicKey.export({ format: 'jwk' })],
+      ['version-1', {
+        ...oldJwk,
+        x: new Uint8Array(Buffer.from(oldJwk.x, 'base64url')),
+        y: new Uint8Array(Buffer.from(oldJwk.y, 'base64url'))
+      }],
       ['version-2', currentKey.publicKey.export({ format: 'jwk' })]
     ]);
     const signer = createAzureKeyVaultReceiptSigner({
