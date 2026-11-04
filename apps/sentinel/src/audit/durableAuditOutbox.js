@@ -257,15 +257,18 @@ function createDurableAuditOutbox({
         throw new Error('AUDIT_OUTBOX_DATABASE_MODE_CHANGED');
       }
 
-      state = loadedState;
+      let recoveredState = loadedState;
+      const recoveredPending = [];
+      let recoveredPendingBytes = 0;
+      const checkpointCoveredFiles = [];
       for (const file of files) {
         const fullPath = path.join(spoolDirectory, file.name);
         const stats = await fs.stat(fullPath);
-        if (file.sequence <= state.checkpointSequence) {
-          await removeEntryFile(file.name);
+        if (file.sequence <= recoveredState.checkpointSequence) {
+          checkpointCoveredFiles.push(file.name);
           continue;
         }
-        if (pendingBytes + stats.size > maxBytes) {
+        if (recoveredPendingBytes + stats.size > maxBytes) {
           throw new Error('AUDIT_OUTBOX_CAPACITY_EXCEEDED');
         }
         const content = await fs.readFile(fullPath, 'utf8');
@@ -278,18 +281,18 @@ function createDurableAuditOutbox({
         ) {
           throw new Error('AUDIT_OUTBOX_ENTRY_INVALID');
         }
-        pending.push({
+        recoveredPending.push({
           sequence: record.sequence,
           fileName: file.name,
           entry: record.entry,
           bytes: stats.size
         });
-        pendingBytes += stats.size;
+        recoveredPendingBytes += stats.size;
       }
 
-      let expectedSequence = state.checkpointSequence + 1;
-      let expectedHash = state.checkpointHash;
-      for (const item of pending) {
+      let expectedSequence = recoveredState.checkpointSequence + 1;
+      let expectedHash = recoveredState.checkpointHash;
+      for (const item of recoveredPending) {
         if (item.sequence !== expectedSequence || item.entry.prevHash !== expectedHash) {
           throw new Error('AUDIT_OUTBOX_CHAIN_GAP');
         }
@@ -301,47 +304,61 @@ function createDurableAuditOutbox({
       }
 
       let persistedPending = [];
-      if (databaseAnchor !== state.checkpointHash) {
-        const persistedPendingIndex = pending.findIndex(
+      if (databaseAnchor !== recoveredState.checkpointHash) {
+        const persistedPendingIndex = recoveredPending.findIndex(
           (item) => item.entry.auditHash === databaseAnchor
         );
         if (persistedPendingIndex < 0) {
           throw new Error('AUDIT_OUTBOX_DATABASE_ANCHOR_MISMATCH');
         }
-        persistedPending = pending.slice(0, persistedPendingIndex + 1);
+        persistedPending = recoveredPending.slice(0, persistedPendingIndex + 1);
         if (typeof verifyPersistedEntry !== 'function') {
           throw new Error('AUDIT_OUTBOX_PERSISTED_VERIFIER_REQUIRED');
         }
         for (const item of persistedPending) {
           await verifyPersistedEntry(item.entry, item.sequence);
         }
-        state = {
-          ...state,
+        recoveredState = {
+          ...recoveredState,
           checkpointSequence: persistedPending[persistedPending.length - 1].sequence,
           checkpointHash: databaseAnchor
         };
       }
 
       const recoveredSequence = expectedSequence - 1;
-      if (state.lastSequence > recoveredSequence) {
+      if (recoveredState.lastSequence > recoveredSequence) {
         throw new Error('AUDIT_OUTBOX_PENDING_ENTRY_MISSING');
       }
-      if (state.lastSequence === recoveredSequence && state.lastHash !== expectedHash) {
+      if (
+        recoveredState.lastSequence === recoveredSequence &&
+        recoveredState.lastHash !== expectedHash
+      ) {
         throw new Error('AUDIT_OUTBOX_STATE_CHAIN_MISMATCH');
       }
 
-      if (recoveredSequence > state.lastSequence) {
-        state = { ...state, lastSequence: recoveredSequence, lastHash: expectedHash };
+      if (recoveredSequence > recoveredState.lastSequence) {
+        recoveredState = {
+          ...recoveredState,
+          lastSequence: recoveredSequence,
+          lastHash: expectedHash
+        };
       }
-      if (pendingBytes > maxBytes) {
+      if (recoveredPendingBytes > maxBytes) {
         throw new Error('AUDIT_OUTBOX_CAPACITY_EXCEEDED');
       }
-      await writeState(state);
-      for (const item of persistedPending) {
-        await removeEntryFile(item.fileName);
-        pendingBytes -= item.bytes;
+      await writeState(recoveredState);
+      const filesToRemove = new Set([
+        ...checkpointCoveredFiles,
+        ...persistedPending.map((item) => item.fileName)
+      ]);
+      for (const fileName of filesToRemove) {
+        await removeEntryFile(fileName);
       }
-      pending.splice(0, persistedPending.length);
+      const persistedPendingCount = persistedPending.length;
+      pending.push(...recoveredPending.slice(persistedPendingCount));
+      pendingBytes = recoveredPending
+        .slice(persistedPendingCount)
+        .reduce((total, item) => total + item.bytes, 0);
       initialized = true;
     } catch (error) {
       await releaseLock();
