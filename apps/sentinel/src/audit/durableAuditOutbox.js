@@ -353,7 +353,7 @@ function createDurableAuditOutbox({
     assertUsable();
     const sequence = state.lastSequence + 1;
     const prevHash = state.lastHash;
-    const hashedEntry = hashEntry(entry, prevHash);
+    const hashedEntry = hashEntry(JSON.parse(JSON.stringify(entry)), prevHash);
     const fileName = `${String(sequence).padStart(20, '0')}-${hashedEntry.eventId}.json`;
     const content = `${JSON.stringify({ sequence, entry: hashedEntry })}\n`;
     const bytes = Buffer.byteLength(content);
