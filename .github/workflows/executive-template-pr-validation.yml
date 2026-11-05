@@ -30,14 +30,14 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - name: Require the trusted workflow ref and explicit confirmation
+      - name: Require main and explicit confirmation
         env:
           WORKFLOW_REF: ${{ github.ref }}
           CONFIRM_READ_ONLY: ${{ inputs.confirm_read_only }}
         run: |
           set -euo pipefail
           if [[ "$WORKFLOW_REF" != "refs/heads/main" ]]; then
-            echo "Run this workflow from main so its definition is the reviewed default-branch version." >&2
+            echo "Run this workflow from main. Review of its definition must be established separately." >&2
             exit 1
           fi
           if [[ "$CONFIRM_READ_ONLY" != "true" ]]; then
@@ -51,6 +51,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           EXPECTED_HEAD_SHA: ${{ inputs.expected_head_sha }}
           VALIDATION_SCOPE: ${{ inputs.validation_scope }}
+          WORKFLOW_SHA: ${{ github.workflow_sha }}
         run: |
           node <<'NODE'
           const fs = require('node:fs');
@@ -62,6 +63,10 @@ jobs:
             }
             if (process.env.VALIDATION_SCOPE !== 'current-pr-checks') {
               throw new Error('Unsupported check-review scope.');
+            }
+            const workflowSha = process.env.WORKFLOW_SHA;
+            if (!/^[0-9a-f]{40}$/.test(workflowSha || '')) {
+              throw new Error('Workflow definition SHA must be exactly 40 lowercase hexadecimal characters.');
             }
 
             const apiHeaders = new Headers({
@@ -76,15 +81,18 @@ jobs:
               return response.json();
             }
 
+            function validateTarget(pr) {
+              if (pr.state !== 'open') throw new Error('PR #48 is not open.');
+              if (pr.base?.ref !== 'main') throw new Error('PR #48 no longer targets main.');
+              if (pr.head?.repo?.full_name !== process.env.GITHUB_REPOSITORY) {
+                throw new Error('PR #48 head is not in this repository; fork code is not run by this pilot.');
+              }
+              if (pr.head?.sha !== expectedSha) {
+                throw new Error(`PR #48 head moved. Expected ${expectedSha}; current head is ${pr.head?.sha || 'unknown'}. Review the new head before retrying.`);
+              }
+            }
             const pr = await getJson(`${apiBase}/pulls/48`, 'PR #48 metadata');
-            if (pr.state !== 'open') throw new Error('PR #48 is not open.');
-            if (pr.base?.ref !== 'main') throw new Error('PR #48 no longer targets main.');
-            if (pr.head?.repo?.full_name !== process.env.GITHUB_REPOSITORY) {
-              throw new Error('PR #48 head is not in this repository; fork code is not run by this pilot.');
-            }
-            if (pr.head?.sha !== expectedSha) {
-              throw new Error(`PR #48 head moved. Expected ${expectedSha}; current head is ${pr.head?.sha || 'unknown'}. Review the new head before retrying.`);
-            }
+            validateTarget(pr);
 
             const checkRuns = [];
             let totalCount = null;
@@ -110,9 +118,12 @@ jobs:
             })), null, 2);
             const longestBacktickRun = Math.max(2, ...[...checkSummary.matchAll(/`+/g)].map((match) => match[0].length));
             const fence = '`'.repeat(longestBacktickRun + 1);
-            fs.appendFileSync(process.env.GITHUB_OUTPUT, `head_sha=${pr.head.sha}\n`);
+            // Revalidate immediately before publishing; later actions still need their own check.
+            const finalPr = await getJson(`${apiBase}/pulls/48`, 'PR #48 final metadata');
+            validateTarget(finalPr);
+            fs.appendFileSync(process.env.GITHUB_OUTPUT, `head_sha=${expectedSha}\nworkflow_sha=${workflowSha}\n`);
             fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY,
-              `## Read-only Executive Template check review\n\n- Target: [PR #48](${pr.html_url})\n- Pinned head: \`${pr.head.sha}\`\n- Checks found: ${checkRuns.length}\n- This run reports existing check results only; PR CI runs the tests. Check statuses do not constitute review acceptance.\n\n${fence}json\n${checkSummary}\n${fence}\n`);
+              `## Read-only Executive Template check review\n\n- Target: [PR #48](${pr.html_url})\n- Pinned head: \`${expectedSha}\`\n- Workflow definition SHA: \`${workflowSha}\`\n- Checks found: ${checkRuns.length}\n- PR state, base, repository and head were rechecked immediately before reporting. This is a snapshot; recheck before any later action.\n- The main branch selection and recorded workflow SHA do not prove review or branch protection. Establish those separately.\n- This run reports existing check results only; PR CI runs the tests. Check statuses do not constitute review acceptance.\n\n${fence}json\n${checkSummary}\n${fence}\n`);
           }
 
           main().catch((error) => {
