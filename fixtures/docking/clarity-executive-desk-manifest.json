@@ -1,0 +1,22 @@
+{
+    "udpVersion": "1.0",
+    "systemId": "SYS-CLARITY-MEMORY",
+    "adapterId": "ADAPTER-CLARITY-EXECUTIVE-DESK",
+    "name": "Clarity Memory Layer",
+    "owner": "Nunn Corporation | Nunn Cloud LLC",
+    "requestedTrustTier": "TIER_0",
+    "capabilities": [
+        "READ_STATUS",
+        "FACEPLANE_READ",
+        "QUERY_TRUST_REGISTRY"
+    ],
+    "metadata": {
+        "source": "bounded-local-candidate",
+        "surfaces": [
+            "executive-desk",
+            "sentinelos"
+        ],
+        "authority": "read-only",
+        "authoritativeSourceConfirmed": false
+    }
+}

@@ -14,8 +14,11 @@ async function fileState(context: CommandContext, relativePath: string): Promise
     try {
         await access(path.join(context.repoRoot, relativePath));
         return `artifact_present_not_behavior_verified: ${relativePath}`;
-    } catch {
-        return `missing_artifact: ${relativePath}`;
+    } catch (error) {
+        if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+            return `missing_artifact: ${relativePath}`;
+        }
+        throw error;
     }
 }
 
@@ -38,55 +41,57 @@ export async function runDailyCadence(context: CommandContext): Promise<CommandE
             buildSection('SentinelOS Health', health),
             '',
             buildSection('Executive Desk Status', [
-                'Read-only governed loop is available locally.',
-                'Cadence automation is running in local-only mode.',
+                'Overall Executive Desk posture is unverified by this report; artifact presence does not establish runtime behavior or current health.',
+                'Refresh live environment and governance evidence before making an overall readiness or failure claim.',
             ]),
             '',
             buildSection('Active Priorities', [
-                'GBP mission package execution quality and craftsmanship.',
-                'Sovereign pilot package design with zero-dependency local execution.',
-                'Government relationship building and readiness evidence.',
-                'Runtime verification for Sentinel AI and Executive Desk command path.',
+                'Review current priorities against dated owner and approval records; this generator does not establish that any item remains active.',
+                'If still applicable, verify the Executive Desk workload, PostgreSQL binding, Stage 2 GPT publish, and Stage 3 gateway/WAF controls using current evidence.',
+                'Record a source, observation time, and reviewer for each priority carried into the report.',
             ]),
             '',
             buildSection('Government Package Standard', [
-                'Deliver a dual-front-door package for executives and operators.',
-                'Keep the demonstration self-contained with no external cloud dependency.',
-                'Show the interactive control plane, verification ledger, and executable overlay scaffolds together.',
+                'Keep public messaging outcome-first and assessment-led.',
+                'Keep sensitive operational controls behind authenticated Executive Desk boundaries.',
+                'Use evidence-backed governance language instead of unsupported certification or compliance claims.',
             ]),
             '',
             buildSection('Governance Exceptions', [
-                'No external mutation allowed in this runtime.',
-                'No compliance or certification claims permitted without explicit authorization.',
+                'No external mutation without explicit authorization.',
+                'No production launch claim until the Executive Desk workload, database binding, and rollout enforcement are verified.',
             ]),
             '',
             buildSection('Outstanding Approvals', [
-                'Customer authorization: pending',
-                'Certification claim: not authorized',
-                'External production command execution: pending Stage 2/3 controls',
+                'Approval status is not observed by this generator; check current approval records for the Executive Desk workload and database binding.',
+                'Approval and verification status for PostgreSQL setup/smoke checks and Stage 2/3 controls must be confirmed from dated source records.',
+                'Do not infer pending or approved status from this report.',
             ]),
             '',
             buildSection('Government Deployment Readiness', [
                 'readiness_score_type: internal_evidence_readiness',
+                'readiness_status: unverified; live-environment blocker status not observed',
                 'certification_claim: false',
                 'compliance_claim: false',
                 'customer_authorization: false',
             ]),
             '',
-            buildSection('Evidence Collected', [
-                'daily_evidence.system_health',
-                'daily_evidence.governance_status',
-                'daily_evidence.approval_activity',
-                'daily_evidence.risk_summary',
-                'daily_evidence.infrastructure_readiness',
-                'daily_evidence.ai_activity_summary',
-                'daily_evidence.receipt_ledger_summary',
-                'daily_evidence.executive_notes',
+            buildSection('Evidence Observed in This Run', [
+                'Repository path presence was checked for the Executive Desk server, API adapter, and integration checklist; presence does not establish runtime behavior.',
+                'Completion-state artifact presence was checked for the configured implementation, verification, and operational paths.',
+                'No live environment, governance register, risk summary, infrastructure readiness, AI activity, or receipt ledger data was queried.',
+            ]),
+            '',
+            buildSection('Required Evidence Not Collected', [
+                'Current governance status and approvals from authoritative records.',
+                'Live-environment blockers, deployed infrastructure readiness, and runtime health.',
+                'AI activity and receipt-ledger summaries.',
+                'Dated, attributable evidence for any risk, blocker, or readiness conclusion.',
             ]),
             '',
             buildSection('Risks and Blockers', [
-                'Local runtime currently assumes internal-only operation.',
-                'PowerShell command host still requires environment-level validation in each machine profile.',
+                'Review the integration checklist and current deployment inventory; this generator does not inspect live database binding, deployed workloads, gateways, Front Door, Application Gateway, WAF, or rollout status.',
+                'Record each verified risk or blocker with its source, observation time, and reviewer; otherwise report it as unverified.',
             ]),
             '',
             renderSentinelCompletionMarkdown(completion),
