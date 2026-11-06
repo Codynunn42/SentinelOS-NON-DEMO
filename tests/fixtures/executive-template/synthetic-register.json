@@ -1,0 +1,73 @@
+{
+  "sheets": {
+    "Portfolio": [
+      {
+        "Work Item ID": "DEMO-001",
+        "Priority": "P1",
+        "Status": "HOLD",
+        "Accountable Owner": "Fixture coordinator",
+        "Next Action": "Review invented evidence",
+        "Last Updated": "2031-02-03",
+        "Deadline / Review Date": "2031-02-05"
+      }
+    ],
+    "Actions": [
+      {
+        "Action ID": "TASK-001",
+        "Work Item ID": "DEMO-001",
+        "Status": "In Progress",
+        "Owner": "Fixture coordinator",
+        "Action": "Reconcile invented acceptance criteria",
+        "Dependency": "Independent review pending",
+        "Evidence Required": "Synthetic checklist",
+        "Last Updated": "2031-02-03",
+        "Due Date": "2031-02-02"
+      }
+    ],
+    "Decisions": [
+      {
+        "Decision ID": "CHOICE-001",
+        "Disposition": "HOLD",
+        "Authority": "Fixture decision role",
+        "Decision / Direction": "Retain synthetic hold",
+        "Conditions": "No execution authority",
+        "Review / Expiry Date": "2031-02-05",
+        "Owner / Next Action": "Fixture coordinator to request review",
+        "Last Updated": "2031-02-03"
+      }
+    ],
+    "Evidence": [
+      {
+        "Evidence ID": "SAMPLE-001",
+        "Work Item ID": "DEMO-001",
+        "Verification Status": "Invented, unverified",
+        "Source Link": "https://example.invalid/synthetic-evidence",
+        "Observed At": "2031-02-03",
+        "Summary": "Synthetic test record"
+      }
+    ],
+    "VR Workforce": [
+      {
+        "Assignment ID": "ROLE-001",
+        "Work Item ID": "DEMO-001",
+        "VR Workforce Role": "Fixture reporting role",
+        "Human Accountable Owner": "Fixture coordinator",
+        "Status": "In Progress",
+        "Last Reviewed": "2031-02-03",
+        "Latest Report": "Synthetic support only; no reviewer assignment"
+      }
+    ],
+    "Risks": [
+      {
+        "Risk ID": "CONCERN-001",
+        "Severity": "Medium",
+        "Status": "Open",
+        "Workstream": "Synthetic review",
+        "Risk / Blocker": "Acceptance unverified",
+        "Mitigation / Next Control": "Obtain independent review",
+        "Owner": "Fixture coordinator",
+        "Review Date": "2031-02-05"
+      }
+    ]
+  }
+}

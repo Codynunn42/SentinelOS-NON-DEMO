@@ -61,7 +61,8 @@
     "start:executive-desk:local-sentinel": "cd apps/executive-desk && SENTINEL_AI_BASE_URL=http://127.0.0.1:3001 SENTINEL_AI_HEALTH_PATH=/health SENTINEL_AI_SCAN_PATH=/proxy/command npx tsx server.ts",
     "scan:executive-desk:sentinel-status": "pnpm --dir apps/executive-desk run api:sentinel-status",
     "scan:executive-desk:sentinel-oauth-fix": "pnpm --dir apps/executive-desk run api:sentinel-scan:oauth-fix",
-    "test": "mocha --require tsx \"apps/executive-desk/**/__tests__/**/*.test.ts\" \"apps/executive-desk/**/*.test.ts\" \"apps/sentinel/**/__tests__/**/*.test.js\" \"apps/sentinel/**/*.test.js\"",
+    "test": "mocha --require tsx \"apps/executive-desk/**/__tests__/**/*.test.ts\" \"apps/executive-desk/**/*.test.ts\" \"apps/sentinel/**/__tests__/**/*.test.js\" \"apps/sentinel/**/*.test.js\" && node --test tests/orchestrate-executive-template.test.js",
+    "test:executive-template-orchestration": "node --test tests/orchestrate-executive-template.test.js",
     "test:coverage": "c8 --all --src apps/executive-desk --exclude \"apps/executive-desk/public/**\" --exclude \"apps/executive-desk/**/__tests__/**\" --exclude \"apps/executive-desk/**/*.test.ts\" --exclude \"apps/executive-desk/**/*.md\" --reporter=text-summary --reporter=lcov pnpm run test",
     "test:coverage:check": "c8 check-coverage --lines 80 --statements 80 --functions 80 --branches 75",
     "check:policy": "node scripts/check-policy-engine.js",
@@ -129,4 +130,3 @@
     }
   }
 }
-
