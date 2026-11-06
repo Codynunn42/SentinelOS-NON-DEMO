@@ -416,9 +416,30 @@ const queue = [
   sections.historicalQueue ? `Historical source, not a refreshed register:\n\n${sourceSection(sections.historicalQueue)}` : '',
   sourceSection(sections.queue)
 ].filter(Boolean).join('\n\n');
+const sprintPlanFile = option('sprint-plan');
+const sprintPlanLines = (() => {
+  if (sprintPlanFile === undefined) {
+    return ['- Daily PR sprint focus: UNVERIFIED - no --sprint-plan file supplied.'];
+  }
+  requiredString(sprintPlanFile, 'sprint-plan');
+  const sprintPath = path.resolve(sprintPlanFile);
+  let content;
+  try {
+    content = fs.readFileSync(sprintPath, 'utf8');
+  } catch (error) {
+    fail(`Cannot read sprint plan ${sprintPlanFile}: ${error.message}`);
+  }
+  const focusMatch = content.match(/^\*\*Proposed first focus:\*\*(.+)$/m);
+  const focusLine = focusMatch
+    ? `- Daily PR sprint focus (user-supplied, unverified): ${focusMatch[1].trim()}`
+    : `- Daily PR sprint plan supplied (user-supplied, unverified): ${path.basename(sprintPath)}`;
+  return [focusLine];
+})();
+
 const nextActions = [
   '- Reconfirm stale Portfolio/Actions rows and resolve conflicts against primary evidence before changing status or closing work.',
   '- Apply recorded decisions only. Owner fields do not establish reviewer eligibility or execution authority.',
+  ...sprintPlanLines,
   ...dispositionRules.map((rule) => `- ${rule.id}: retain the recorded disposition; change only through an authorized, attributable controlling-record update.`),
   ...followups
 ].join('\n');

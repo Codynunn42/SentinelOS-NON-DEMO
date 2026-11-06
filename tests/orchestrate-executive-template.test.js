@@ -666,3 +666,24 @@ with zipfile.ZipFile(sys.argv[1], 'w') as z:
   assert.match(f.read('PACKET'), /Register-recorded: HOLD/);
   assert.match(f.read('PACKET'), /synthetic\.xlsx/);
 });
+
+test('sprint plan file is read and focus line appears in NEXT_ACTIONS', (context) => {
+  const f = fixture(context);
+  const sprintFile = path.join(f.dir, 'sprint.md');
+  fs.writeFileSync(sprintFile, '**Proposed first focus:** PR #47 — Sanitize reconciliation candidate\n');
+  passed(f.run(['--skip-pre-escalation', '--skip-ledger', `--sprint-plan=${sprintFile}`], wrapper));
+  assert.match(f.read(), /Daily PR sprint focus \(user-supplied, unverified\): PR #47/);
+});
+
+test('missing sprint plan marks focus as UNVERIFIED in NEXT_ACTIONS', (context) => {
+  const f = fixture(context);
+  passed(f.run(['--skip-pre-escalation', '--skip-ledger'], wrapper));
+  assert.match(f.read(), /Daily PR sprint focus: UNVERIFIED/);
+  const missingFile = path.join(f.dir, 'missing-sprint.md');
+  const result = f.run([`--sprint-plan=${missingFile}`]);
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /Cannot read sprint plan/);
+  const empty = f.run(['--sprint-plan=']);
+  assert.notEqual(empty.status, 0);
+  assert.match(empty.stderr, /sprint-plan must be a nonempty string/);
+});
