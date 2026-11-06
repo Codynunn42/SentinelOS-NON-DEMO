@@ -312,15 +312,62 @@ function buildPublicFrontDoorVerificationTemplate() {
     };
 }
 
-function buildDoeSbirsttrReadinessTemplate() {
+const DOE_STATUS_FIELDS = [
+    ['samRegistration', 'SAM.gov registration'],
+    ['cageAssignment', 'CAGE assignment'],
+    ['sbaCompanyRegistry', 'SBA Company Registry']
+];
+
+function normalizeDoeStatusEvidence(evidence = {}) {
+    return DOE_STATUS_FIELDS.map(([field, label]) => {
+        const item = evidence && typeof evidence === 'object' ? evidence[field] : undefined;
+        const status = normalizeString(item?.status);
+        const provenanceClassification = normalizeString(item?.provenanceClassification);
+        const observationDate = normalizeString(item?.observationDate);
+        const sourceReference = normalizeString(item?.sourceReference);
+        const dateIsValid = isValidDoeObservationDate(observationDate);
+
+        if (!status || !['owner_reported', 'documentary_reference'].includes(provenanceClassification)
+            || !dateIsValid || !sourceReference) {
+            return {
+                field,
+                label,
+                status: 'unknown',
+                provenanceClassification: 'unverified',
+                verification: 'unverified',
+                observationDate: null,
+                sourceReference: null
+            };
+        }
+
+        return {
+            field,
+            label,
+            status,
+            provenanceClassification,
+            assertion: 'reported by caller; not independently verified',
+            verification: 'unverified',
+            observationDate,
+            sourceReference
+        };
+    });
+}
+
+function isValidDoeObservationDate(value) {
+    if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+        const parsed = new Date(`${value}T00:00:00.000Z`);
+        return Number.isFinite(parsed.getTime()) && parsed.toISOString().slice(0, 10) === value;
+    }
+    return /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/.test(value)
+        && isValidDoeObservationDate(value.slice(0, 10))
+        && Number.isFinite(Date.parse(value));
+}
+
+function buildDoeSbirsttrReadinessTemplate(statusEvidence) {
     return {
         focus: 'doe_sbirsttr_readiness',
-        currentPosture: 'pre_application_readiness_active_alignment',
-        ownerReported: [
-            'SAM.gov registration information reported correct by owner; current active status documentary verification pending',
-            'CAGE assignment pending',
-            'SBA Company Registry reported complete; documentary reverification pending'
-        ],
+        currentPosture: 'pre_application_readiness_unverified',
+        statusEvidence,
         blockedUntilEvidence: [
             'CAGE assignment and SAM evidence archive',
             'SBA documentation submission or acceptance record',
@@ -397,7 +444,9 @@ function buildLightQuantitativeNextStepsResult(payload = {}, context = {}) {
             lane: 'doe_sbirsttr_readiness',
             score: scoreGate({ evidence: 62, risk: 30, reversibility: 90, authority: 72 }),
             decision: 'prepare_owner_review_packet',
-            output: buildDoeSbirsttrReadinessTemplate()
+            output: buildDoeSbirsttrReadinessTemplate(
+                normalizeDoeStatusEvidence(payload.doeEvidence)
+            )
         });
     }
 
