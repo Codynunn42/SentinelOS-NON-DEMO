@@ -355,7 +355,9 @@ function createDurableAuditOutbox({
         await removeEntryFile(fileName);
       }
       const persistedPendingCount = persistedPending.length;
-      pending.push(...recoveredPending.slice(persistedPendingCount));
+      for (let index = persistedPendingCount; index < recoveredPending.length; index += 1) {
+        pending.push(recoveredPending[index]);
+      }
       pendingBytes = recoveredPending
         .slice(persistedPendingCount)
         .reduce((total, item) => total + item.bytes, 0);

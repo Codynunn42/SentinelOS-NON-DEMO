@@ -5,6 +5,7 @@ const path = require('path');
 const { readFileSync } = require('fs');
 const { Pool } = require('pg');
 const { createAuditLogger } = require('../auditLogger');
+const { createDurableAuditOutbox } = require('../durableAuditOutbox');
 const databaseUrl =
   process.env.AUDIT_OUTBOX_TEST_DATABASE_URL || process.env.RECEIPT_LEDGER_TEST_DATABASE_URL;
 const itWithPostgres = databaseUrl ? it : it.skip;
@@ -125,6 +126,64 @@ describe('audit startup checkpoint recovery', () => {
     assert.deepEqual(recovering.verifyChain(), { valid: true, checked: filesBefore.length });
     assert.deepEqual(await spoolFiles(), filesBefore);
     await recovering.close();
+  });
+
+  it('recovers a backlog larger than the maximum spread argument count', async () => {
+    const entryCount = 130_000;
+    const auditHash = 'a'.repeat(64);
+    const fakeFiles = Array.from({ length: entryCount }, (_, index) => {
+      const sequence = index + 1;
+      const eventId = [
+        String(sequence).padStart(8, '0'),
+        '0000',
+        '4000',
+        '8000',
+        String(sequence).padStart(12, '0')
+      ].join('-');
+      return {
+        name: `${String(sequence).padStart(20, '0')}-${eventId}.json`,
+        isFile: () => true
+      };
+    });
+    const originalReaddir = fs.readdir;
+    const originalStat = fs.stat;
+    const originalReadFile = fs.readFile;
+    fs.readdir = async () => fakeFiles;
+    fs.stat = async () => ({ size: 100 });
+    fs.readFile = async (filePath) => {
+      if (path.basename(filePath) === 'state.json') {
+        const error = new Error('state not found');
+        error.code = 'ENOENT';
+        throw error;
+      }
+      const name = path.basename(filePath);
+      const sequence = Number(name.slice(0, 20));
+      const eventId = name.slice(21, -5);
+      return JSON.stringify({
+        sequence,
+        entry: {
+          eventId,
+          prevHash: sequence === 1 ? null : auditHash,
+          auditHash
+        }
+      });
+    };
+
+    const outbox = createDurableAuditOutbox({
+      directory,
+      databaseStatus: () => 'disabled',
+      loadAnchor: async () => null,
+      maxBytes: entryCount * 100
+    });
+    try {
+      await outbox.initialize({ verifyEntry: () => true });
+      assert.equal(outbox.pendingCount, entryCount);
+    } finally {
+      fs.readdir = originalReaddir;
+      fs.stat = originalStat;
+      fs.readFile = originalReadFile;
+      await outbox.close();
+    }
   });
 
   it('verifies the retained suffix and checks database event inventory separately', async () => {
