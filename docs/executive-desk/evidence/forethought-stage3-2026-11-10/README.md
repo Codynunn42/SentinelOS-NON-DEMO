@@ -65,7 +65,7 @@ sha256sum -c docs/executive-desk/evidence/forethought-stage3-2026-11-10/SHA256SU
 1. **C4 advisory provenance and relationship:** The user-provided C4 archive's package hash, internal checksums, declared base commit/blob IDs, and patch-to-source parity were verified. The external library provenance is not independently authenticated. C4 is a separate Advisory Job candidate, not the Discovery Lens Stage 3 implementation in PR #73; see `C4_ADVISORY_RECONCILIATION_2026-11-11.md`.
 2. **Microsoft agenda:** The intended Microsoft agenda was not identified or verified in this workspace. Do not treat a potentially related invitation as the intended source without confirmation.
 3. **Technical pre-review:** Internal AI-assisted analysis reproduced two medium-severity baseline findings; owner-authorized fixes and tests are in the revised candidate. This is not independent verification; see `PRELIMINARY_AI_REVIEW_2026-11-11.md` and `REVISED_CANDIDATE_CHANGELOG.md`.
-4. **Hosted CI:** Draft PR #73 checks passed at head `63e510df35ac41f4a5b4e4009a0df05a0ce6d129`. The complete check links and scope are recorded in `SOURCE_AND_CI_RECONCILIATION_2026-11-11.md`.
+4. **Hosted CI:** Draft PR #73 checks passed at C4-reconciled head `e68658154003a2625cce3b9bfce6d6b65aa27a1b`. Check links are recorded in `SOURCE_AND_CI_RECONCILIATION_2026-11-11.md`.
 5. **Runtime evidence:** The currently deployed image is a different commit than the Forethought candidate. Its current state and the dated workflow/probe evidence are separated in `RUNTIME_EVIDENCE_2026-11-11.md`.
 6. **Scope:** No merge, deployment, operational integration, paid provisioning, or governance disposition change is authorized by this test result.
 
