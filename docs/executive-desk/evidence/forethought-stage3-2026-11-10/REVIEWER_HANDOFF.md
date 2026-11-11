@@ -15,8 +15,8 @@
 - Revised snapshot SHA-256: `63baba810724ab6e152cdfa4b6e9f21f95e167bd9f63f9e8f850bdbdd3522519`
 - Revised per-file hashes: `revised-source-sha256.txt`
 - The original checkout was dirty; the Stage 3 directory was untracked and `package.json` was modified. Review the revised snapshot and compare it with the preserved baseline, not that original working tree or commit SHA alone.
-- For hosted-CI preparation, the exact revised source and packet are being isolated on branch `review/forethought-stage3-revised-2026-11-11`, based on `origin/main` at `e1371a6a8d8e9f574e8703196061db359fe160c6`. This branch excludes unrelated worktree changes. Its committed head and hosted CI result will be recorded after publication; neither is established yet.
-- A fresh local test in the isolated review worktree completed with exit code `0`: **124 passing, 3 pending**. The Stage 3 harness reported all 42 acceptance and regression tests programmatically verified. The retained output and run metadata are `test-output-review-branch.log` and `test-run-metadata-review-branch.txt`. This is not hosted-CI evidence.
+- The isolated review branch is `review/forethought-stage3-revised-2026-11-11`, based on `origin/main` at `e1371a6a8d8e9f574e8703196061db359fe160c6`. Its candidate source commit is `3198b91c81520ce13e858ee5d39974d71a5787ef`; unrelated worktree changes are excluded. It is published as [draft PR #73](https://github.com/Codynunn42/SentinelOS-NON-DEMO/pull/73), for CI and review preparation only.
+- A fresh local test in the isolated review worktree completed with exit code `0`: **124 passing, 3 pending**. The Stage 3 harness reported all 42 acceptance and regression tests programmatically verified. The retained output and run metadata are `test-output-review-branch.log` and `test-run-metadata-review-branch.txt`. The tested source files match the hashes in the committed candidate. This is not hosted-CI evidence.
 
 ## Local test evidence (not independent acceptance)
 
@@ -29,7 +29,7 @@
 
 Pending tests are not passing tests. The original-checkout run had six pending; the isolated review worktree run had three pending. This local evidence does not establish hosted CI, C4 advisory authenticity, independent acceptance, or operational approval.
 
-The baseline suite was rerun on 2026-11-11 in the original checkout with **147 passing, 6 pending**, exit code `0`. After the fixes, that dirty checkout reported **150 passing, 6 pending**, exit code `0`; this count is not attributable to the isolated review branch. In the clean-base review worktree, `pnpm test` reported **124 passing, 3 pending**, exit code `0`, including the Stage 3 suite's 42 programmatically verified acceptance and regression tests. The revised candidate has no hosted workflow run yet.
+The baseline suite was rerun on 2026-11-11 in the original checkout with **147 passing, 6 pending**, exit code `0`. After the fixes, that dirty checkout reported **150 passing, 6 pending**, exit code `0`; this count is not attributable to the isolated review branch. In the clean-base review worktree, `pnpm test` reported **124 passing, 3 pending**, exit code `0`, including the Stage 3 suite's 42 programmatically verified acceptance and regression tests. Hosted workflow checks for draft PR #73 passed for source commit `3198b91c81520ce13e858ee5d39974d71a5787ef`: `Analyze (actions)`, `Analyze (javascript-typescript)`, `CodeQL`, and `sentinel-api`. See `SOURCE_AND_CI_RECONCILIATION_2026-11-11.md` for run links. This is hosted CI evidence, not independent review or final acceptance.
 
 ## Review eligibility and acceptance boundary
 

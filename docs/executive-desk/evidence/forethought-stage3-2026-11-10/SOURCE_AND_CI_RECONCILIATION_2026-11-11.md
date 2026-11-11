@@ -18,7 +18,16 @@ The repository's [`ci.yml`](../../../../.github/workflows/ci.yml) runs `pnpm tes
 
 The original revised candidate was prepared from checkout commit `fd142a8af84e396d7fcd1584348b73f455dcf910`, where its Forethought files were untracked and unrelated worktree changes were present. To isolate exact-candidate validation, a clean review worktree was created from `origin/main` at `e1371a6a8d8e9f574e8703196061db359fe160c6`, on branch `review/forethought-stage3-revised-2026-11-11`. The branch contains only the Forethought source/tests and directly related evidence/handoff updates; unrelated `package.json`, CI workflow, and other dirty changes are excluded. Its intended use is a draft PR for CI and review preparation only; merge and deployment remain out of scope.
 
-At the time this reconciliation was written, the review-branch changes had not yet been committed or pushed. In the clean-base review worktree, `pnpm test` completed with exit code `0`: **124 passing, 3 pending**; the Stage 3 suite reported all 42 acceptance and regression tests verified. This is local evidence only. No hosted PR/run exists for the revised candidate yet, so exact-candidate hosted CI remains **not established**.
+The candidate source commit `3198b91c81520ce13e858ee5d39974d71a5787ef` was pushed to `review/forethought-stage3-revised-2026-11-11` and published as [draft PR #73](https://github.com/Codynunn42/SentinelOS-NON-DEMO/pull/73). The PR is for review preparation and hosted CI only; merge and deployment remain out of scope. In the clean-base review worktree, `pnpm test` completed with exit code `0`: **124 passing, 3 pending**; the Stage 3 suite reported all 42 acceptance and regression tests verified. The worktree's tested source files match the committed candidate hashes.
+
+Hosted checks completed successfully on source commit `3198b91c81520ce13e858ee5d39974d71a5787ef`:
+
+- [Analyze (actions)](https://github.com/Codynunn42/SentinelOS-NON-DEMO/actions/runs/43114570370/job/130839087383) — pass.
+- [Analyze (javascript-typescript)](https://github.com/Codynunn42/SentinelOS-NON-DEMO/actions/runs/43114570370/job/130839087910) — pass.
+- [CodeQL](https://github.com/Codynunn42/SentinelOS-NON-DEMO/runs/130839378988) — pass.
+- [sentinel-api](https://github.com/Codynunn42/SentinelOS-NON-DEMO/actions/runs/43114576506/job/130839104175) — pass.
+
+These are checks for the isolated candidate source on the draft PR. They do not establish C4 advisory authenticity, independent review, final acceptance, or authorization to merge or deploy.
 
 The successful Nov. 4 deployment workflow concerns the different deployed commit `e1371a6a8d8e9f574e8703196061db359fe160c6`. It is runtime evidence for that image only, not CI or deployment evidence for the Forethought candidate. See `RUNTIME_EVIDENCE_2026-11-11.md`.
 

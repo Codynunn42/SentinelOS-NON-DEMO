@@ -23,13 +23,13 @@ The original baseline snapshot and its original run records are retained unchang
 - Full repository test command `pnpm test`: **150 passing, 6 pending**, exit code `0`; see `test-output-revised-2026-11-11.log` and `test-run-metadata-revised-2026-11-11.txt`.
 - Three PostgreSQL receipt-ledger persistence tests remain pending because `RECEIPT_LEDGER_TEST_DATABASE_URL` was not set. Three additional in-memory receipt-ledger tests conditionally skipped because they received no persisted records or the ledger did not expose a signature-verification method. All six remain pending, not passed.
 - `revised-source-sha256.txt` records the revised source/configuration file hashes; `SHA256SUMS` covers the revised archive and report files.
-- The revised source was copied into a clean worktree based on `origin/main` at `e1371a6a8d8e9f574e8703196061db359fe160c6`, with unrelated local changes excluded. A fresh `pnpm test` there reported **124 passing, 3 pending**, exit code `0`; the Stage 3 suite programmatically verified all 42 acceptance and regression tests. See `test-output-review-branch.log` and `test-run-metadata-review-branch.txt`. This is not hosted CI.
+- The revised source was copied into a clean worktree based on `origin/main` at `e1371a6a8d8e9f574e8703196061db359fe160c6`, with unrelated local changes excluded. It is committed at `3198b91c81520ce13e858ee5d39974d71a5787ef` and published in [draft PR #73](https://github.com/Codynunn42/SentinelOS-NON-DEMO/pull/73). A fresh `pnpm test` there reported **124 passing, 3 pending**, exit code `0`; the Stage 3 suite programmatically verified all 42 acceptance and regression tests. See `test-output-review-branch.log` and `test-run-metadata-review-branch.txt`. This is not hosted CI.
 - The earlier **150 passing, 6 pending** result was from the original dirty checkout and is retained as historical local evidence only. It is not the test count for the isolated review candidate.
 
 ## Remaining gates
 
 - No independent reviewer has verified the fixes.
 - The original C4 advisory is still unavailable, so advisory fidelity cannot be established.
-- No hosted CI run exists yet for this revised candidate.
+- Hosted CI for draft PR #73 is still being determined.
 - No deployment or operational integration was performed.
 - HOLD remains in effect; no acceptance or governance disposition changed.
