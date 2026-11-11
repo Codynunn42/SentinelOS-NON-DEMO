@@ -1,0 +1,29 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> sentinelos-non-demo@0.1.0 check:deployment-gate /workspace/scratch/ea27dac3fd2b/pr73-integration
+> pnpm run test:deployment-contract && pnpm run check:deployment-contract
+
+
+> sentinelos-non-demo@0.1.0 test:deployment-contract /workspace/scratch/ea27dac3fd2b/pr73-integration
+> node --test tests/deployment-contract.test.js
+
+✔ accepts a valid Azure Container Apps deployment contract (2.030307ms)
+✔ accepts a revision whose image is nested under the template container (0.240681ms)
+✔ fails closed when the exact revision has no image evidence (0.379511ms)
+✔ rejects when the supplied exact revision name does not match the expected suffix (0.244457ms)
+✔ rejects a supplied exact revision without a name (0.291002ms)
+✔ rejects when the app is healthy but the exact revision is stale (0.201722ms)
+✔ rejects malformed port and probe state (0.37216ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 161.450913
+
+> sentinelos-non-demo@0.1.0 check:deployment-contract /workspace/scratch/ea27dac3fd2b/pr73-integration
+> node scripts/check-deployment-contract.js
+
+Deployment gate wiring, provenance, and reference-manifest boundaries are present.

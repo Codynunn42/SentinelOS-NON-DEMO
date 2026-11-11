@@ -1,3 +1,7 @@
+## Expanded candidate — exact-head CI required
+
+The C4/Lens integration was prepared from parent `9d95b5b2028c72849b8f3deb12e81332f13481d6`. Its tested sources and current local results are recorded in `../forethought-c4-integration-2026-11-11/`. Earlier CI passes in this document apply to earlier heads only. Use GitHub checks for the current expanded PR head before any acceptance decision. The PR description reports the observed current-head state separately.
+
 # Forethought Source, Agenda, and CI Reconciliation — 2026-11-11
 
 **Disposition:** C4 package recovered and reconciled to its declared source base; external provenance and Microsoft agenda remain unresolved. No candidate merge or deployment was attempted.

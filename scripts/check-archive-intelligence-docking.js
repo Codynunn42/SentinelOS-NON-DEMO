@@ -1,5 +1,5 @@
 const assert = require('assert');
-const { routeArchiveIntelligenceIntake } = require('../apps/sentinel/src/learning/interpretation');
+const { routeArchiveIntelligenceIntake } = require('../apps/sentinel/src/archiveIntelligence/intakeRouter');
 
 const futureTheory = routeArchiveIntelligenceIntake({
   id: 'incoming_managed_results',
@@ -37,10 +37,10 @@ const currentTruth = routeArchiveIntelligenceIntake({
   source: 'operator'
 });
 
-assert.strictEqual(currentTruth.lane, 'active_context');
-assert(currentTruth.evidenceConnections.some((connection) => connection.role === 'current_truth'));
-assert.strictEqual(currentTruth.interpretation.requiresApproval, false);
-assert.strictEqual(currentTruth.interpretation.actionGate, 'observe_only');
+assert.strictEqual(currentTruth.lane, 'archive_reference');
+assert(currentTruth.evidenceConnections.some((connection) => connection.slot === 'HISTORICAL_CONTEXT'));
+assert.strictEqual(currentTruth.interpretation.requiresApproval, true);
+assert.strictEqual(currentTruth.interpretation.actionGate, 'human_review_required');
 
 const deferredDraft = routeArchiveIntelligenceIntake({
   id: 'incoming_arizona_spo',

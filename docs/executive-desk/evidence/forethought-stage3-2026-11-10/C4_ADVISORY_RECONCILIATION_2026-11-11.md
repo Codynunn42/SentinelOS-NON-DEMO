@@ -1,3 +1,7 @@
+## Updated handling decision — November 11
+
+The user explicitly requested integration into draft PR #73 and expansion of the candidate. The new combined source and tests are documented in `../forethought-c4-integration-2026-11-11/README.md`. The original ZIP and its provenance limits are preserved unchanged. This authorizes research-source integration only; no independent acceptance, external-provenance authentication, merge, deployment or live adapters is implied. The original reconciliation below records the earlier separate-candidate state.
+
 # C4 Advisory Package Reconciliation — 2026-11-11
 
 ## Received package and integrity

@@ -1,0 +1,37 @@
+✔ legacy May keywords cannot establish current authority or bypass review (2.553445ms)
+✔ trusted active artifact can occupy authority slot without granting execution (1.245503ms)
+✔ freshness decreases with time independently of trusted authority (0.39031ms)
+✔ expired/nonactive/superseded/missing/malformed/future metadata never establishes authority (1.774756ms)
+✔ expiry equality is valid; the first later instant is expired (0.364019ms)
+✔ forged metadata, revoked authority and replayed version cannot become current (6.402075ms)
+✔ denials do not read content or expose source IDs, titles, hold vectors or payloads (4.702382ms)
+✔ retention hold alone allows read; explicit read hold and UNDER_HOLD stop synthesis (1.906747ms)
+✔ C4 returns supported line citations, a pending signoff, and immutable input/output (2.233539ms)
+✔ structured contradictions remain unresolved and missing required evidence is explicit (8.491026ms)
+✔ historical evidence remains visible but cannot support a current conclusion (3.260656ms)
+✔ invalid quote or nonexistent line fails closed without partial packet (0.572005ms)
+✔ expiry or revocation between validation and release blocks the packet (1.44663ms)
+✔ ordinary clock advance within validity does not block a packet (0.682937ms)
+✔ missing clock, store failure, malformed input yield structured failure (0.765003ms)
+✔ 100 frozen benchmark cases have repeatable semantics and expected safety outcomes (49.928199ms)
+✔ telemetry keeps CPU, RSS, heap and unknown energy separate (0.611557ms)
+✔ a denied source after an allowed source still returns no partial findings (0.383447ms)
+✔ source mutation after discovery fails identity validation (0.395282ms)
+✔ Stage 3 Lens and C4 produce a combined packet with exact source citations (10.415893ms)
+✔ Lens target selection excludes irrelevant source claims from C4 synthesis (3.432478ms)
+✔ unrelated-keyword release hold cannot be lost by C4 lexical discovery (2.698326ms)
+✔ fixture_verified never overrides expiry or unverified authority (3.631909ms)
+✔ synthesis conflict or required gap downgrades Lens prerequisite support (3.590719ms)
+✔ missing/mismatched scope grant denies before payload retrieval (1.952289ms)
+✔ content/version/source identity mismatch halts instead of substituting evidence (2.762741ms)
+✔ changing snapshot membership or sensitivity grants blocks packet release (1.821399ms)
+✔ bridge rejects duplicates, missing versions and test-only hooks (1.201241ms)
+✔ global environment records remain included; foreign environment remains excluded (1.931938ms)
+ℹ tests 29
+ℹ suites 0
+ℹ pass 29
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 257.931817

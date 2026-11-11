@@ -1,3 +1,7 @@
+## Current expanded scope — November 11
+
+PR #73 now combines the Stage 3 Discovery Lens and C4 Advisory Job through an explicit research bridge at the user's request. Current evidence is in `../forethought-c4-integration-2026-11-11/`; see the updated `REVIEWER_HANDOFF.md`. Earlier standalone source snapshots, test runs and CI results below remain historical. They do not validate the expanded head. No merge/deployment/operational authorization or independent acceptance is added.
+
 # Forethought Stage 3 Evidence Packet
 
 **Prepared:** 2026-11-10; updated 2026-11-11  
