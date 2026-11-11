@@ -1,12 +1,12 @@
 # Forethought Source, Agenda, and CI Reconciliation — 2026-11-11
 
-**Disposition:** Source and agenda recovery remain blocked; no candidate merge or deployment was attempted.
+**Disposition:** C4 package recovered and reconciled to its declared source base; external provenance and Microsoft agenda remain unresolved. No candidate merge or deployment was attempted.
 
 ## C4 advisory source
 
-Searched the workspace for `Sentinel_Forethought_Advisory_C4_Candidate_v0_2.zip`, Forethought advisory references, and likely matching filenames. The exact ZIP was not found. The local Git history contains no matching advisory path. The GitHub tree search across all 23 remote branches and the repository's release asset names found no matching advisory package; the `main` tree contains only the Forethought source directory and `interpretation.js`.
+The user supplied `Sentinel_Forethought_Advisory_C4_Candidate_v0_2.zip` from a library. The exact 431,405-byte archive is preserved in this packet; SHA-256 is `ce82c5961f3a0790f3ce786bfa5a12e66c22d0628b0c72c1357ef83f97dfc45b`. All 28 entries listed by the embedded checksum manifest verified. The package's declared base commit and four Git blob IDs matched the repository, and its source patch applied cleanly to that base; all five patched code files byte-matched the package candidate. See `C4_ADVISORY_RECONCILIATION_2026-11-11.md`.
 
-No original package hash, provenance, inventory, or version identity can therefore be established. The Stage 3 source snapshot is available for technical review, but it is not a substitute for the C4 advisory and cannot support an advisory-fidelity claim. Source retrieval requires an authorized original ZIP or repository location from outside the searched workspace and GitHub branches/releases.
+These checks establish byte integrity and consistency with the declared repository base. The external library, publisher identity, and any signed release provenance were not independently verified. The C4 package is a local Advisory Job candidate, not a deployed or accepted runtime. It is also distinct from the Discovery Lens Stage 3 candidate in PR #73: that PR does not include C4's archive-intelligence changes or `advisoryJob.js`. Therefore C4 implementation fidelity is not claimed for PR #73. The two candidates require separate review and an authorized decision on whether to retain them separately, integrate them, or designate one as superseding the other.
 
 ## Microsoft agenda
 
@@ -18,24 +18,24 @@ The repository's [`ci.yml`](../../../../.github/workflows/ci.yml) runs `pnpm tes
 
 The original revised candidate was prepared from checkout commit `fd142a8af84e396d7fcd1584348b73f455dcf910`, where its Forethought files were untracked and unrelated worktree changes were present. To isolate exact-candidate validation, a clean review worktree was created from `origin/main` at `e1371a6a8d8e9f574e8703196061db359fe160c6`, on branch `review/forethought-stage3-revised-2026-11-11`. The branch contains only the Forethought source/tests and directly related evidence/handoff updates; unrelated `package.json`, CI workflow, and other dirty changes are excluded. Its intended use is a draft PR for CI and review preparation only; merge and deployment remain out of scope.
 
-The candidate source commit `3198b91c81520ce13e858ee5d39974d71a5787ef` was pushed to `review/forethought-stage3-revised-2026-11-11` and published as [draft PR #73](https://github.com/Codynunn42/SentinelOS-NON-DEMO/pull/73). The PR is for review preparation and hosted CI only; merge and deployment remain out of scope. In the clean-base review worktree, `pnpm test` completed with exit code `0`: **124 passing, 3 pending**; the Stage 3 suite reported all 42 acceptance and regression tests verified. The worktree's tested source files match the committed candidate hashes.
+The candidate source commit `3198b91c81520ce13e858ee5d39974d71a5787ef` was pushed to `review/forethought-stage3-revised-2026-11-11` and published as [draft PR #73](https://github.com/Codynunn42/SentinelOS-NON-DEMO/pull/73). The current PR head is `63e510df35ac41f4a5b4e4009a0df05a0ce6d129`. The PR is for review preparation and hosted CI only; merge and deployment remain out of scope. In the clean-base review worktree, `pnpm test` completed with exit code `0`: **124 passing, 3 pending**; the Stage 3 suite reported all 42 acceptance and regression tests verified. The worktree's tested source files match the committed candidate hashes.
 
-Hosted checks completed successfully on source commit `3198b91c81520ce13e858ee5d39974d71a5787ef`:
+Hosted checks completed successfully on PR head `63e510df35ac41f4a5b4e4009a0df05a0ce6d129`:
 
 - [Analyze (actions)](https://github.com/Codynunn42/SentinelOS-NON-DEMO/actions/runs/43114570370/job/130839087383) — pass.
 - [Analyze (javascript-typescript)](https://github.com/Codynunn42/SentinelOS-NON-DEMO/actions/runs/43114570370/job/130839087910) — pass.
 - [CodeQL](https://github.com/Codynunn42/SentinelOS-NON-DEMO/runs/130839378988) — pass.
 - [sentinel-api](https://github.com/Codynunn42/SentinelOS-NON-DEMO/actions/runs/43114576506/job/130839104175) — pass.
 
-These are checks for the isolated candidate source on the draft PR. They do not establish C4 advisory authenticity, independent review, final acceptance, or authorization to merge or deploy.
+These are checks for the isolated Stage 3 candidate on the draft PR. They do not establish external C4 provenance, independent review, final acceptance, or authorization to merge or deploy.
 
 The successful Nov. 4 deployment workflow concerns the different deployed commit `e1371a6a8d8e9f574e8703196061db359fe160c6`. It is runtime evidence for that image only, not CI or deployment evidence for the Forethought candidate. See `RUNTIME_EVIDENCE_2026-11-11.md`.
 
 ## Current status
 
-- Original advisory authenticity and comparison: outstanding.
+- C4 package integrity and source binding: verified; external library provenance and independent review: outstanding; relationship to Stage 3 candidate requires an authorized decision.
 - Microsoft agenda identity: outstanding.
-- Exact-candidate hosted CI: not run; authorized candidate PR/commit needed.
+- Exact Stage 3 candidate hosted CI: passed on the current draft PR head.
 - Technical pre-review: two AI-assisted, directly reproduced medium findings are documented in `PRELIMINARY_AI_REVIEW_2026-11-11.md`.
 - Independent reviewer: not assigned; no independent acceptance.
 - Governance and operational authorization: unchanged; HOLD retained.

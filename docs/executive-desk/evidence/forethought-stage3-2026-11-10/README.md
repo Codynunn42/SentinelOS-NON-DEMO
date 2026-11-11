@@ -7,7 +7,7 @@
 
 The baseline command `pnpm test` completed with exit code `0`: **147 passing, 6 pending**. The complete captured output is in `test-output.log`. That output includes the Stage 3 suite's report that all 42 acceptance and regression probes ran.
 
-This result documents the behavior tested in the checkout identified below. It does not establish source authenticity for the C4 advisory, independent acceptance, approval to integrate, deployment readiness, or compliance.
+These results document behavior in the named checkouts only. They do not establish external provenance for the C4 package, independent acceptance, approval to integrate, deployment readiness, or compliance.
 
 The 2026-11-11 pre-fix rerun completed with exit code `0`: **147 passing, 6 pending**. After the owner-authorized fixes, `pnpm test` completed with exit code `0`: **150 passing, 6 pending**. The baseline and revised full outputs and timestamps are retained separately. Three pending tests are PostgreSQL receipt-ledger persistence tests skipped because `RECEIPT_LEDGER_TEST_DATABASE_URL` was not set. Three additional in-memory receipt-ledger tests conditionally skipped because no persisted records were returned or the ledger did not provide a signature-verification method. They are pending, not passed.
 
@@ -49,7 +49,9 @@ sha256sum -c docs/executive-desk/evidence/forethought-stage3-2026-11-10/revised-
 - `RUNTIME_EVIDENCE_2026-11-11.md` — current runtime and historical exact deployment-workflow evidence
 - `PRELIMINARY_AI_REVIEW_2026-11-11.md` — baseline internal, non-independent technical review and reproduced findings
 - `REVISED_CANDIDATE_CHANGELOG.md` — owner-authorized changes and revised-candidate verification
-- `SOURCE_AND_CI_RECONCILIATION_2026-11-11.md` — C4 source, Microsoft agenda, and hosted-CI search result
+- `Sentinel_Forethought_Advisory_C4_Candidate_v0_2.zip` — preserved user-provided C4 package
+- `C4_ADVISORY_RECONCILIATION_2026-11-11.md` — C4 package integrity, source binding, and scope comparison with the Stage 3 candidate
+- `SOURCE_AND_CI_RECONCILIATION_2026-11-11.md` — C4 source, Microsoft agenda, and hosted-CI reconciliation
 - `REVIEWER_HANDOFF.md` — independent reviewer scope, candidate identity, and acceptance boundaries
 
 To verify packet-file integrity from the repository root:
@@ -60,13 +62,13 @@ sha256sum -c docs/executive-desk/evidence/forethought-stage3-2026-11-10/SHA256SU
 
 ## Evidence limits and open items
 
-1. **C4 advisory source:** The original `Sentinel_Forethought_Advisory_C4_Candidate_v0_2.zip` was not available for verification. The local source snapshot is not a substitute for that original or evidence of its authenticity.
+1. **C4 advisory provenance and relationship:** The user-provided C4 archive's package hash, internal checksums, declared base commit/blob IDs, and patch-to-source parity were verified. The external library provenance is not independently authenticated. C4 is a separate Advisory Job candidate, not the Discovery Lens Stage 3 implementation in PR #73; see `C4_ADVISORY_RECONCILIATION_2026-11-11.md`.
 2. **Microsoft agenda:** The intended Microsoft agenda was not identified or verified in this workspace. Do not treat a potentially related invitation as the intended source without confirmation.
 3. **Technical pre-review:** Internal AI-assisted analysis reproduced two medium-severity baseline findings; owner-authorized fixes and tests are in the revised candidate. This is not independent verification; see `PRELIMINARY_AI_REVIEW_2026-11-11.md` and `REVISED_CANDIDATE_CHANGELOG.md`.
-4. **Hosted CI:** Draft PR #73 checks passed for candidate source commit `3198b91c81520ce13e858ee5d39974d71a5787ef`. The complete check links and scope are recorded in `SOURCE_AND_CI_RECONCILIATION_2026-11-11.md`.
+4. **Hosted CI:** Draft PR #73 checks passed at head `63e510df35ac41f4a5b4e4009a0df05a0ce6d129`. The complete check links and scope are recorded in `SOURCE_AND_CI_RECONCILIATION_2026-11-11.md`.
 5. **Runtime evidence:** The currently deployed image is a different commit than the Forethought candidate. Its current state and the dated workflow/probe evidence are separated in `RUNTIME_EVIDENCE_2026-11-11.md`.
 6. **Scope:** No merge, deployment, operational integration, paid provisioning, or governance disposition change is authorized by this test result.
 
 ## Reviewer handoff
 
-An independent reviewer may start technical analysis and testing against the revised, hash-verified snapshot now, while comparing it with the preserved baseline. Two baseline findings have been remediated in the revised candidate but remain unverified independently. Authenticate and reconcile the original C4 advisory when available; advisory fidelity cannot be concluded before that comparison. Final acceptance also requires disposition of significant findings and any exact-candidate hosted CI required by the authorized process. `ACCEPT FOR REVIEW ONLY` denotes packet readiness, not implementation acceptance. Keep HOLD in place until the authorized decision-maker resolves those gates.
+An independent reviewer may start technical analysis and testing against the revised, hash-verified Stage 3 snapshot while comparing it with the preserved baseline. Two baseline findings have been remediated but remain unverified independently. The received C4 archive is a different candidate; its integrity and declared source binding are documented, but its external provenance and implementation have not been independently accepted. The authorized decision-maker must determine whether the C4 Advisory Job and Stage 3 Discovery Lens candidates are separate, to be integrated, or superseding. `ACCEPT FOR REVIEW ONLY` denotes packet readiness, not implementation acceptance. Keep HOLD in place until those gates are resolved.

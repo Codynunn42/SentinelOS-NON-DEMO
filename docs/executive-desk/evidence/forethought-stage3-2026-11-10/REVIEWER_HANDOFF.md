@@ -33,9 +33,9 @@ The baseline suite was rerun on 2026-11-11 in the original checkout with **147 p
 
 ## Review eligibility and acceptance boundary
 
-The independent reviewer may begin static analysis and independent testing of the identified, hash-verified candidate snapshot before the original C4 advisory is recovered. Any resulting assessment is limited to the technical candidate identified above; without the original advisory, the reviewer cannot conclude that the candidate faithfully implements that advisory.
+The independent reviewer may begin static analysis and testing of both the identified Stage 3 snapshot and the separately preserved C4 package. The C4 archive is not the Stage 3 candidate: see `C4_ADVISORY_RECONCILIATION_2026-11-11.md` for verified package integrity, source binding, and scope differences. External provenance is not independently authenticated. The reviewer should assess each artifact separately and avoid treating the Stage 3 candidate as an implementation of the C4 Advisory Job.
 
-Final technical acceptance is not eligible until the original advisory has been authenticated and reconciled against the candidate, significant findings have been resolved or explicitly dispositioned by the authorized decision-maker, and any hosted-CI evidence required by the authorized acceptance process has been completed. Pending tests must remain identified as pending, not counted as passing.
+Final technical acceptance is not eligible until external C4 provenance is resolved to the authorized decision-maker's satisfaction, the relationship between the two candidates is decided, significant findings are resolved or explicitly dispositioned, and any remaining acceptance requirements are completed. Pending tests must remain identified as pending, not counted as passing. PR #73 hosted checks passed at head `63e510df35ac41f4a5b4e4009a0df05a0ce6d129`; see the CI reconciliation for links.
 
 `ACCEPT FOR REVIEW ONLY` below means acknowledgment that the packet is ready for review; it is not acceptance of the implementation, a final technical decision, or permission to merge, integrate, deploy, or advance a governance gate.
 
@@ -56,9 +56,9 @@ For each finding, cite the snapshot file and line, describe impact and reproduci
 
 The separate `RUNTIME_EVIDENCE_2026-11-11.md` documents the current deployed Sentinel runtime. Its deployed image is commit `e1371a6...`, not either Forethought snapshot; do not use that runtime evidence as proof that this candidate was deployed or accepted.
 
-### 2. Authenticate and reconcile the C4 advisory
+### 2. Independently review and disposition the C4 candidate
 
-Obtain the original `Sentinel_Forethought_Advisory_C4_Candidate_v0_2.zip` from an authorized source. Record its origin, retrieval date, package hash, internal file inventory, and version identity. Compare the original advisory and its referenced files with the retained candidate snapshot; document missing, changed, or additional content. Do not treat secondary notes or a related v0.2 specification as the original package.
+The user supplied `Sentinel_Forethought_Advisory_C4_Candidate_v0_2.zip`, which is preserved with package and internal hashes in the packet. Its declared base commit, blob bindings, patch application, and resulting source bytes were verified. The reported library origin is not independently authenticated by a signature or publisher record. Review this C4 Advisory Job candidate separately from the Stage 3 Discovery Lens code and record whether it should remain separate, be integrated, or supersede the Stage 3 work. Do not imply C4 implementation fidelity for PR #73.
 
 ### 3. Record an explicit decision
 
@@ -69,8 +69,8 @@ Complete this section only after review:
 - Review date:
 - Candidate snapshot SHA-256 verified:
 - Technical findings and severity:
-- Advisory package SHA-256 and source:
-- Advisory-to-candidate reconciliation:
+- C4 package SHA-256, source-provenance disposition, and review:
+- Relationship decision for C4 and Stage 3 candidates:
 - Hosted-CI requirement and evidence:
 - Required remediation or accepted limitations:
 - Decision: `ACCEPT FOR REVIEW ONLY` (packet readiness only) / `ACCEPT WITH CONDITIONS` / `REJECT` / `INCONCLUSIVE`
@@ -80,8 +80,9 @@ No decision in this handoff authorizes merge, deployment, operational integratio
 
 ## Still outstanding
 
-- Original C4 advisory retrieval and authenticity verification.
+- External C4 library provenance disposition and independent technical review.
+- Authorized decision on whether C4 and Stage 3 remain separate, are integrated, or one supersedes the other.
 - Independent reviewer assignment, eligibility confirmation, and completed review.
-- Exact-candidate hosted CI evidence, if required by the authorized acceptance process.
+- Independent reviewer assignment, eligibility confirmation, and completed review.
 - Microsoft agenda source identification and reconciliation.
 - Authorized acceptance decision. Until then, maintain HOLD; no merge, deployment, or operational integration.
