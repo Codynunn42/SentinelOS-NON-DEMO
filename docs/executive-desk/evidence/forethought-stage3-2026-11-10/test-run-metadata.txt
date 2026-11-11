@@ -1,0 +1,4 @@
+command=pnpm test
+started_at=2026-11-10T23:03:29,008119834+00:00
+finished_at=2026-11-10T23:03:31,497595331+00:00
+exit_code=0
