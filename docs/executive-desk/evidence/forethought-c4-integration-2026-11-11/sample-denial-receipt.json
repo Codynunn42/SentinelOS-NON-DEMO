@@ -1,0 +1,54 @@
+{
+  "requestId": "case-5",
+  "status": "BLOCKED",
+  "code": "ACCESS_DENIED",
+  "executionAllowed": false,
+  "telemetry": {
+    "totalWallMs": 0.11517700000001696,
+    "cpuUserUs": 0,
+    "cpuSystemUs": 114,
+    "rssDeltaBytes": 0,
+    "heapUsedDeltaBytes": 13520,
+    "sampledMaxRssBytes": 82468864,
+    "sampledMaxHeapUsedBytes": 20847040,
+    "processLifetimeMaxRssKiB": 83128,
+    "stages": [
+      {
+        "name": "lens",
+        "status": "OK",
+        "wallMs": 0.041568999999981315,
+        "cpuUserUs": 0,
+        "cpuSystemUs": 41,
+        "rssDeltaBytes": 0,
+        "heapUsedDeltaBytes": 7704,
+        "sampledRssBytes": 82468864,
+        "sampledHeapUsedBytes": 20841712
+      },
+      {
+        "name": "sentinel",
+        "status": "BLOCKED",
+        "wallMs": 0.048147999999969215,
+        "cpuUserUs": 0,
+        "cpuSystemUs": 47,
+        "rssDeltaBytes": 0,
+        "heapUsedDeltaBytes": 2008,
+        "sampledRssBytes": 82468864,
+        "sampledHeapUsedBytes": 20844600
+      },
+      {
+        "name": "telemetry",
+        "status": "OK",
+        "wallMs": 0.006168000000002394,
+        "cpuUserUs": 0,
+        "cpuSystemUs": 5,
+        "rssDeltaBytes": 0,
+        "heapUsedDeltaBytes": 144,
+        "sampledRssBytes": 82468864,
+        "sampledHeapUsedBytes": 20846528
+      }
+    ],
+    "energyJ": null,
+    "carbonG": null,
+    "energyStatus": "UNKNOWN"
+  }
+}

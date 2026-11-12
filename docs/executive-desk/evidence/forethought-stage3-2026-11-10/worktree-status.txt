@@ -1,0 +1,64 @@
+ M .data/closeout-state.json
+ M .github/workflows/ci.yml
+ M apps/api/server.js
+ M apps/executive-desk/cadence/2026-10-24_GOV006_ISOLATED_REHEARSAL_PROCEDURE_DRAFT.md
+ M apps/executive-desk/cadence/EXECUTIVE_TEMPLATE_MASTER.md
+ M apps/executive-desk/cadence/__tests__/daily.test.ts
+ M apps/executive-desk/cadence/daily.ts
+ M apps/sentinel/src/governance/core/driftConfig.js
+ M apps/sentinel/src/governance/core/driftMonitor.js
+ M docs/GBP/doctrine/NUNN_CORPORATION_MASTER_OPERATING_BINDER_2026-06-15.md
+ M docs/GBP/overlays/NEXT_STEPS.md
+ M docs/governance/ARIZONA_SPO_MODERNIZATION_BRIEF_LAYOUT.md
+ M docs/governance/EXECUTIVE_TEMPLATE_CANONICAL.md
+ M docs/governance/SYSTEM_DESIGN.md
+ M package.json
+ M scripts/check-command-http-postgres.js
+ M scripts/check-drift-governance-core.js
+ M scripts/check-openai-faceplane.js
+ M scripts/orchestrate-executive-template.js
+ M scripts/run-governance-flow.js
+?? alcf-lammps-energy-diagnostics-evidence.tar.gz
+?? alcf-lammps-energy-diagnostics-evidence.tar.gz.sha256
+?? alcf-lammps-smoke-evidence.tar.gz
+?? apps/executive-desk/cadence/2026-10-26_OPERATING_QUEUE_RECONCILIATION.md
+?? apps/executive-desk/cadence/2026-10-26_PERSONNEL_ACCESS_RECONCILIATION.md
+?? apps/executive-desk/cadence/2026-10-28_UNIT2_FAILURE_TESTS.patch
+?? apps/executive-desk/cadence/2026-10-28_UNIT2_INDEPENDENT_REVIEW.md
+?? apps/executive-desk/cadence/2026-10-28_UNIT2_REVIEW_HANDOFF.md
+?? apps/executive-desk/cadence/2026-10-28_UNIT2_VALIDATION_FILE_HASHES.txt
+?? apps/executive-desk/cadence/2026-10-28_UNIT2_VALIDATION_LOGS.txt
+?? apps/executive-desk/cadence/2026-10-28_UNIT2_VALIDATION_MATRIX.md
+?? apps/executive-desk/cadence/2026-10-29_EXECUTIVE_PROCESSING_REVIEW_QUEUE.md
+?? apps/executive-desk/cadence/2026-10-30_EXECUTIVE_DAILY_BRIEF.md
+?? apps/executive-desk/cadence/2026-11-02_CAPABILITY_TO_GOVERNANCE_EVIDENCE_INDEX.md
+?? apps/executive-desk/cadence/2026-11-02_CAPABILITY_TO_GOVERNANCE_VERIFICATION_MATRIX.md
+?? apps/executive-desk/cadence/2026-11-02_GOV-006_REQUIREMENT_A_EVIDENCE_MATRIX.md
+?? apps/executive-desk/cadence/2026-11-02_GOV-006_REQUIREMENT_B_EVIDENCE_INVENTORY.md
+?? apps/executive-desk/cadence/2026-11-02_GOV-006_REQUIREMENT_B_EVIDENCE_INVENTORY.sha256
+?? apps/executive-desk/cadence/2026-11-02_GOV-006_REQUIREMENT_B_EVIDENCE_RECONCILIATION.md
+?? apps/executive-desk/cadence/2026-11-02_GOV-006_REQUIREMENT_B_INDEPENDENT_REVIEW_PACKET.md
+?? apps/executive-desk/cadence/2026-11-04_DRIFT_AND_GOVERNANCE_EVIDENCE_CLOSEOUT_DRAFT.md
+?? apps/executive-desk/cadence/2026-11-04_TOPIC_8_SECURE_ENERGY_COMPUTE_EXPERIMENT_SPEC_DRAFT.md
+?? apps/executive-desk/cadence/2026-11-06_GATE_COUNCIL_REVIEW_PACKET_V5.1_PRE_CIRCULATION_DRAFT.md
+?? apps/executive-desk/cadence/2026-11-06_OPEN_PR_TRIAGE_DAILY_SPRINT.md
+?? apps/executive-desk/cadence/2026-11-06_REVIEW_CORRECTIONS_AND_REQUIREMENT_B_DOSSIER_DRAFT.md
+?? apps/executive-desk/cadence/EXECUTIVE_TEMPLATE_2026-10-26.md
+?? apps/executive-desk/government-readiness/governance/cadence/weekly/2026-10-30_PROGRAM_GATE_COUNCIL.md
+?? apps/sentinel/src/__tests__/
+?? apps/sentinel/src/forethought/discoveryLens/
+?? apps/sentinel/src/status/
+?? docs/executive-desk/daily/2026-10-29.md
+?? docs/executive-desk/daily/2026-11-09.md
+?? docs/executive-desk/evidence/forethought-stage3-2026-11-10/
+?? docs/executive-desk/receipts/2026-10-29T19-57-32.474Z-executive-daily.json
+?? docs/executive-desk/receipts/2026-11-09T17-58-56.864Z-executive-daily.json
+?? docs/governance/2026-11-02_ARIZONA_SPO_ARCHITECTURE_REVIEW_CHECKLIST.md
+?? docs/governance/2026-11-02_ARIZONA_SPO_AUTHORITY_AND_INTERFACE_VERIFICATION_ADDENDUM_DRAFT.md
+?? docs/governance/EXECUTIVE_PACKET_2026-10-26.md
+?? docs/governance/GITHUB_PR_STATUS_CAPTURE.md
+?? docs/sentinel-ai/
+?? scripts/capture-github-pr-status.js
+?? scripts/read-executive-register.py
+?? tests/capture-github-pr-status.test.js
+?? tests/orchestrate-executive-template.test.js

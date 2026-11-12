@@ -1,0 +1,38 @@
+{
+  "integrationParent": "9d95b5b2028c72849b8f3deb12e81332f13481d6",
+  "recordedAt": "2026-11-11T23:08:49.867870+00:00",
+  "node": "v24.22.1",
+  "pnpm": "10.33.4",
+  "commands": [
+    {
+      "command": "pnpm test",
+      "exitCode": 0,
+      "passing": 125,
+      "pending": 3
+    },
+    {
+      "command": "node --test tests/forethoughtAdvisory/advisory.cases.cjs tests/forethoughtAdvisory/bridge.cases.cjs",
+      "exitCode": 0,
+      "passing": 29
+    },
+    {
+      "command": "node scripts/check-archive-intelligence-docking.js",
+      "exitCode": 0
+    },
+    {
+      "command": "pnpm run check:deployment-gate",
+      "exitCode": 0
+    },
+    {
+      "command": "pnpm run check:executive-desk:types",
+      "exitCode": 0
+    },
+    {
+      "command": "node scripts/benchmark-forethought-advisory.js",
+      "exitCode": 0
+    }
+  ],
+  "hostedCI": "not yet observed for expanded head",
+  "independentAcceptance": false,
+  "productionChanges": false
+}

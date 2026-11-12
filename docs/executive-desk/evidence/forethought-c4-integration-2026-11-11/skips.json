@@ -1,0 +1,1202 @@
+[
+  {
+    "config": "C3",
+    "caseId": "case-5",
+    "repeat": 0,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-6",
+    "repeat": 0,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-15",
+    "repeat": 0,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-16",
+    "repeat": 0,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-25",
+    "repeat": 0,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-26",
+    "repeat": 0,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-35",
+    "repeat": 0,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-36",
+    "repeat": 0,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-45",
+    "repeat": 0,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-46",
+    "repeat": 0,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-55",
+    "repeat": 0,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-56",
+    "repeat": 0,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-65",
+    "repeat": 0,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-66",
+    "repeat": 0,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-75",
+    "repeat": 0,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-76",
+    "repeat": 0,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-85",
+    "repeat": 0,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-86",
+    "repeat": 0,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-95",
+    "repeat": 0,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-96",
+    "repeat": 0,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-5",
+    "repeat": 1,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-6",
+    "repeat": 1,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-15",
+    "repeat": 1,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-16",
+    "repeat": 1,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-25",
+    "repeat": 1,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-26",
+    "repeat": 1,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-35",
+    "repeat": 1,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-36",
+    "repeat": 1,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-45",
+    "repeat": 1,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-46",
+    "repeat": 1,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-55",
+    "repeat": 1,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-56",
+    "repeat": 1,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-65",
+    "repeat": 1,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-66",
+    "repeat": 1,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-75",
+    "repeat": 1,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-76",
+    "repeat": 1,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-85",
+    "repeat": 1,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-86",
+    "repeat": 1,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-95",
+    "repeat": 1,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-96",
+    "repeat": 1,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-5",
+    "repeat": 2,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-6",
+    "repeat": 2,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-15",
+    "repeat": 2,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-16",
+    "repeat": 2,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-25",
+    "repeat": 2,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-26",
+    "repeat": 2,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-35",
+    "repeat": 2,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-36",
+    "repeat": 2,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-45",
+    "repeat": 2,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-46",
+    "repeat": 2,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-55",
+    "repeat": 2,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-56",
+    "repeat": 2,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-65",
+    "repeat": 2,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-66",
+    "repeat": 2,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-75",
+    "repeat": 2,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-76",
+    "repeat": 2,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-85",
+    "repeat": 2,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-86",
+    "repeat": 2,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-95",
+    "repeat": 2,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-96",
+    "repeat": 2,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-5",
+    "repeat": 3,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-6",
+    "repeat": 3,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-15",
+    "repeat": 3,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-16",
+    "repeat": 3,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-25",
+    "repeat": 3,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-26",
+    "repeat": 3,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-35",
+    "repeat": 3,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-36",
+    "repeat": 3,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-45",
+    "repeat": 3,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-46",
+    "repeat": 3,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-55",
+    "repeat": 3,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-56",
+    "repeat": 3,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-65",
+    "repeat": 3,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-66",
+    "repeat": 3,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-75",
+    "repeat": 3,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-76",
+    "repeat": 3,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-85",
+    "repeat": 3,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-86",
+    "repeat": 3,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-95",
+    "repeat": 3,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-96",
+    "repeat": 3,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-5",
+    "repeat": 4,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-6",
+    "repeat": 4,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-15",
+    "repeat": 4,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-16",
+    "repeat": 4,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-25",
+    "repeat": 4,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-26",
+    "repeat": 4,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-35",
+    "repeat": 4,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-36",
+    "repeat": 4,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-45",
+    "repeat": 4,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-46",
+    "repeat": 4,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-55",
+    "repeat": 4,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-56",
+    "repeat": 4,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-65",
+    "repeat": 4,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-66",
+    "repeat": 4,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-75",
+    "repeat": 4,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-76",
+    "repeat": 4,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-85",
+    "repeat": 4,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-86",
+    "repeat": 4,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-95",
+    "repeat": 4,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-96",
+    "repeat": 4,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-5",
+    "repeat": 5,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-6",
+    "repeat": 5,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-15",
+    "repeat": 5,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-16",
+    "repeat": 5,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-25",
+    "repeat": 5,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-26",
+    "repeat": 5,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-35",
+    "repeat": 5,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-36",
+    "repeat": 5,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-45",
+    "repeat": 5,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-46",
+    "repeat": 5,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-55",
+    "repeat": 5,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-56",
+    "repeat": 5,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-65",
+    "repeat": 5,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-66",
+    "repeat": 5,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-75",
+    "repeat": 5,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-76",
+    "repeat": 5,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-85",
+    "repeat": 5,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-86",
+    "repeat": 5,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-95",
+    "repeat": 5,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-96",
+    "repeat": 5,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-5",
+    "repeat": 6,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-6",
+    "repeat": 6,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-15",
+    "repeat": 6,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-16",
+    "repeat": 6,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-25",
+    "repeat": 6,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-26",
+    "repeat": 6,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-35",
+    "repeat": 6,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-36",
+    "repeat": 6,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-45",
+    "repeat": 6,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-46",
+    "repeat": 6,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-55",
+    "repeat": 6,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-56",
+    "repeat": 6,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-65",
+    "repeat": 6,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-66",
+    "repeat": 6,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-75",
+    "repeat": 6,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-76",
+    "repeat": 6,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-85",
+    "repeat": 6,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-86",
+    "repeat": 6,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-95",
+    "repeat": 6,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-96",
+    "repeat": 6,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-5",
+    "repeat": 7,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-6",
+    "repeat": 7,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-15",
+    "repeat": 7,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-16",
+    "repeat": 7,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-25",
+    "repeat": 7,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-26",
+    "repeat": 7,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-35",
+    "repeat": 7,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-36",
+    "repeat": 7,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-45",
+    "repeat": 7,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-46",
+    "repeat": 7,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-55",
+    "repeat": 7,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-56",
+    "repeat": 7,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-65",
+    "repeat": 7,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-66",
+    "repeat": 7,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-75",
+    "repeat": 7,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-76",
+    "repeat": 7,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-85",
+    "repeat": 7,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-86",
+    "repeat": 7,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-95",
+    "repeat": 7,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-96",
+    "repeat": 7,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-5",
+    "repeat": 8,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-6",
+    "repeat": 8,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-15",
+    "repeat": 8,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-16",
+    "repeat": 8,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-25",
+    "repeat": 8,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-26",
+    "repeat": 8,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-35",
+    "repeat": 8,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-36",
+    "repeat": 8,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-45",
+    "repeat": 8,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-46",
+    "repeat": 8,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-55",
+    "repeat": 8,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-56",
+    "repeat": 8,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-65",
+    "repeat": 8,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-66",
+    "repeat": 8,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-75",
+    "repeat": 8,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-76",
+    "repeat": 8,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-85",
+    "repeat": 8,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-86",
+    "repeat": 8,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-95",
+    "repeat": 8,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-96",
+    "repeat": 8,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-5",
+    "repeat": 9,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-6",
+    "repeat": 9,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-15",
+    "repeat": 9,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-16",
+    "repeat": 9,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-25",
+    "repeat": 9,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-26",
+    "repeat": 9,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-35",
+    "repeat": 9,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-36",
+    "repeat": 9,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-45",
+    "repeat": 9,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-46",
+    "repeat": 9,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-55",
+    "repeat": 9,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-56",
+    "repeat": 9,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-65",
+    "repeat": 9,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-66",
+    "repeat": 9,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-75",
+    "repeat": 9,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-76",
+    "repeat": 9,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-85",
+    "repeat": 9,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-86",
+    "repeat": 9,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-95",
+    "repeat": 9,
+    "reason": "NO_PREVALIDATED_INPUT"
+  },
+  {
+    "config": "C3",
+    "caseId": "case-96",
+    "repeat": 9,
+    "reason": "NO_PREVALIDATED_INPUT"
+  }
+]
