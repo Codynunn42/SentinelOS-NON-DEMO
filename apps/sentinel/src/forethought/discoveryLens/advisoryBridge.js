@@ -70,14 +70,19 @@ function runDiscoveryAdvisoryJob(request, deps) {
         if (!item || typeof item.id !== 'string' || unique.has(item.id)) blocked();
         unique.add(item.id);
       }
-      const sourceIds = new Set();
-      const candidates = scopedRecords.map((record) => {
-        if (sourceIds.has(record.source_id)) blocked();
-        sourceIds.add(record.source_id);
+      const sources = new Map();
+      const candidates = [];
+      for (const record of scopedRecords) {
+        const prior = sources.get(record.source_id);
+        if (prior) {
+          if (prior.source_version !== record.source_version || prior.text !== record.text) blocked();
+          continue;
+        }
+        sources.set(record.source_id, record);
         const item = metadata.find((m) => m.id === record.source_id && m.version === record.source_version);
         if (!item) blocked();
-        return item;
-      });
+        candidates.push(item);
+      }
       return candidates;
     },
     selectEvidence: (ctx) => {
