@@ -1,0 +1,31 @@
+{
+  "generatedAt": "2026-11-12T00:47:10.107Z",
+  "base": "51490c22c9091f95d92da312e73c9cf246e17578",
+  "evaluatorSha256": "80bfc6fc31b2da96f76ed42b7fb6946cef8fe3b404ae8399bdfe2f5846520109",
+  "node": "v24.14.0",
+  "platform": "linux",
+  "cases": 100,
+  "repeats": 5,
+  "measuredCalls": 500,
+  "statuses": {
+    "BLOCKED": 50,
+    "INSUFFICIENT_EVIDENCE": 50,
+    "INFEASIBLE": 50,
+    "NO_IMPROVEMENT_FOUND": 50,
+    "MODELED_IMPROVEMENT": 300
+  },
+  "completePacketLatencyMs": {
+    "p50": 2.4690309999999727,
+    "p95": 4.287909000000013,
+    "p99": 5.574182000000064
+  },
+  "semanticRepeatability": "PASS",
+  "allOutputNumbersFinite": true,
+  "energyJ": null,
+  "carbonG": null,
+  "limits": [
+    "Synthetic in-memory policy, identity, evidence and forecasts; correlated repetitions.",
+    "Local process timings include serialization; fixture setup, semantic hashing and file output are excluded.",
+    "No live provider, actuator, standard certification, energy meter, human acceptance or Light comparison."
+  ]
+}

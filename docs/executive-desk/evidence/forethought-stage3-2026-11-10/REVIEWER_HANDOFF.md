@@ -20,6 +20,14 @@ PR #74 is a stacked research continuation, not a replacement for #73's review.
 Its domain findings and remediation require their own source identity and
 verification. Publication and branch consolidation do not advance any gate.
 
+The November 12 PR #74 correction consolidates #73 without rewriting history.
+See `../synapseeco-state-pinning-2026-11-12/README.md` and its source manifest
+for the combined candidate, **150 repository passes, 3 pending tests**, **37
+C4/bridge cases**, and **25 SynapseEco tests**. Review the first-authorized-read
+digest/snapshot/principal/policy pins and the separation between the fixed
+simulation anchor and live expiry/revocation checks. These are engineering
+regressions and AI-assisted verification, not independent human acceptance.
+
 ## Current candidate and relationship decision
 
 At the user's explicit request, PR #73 now expands the Stage 3 Discovery Lens with the C4 Advisory Job. These previously separate research candidates are integrated through an explicit bridge; neither is silently treated as the other. Review the current PR head and the source hashes in `../forethought-c4-integration-2026-11-11/source-sha256.txt`. The integration parent is `9d95b5b2028c72849b8f3deb12e81332f13481d6`, on `review/forethought-stage3-revised-2026-11-11`.
