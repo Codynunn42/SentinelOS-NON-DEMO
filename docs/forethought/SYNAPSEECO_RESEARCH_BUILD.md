@@ -27,13 +27,39 @@ Cody's requirements define the product: finish the useful job, preserve human au
 - `apps/sentinel/src/forethought/evaluators/synapseEcoJob.js`: docking grant -> Lens/C4 -> exact current-authority artifact -> domain evaluation -> Lens/C4/grant/source recheck -> immutable human-review packet. Failures discard domain results.
 - `tests/forethoughtAdvisory/synapseEcoFixtures.js`: the synthetic identity, grant, evidence and forecast adapters; they are not production authentication.
 
-The authorized artifact is `{config, payload}` JSON. It must be selected by Lens, current in C4, and bound to the requested facility. Payload units are explicitly degC, kW_electric, gCO2/kWh and USD/kWh. The simulation is 24 hourly intervals starting exactly at the trusted evaluation clock. Latest telemetry is assumed unchanged until start; this assumption is disclosed and must be assessed against facility evidence. R/C, constant COP, operating limits, weather/internal gains and carbon forecasts remain provisional.
+The authorized artifact is `{config, payload}` JSON. It must be selected by Lens, current in C4, and bound to the requested facility. Payload units are explicitly degC, kW_electric, gCO2/kWh and USD/kWh. The simulation is 24 hourly intervals starting exactly at the trusted clock sampled at job intake, not at a later pipeline-stage clock sample. Latest telemetry is assumed unchanged until start; this assumption is disclosed and must be assessed against facility evidence. R/C, constant COP, operating limits, weather/internal gains and carbon forecasts remain provisional.
+
+The November 12 correction pins the authenticated principal, complete Lens
+snapshot, per-source policy, and exact artifact digest/content at first authorized
+intake across both bridge calls. Each check still re-fetches live adapter state,
+compares it with immutable copies, and discards all domain output on drift, even
+when the changed source has a newly matching trusted policy digest. No intake
+read bypasses the existing C4 entitlement gate. Citations use the pinned digest.
+Detected drift returns `status: BLOCKED`, `domainStatus: INSUFFICIENT_EVIDENCE`
+and `code: STATE_CHANGED_BEFORE_RELEASE`, without metrics or citations.
+
+Only simulation math uses the fixed intake anchor. C4 freshness and docking
+expiry/revocation continue to use live trusted clocks at release. The synchronous
+adapter checks do not establish atomic transactions or detect unobserved
+change-and-revert (ABA) between checks; production transaction semantics remain
+outstanding.
 
 The machine schedule retains full precision so its energy sum reconciles with comparative totals. Human-facing conclusion text is rounded. Terminal agreement means within 0.15 C of the modeled baseline final state, not exact measured physical equality. The model checks its step trajectory under its declared assumptions; it is not a commissioned comfort/safety controller.
 
 `sentinelBoundary` inside the evaluator is explicitly an advisory declaration. The surrounding profile produces an `UNSIGNED_LOCAL_DECISION` binding manifest, code hash, identity, facility and grant expiry, with execution false. Its SHA-256 is an integrity identifier, not a signature, trusted timestamp, Vault audit chain, or deployment/physical-isolation attestation. A production SentinelOS-issued receipt is not implemented here.
 
 ## What the tests show
+
+The following November 11 counts are historical. The consolidated November 12
+candidate retains all six PR #73 shared-source regressions and both original
+PR #74 shared-source cases: **37 passing C4/bridge cases**. Six new job
+regressions cover coordinated source/policy drift, snapshot drift, principal
+drift, advancing-clock determinism, live docking expiry and live evidence expiry.
+The repository suite is now **150 passing, 3 pending**, with **25 SynapseEco
+tests** and the original **42 Stage 3 probes** preserved. Local runtime is Node
+`v24.14.0`, pnpm `10.33.4`. Fresh dated evidence is retained separately under
+`docs/executive-desk/evidence/synapseeco-state-pinning-2026-11-12/`; the original
+packet and benchmark are not overwritten. Hosted CI must match the new PR head.
 
 - Repository Mocha suite: **144 passing, 3 pending**. The suite includes 19 evaluator/docking/end-to-end tests.
 - The C4/bridge Node runner: **31 passing**. Its Mocha wrapper is counted once in the repository suite. Do not add 31 to 144 as separate repository passes.

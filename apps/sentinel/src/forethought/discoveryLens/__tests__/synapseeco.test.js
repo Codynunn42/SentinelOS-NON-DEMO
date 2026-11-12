@@ -3,6 +3,7 @@ const assert = require('node:assert/strict');
 const { SynapseEcoEvaluator } = require('../../evaluators/synapseEcoEvaluator');
 const { runSynapseEcoJob, MANIFEST } = require('../../evaluators/synapseEcoJob');
 const { authorizeAdvisoryDock } = require('../../../integrations/docking/advisoryPolicy');
+const { artifactDigest } = require('../../../archiveIntelligence/artifactPolicy');
 const { domainInput, jobFixture, NOW } = require('../../../../../../tests/forethoughtAdvisory/synapseEcoFixtures');
 const run = (change = () => {}, configChange = {}) => {
   const { config, payload } = domainInput(); change(payload);
@@ -116,5 +117,80 @@ describe('SynapseEco through Discovery Lens and C4', function () {
     const f = jobFixture(); let calls = 0; const read = f.deps.store.readVersion;
     f.deps.store.readVersion = (id, version) => { const value = read(id, version); if (++calls === 4) value.content += ' '; return value; };
     const r = runSynapseEcoJob(f.request, f.deps); assert.equal(r.status, 'BLOCKED'); assert.equal(r.evaluation, undefined);
+  });
+  it('pins first authorized content even when the source and trusted bindings change together', function () {
+    const f = jobFixture(); let calls = 0; const read = f.deps.store.readVersion;
+    f.deps.store.readVersion = (id, version) => {
+      if (++calls === 3) {
+        const input = JSON.parse(f.docs[0].content);
+        input.payload.forecast.intervals[0].internalGainKW = 9;
+        f.docs[0].content = JSON.stringify(input);
+        f.records[0].text = f.docs[0].content;
+        const digest = artifactDigest(f.docs[0]);
+        f.policies[id].digest = digest; f.policies[id].authorityBinding.digest = digest;
+      }
+      return read(id, version);
+    };
+    const r = runSynapseEcoJob(f.request, f.deps);
+    assert.equal(r.status, 'BLOCKED'); assert.equal(r.domainStatus, 'INSUFFICIENT_EVIDENCE');
+    assert.equal(r.code, 'STATE_CHANGED_BEFORE_RELEASE');
+    assert.equal(r.evaluation, undefined); assert.equal(r.citations, undefined);
+  });
+  it('pins the Lens snapshot across both complete bridge calls', function () {
+    const f = jobFixture(); let loads = 0;
+    f.deps.loadLensSnapshot = () => {
+      if (++loads === 4) f.context.corpus_version = 'corpus-2';
+      return { context: f.context, records: f.records };
+    };
+    const r = runSynapseEcoJob(f.request, f.deps);
+    assert.equal(r.status, 'BLOCKED'); assert.equal(r.code, 'STATE_CHANGED_BEFORE_RELEASE');
+    assert.equal(r.evaluation, undefined);
+  });
+  it('does not combine independently valid principals across bridge calls', function () {
+    const f = jobFixture(); let auths = 0; const authenticate = f.deps.authenticate;
+    f.deps.authenticate = (caller) => {
+      const principal = authenticate(caller);
+      if (++auths >= 4) {
+        f.policies['facility-evidence'].readers = ['other-reviewer'];
+        f.grant.subject = 'other-reviewer';
+        return { ...principal, subject: 'other-reviewer' };
+      }
+      return principal;
+    };
+    const r = runSynapseEcoJob(f.request, f.deps);
+    assert.equal(r.status, 'BLOCKED'); assert.equal(r.code, 'STATE_CHANGED_BEFORE_RELEASE');
+    assert.equal(r.evaluation, undefined);
+  });
+  it('pins domain time at intake while the trusted clock advances by 1ms per call', function () {
+    const f = jobFixture(); let ticks = 0;
+    f.deps.clock = () => new Date(Date.parse(NOW) + ticks++).toISOString();
+    const r = runSynapseEcoJob(f.request, f.deps);
+    const expected = new SynapseEcoEvaluator(f.input.config).evaluate(f.input.payload, { asOf: NOW });
+    assert.equal(r.status, 'REVIEW_REQUIRED'); assert.equal(r.domainStatus, 'MODELED_IMPROVEMENT');
+    assert.equal(r.evaluation.timestamp, new Date(NOW).toISOString());
+    assert.deepEqual(r.evaluation.comparativeMetrics, expected.comparativeMetrics);
+    assert.equal(r.citations[0].artifactSha256, artifactDigest(f.docs[0]));
+    assert(ticks > 1); assert(Date.parse(r.localPolicyDecision.evaluatedAt) > Date.parse(NOW));
+  });
+  it('still expires the docking lease at release instead of freezing its clock', function () {
+    const f = jobFixture(); let leases = 0, currentTime = NOW;
+    f.deps.clock = () => currentTime;
+    f.deps.resolveDockingGrant = () => {
+      if (++leases === 2) currentTime = f.grant.expiresAt;
+      return f.grant;
+    };
+    const r = runSynapseEcoJob(f.request, f.deps);
+    assert.equal(r.status, 'BLOCKED'); assert.equal(r.evaluation, undefined);
+  });
+  it('still checks evidence expiry against live time in the final bridge', function () {
+    const f = jobFixture(); let loads = 0, currentTime = NOW;
+    f.deps.clock = () => currentTime;
+    f.deps.loadLensSnapshot = () => {
+      if (++loads === 4) currentTime = '2026-12-01T00:00:00.001Z';
+      return { context: f.context, records: f.records };
+    };
+    const r = runSynapseEcoJob(f.request, f.deps);
+    assert.equal(r.status, 'BLOCKED'); assert.equal(r.code, 'STATE_CHANGED_BEFORE_RELEASE');
+    assert.equal(r.evaluation, undefined);
   });
 });
