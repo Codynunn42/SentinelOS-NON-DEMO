@@ -62,10 +62,61 @@ test('changing snapshot membership or sensitivity grants blocks packet release',
     const r = run(f); assert.equal(r.status, 'BLOCKED'); assert(!r.discoveryReview);
   }
 });
-test('bridge rejects duplicates, missing versions and test-only hooks', () => {
-  for (const change of [(f) => f.records.push(f.records[0]), (f) => delete f.records[0].source_version, (f) => f.context.__test_injected_contaminated_records = []]) {
+test('bridge rejects duplicate record IDs, missing versions and test-only hooks', () => {
+  for (const change of [(f) => f.records.push({ ...f.records[0] }), (f) => delete f.records[0].source_version, (f) => f.context.__test_injected_contaminated_records = []]) {
     const f = bridgeFixture(); change(f); assert.equal(run(f).status, 'BLOCKED');
   }
+});
+test('distinct verified records sharing a source preserve both supporting IDs', () => {
+  const f = bridgeFixture();
+  f.records.push({ ...f.records[0], record_id: 'lens-alias' });
+  const r = run(f);
+  assert.equal(r.status, 'REVIEW_REQUIRED');
+  assert.equal(r.discoveryReview.verdict, 'EVIDENCE_SUPPORTS_PREREQUISITES');
+  assert.deepEqual([...r.discoveryReview.supporting_ids].sort(), ['lens-alias', 'lens-policy-a']);
+  assert.equal(f.readCount(), 2); assert.equal(r.evidenceTable.length, 1);
+  assert.equal(r.executionAllowed, false);
+});
+test('shared-source held record and valid excerpt cannot lose the blocking ID', () => {
+  const f = bridgeFixture(), excerpt = 'The review deadline';
+  f.records.push({ ...f.records[0], record_id: 'lens-hold', status: 'held',
+    entity_tag: 'tag://governance/release-hold/release-1',
+    excerpt, excerpt_start_utf8_byte: 0, excerpt_end_utf8_byte: Buffer.byteLength(excerpt, 'utf8') });
+  const r = run(f);
+  assert.equal(r.status, 'REVIEW_REQUIRED');
+  assert.equal(r.discoveryReview.verdict, 'BLOCKING_EVIDENCE_PRESENT');
+  assert(r.discoveryReview.blocking_ids.includes('lens-hold'));
+  assert.equal(f.readCount(), 2); assert.equal(r.executionAllowed, false);
+});
+test('shared-source conflicting versions block before payload reads', () => {
+  const f = bridgeFixture();
+  f.records.push({ ...f.records[0], record_id: 'lens-alias', source_version: 'v2' });
+  assert.equal(run(f).status, 'BLOCKED'); assert.equal(f.readCount(), 0);
+});
+test('shared-source conflicting content fails closed for every record', () => {
+  const f = bridgeFixture();
+  f.records.push({ ...f.records[0], record_id: 'lens-alias', text: 'forged' });
+  const r = run(f);
+  assert.equal(r.status, 'BLOCKED'); assert(!r.discoveryReview); assert(!r.conclusions);
+});
+test('shared-source malformed excerpt fails closed', () => {
+  const f = bridgeFixture();
+  f.records.push({ ...f.records[0], record_id: 'lens-alias', excerpt: 'forged',
+    excerpt_start_utf8_byte: 0, excerpt_end_utf8_byte: 6 });
+  const r = run(f);
+  assert.equal(r.status, 'BLOCKED'); assert(!r.discoveryReview);
+});
+test('shared-source unverified alias remains conflicting and foreign alias stays excluded', () => {
+  const f = bridgeFixture();
+  f.records.push({ ...f.records[0], record_id: 'lens-unverified', status: 'unverified' });
+  f.records.push({ ...f.records[0], record_id: 'lens-foreign', environment: 'prod', source_version: 'v2' });
+  const r = run(f);
+  assert.equal(r.status, 'REVIEW_REQUIRED');
+  assert.equal(r.discoveryReview.verdict, 'BLOCKING_EVIDENCE_PRESENT');
+  assert(r.discoveryReview.conflicting_ids.includes('lens-unverified'));
+  assert(!r.discoveryReview.conflicting_ids.includes('lens-foreign'));
+  assert.equal(r.discoveryReview.supporting_ids.length, 0);
+  assert.equal(r.executionAllowed, false);
 });
 test('global environment records remain included; foreign environment remains excluded', () => {
   const f = bridgeFixture(); f.records[0].environment = 'all'; assert.equal(run(f).status, 'REVIEW_REQUIRED');
