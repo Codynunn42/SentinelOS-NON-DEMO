@@ -49,6 +49,30 @@ C4: 1,000 calls, 800 review packets, 200 expected blocked receipts; semantic rep
 
 CPU time, RSS and heap are separate resource measures. Sampled boundary maxima are not true per-request peaks; process maxRSS is a lifetime high-water mark. The RSS MB-hour estimate includes shared runtime memory. CPU time plus memory-time cannot be summed into a physical energy quantity.
 
-## Review remaining
+## November 12 shared-source correction
+
+Source commit `8133d0897a9920f340cf1e7c05f619d98c1ad583` preserves distinct
+Lens record IDs sharing an exact source/version binding. Retrieval is
+deduplicated, not the records used for hold, excerpt and support validation.
+Six focused regressions cover verified aliases, held excerpts, version/content
+conflicts, malformed excerpts, unverified aliases and foreign environments.
+
+- Isolated C4/bridge runner: **35 passing, 0 failing**.
+- Full `pnpm test`: **125 passing, 3 pending**, exit 0; Stage 3's 42 probes remain included.
+- Runtime: Node `v24.14.0`, pnpm `10.33.4`, Linux x64.
+- Exact commands, timestamps and outputs are in the dated November 12 run files.
+- `source-sha256-2026-11-12.txt` identifies the corrected source; the original
+  source manifest, archive and benchmark remain historical and unchanged.
+- Failed missing-dependency and hidden-checkout-path attempts are retained.
+  The passing run used `/home/codespace/forethought-review-fix`; no application
+  route code was changed to obtain that result.
+- Hosted CI for this corrected candidate must be verified separately after
+  publication. Older hosted results do not validate this correction.
+
+PR #74 contains an overlapping shared-source implementation. Its continuation
+must consolidate these regressions rather than discard them or overwrite the
+published branches. Neither update is acceptance or operational authorization.
+
+## Outstanding review
 
 Independent reviewer assignment and technical/provenance disposition; expanded-scope current-head hosted CI; missing real identity/policy/store adapters and signed provenance validation; operational verification and authorized acceptance. Microsoft agenda reconciliation remains separate and outstanding. GOV-001 Conditional; GOV-002 HOLD; GOV-006 verification outstanding. Nothing in this packet closes a gate.
