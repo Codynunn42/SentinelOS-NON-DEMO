@@ -1,0 +1,47 @@
+source_commit=f1945bd9df5f4e52a12cabfe99bb76dd73e790e3
+branch=review/synapseeco-state-pinning
+checkout=/home/codespace/forethought-pr74-review
+node=v24.14.0
+pnpm=10.33.4
+platform=Linux x86_64
+
+working_tree_before_capture:
+ M .data/closeout-state.json
+ M docs/executive-desk/evidence/forethought-stage3-2026-11-10/REVIEWER_HANDOFF.md
+?? docs/executive-desk/evidence/synapseeco-state-pinning-2026-11-12/
+
+command=pnpm test
+started_utc=2026-11-12T00:46:59Z
+ended_utc=2026-11-12T00:47:01Z
+exit_code=0
+output=full-suite.log
+
+command=pnpm run check:synapseeco-research
+started_utc=2026-11-12T00:47:01Z
+ended_utc=2026-11-12T00:47:02Z
+exit_code=0
+output=targeted-tests.log
+
+command=node --test tests/forethoughtAdvisory/advisory.cases.cjs tests/forethoughtAdvisory/bridge.cases.cjs
+started_utc=2026-11-12T00:47:02Z
+ended_utc=2026-11-12T00:47:02Z
+exit_code=0
+output=bridge-tests.log
+
+command=pnpm run check:executive-desk:types
+started_utc=2026-11-12T00:47:02Z
+ended_utc=2026-11-12T00:47:06Z
+exit_code=0
+output=types.log
+
+command=pnpm run check:deployment-gate
+started_utc=2026-11-12T00:47:06Z
+ended_utc=2026-11-12T00:47:07Z
+exit_code=0
+output=deployment-contract.log
+
+command=pnpm run benchmark:synapseeco-research
+started_utc=2026-11-12T00:47:07Z
+ended_utc=2026-11-12T00:47:10Z
+exit_code=0
+output=benchmark.log

@@ -105,7 +105,9 @@
     "simulate:stress-mock-faceplanes": "node scripts/stress-mock-faceplanes.js",
     "db:apply-schema": "node scripts/db-apply-schema.js",
     "db:smoke": "node scripts/db-smoke.js",
-    "check:gpt-action-connector": "node scripts/check-gpt-action-connector.js"
+    "check:gpt-action-connector": "node scripts/check-gpt-action-connector.js",
+    "check:synapseeco-research": "mocha apps/sentinel/src/forethought/discoveryLens/__tests__/synapseeco.test.js",
+    "benchmark:synapseeco-research": "node scripts/benchmark-synapseeco-research.js"
   },
   "engines": {
     "node": ">=20"
@@ -129,4 +131,3 @@
     }
   }
 }
-

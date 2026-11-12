@@ -1,0 +1,291 @@
+{
+  "requestId": "synapseeco-review-1",
+  "status": "REVIEW_REQUIRED",
+  "domainStatus": "MODELED_IMPROVEMENT",
+  "executionAllowed": false,
+  "humanReviewRequired": true,
+  "signOff": {
+    "status": "PENDING_HUMAN_REVIEW",
+    "grantsExecution": false
+  },
+  "localPolicyDecision": {
+    "issuer": "LOCAL_ADVISORY_POLICY_GATE",
+    "evidenceType": "UNSIGNED_LOCAL_DECISION",
+    "manifestSha256": "9f103e78060cdd48965fabcf15d42a0ab0777b8e9b457b39ff79fcbf6a016c34",
+    "grantId": "research-grant-1",
+    "tenant": "alpha",
+    "subject": "reviewer",
+    "adapterId": "SYNAPSEECO-THERMAL",
+    "codeSha256": "80bfc6fc31b2da96f76ed42b7fb6946cef8fe3b404ae8399bdfe2f5846520109",
+    "facilityId": "FACILITY-01",
+    "evaluatedAt": "2026-11-11T23:50:00Z",
+    "expiresAt": "2026-12-01T00:00:00Z",
+    "capabilities": [
+      "READ_TELEMETRY",
+      "READ_STATUS",
+      "RUN_ADVISORY_EVALUATION"
+    ],
+    "executionAllowed": false,
+    "limitation": "Requires trusted adapters; not a signed SentinelOS receipt or physical isolation attestation.",
+    "receiptSha256": "4351bf21c96f3be82cb87cb4d79604029e6c45a36a730d8b7e9b87355bddd48a"
+  },
+  "citations": [
+    {
+      "documentId": "facility-evidence",
+      "version": "v1",
+      "artifactSha256": "2f2c9977f0b99fdb26d086edb4970bd2260d69c9efe644c2b8d46ecccb320bc7",
+      "locator": "JSON:$.config,$.payload"
+    }
+  ],
+  "forethought": {
+    "supportedConclusion": "Modeled pre-cooling across 24h reduces emissions by 6723.2g CO2 (30.7%) with net savings of $3.25 while preserving the comfort envelope and terminal thermal balance.",
+    "epistemicGaps": [
+      "Thermal R/C/COP and comfort policy are provisional; facility calibration is outstanding.",
+      "Forecasts and constant COP are model inputs, not measured realized savings.",
+      "Latest telemetry is assumed unchanged until simulation start; intervening thermal dynamics are not observed."
+    ],
+    "unresolvedConflicts": [],
+    "nextUsefulStep": "Submit review packet to Executive Desk for operator authorization. System remains in shadow advisory mode."
+  },
+  "evaluation": {
+    "status": "MODELED_IMPROVEMENT",
+    "evaluationType": "MODELED_SHADOW_FINDING_UNVERIFIED",
+    "facilityId": "FACILITY-01",
+    "timestamp": "2026-11-11T23:50:00.000Z",
+    "primaryObjective": "MINIMIZE_CARBON_EMISSIONS_SUBJECT_TO_COST_CEILING",
+    "forethought": {
+      "supportedConclusion": "Modeled pre-cooling across 24h reduces emissions by 6723.2g CO2 (30.7%) with net savings of $3.25 while preserving the comfort envelope and terminal thermal balance.",
+      "epistemicGaps": [
+        "Thermal R/C/COP and comfort policy are provisional; facility calibration is outstanding.",
+        "Forecasts and constant COP are model inputs, not measured realized savings.",
+        "Latest telemetry is assumed unchanged until simulation start; intervening thermal dynamics are not observed."
+      ],
+      "unresolvedConflicts": [],
+      "nextUsefulStep": "Submit review packet to Executive Desk for operator authorization. System remains in shadow advisory mode."
+    },
+    "sentinelBoundary": {
+      "advisoryOnly": true,
+      "writeExecutionBlocked": true,
+      "evidenceType": "ADVISORY_DECLARATION_ONLY",
+      "enforcedEnvelope": [
+        20,
+        23
+      ]
+    },
+    "provenance": {
+      "carbonSource": "SYNTHETIC-GRID",
+      "version": "fixture-v1",
+      "generatedAt": "2026-11-11T23:50:00Z",
+      "timeCoverage": {
+        "start": "2026-11-11T23:50:00.000Z",
+        "end": "2026-11-12T23:50:00.000Z",
+        "durationHours": 24
+      }
+    },
+    "comparativeMetrics": {
+      "baseline": {
+        "totalEnergyKWh": 58.33333333333335,
+        "totalEmissionsGrams": 21875,
+        "totalCostUSD": 12.458333333333337,
+        "finalTempC": 21.5
+      },
+      "proposed": {
+        "totalEnergyKWh": 58.8187312740652,
+        "totalEmissionsGrams": 15151.762406662676,
+        "totalCostUSD": 9.208016151849634,
+        "finalTempC": 21.5
+      },
+      "deltas": {
+        "avoidedEmissionsGrams": 6723.237593337324,
+        "relativeEmissionsReductionPct": 30.73480042668491,
+        "netCostSavingsUSD": 3.2503171814837035,
+        "thermalReboundEnergyKWh": 0.4853979407318505
+      }
+    },
+    "schedule": [
+      {
+        "intervalStart": "2026-11-11T23:50:00.000Z",
+        "powerKW": 20.749999999999982,
+        "resultingTempC": 20.1,
+        "carbonIntensity": 100
+      },
+      {
+        "intervalStart": "2026-11-12T00:50:00.000Z",
+        "powerKW": 2.3166666666666664,
+        "resultingTempC": 20.1,
+        "carbonIntensity": 100
+      },
+      {
+        "intervalStart": "2026-11-12T01:50:00.000Z",
+        "powerKW": 2.3166666666666664,
+        "resultingTempC": 20.1,
+        "carbonIntensity": 100
+      },
+      {
+        "intervalStart": "2026-11-12T02:50:00.000Z",
+        "powerKW": 2.3166666666666664,
+        "resultingTempC": 20.1,
+        "carbonIntensity": 100
+      },
+      {
+        "intervalStart": "2026-11-12T03:50:00.000Z",
+        "powerKW": 2.3166666666666664,
+        "resultingTempC": 20.1,
+        "carbonIntensity": 100
+      },
+      {
+        "intervalStart": "2026-11-12T04:50:00.000Z",
+        "powerKW": 2.3166666666666664,
+        "resultingTempC": 20.1,
+        "carbonIntensity": 100
+      },
+      {
+        "intervalStart": "2026-11-12T05:50:00.000Z",
+        "powerKW": 0,
+        "resultingTempC": 20.27375,
+        "carbonIntensity": 450
+      },
+      {
+        "intervalStart": "2026-11-12T06:50:00.000Z",
+        "powerKW": 0,
+        "resultingTempC": 20.445328125,
+        "carbonIntensity": 450
+      },
+      {
+        "intervalStart": "2026-11-12T07:50:00.000Z",
+        "powerKW": 0,
+        "resultingTempC": 20.6147615234375,
+        "carbonIntensity": 450
+      },
+      {
+        "intervalStart": "2026-11-12T08:50:00.000Z",
+        "powerKW": 0,
+        "resultingTempC": 20.782077004394534,
+        "carbonIntensity": 450
+      },
+      {
+        "intervalStart": "2026-11-12T09:50:00.000Z",
+        "powerKW": 0,
+        "resultingTempC": 20.9473010418396,
+        "carbonIntensity": 450
+      },
+      {
+        "intervalStart": "2026-11-12T10:50:00.000Z",
+        "powerKW": 0,
+        "resultingTempC": 21.110459778816608,
+        "carbonIntensity": 450
+      },
+      {
+        "intervalStart": "2026-11-12T11:50:00.000Z",
+        "powerKW": 0,
+        "resultingTempC": 21.3965790315814,
+        "carbonIntensity": 450
+      },
+      {
+        "intervalStart": "2026-11-12T12:50:00.000Z",
+        "powerKW": 0,
+        "resultingTempC": 21.679121793686633,
+        "carbonIntensity": 450
+      },
+      {
+        "intervalStart": "2026-11-12T13:50:00.000Z",
+        "powerKW": 0,
+        "resultingTempC": 21.95813277126555,
+        "carbonIntensity": 450
+      },
+      {
+        "intervalStart": "2026-11-12T14:50:00.000Z",
+        "powerKW": 0,
+        "resultingTempC": 22.233656111624732,
+        "carbonIntensity": 450
+      },
+      {
+        "intervalStart": "2026-11-12T15:50:00.000Z",
+        "powerKW": 0,
+        "resultingTempC": 22.505735410229423,
+        "carbonIntensity": 450
+      },
+      {
+        "intervalStart": "2026-11-12T16:50:00.000Z",
+        "powerKW": 0,
+        "resultingTempC": 22.649413717601554,
+        "carbonIntensity": 450
+      },
+      {
+        "intervalStart": "2026-11-12T17:50:00.000Z",
+        "powerKW": 0,
+        "resultingTempC": 22.791296046131535,
+        "carbonIntensity": 450
+      },
+      {
+        "intervalStart": "2026-11-12T18:50:00.000Z",
+        "powerKW": 0.41873127406523025,
+        "resultingTempC": 22.9,
+        "carbonIntensity": 450
+      },
+      {
+        "intervalStart": "2026-11-12T19:50:00.000Z",
+        "powerKW": 1.8500000000000003,
+        "resultingTempC": 22.9,
+        "carbonIntensity": 450
+      },
+      {
+        "intervalStart": "2026-11-12T20:50:00.000Z",
+        "powerKW": 1.8500000000000003,
+        "resultingTempC": 22.9,
+        "carbonIntensity": 450
+      },
+      {
+        "intervalStart": "2026-11-12T21:50:00.000Z",
+        "powerKW": 1.8500000000000003,
+        "resultingTempC": 22.9,
+        "carbonIntensity": 450
+      },
+      {
+        "intervalStart": "2026-11-12T22:50:00.000Z",
+        "powerKW": 20.516666666666648,
+        "resultingTempC": 21.5,
+        "carbonIntensity": 450
+      }
+    ],
+    "assumptionsAndCitations": [
+      {
+        "parameter": "facilityId",
+        "value": "FACILITY-01",
+        "status": "PROVISIONAL"
+      },
+      {
+        "parameter": "thermalModel",
+        "model": "1R-1C hourly Euler; constant COP; per-hour constant inputs",
+        "R": 2,
+        "C": 40,
+        "COP": 3,
+        "maxElectricalPowerKW": 50,
+        "status": "UNCOMMISSIONED"
+      },
+      {
+        "parameter": "comfortEnvelope",
+        "value": "20C - 23C",
+        "status": "PROVISIONAL"
+      },
+      {
+        "parameter": "terminalConstraint",
+        "value": "T_final within ±0.15C of modeled baseline final temperature",
+        "toleranceC": 0.15,
+        "finalDifferenceC": 0,
+        "status": "MODEL_CONSTRAINT_ONLY"
+      }
+    ],
+    "computationalProfile": {
+      "processCpuUserPlusSystemMicroseconds": 87,
+      "evaluationDurationMs": 0.106,
+      "processMemoryRssBytes": 76009472,
+      "processMemoryRssDeltaBytes": 0
+    }
+  },
+  "limits": [
+    "Synthetic or explicitly approved research inputs only.",
+    "Model and forecasts do not establish realized savings or green compliance.",
+    "Evaluator boundary flags are declarations; the local gate is not production enforcement attestation."
+  ]
+}
