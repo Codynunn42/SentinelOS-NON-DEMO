@@ -1,0 +1,7 @@
+baseline_commit=51490c22c9091f95d92da312e73c9cf246e17578
+node=v24.14.0
+pnpm=10.33.4
+started_utc=2026-11-12T00:24:00Z
+command=pnpm test
+ended_utc=2026-11-12T00:24:01Z
+exit_code=1

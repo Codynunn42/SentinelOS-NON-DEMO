@@ -1,6 +1,24 @@
 # Forethought Discovery Lens + C4 — Independent Reviewer Handoff
 
-Updated November 11, 2026. Review is not independent acceptance. Draft PR #73 remains HOLD; no merge, deployment, live adapters, spending or governance transition is authorized.
+Updated November 12, 2026. Review is not independent acceptance. Draft PR #73 remains HOLD; no merge to main, deployment, live adapters, spending or governance transition is authorized.
+
+## Corrected shared-source candidate
+
+Review source commit `8133d0897a9920f340cf1e7c05f619d98c1ad583` and
+`../forethought-c4-integration-2026-11-11/source-sha256-2026-11-12.txt` for the
+shared-source correction. The dated run files retain **35 isolated C4/bridge
+passes**, **125 repository passes**, **3 pending tests**, and all **42 Stage 3
+probes**, using Node `v24.14.0` and pnpm `10.33.4`. The November 11 results below
+remain historical, not the source identity of this correction.
+
+Technical review may begin against the identified snapshot now. Final
+acceptance additionally requires original-advisory reconciliation and provenance
+disposition, resolution of significant findings, and exact-candidate hosted CI
+required by the authorized process. No independent reviewer is assigned.
+
+PR #74 is a stacked research continuation, not a replacement for #73's review.
+Its domain findings and remediation require their own source identity and
+verification. Publication and branch consolidation do not advance any gate.
 
 ## Current candidate and relationship decision
 
