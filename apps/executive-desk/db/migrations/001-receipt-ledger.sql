@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS receipts (
   authority_check_result JSONB NOT NULL,
   risk_gate_outcome JSONB NOT NULL,
   signature VARCHAR NOT NULL,
-  signature_version SMALLINT NOT NULL DEFAULT 2 CHECK (signature_version IN (1, 2)),
+  signature_version SMALLINT NOT NULL DEFAULT 1 CHECK (signature_version IN (1, 2)),
   reasons TEXT[] DEFAULT '{}',
   principal_context JSONB,
   delegated_by VARCHAR(255),
