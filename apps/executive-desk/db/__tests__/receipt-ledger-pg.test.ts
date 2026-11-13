@@ -137,6 +137,37 @@ postgresDescribe('PostgresReceiptLedger isolated persistence round trip', () => 
         }
     });
 
+    it('defaults legacy signatures to version 1 while exporting longer signatures on a fresh schema', async () => {
+        const pool = new Pool({ connectionString: testDatabaseUrl });
+        const client = await pool.connect();
+        try {
+            await client.query('BEGIN');
+            await client.query('CREATE SCHEMA receipt_migration_test');
+            await client.query('SET LOCAL search_path TO receipt_migration_test');
+            const migration = await readFile(
+                'apps/executive-desk/db/migrations/001-receipt-ledger.sql', 'utf8',
+            );
+            await client.query(migration);
+            await client.query(`
+                INSERT INTO receipts
+                  (id, command, tenant, executor, "timestamp", status, payload,
+                   authority_check_result, risk_gate_outcome, signature)
+                VALUES ($1, 'test', 'test-tenant', 'test-operator', '2026-01-01',
+                        'executed', '{}', '{}', '{}', $2)
+            `, [baseReceipt.id, 'a'.repeat(100)]);
+            const stored = await client.query('SELECT signature_version FROM receipts');
+            assert.equal(stored.rows[0].signature_version, 1);
+            const exported = await client.query(
+                "SELECT signature FROM export_receipts_since('2025-01-01')",
+            );
+            assert.deepEqual(exported.rows, [{ signature: 'a'.repeat(100) }]);
+        } finally {
+            await client.query('ROLLBACK');
+            client.release();
+            await pool.end();
+        }
+    });
+
     it('adds version metadata without rewriting a synthetic legacy row', async () => {
         const pool = new Pool({ connectionString: testDatabaseUrl });
         const client = await pool.connect();
