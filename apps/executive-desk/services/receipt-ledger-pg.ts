@@ -277,7 +277,7 @@ export class PostgresReceiptLedger {
      */
     private sign(payload: Record<string, unknown>, version: number = LEGACY_SIGNATURE_VERSION): string {
         const data = version === CURRENT_SIGNATURE_VERSION
-            ? JSON.stringify(this.canonicalize(payload))
+            ? JSON.stringify(this.canonicalize(JSON.parse(JSON.stringify(payload))))
             : JSON.stringify(payload);
         return createHash('sha256').update(data).digest('hex');
     }
@@ -319,9 +319,6 @@ export class PostgresReceiptLedger {
     private canonicalize(value: unknown): unknown {
         if (Array.isArray(value)) {
             return value.map((item) => this.canonicalize(item));
-        }
-        if (value instanceof Date) {
-            return value.toJSON();
         }
         if (value && typeof value === 'object') {
             return Object.fromEntries(

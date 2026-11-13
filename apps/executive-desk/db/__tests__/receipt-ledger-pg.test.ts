@@ -101,6 +101,26 @@ describe('PostgresReceiptLedger signatures', () => {
             await ledger.close();
         }
     });
+
+    it('uses the persisted JSON representation when calculating version 2 digests', async () => {
+        const ledger = new PostgresReceiptLedger('postgres://localhost/unused_test');
+        const normalized: Omit<ReceiptEntry, 'signature'> = {
+            ...baseReceipt,
+            signatureVersion: 2,
+            payload: { observedAt: '2026-01-01T00:00:00.000Z', values: [null] },
+        };
+        const signature = v2Digest(normalized);
+        try {
+            assert.equal(ledger.verify({ ...normalized, signature }), true);
+            assert.equal(ledger.verify({
+                ...normalized,
+                payload: { observedAt: new Date('2026-01-01T00:00:00.000Z'), values: [undefined] },
+                signature,
+            }), true);
+        } finally {
+            await ledger.close();
+        }
+    });
 });
 
 const testDatabaseUrl = process.env.RECEIPT_LEDGER_TEST_DATABASE_URL;
@@ -114,6 +134,37 @@ postgresDescribe('PostgresReceiptLedger isolated persistence round trip', () => 
             'RECEIPT_LEDGER_TEST_DATABASE_URL must target a database named as test/testing/ci');
         if (process.env.DATABASE_URL && process.env.DATABASE_URL === testDatabaseUrl) {
             assert.fail('The isolated test database URL must not be the application DATABASE_URL');
+        }
+    });
+
+    it('defaults legacy signatures to version 1 while exporting longer signatures on a fresh schema', async () => {
+        const pool = new Pool({ connectionString: testDatabaseUrl });
+        const client = await pool.connect();
+        try {
+            await client.query('BEGIN');
+            await client.query('CREATE SCHEMA receipt_migration_test');
+            await client.query('SET LOCAL search_path TO receipt_migration_test');
+            const migration = await readFile(
+                'apps/executive-desk/db/migrations/001-receipt-ledger.sql', 'utf8',
+            );
+            await client.query(migration);
+            await client.query(`
+                INSERT INTO receipts
+                  (id, command, tenant, executor, "timestamp", status, payload,
+                   authority_check_result, risk_gate_outcome, signature)
+                VALUES ($1, 'test', 'test-tenant', 'test-operator', '2026-01-01',
+                        'executed', '{}', '{}', '{}', $2)
+            `, [baseReceipt.id, 'a'.repeat(100)]);
+            const stored = await client.query('SELECT signature_version FROM receipts');
+            assert.equal(stored.rows[0].signature_version, 1);
+            const exported = await client.query(
+                "SELECT signature FROM export_receipts_since('2025-01-01')",
+            );
+            assert.deepEqual(exported.rows, [{ signature: 'a'.repeat(100) }]);
+        } finally {
+            await client.query('ROLLBACK');
+            client.release();
+            await pool.end();
         }
     });
 
