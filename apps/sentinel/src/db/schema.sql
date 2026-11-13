@@ -21,6 +21,8 @@ CREATE TABLE IF NOT EXISTS deals (
 
 CREATE TABLE IF NOT EXISTS audit_logs (
   id SERIAL PRIMARY KEY,
+  event_id TEXT,
+  chain_sequence BIGINT,
   tenant_id TEXT NOT NULL DEFAULT 'ownerfi',
   command TEXT NOT NULL,
   payload JSONB NOT NULL,
@@ -58,6 +60,13 @@ CREATE TABLE IF NOT EXISTS governance_signals (
 ALTER TABLE applications ADD COLUMN IF NOT EXISTS tenant_id TEXT NOT NULL DEFAULT 'ownerfi';
 ALTER TABLE deals ADD COLUMN IF NOT EXISTS tenant_id TEXT NOT NULL DEFAULT 'ownerfi';
 ALTER TABLE audit_logs ADD COLUMN IF NOT EXISTS tenant_id TEXT NOT NULL DEFAULT 'ownerfi';
+ALTER TABLE audit_logs ADD COLUMN IF NOT EXISTS event_id TEXT;
+ALTER TABLE audit_logs ADD COLUMN IF NOT EXISTS chain_sequence BIGINT;
+UPDATE audit_logs
+SET event_id = result->>'eventId'
+WHERE event_id IS NULL
+  AND result ? 'eventId';
+CREATE UNIQUE INDEX IF NOT EXISTS audit_logs_event_id_unique ON audit_logs (event_id);
 ALTER TABLE approvals ADD COLUMN IF NOT EXISTS tenant_id TEXT;
 ALTER TABLE approvals ADD COLUMN IF NOT EXISTS events JSONB NOT NULL DEFAULT '[]'::jsonb;
 ALTER TABLE approvals ADD COLUMN IF NOT EXISTS resolution JSONB;
