@@ -339,7 +339,7 @@ export class PostgresReceiptLedger {
             throw new Error(`${SIGNING_KEY_ENVIRONMENT_VARIABLE}_REQUIRED_FOR_SIGNING`);
         }
         return createHmac('sha256', this.signingKey)
-            .update(JSON.stringify(this.canonicalize(payload)), 'utf8')
+            .update(JSON.stringify(this.canonicalize(JSON.parse(JSON.stringify(payload)))), 'utf8')
             .digest('hex');
     }
 
@@ -365,9 +365,6 @@ export class PostgresReceiptLedger {
     private canonicalize(value: unknown): unknown {
         if (Array.isArray(value)) {
             return value.map((item) => this.canonicalize(item));
-        }
-        if (value instanceof Date) {
-            return value.toJSON();
         }
         if (value && typeof value === 'object') {
             return Object.fromEntries(
