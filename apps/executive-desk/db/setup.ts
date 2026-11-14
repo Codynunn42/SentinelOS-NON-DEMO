@@ -1,13 +1,19 @@
 /**
  * Database Setup & Migration Runner
- * 
+ *
  * Usage:
  * npx ts-node apps/executive-desk/db/setup.ts
- * 
+ * npx ts-node apps/executive-desk/db/setup.ts rollback [migration-file]
+ *
  * This script:
  * 1. Connects to PostgreSQL via DATABASE_URL
  * 2. Runs all migrations in db/migrations/
  * 3. Reports schema status
+ *
+ * Rollback mode reverses the most recently applied migration (or the named
+ * one, only if it is the most recently applied) using the matching file in
+ * db/migrations/down/, and removes its schema_migrations record in the same
+ * transaction. Migrations are rolled back newest-first, one at a time.
  */
 
 import fs from 'fs';
@@ -114,4 +120,84 @@ async function runMigrations(): Promise<void> {
     }
 }
 
-runMigrations();
+async function rollbackMigration(targetFile?: string): Promise<void> {
+    const pool = new Pool({ connectionString: DATABASE_URL });
+    const client = await connectWithRetry(pool);
+
+    try {
+        console.log('⏪ Receipt Ledger Migration Rollback\n');
+        console.log(`📍 Database URL: ${DATABASE_URL.split('@')[1]}\n`);
+
+        const migrationsDir = path.join(__dirname, 'migrations');
+        const migrationFiles = fs
+            .readdirSync(migrationsDir)
+            .filter((f) => f.endsWith('.sql'))
+            .sort();
+
+        // Applied migrations, in the order the runner would apply them
+        const applied = await client.query(
+            'SELECT name FROM schema_migrations ORDER BY name',
+        );
+        const appliedFiles = applied.rows
+            .map((row) => row.name as string)
+            .filter((name) => migrationFiles.includes(name));
+
+        if (appliedFiles.length === 0) {
+            console.log('No applied migrations to roll back.');
+            return;
+        }
+
+        const latest = appliedFiles[appliedFiles.length - 1];
+        const target = targetFile ?? latest;
+
+        if (!appliedFiles.includes(target)) {
+            console.error(`❌ Rollback failed: ${target} is not applied.`);
+            process.exit(1);
+        }
+
+        if (target !== latest) {
+            console.error(
+                `❌ Rollback failed: ${target} is not the most recently applied migration.`,
+            );
+            console.error(`   Roll back ${latest} first (newest-first, one at a time).`);
+            process.exit(1);
+        }
+
+        const downFile = target.replace(/\.sql$/, '.down.sql');
+        const downPath = path.join(migrationsDir, 'down', downFile);
+        if (!fs.existsSync(downPath)) {
+            console.error(`❌ Rollback failed: no down migration found at ${downPath}`);
+            process.exit(1);
+        }
+
+        const downSQL = fs.readFileSync(downPath, 'utf8');
+
+        // Reverse the migration and its tracking record atomically: if the
+        // down migration fails, schema_migrations still shows it as applied.
+        await client.query('BEGIN');
+        try {
+            await client.query(downSQL);
+            await client.query('DELETE FROM schema_migrations WHERE name = $1', [target]);
+            await client.query('COMMIT');
+        } catch (error) {
+            await client.query('ROLLBACK');
+            throw error;
+        }
+
+        console.log(`  ✓ ${target} rolled back (${downFile})`);
+        console.log('\n✅ Rollback complete!\n');
+    } catch (error) {
+        console.error('❌ Rollback failed:', error);
+        process.exit(1);
+    } finally {
+        client.release();
+        await pool.end();
+    }
+}
+
+const args = process.argv.slice(2);
+if (args[0] === 'rollback') {
+    rollbackMigration(args[1]);
+} else {
+    runMigrations();
+}
