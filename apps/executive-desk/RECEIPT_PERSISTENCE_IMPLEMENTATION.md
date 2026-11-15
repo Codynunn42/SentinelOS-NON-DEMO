@@ -300,6 +300,8 @@ If switching backends later:
 
 ## Migration rollback
 
+**Application prerequisite:** stop all receipt-producing processes before rolling back, and resume only an application release compatible with the target schema. Do not restart the current release against a rolled-back schema: its PostgreSQL ledger initializer recreates the removed columns and restores the version 3 constraint without updating `schema_migrations`.
+
 Migrations in `apps/executive-desk/db/migrations/` apply forward-only by default. Each migration from `003-receipt-signature-v2.sql` onward ships a matching down migration in `apps/executive-desk/db/migrations/down/`, and the runner can reverse them:
 
 ```bash
