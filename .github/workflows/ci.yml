@@ -52,7 +52,7 @@ jobs:
         run: |
           pnpm exec mocha --require tsx \
             apps/executive-desk/db/__tests__/receipt-ledger-pg.test.ts \
-            apps/executive-desk/db/__tests_/migration-rollback.test.ts \
+            apps/executive-desk/db/__tests__/migration-rollback.test.ts \
             apps/sentinel/src/audit/__tests__/auditLogger.test.js \
             apps/sentinel/src/audit/__tests__/checkpoint-recovery.test.js
 
