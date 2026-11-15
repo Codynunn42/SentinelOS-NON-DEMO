@@ -14,6 +14,10 @@
  * one, only if it is the most recently applied) using the matching file in
  * db/migrations/down/, and removes its schema_migrations record in the same
  * transaction. Migrations are rolled back newest-first, one at a time.
+ *
+ * Both modes hold a PostgreSQL advisory lock for the whole run, so a forward
+ * setup and a rollback (or two setups) can never interleave: the
+ * newest-first check and the change it guards are one atomic decision.
  */
 
 import fs from 'fs';
@@ -47,11 +51,22 @@ async function connectWithRetry(pool: Pool) {
     throw lastError;
 }
 
+const MIGRATION_LOCK_KEY = 'sentinel-executive-desk-migrations';
+
+async function acquireMigrationLock(client: import('pg').PoolClient): Promise<void> {
+    await client.query('SELECT pg_advisory_lock(hashtext($1))', [MIGRATION_LOCK_KEY]);
+}
+
+async function releaseMigrationLock(client: import('pg').PoolClient): Promise<void> {
+    await client.query('SELECT pg_advisory_unlock(hashtext($1))', [MIGRATION_LOCK_KEY]);
+}
+
 async function runMigrations(): Promise<void> {
     const pool = new Pool({ connectionString: DATABASE_URL });
     const client = await connectWithRetry(pool);
 
     try {
+        await acquireMigrationLock(client);
         console.log('🔧 Receipt Ledger Database Setup\n');
         console.log(`📍 Database URL: ${DATABASE_URL.split('@')[1]}\n`);
 
@@ -115,6 +130,7 @@ async function runMigrations(): Promise<void> {
         console.error('❌ Migration failed:', error);
         process.exit(1);
     } finally {
+        await releaseMigrationLock(client).catch(() => undefined);
         client.release();
         await pool.end();
     }
@@ -125,22 +141,19 @@ async function rollbackMigration(targetFile?: string): Promise<void> {
     const client = await connectWithRetry(pool);
 
     try {
+        await acquireMigrationLock(client);
         console.log('⏪ Receipt Ledger Migration Rollback\n');
         console.log(`📍 Database URL: ${DATABASE_URL.split('@')[1]}\n`);
 
         const migrationsDir = path.join(__dirname, 'migrations');
-        const migrationFiles = fs
-            .readdirSync(migrationsDir)
-            .filter((f) => f.endsWith('.sql'))
-            .sort();
 
-        // Applied migrations, in the order the runner would apply them
+        // Use the complete database history, including migrations whose
+        // files are absent from this checkout: an applied newer migration
+        // must block a rollback even when this checkout cannot see it.
         const applied = await client.query(
             'SELECT name FROM schema_migrations ORDER BY name',
         );
-        const appliedFiles = applied.rows
-            .map((row) => row.name as string)
-            .filter((name) => migrationFiles.includes(name));
+        const appliedFiles = applied.rows.map((row) => row.name as string);
 
         if (appliedFiles.length === 0) {
             console.log('No applied migrations to roll back.');
@@ -190,6 +203,7 @@ async function rollbackMigration(targetFile?: string): Promise<void> {
         console.error('❌ Rollback failed:', error);
         process.exit(1);
     } finally {
+        await releaseMigrationLock(client).catch(() => undefined);
         client.release();
         await pool.end();
     }
