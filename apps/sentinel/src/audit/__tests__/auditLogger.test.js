@@ -456,6 +456,47 @@ describe('durable audit outbox writer locking', () => {
 });
 
 describe('audit persistence reconciliation', () => {
+  it('hashes the default tenant that is persisted when tenant is omitted', async () => {
+    const persistedEntries = [];
+    const logger = createTestLogger({
+      databaseStatus: () => 'synthetic-test-database',
+      persistQuery: async (sql, parameters) => {
+        if (sql.includes('INSERT INTO audit_logs')) {
+          persistedEntries.push({
+            tenant: parameters[2],
+            auditHash: JSON.parse(parameters[5]).auditHash
+          });
+          return { rowCount: 1, rows: [] };
+        }
+        return { rowCount: 0, rows: [] };
+      }
+    });
+
+    const entry = await logger.log({
+      command: 'synthetic.default-tenant',
+      payload: {},
+      result: {}
+    });
+    const expectedHash = crypto.createHash('sha256').update(stableStringify({
+      eventId: entry.eventId,
+      tenant: 'ownerfi',
+      command: entry.command,
+      payload: entry.payload,
+      result: entry.result,
+      actor: entry.actor || null,
+      timestamp: entry.timestamp,
+      prevHash: null
+    })).digest('hex');
+
+    assert.equal(entry.tenant, 'ownerfi');
+    assert.equal(entry.auditHash, expectedHash);
+    assert.deepEqual(persistedEntries, [{
+      tenant: 'ownerfi',
+      auditHash: expectedHash
+    }]);
+    assert.deepEqual(logger.verifyChain(), { valid: true, checked: 1 });
+  });
+
   it('continues to verify existing valid spool entries without changing their hashes', async () => {
     const spoolDirectory = path.join(os.tmpdir(), `sentinel-audit-${crypto.randomUUID()}`);
     const eventId = crypto.randomUUID();
