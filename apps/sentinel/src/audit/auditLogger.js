@@ -10,6 +10,7 @@ const crypto = require('crypto');
 
 const DEFAULT_RETRY_INTERVAL_MS = 5000;
 const MAX_RETRY_INTERVAL_MS = 60000;
+const DEFAULT_AUDIT_TENANT = 'ownerfi';
 
 function stableStringify(value) {
   if (Array.isArray(value)) {
@@ -249,7 +250,11 @@ function createAuditLogger({
   }
 
   async function appendHashedEntry(entry) {
-    const { entry: hashedEntry } = await outbox.append(entry, (value, prevHash) => {
+    const normalizedEntry = {
+      ...entry,
+      tenant: entry.tenant || DEFAULT_AUDIT_TENANT
+    };
+    const { entry: hashedEntry } = await outbox.append(normalizedEntry, (value, prevHash) => {
       value.prevHash = prevHash;
       value.auditHash = hashAuditEntry(value, prevHash);
       return value;
@@ -269,7 +274,7 @@ function createAuditLogger({
       [
         entry.eventId,
         sequence,
-        entry.tenant || 'ownerfi',
+        entry.tenant || DEFAULT_AUDIT_TENANT,
         entry.command,
         JSON.stringify(entry.payload || {}),
         JSON.stringify({
@@ -310,7 +315,7 @@ function createAuditLogger({
       !row ||
       row.event_id !== entry.eventId ||
       Number(row.chain_sequence) !== sequence ||
-      row.tenant_id !== (entry.tenant || 'ownerfi') ||
+      row.tenant_id !== (entry.tenant || DEFAULT_AUDIT_TENANT) ||
       row.command !== entry.command ||
       stableStringify(row.payload) !== stableStringify(expectedPayload) ||
       stableStringify(row.result) !== stableStringify(expectedResult) ||
