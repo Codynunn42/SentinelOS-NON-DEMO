@@ -1,0 +1,269 @@
+
+> sentinelos-non-demo@0.1.0 test /workspaces/SentinelOS-NON-DEMO
+> mocha --require tsx "apps/executive-desk/**/__tests__/**/*.test.ts" "apps/executive-desk/**/*.test.ts" "apps/sentinel/**/__tests__/**/*.test.js" "apps/sentinel/**/*.test.js"
+
+
+
+  Executive Desk API Routes
+    Authentication
+      ✔ should reject requests without principal
+      ✔ should accept requests with principal header
+      ✔ should accept requests with bearer token
+      ✔ should require bearer token for API routes when AUTH_ENABLED is true by default
+      ✔ should require bearer token for API routes when API auth is enabled
+      ✔ should accept bearer token for API routes when API auth is enabled
+      ✔ should reject principal header mismatch when API auth is enabled
+    HTTPS Enforcement
+      ✔ should reject non-HTTPS requests when HTTPS is required
+      ✔ should accept forwarded HTTPS requests when HTTPS is required
+      ✔ should reject partially parsed trust proxy hop values
+    Health Check
+      ✔ should return health status without auth
+    Sentinel Connect
+      ✔ should require principal for connect status
+      ✔ should expose connect status with auth
+      ✔ should require credentials for sign-in
+      ✔ should reject sign-in principal mismatch when API auth is enabled
+    Scope Authorization
+      ✔ should reject missing scopes for Vault.Read-protected endpoint
+      ✔ should reject client-supplied scope headers for Vault.Read-protected endpoint
+      ✔ should reject forged bearer payload scopes that do not match the configured token
+      ✔ should reject wrong verified token scope for Vault.Read-protected endpoint
+      ✔ should accept required verified token scope for Vault.Read-protected endpoint
+    Frontend Surface
+      ✔ should serve the Executive Desk cockpit
+      ✔ should serve frontend JavaScript
+      ✔ should serve frontend CSS
+      ✔ should serve the sovereign demo landing page
+      ✔ should serve the sovereign demo landing page on the canonical route
+      ✔ should serve sovereign demo assets
+    Proxy Command E2E Surface
+      ✔ should require bearer token for proxy when auth is enabled
+      ✔ should accept proxy bearer token when auth is enabled
+      ✔ should reject proxy principal mismatch when auth is enabled
+      ✔ should execute the governed read-only diagnosis path
+      ✔ should block unsupported commands before execution
+    Receipt Endpoints
+      ✔ should list receipts
+      ✔ should support pagination
+      ✔ should filter by status
+      ✔ should filter by command
+      ✔ should handle invalid skip/limit
+      ✔ should get receipt by ID
+      ✔ should return 404 for non-existent receipt
+      ✔ should export receipts as JSON
+      ✔ should export receipts as JSONL
+      ✔ should export receipts as CSV
+      ✔ should get receipt statistics
+    Delegation Endpoints
+      ✔ should list delegations
+      ✔ should filter delegations by grantedTo
+      ✔ should filter by command
+      ✔ should get delegation by ID
+      ✔ should return 404 for non-existent delegation
+    Risk Assessment Endpoints
+      ✔ should get risk status
+      ✔ should get risk factors history
+      ✔ should support different windows
+    Closeout State Endpoints
+      ✔ should get default closeout state
+      ✔ should update closeout state
+      ✔ should reject invalid closeout update payload
+      ✔ should record MOB template run
+      ✔ should list MOB template runs
+      ✔ should filter MOB template runs by status
+      ✔ should export MOB runs as CSV
+      ✔ should export MOB runs as JSON
+      ✔ should reject invalid MOB export format
+      ✔ should export closeout bundle as JSON
+      Sentinel AI Remote Connector
+        ✔ should report hosted Sentinel AI posture when no remote is configured
+        ✔ should produce a course-setting scan payload
+    Pre-auth Rate Limiting
+      ✔ should reject the 101st request even when untrusted identity values rotate (236ms)
+    Error Handling
+      ✔ should return 404 for unknown endpoint
+      ✔ should include request ID in response
+      ✔ should include rate limit headers
+
+  daily cadence evidence labels
+    ✔ separates checked repository observations from evidence not collected
+
+  PostgresReceiptLedger signatures
+    ✔ verifies the legacy serializer digest vector only when its JSONB values are reconstructible
+    ✔ verifies version 2 and rejects authority tampering and unknown versions
+
+  PostgresReceiptLedger isolated persistence round trip
+    - adds version metadata without rewriting a synthetic legacy row
+    - persists and maps signature version and authority fields without changing signed bytes
+    - preserves absent and empty delegation fields across reloads
+
+  receipt-ledger
+    - persists and retrieves receipt by id
+    ✔ supports pagination edges
+    - supports status/command/date filtering
+    ✔ exports JSON/JSONL/CSV with expected shape
+    - rejects invalid signature/tampered receipt when verification exists
+
+  command-handler
+    ✔ blocks when authority denies
+    ✔ blocks when risk gate denies
+    ✔ returns rejected receipt for invalid tenant
+    ✔ returns rejected receipt for missing principal
+    ✔ blocks unsupported command
+    ✔ returns executed + receipt for valid diagnosis
+    ✔ handles execution throw and still returns governed failure
+    ✔ propagates audit reference / correlation fields
+
+  authority-check
+    ✔ allows read-only command for valid principal
+    ✔ denies when principal missing required role/group
+    ✔ allows via active delegation window
+    ✔ denies expired delegation
+    ✔ denies not-yet-active delegation
+    ✔ handles identity provider timeout/failure safely
+
+  risk-assessment
+    ✔ passes exactly at allowed threshold
+    ✔ blocks just over threshold
+    ✔ applies defaults for missing factors
+    ✔ handles stale infra health data
+    ✔ handles provider timeout/error
+    ✔ matches weighted-score golden cases
+
+  read-only status API characterization
+    ✔ serves status observations and keeps learning suggestions non-executing (364ms)
+
+  receipt lookup compatibility
+    ✔ labels legacy receipts unsigned in both the receipt and embedded audit result
+
+  Sentinel bridge gaps report command
+    ✔ builds a read-only bridge gaps report with doctor and light guidance
+    ✔ normalizes north star status to allowed enum values
+    ✔ routes through the governed handler and returns a receipt
+
+  durable dispatch result verification
+    ✔ binds the persisted command result to the signed receipt for replay
+
+  DOE SBIR/STTR readiness evidence
+    ✔ reports missing or malformed status evidence as unknown and unverified
+    ✔ labels complete caller inputs as reported rather than verified
+    ✔ rejects impossible calendar dates even in timestamp-form observations
+
+  control-plane validation contract
+    ✔ rejects context: null before fallback or mutation
+    ✔ rejects context: [] before fallback or mutation
+    ✔ rejects context: "invalid" before fallback or mutation
+    ✔ rejects context: 42 before fallback or mutation
+    ✔ rejects context: false before fallback or mutation
+    ✔ rejects payload: null before fallback or mutation
+    ✔ rejects payload: [] before fallback or mutation
+    ✔ rejects payload: "invalid" before fallback or mutation
+    ✔ rejects payload: 42 before fallback or mutation
+    ✔ rejects payload: false before fallback or mutation
+    ✔ rejects metadata: null before fallback or mutation
+    ✔ rejects metadata: [] before fallback or mutation
+    ✔ rejects metadata: "invalid" before fallback or mutation
+    ✔ rejects metadata: 42 before fallback or mutation
+    ✔ rejects metadata: false before fallback or mutation
+    ✔ keeps omitted objects optional and accepts object payloads
+    ✔ executes normalized {"command":"status","actor":{"role":"operator"}} through a signed envelope
+    ✔ executes normalized {"command":"status","metadata":{"role":"operator","actor":"u"}} through a signed envelope
+    ✔ executes normalized {"intent":"status","actor":{"role":"operator"}} through a signed envelope
+    ✔ executes normalized {"intent":"deal.execute","actor":{"role":"operator"}} through a signed envelope
+    ✔ rejects partial qualified-command mismatch {"entity":"application"}
+    ✔ rejects partial qualified-command mismatch {"action":"approve"}
+    ✔ rejects empty path segments and malformed actors
+
+  durable command execution journal
+    ✔ hashes idempotency keys instead of storing their raw values
+    ✔ claims a tenant-scoped key and rejects reuse with a changed payload
+    ✔ allows safe retry after pre-mutation failure and blocks started executions
+    ✔ atomically stores a signed receipt and completed result for idempotent replay
+    ✔ does not complete without a signed receipt or a started pending journal
+
+  Discovery Lens Stage 3 invariant regressions
+    ✔ rejects prerequisite support when retrieval status is insufficient
+    ✔ rejects prerequisite support when the trusted context has no action
+    ✔ halts rather than emitting excerpts over the byte limit
+    ✔ rejects oversized excerpts at the adapter boundary
+    ✔ returns a closed failure for malformed hold arrays without throwing
+    ✔ rejects duplicate IDs in the trusted corpus snapshot
+    ✔ excludes records from a different environment during retrieval
+    ✔ rejects a packet that includes a trusted record from another environment
+    ✔ rejects prerequisite support that cites a failed source record
+
+  Discovery Lens Stage 3 acceptance suite
+==============================================================================================================
+DISCOVERY LENS → FORETHOUGHT: STAGE 3 COMPLETE ACCEPTANCE & REGRESSION SUITE (42 TESTS)
+Repository Baseline Forethought Loaded: SUCCESS
+==============================================================================================================
+
+RUNNING 20 AUDITED REGRESSION PROBES:
+
+ALL 42 ACCEPTANCE & REGRESSION TESTS PROGRAMMATICALLY VERIFIED.
+  ✓ F01: Valid exact-tag support
+  ✓ F02: Missing/partial prerequisites
+  ✓ F03: Applicable release hold
+  ✓ F04: Cross-tenant ingestion
+  ✓ F05: Contaminated partition halts
+  ✓ F06: Sensitivity mismatch
+  ✓ F07: Release/environment/version mismatch
+  ✓ F08: As-of and freshness
+  ✓ F09: Conflicting claims
+  ✓ F10: Historical/draft evidence
+  ✓ F11: Prompt injection
+  ✓ F12: Ambiguous query/tag-action conflict
+  ✓ F13: Source integrity
+  ✓ F14: Cache invalidation
+  ✓ F15: Caller compatibility with real Forethought
+  ✓ F16: Trusted learning state preservation without shadowing
+  ✓ F17: Global and target holds
+  ✓ F18: Missing hold channel simulated failure
+  ✓ F19: Malformed/bounded packet enforcement
+  ✓ F20: Semantic reference coverage
+  ✓ F21: Policy fixture supports
+  ✓ F22: Analyzer mutation defense
+  ✓ R01: Forged packet security rejection at adapter
+  ✓ R02: Invalid cutoff and source timestamp rejection
+  ✓ R03: Action environment outside active scope rejection
+  ✓ R04: Contrary evidence blocks prerequisite support
+  ✓ R05: 1,001-record bound halts before serialization
+  ✓ R06: Duplicate record IDs reject before deduplication
+  ✓ R07: Adapter independently validates sensitivity and cutoff
+  ✓ R08: Malformed array error does not overwrite earlier status validation errors
+  ✓ R09: Calendar validation strictly rejects February 30
+  ✓ R10: No-action request conforms to Schema v0.2 review object
+  ✓ R11: Formatted packet excerpt tampering rejected via trusted snapshot
+  ✓ R12: Missing action_review rejected by adapter
+  ✓ R13: Scope ID mismatch rejected by adapter
+  ✓ R14: Support verdict citing held record rejected by adapter
+  ✓ R15: Dangling governance hold rejected by adapter
+  ✓ R16: Omitted applicable hold rejected by adapter
+  ✓ R17: Mandatory trustedContext and trustedCorpusSnapshot enforced
+  ✓ R18: Omitted applicable component hold rejected by adapter
+  ✓ R19: Authentic source for different target rejected as action support
+  ✓ R20: Complete metadata, provenance, schema closure, and action immutability verified
+==============================================================================================================
+    ✔ passes all acceptance and regression probes
+
+  versioned signed receipts
+    ✔ signs and verifies the immutable receipt and server-derived authority
+    ✔ rejects tampering with receipt and authority fields
+    ✔ fails closed for malformed signatures, unknown versions and unavailable keys
+    ✔ loads exact retained key versions for receipt verification
+    ✔ labels legacy records unsigned without signing or mutating their source
+    ✔ rejects incomplete authority and duplicate scopes before signing
+
+  buildStatusBriefing
+    ✔ does not equate an HTTP-healthy observation with readiness
+    ✔ labels missing and stale observations without success-shaped defaults
+    ✔ preserves drift as a blocker and recommends review before retry
+    ✔ uses a neutral available label when inputs are fresh and learning is stable
+    ✔ does not trust timestamps materially in the future
+    ✔ reports readiness evaluation failures without exposing exception details
+
+
+  150 passing (978ms)
+  6 pending
+

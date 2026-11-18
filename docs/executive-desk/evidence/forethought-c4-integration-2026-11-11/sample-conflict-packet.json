@@ -1,0 +1,191 @@
+{
+  "requestId": "case-4",
+  "status": "REVIEW_REQUIRED",
+  "executionAllowed": false,
+  "summary": "0 supported source claims; 1 conflicts; 0 required evidence gaps.",
+  "conclusions": [],
+  "conflicts": [
+    {
+      "key": "review:deadline",
+      "alternatives": [
+        {
+          "value": "Friday",
+          "citation": {
+            "documentId": "policy-4",
+            "version": "v1",
+            "digest": "85fe4bedfd29370608f0133089182ab98b0a3887274b16ed135760d6e5d11090",
+            "startLine": 1,
+            "endLine": 1,
+            "quote": "The review deadline is Friday."
+          }
+        },
+        {
+          "value": "Monday",
+          "citation": {
+            "documentId": "conflict-4",
+            "version": "v1",
+            "digest": "35701acd08bef7151e7e346072d9c633dc7178e06f050bf952153085dd31af8f",
+            "startLine": 1,
+            "endLine": 1,
+            "quote": "The review deadline is Monday."
+          }
+        }
+      ]
+    }
+  ],
+  "gaps": [],
+  "nextUsefulAction": "Ask the accountable owner to resolve the cited conflicting claims.",
+  "framing": {
+    "name": "Sentinel Analysis",
+    "systemGoal": "stability-first governed execution",
+    "alignmentScore": 0.5,
+    "riskLevel": "medium",
+    "requiresHumanReview": true,
+    "requiresApproval": true,
+    "actionGate": "human_review_required",
+    "framedSuggestion": "System state is not fully understood. Observation is recommended before taking action.",
+    "explanation": "Deterministic source-claim extraction; factual confidence unassessed.",
+    "interpretation": "System state is unknown with medium risk. Ask the accountable owner to resolve the cited conflicting claims.",
+    "directive": "Observe, collect more history, and avoid automation until confidence improves.",
+    "confidence": null,
+    "evidence": [],
+    "security": null,
+    "originalSuggestions": []
+  },
+  "discoveryReview": {
+    "verdict": "INSUFFICIENT_EVIDENCE",
+    "supporting_ids": [],
+    "blocking_ids": [],
+    "conflicting_ids": [],
+    "missing_requirements": [],
+    "rationale": "Advisory conflicts or required evidence gaps remain unresolved.",
+    "next_evidence_request": "Ask the accountable owner to resolve the cited conflicting claims.",
+    "authorization_evidenced": false,
+    "execution_allowed": false
+  },
+  "evidenceTable": [
+    {
+      "id": "policy-4",
+      "version": "v1",
+      "title": "Sentinel review policy",
+      "provenance": {
+        "origin": "fixture_registry",
+        "authoredAt": "2026-11-01T00:00:00Z",
+        "ingestedAt": "2026-11-02T00:00:00Z",
+        "authorityLevel": 4
+      },
+      "lifecycle": {
+        "status": "ACTIVE",
+        "validUntil": "2026-12-01T00:00:00Z",
+        "supersededBy": null
+      },
+      "slot": "CURRENT_AUTHORITY",
+      "authorityLevel": 4,
+      "freshness": {
+        "score": 0.7055555555555556,
+        "rationale": "Remaining validity fraction; not factual confidence or permission."
+      },
+      "reasons": [],
+      "retentionHold": false
+    },
+    {
+      "id": "conflict-4",
+      "version": "v1",
+      "title": "Sentinel review policy",
+      "provenance": {
+        "origin": "fixture_registry",
+        "authoredAt": "2026-11-01T00:00:00Z",
+        "ingestedAt": "2026-11-02T00:00:00Z",
+        "authorityLevel": 4
+      },
+      "lifecycle": {
+        "status": "ACTIVE",
+        "validUntil": "2026-12-01T00:00:00Z",
+        "supersededBy": null
+      },
+      "slot": "CURRENT_AUTHORITY",
+      "authorityLevel": 4,
+      "freshness": {
+        "score": 0.7055555555555556,
+        "rationale": "Remaining validity fraction; not factual confidence or permission."
+      },
+      "reasons": [],
+      "retentionHold": false
+    }
+  ],
+  "signOff": {
+    "required": true,
+    "status": "PENDING_HUMAN_REVIEW",
+    "grantsExecution": false
+  },
+  "telemetry": {
+    "totalWallMs": 0.5976989999999205,
+    "cpuUserUs": 23,
+    "cpuSystemUs": 540,
+    "rssDeltaBytes": 0,
+    "heapUsedDeltaBytes": 170096,
+    "sampledMaxRssBytes": 82468864,
+    "sampledMaxHeapUsedBytes": 20799808,
+    "processLifetimeMaxRssKiB": 83128,
+    "stages": [
+      {
+        "name": "lens",
+        "status": "OK",
+        "wallMs": 0.13295099999993454,
+        "cpuUserUs": 0,
+        "cpuSystemUs": 101,
+        "rssDeltaBytes": 0,
+        "heapUsedDeltaBytes": 9112,
+        "sampledRssBytes": 82468864,
+        "sampledHeapUsedBytes": 20639312
+      },
+      {
+        "name": "sentinel",
+        "status": "OK",
+        "wallMs": 0.19468300000005456,
+        "cpuUserUs": 0,
+        "cpuSystemUs": 194,
+        "rssDeltaBytes": 0,
+        "heapUsedDeltaBytes": 62376,
+        "sampledRssBytes": 82468864,
+        "sampledHeapUsedBytes": 20702568
+      },
+      {
+        "name": "forethought",
+        "status": "OK",
+        "wallMs": 0.04155100000002676,
+        "cpuUserUs": 0,
+        "cpuSystemUs": 41,
+        "rssDeltaBytes": 0,
+        "heapUsedDeltaBytes": 11304,
+        "sampledRssBytes": 82468864,
+        "sampledHeapUsedBytes": 20714544
+      },
+      {
+        "name": "desk",
+        "status": "OK",
+        "wallMs": 0.184566000000018,
+        "cpuUserUs": 0,
+        "cpuSystemUs": 184,
+        "rssDeltaBytes": 0,
+        "heapUsedDeltaBytes": 83152,
+        "sampledRssBytes": 82468864,
+        "sampledHeapUsedBytes": 20798424
+      },
+      {
+        "name": "telemetry",
+        "status": "OK",
+        "wallMs": 0.0060320000000047,
+        "cpuUserUs": 0,
+        "cpuSystemUs": 5,
+        "rssDeltaBytes": 0,
+        "heapUsedDeltaBytes": 144,
+        "sampledRssBytes": 82468864,
+        "sampledHeapUsedBytes": 20799296
+      }
+    ],
+    "energyJ": null,
+    "carbonG": null,
+    "energyStatus": "UNKNOWN"
+  }
+}
