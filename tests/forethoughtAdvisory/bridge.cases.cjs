@@ -124,3 +124,16 @@ test('global environment records remain included; foreign environment remains ex
   assert.equal(r.status, 'REVIEW_REQUIRED'); assert.equal(r.conclusions.length, 0);
   assert.equal(r.discoveryReview.verdict, 'INSUFFICIENT_EVIDENCE');
 });
+test('distinct Lens record IDs may share one valid source without losing records', () => {
+  const f = bridgeFixture(); f.records.push({ ...f.records[0], record_id: 'second-valid-record' });
+  const r = run(f); assert.equal(r.status, 'REVIEW_REQUIRED');
+  assert.equal(r.evidenceTable.length, 1); assert.equal(r.discoveryReview.supporting_ids.length, 2);
+});
+test('shared sources cannot hide a hold or conflict in version/content', () => {
+  const f = bridgeFixture(); f.records.push({ ...f.records[0], record_id: 'release-hold', status: 'held', entity_tag: 'tag://governance/release-hold/release-1' });
+  assert.equal(run(f).discoveryReview.verdict, 'BLOCKING_EVIDENCE_PRESENT');
+  for (const changes of [{ text: 'different' }, { source_version: 'v2' }]) {
+    const g = bridgeFixture(); g.records.push({ ...g.records[0], ...changes, record_id: 'conflicting-record' });
+    assert.equal(run(g).status, 'BLOCKED');
+  }
+});

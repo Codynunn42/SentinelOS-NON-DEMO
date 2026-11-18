@@ -12,6 +12,7 @@ describe('Discovery Lens and C4 advisory integration', function () {
       'tests/forethoughtAdvisory/bridge.cases.cjs'], { cwd: root, encoding: 'utf8', timeout: 12000 });
     assert.ifError(result.error);
     assert.equal(result.status, 0, `${result.stdout}\n${result.stderr}`);
-    assert.match(result.stdout, /(?:# |ℹ )?pass 35/);
+    assert.match(result.stdout, /(?:# |ℹ )?pass 37\b/);
+    assert.match(result.stdout, /(?:# |ℹ )?fail 0/);
   });
 });
