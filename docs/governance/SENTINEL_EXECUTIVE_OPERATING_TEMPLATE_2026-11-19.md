@@ -34,9 +34,12 @@ operating_boundary:
     services_partner_approval: unconfirmed
     partneru_training: review_only_if_accessible
   hydropower:
-    connectwerx_attendance: not_reported
+    connectwerx_attendance: owner_reported_attended_2026_11_19
     simulation: proposed_read_only_human_authorized
+    simulation_only_topic_fit: unresolved
+    new_validation_expectations: unresolved
     eligibility_and_feasibility: unverified
+    topic_5_pitch: proposed_next_candidate
   authority_created: false
 ```
 
@@ -45,7 +48,7 @@ operating_boundary:
 | Order | Workstream | Status | Next decision or evidence |
 | --- | --- | --- | --- |
 | 1 | Independent SentinelOS review of #51 and #71 | Pinned-head technical evidence refreshed; independent human review outstanding | Obtain an eligible independent human review and findings at the verified heads. |
-| 2 | DOE hydropower pathway | Topic and public timing verified; attendance planned, outcome pending; applicant eligibility and project feasibility unconfirmed | Attend the ConnectWerx office hours as planned, then record the actual outcome; check applicant-specific eligibility before deciding whether to develop a pitch or simulation. |
+| 2 | DOE hydropower pathway | Part I attended per owner report; Topic 5 Hydropower proposed as next pitch; simulation-only fit and new validation expectations unresolved | Submit topic-specific questions, review posted Q&A/materials, prepare for Part II on December 1, and verify eligibility/technical novelty before a pitch decision. |
 | 3 | GPU/export-compliance checkpoint | Proposed; approval pending | Define applicable GPU partner and cross-border scenarios, propose a decision owner, and seek approval of the checkpoint before operating-procedure adoption. |
 | 4 | Bounded GPU validation | Planning only | Maintain Inception relationship and gather measured latency, energy, cost, reliability, and quality evidence under separately approved scope. |
 | 5 | OpenAI Partner Network | Assessment submitted; external review pending | Monitor portal/email; do not represent Services Partner approval. |
@@ -66,9 +69,10 @@ operating_boundary:
   #71 diff. It is not independent human acceptance. Issue #78 remains open and
   unassigned; no reviewer acceptance is established. GOV-006 remains
   outstanding.
-- The ConnectWerx office-hours time was listed as November 19 at 1 PM Arizona.
-  Attendance was not reported during this processing; record the actual outcome
-  rather than inferring attendance or non-attendance.
+- The ConnectWerx Part I event was listed for November 19 at 1 PM Arizona.
+  Cody now reports attending, submitting/upvoting Vevox questions, and
+  completing the post-session survey. Treat the meeting notes and AMP statuses
+  as owner-reported, not independently verified.
 - The [DOE Fall 2026 SBIR/STTR Phase I announcement](https://www.energy.gov/technologycommercialization/articles/energy-department-announces-fall-2026-sbirsttr-phase-i-topics)
   and [ConnectWerx opportunity page](https://sbir-sttr.connectwerx.org/portfolio-items/fy26-fall-opportunity/)
   identify Topic 05 as “Cutting Edge Energy Generation and Power Management
@@ -78,14 +82,22 @@ operating_boundary:
   include for-profit U.S. business status, specified U.S. ownership/control,
   and a 500-or-fewer employee limit including affiliates; Nunn-specific
   eligibility has not been established.
-- The ConnectWerx [office-hours listing](https://sbir-sttr.connectwerx.org/event/fy26-fall-opportunity-office-hours-pt-i/)
-  schedules November 19, 3–4 PM ET (1–2 PM Arizona). Cody plans to attend and
-  has prepared three questions on Topic 05 scope, simulation/validation, and
-  the use of prior engineering work as preliminary feasibility evidence. The
-  questions are not evidence that they were asked or answered; see the
-  `ConnectWerx Topic 05 Questions` section in the next-steps record. The
-  proposed single-waterway simulation is a project-specific evidence method,
-  not an asserted Topic 05 mandate.
+- Cody reports attending the November 19 ConnectWerx office hours, submitting
+  and upvoting Vevox questions, and receiving survey-submission confirmation.
+  Treat meeting takeaways and AMP pitch statuses in the next-steps record as
+  owner-reported, not independently verified. Two questions remain open:
+  simulation-only/human-authorized fit and what new validation DOE expects.
+- The [Topic 05 question form](https://atisc.formstack.com/forms/fy26_fall_opportunity_topic_questions)
+  is the reported follow-up route. Office Hours Part II is reported for
+  December 1 at 1 PM Phoenix time. DOE written Q&A and webinar materials are
+  expected on the opportunity page; December 14 is only a proposed internal
+  target ahead of the December 16 noon Phoenix pitch deadline.
+- The proposed hydropower pitch must distinguish the new research advance from
+  prior Sentinel, Forethought, and SynapseEco engineering; compare with current
+  hydropower tools; and use a defined feasibility test and measurable outcomes.
+  A U.S. operator host and Oak Ridge Powersheds are exploration candidates,
+  not commitments. Simulation-only topic fit and validation expectations remain
+  unresolved.
 - The #51/#71 review must assess the combined behavior at pinned heads.
   Independent review evidence is distinct from automated CI and owner-authored
   findings. GOV-006 remains outstanding until independently established.

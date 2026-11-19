@@ -16,15 +16,16 @@ June 15 MOB remains the constant source; this overlay adds a current priority
 view and does not replace, close, or silently reorder unrelated binder items.
 
 Statuses below reflect the supplied executive update and verified evidence
-available when this overlay was refreshed. PR evidence is refreshed below;
-partner-portal and event outcomes remain unverified.
+available when this overlay was refreshed. PR evidence is refreshed below.
+The November 19 office-hours outcome and AMP pitch statuses are owner-reported;
+partner-portal status remains unverified.
 
 ## Current Queue
 
 | Priority | Workstream | Status | Owner / assignment status | Accountable decision / next action | Completion evidence | Boundary |
 | --- | --- | --- | --- | --- | --- |
 | 1 | Independent SentinelOS acceptance evidence — PR #51/#71 | Pinned-head technical review prepared; independent human acceptance outstanding | Issue #78 remains open and unassigned; no reviewer acceptance is recorded. | Obtain an eligible independent human review of the verified combined behavior. | #51 head `e2947bdbfc4b480ed7aea2afe61d4e4c5c814c77`; #71 head `2ef52fbffc2fdc05df5f37cd420bc7f310ff2e28`, based on #51. #71 CI run 44188675058 succeeded (55 PostgreSQL-stage tests; full suite 181 passing / 10 pending). AI-assisted review found no significant issues; it is not independent acceptance. | No merge, deployment, or GOV-006 closure by owner or automation. |
-| 2 | DOE hydropower opportunity and single-waterway simulation | Topic and public timing verified; attendance planned, outcome pending; applicant eligibility and project feasibility unconfirmed | Cody plans to attend and has prepared three questions on Topic 05 alignment, simulation/validation, and prior engineering evidence; no simulation operator assigned. Company-specific legal eligibility facts have not been verified. | Attend as planned; record actual attendance and any guidance afterward; assess applicant-specific eligibility before any pitch decision; only then define a reproducible read-only simulation if authorized. | Question text is in `NOVEMBER_19_NEXT_STEPS_PROCESSING_RESULT_2026-11-19.md`; it is a planned agenda only, not evidence of questions asked or answers received. Topic 05 includes hydropower and pumped storage; pitch deadline is December 16, 2026 at 2 PM ET (12 PM Arizona). A simulation is a proposed evidence method, not an asserted solicitation requirement. | No application, live control, data transfer, or savings claim. |
+| 2 | DOE hydropower opportunity and single-waterway simulation | Office Hours Part I attended per owner report; Topic 5 Hydropower is the proposed next pitch; simulation-only fit and new validation expectations unresolved | Cody reports Q&A and survey completion. AMP pitch statuses and meeting takeaways are owner-reported; Nunn-specific eligibility and feasibility are unverified. | Submit topic-specific questions; review posted Q&A/materials and attend Part II; distinguish technical novelty from prior engineering, establish a credible Phase I test and customer value, and verify eligibility before a pitch decision. | Owner-reported pitch statuses: Fall Topic 8 submitted (`SBIRSTTR-26-P1T8-033`), Fall Topic 2 withdrawn (`SBIRSTTR-26-P1T2-010`, reported not to count toward cap), Genesis pitch pending (`SBIRSTTR-26-PH1-1067`), and Topic 5 proposed with two Fall slots reported remaining. Details and limits are in `NOVEMBER_19_NEXT_STEPS_PROCESSING_RESULT_2026-11-19.md`. Part II: December 1, 1 PM Phoenix; proposed internal target: December 14; pitch deadline: December 16 at noon Phoenix. | No application, live control, data transfer, or savings claim. |
 | 3 | Export-compliance review checkpoint | Proposed; not approved as an operating requirement | Cody to designate a proposed decision owner; no compliance owner assigned by this overlay. | Identify applicable GPU-partner/cross-border scenarios and seek approval. | Documented approval/revision, trigger criteria, evidence fields, escalation route, and ordinary-domestic-workload boundary. | No blanket assumption, classification, license determination, procedure change, or transfer. |
 | 4 | NVIDIA Inception relationship and bounded GPU validation | Ongoing preparation; no new run or commitment established | Cody to confirm program-resource changes and separately authorize scope/operator; no run owner assigned. | Monitor authoritative changes to developer resources, partner services, and platform support; maintain the bounded plan. | Source-dated change log and, if separately authorized, protocol/results for measured latency, hardware energy, cost, reliability, and quality. | No share-price-driven change, purchase, spend, service access, or unapproved workload execution. |
 | 5 | OpenAI Partner Network Services Track | Assessment submitted / external review pending per owner-reported November 19 portal summary | Cody to decide on any status inquiry; PartnerU access not confirmed. | Monitor portal/email; consider a courteous status inquiry; review PartnerU foundational training only if accessible. | Retained portal/email evidence and dated status update; training status recorded separately from partner approval. | No Services Partner approval claim, payment, resubmission, customer access, or system access grant absent explicit evidence/authorization. |
@@ -47,9 +48,10 @@ partner-portal and event outcomes remain unverified.
   and [November 19 office-hours listing](https://sbir-sttr.connectwerx.org/event/fy26-fall-opportunity-office-hours-pt-i/).
   The published criteria include for-profit U.S. business status, specified
   U.S. ownership/control, and no more than 500 employees including affiliates;
-  Nunn-specific qualification remains unverified. Cody reports an intention to
-  attend office hours at 1 PM Arizona; actual attendance and any guidance remain
-  unconfirmed pending the event.
+  Nunn-specific qualification remains unverified. Cody reports attending
+  Part I and completing the Vevox Q&A/survey. Meeting notes, pitch statuses,
+  and proposed dates remain owner-reported and are not an independent DOE or
+  AMP confirmation.
 - Modeled energy or peak-demand effects, measured hardware results, delivered
   capacity, financing, design commitments, and observed operational outcomes
   remain distinct evidence classes.
