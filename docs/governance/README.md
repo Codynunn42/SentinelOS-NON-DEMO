@@ -43,6 +43,7 @@ This index is the current docs control map. It shows which document is canonical
 | Daily cadence record 2026-09-07 | `docs/2026-09-07_VSCode_Daily_Cadence.md` | `[KEEP:DAILY-CADENCE-RECORD]` | daily operating cadence across deployment, evidence, federal pursuit, and holds/deferred state | file hash and dated record content | Internal operations evidence |
 | DOE nuclear pursuit map 2026-09-07 | `docs/2026-09-07_DOE_Nuclear_Pursuit_Map.md` | `[KEEP:PURSUIT-MAP-RECORD]` | lane prioritization, mission-fit boundaries, and sequence doctrine for DOE nuclear pursuit | dated map narrative and source links | Internal strategy record |
 | Nunn Corporation Internal Stargate Initiative concept | `docs/governance/NUNN_CORPORATION_INTERNAL_STARGATE_INITIATIVE_CONCEPT.md` | `[DRAFT:INTERNAL-CONCEPT]` | naming distinction, proposed read-only energy/workload evaluation, federal/partner engagement and evidence boundaries | requirements review only; no execution or external representation authorized | Internal discussion draft |
+| OpenAI Partner Network status 2026-11-19 | `docs/partners/openai/2026-11-19_OPENAI_PARTNER_NETWORK_STATUS.md` | `[KEEP:PARTNER-STATUS-SNAPSHOT]` | owner-reported Services Partner assessment submission and external-review pending state | user-provided portal screenshot summary; screenshot itself not retained here | Internal partnership evidence |
 
 ## Approval Boundary
 
