@@ -44,7 +44,7 @@ operating_boundary:
 
 | Order | Workstream | Status | Next decision or evidence |
 | --- | --- | --- | --- |
-| 1 | Independent SentinelOS review of #51 and #71 | Required; not established | Recheck exact heads and combined diff, then obtain eligible independent human review and findings. |
+| 1 | Independent SentinelOS review of #51 and #71 | Pinned-head technical evidence refreshed; independent human review outstanding | Obtain an eligible independent human review and findings at the verified heads. |
 | 2 | DOE hydropower pathway | Preparation only | Record whether ConnectWerx office hours were attended; verify Topic 05, simulation requirements, eligibility, and deadline from published sources. |
 | 3 | GPU/export-compliance checkpoint | Proposed; approval pending | Define applicable GPU partner and cross-border scenarios, propose a decision owner, and seek approval of the checkpoint before operating-procedure adoption. |
 | 4 | Bounded GPU validation | Planning only | Maintain Inception relationship and gather measured latency, energy, cost, reliability, and quality evidence under separately approved scope. |
@@ -52,10 +52,20 @@ operating_boundary:
 
 ## Evidence and Governance Notes
 
-- The November 19 executive update reports that PR #71 contains #51's current
-  head and that issue #78 is open while Discussion #77 contains an owner
-  request. Those remote states and exact commit identities were not refreshed
-  as part of this template processing; verify them before reviewer handoff.
+- PR #51 is open at `e2947bdbfc4b480ed7aea2afe61d4e4c5c814c77`. PR #71 is
+  open at `2ef52fbffc2fdc05df5f37cd420bc7f310ff2e28`, based on that exact #51
+  head. Its current code diff is three files. Do not rely on stale historical
+  base/head claims in PR #71's description.
+- PR #71 CI run
+  [44188675058](https://github.com/Codynunn42/SentinelOS-NON-DEMO/actions/runs/44188675058)
+  succeeded at the pinned head: 55 PostgreSQL-stage tests passed; the full
+  suite reported 181 passing and 10 pending. Counts overlap; pending tests are
+  not passes. Hosted checks do not establish live-storage durability or
+  deployed-runtime behavior.
+- A read-only AI-assisted review found no significant issues in the current
+  #71 diff. It is not independent human acceptance. Issue #78 remains open and
+  unassigned; no reviewer acceptance is established. GOV-006 remains
+  outstanding.
 - The ConnectWerx office-hours time was listed as November 19 at 1 PM Arizona.
   Attendance was not reported during this processing; record the actual outcome
   rather than inferring attendance or non-attendance.
