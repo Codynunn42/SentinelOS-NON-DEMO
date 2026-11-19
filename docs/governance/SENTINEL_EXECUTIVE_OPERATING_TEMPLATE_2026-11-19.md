@@ -79,11 +79,13 @@ operating_boundary:
   and a 500-or-fewer employee limit including affiliates; Nunn-specific
   eligibility has not been established.
 - The ConnectWerx [office-hours listing](https://sbir-sttr.connectwerx.org/event/fy26-fall-opportunity-office-hours-pt-i/)
-  schedules November 19, 3–4 PM ET (1–2 PM Arizona). Cody reports plans to
-  attend at 1 PM Arizona and expects to be available again at noon; this is
-  planned attendance, not a record of attendance or participation. The proposed
-  single-waterway simulation is a project-specific evidence method, not an
-  asserted Topic 05 mandate.
+  schedules November 19, 3–4 PM ET (1–2 PM Arizona). Cody plans to attend and
+  has prepared three questions on Topic 05 scope, simulation/validation, and
+  the use of prior engineering work as preliminary feasibility evidence. The
+  questions are not evidence that they were asked or answered; see the
+  `ConnectWerx Topic 05 Questions` section in the next-steps record. The
+  proposed single-waterway simulation is a project-specific evidence method,
+  not an asserted Topic 05 mandate.
 - The #51/#71 review must assess the combined behavior at pinned heads.
   Independent review evidence is distinct from automated CI and owner-authored
   findings. GOV-006 remains outstanding until independently established.

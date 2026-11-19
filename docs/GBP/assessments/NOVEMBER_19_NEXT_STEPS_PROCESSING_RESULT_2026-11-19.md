@@ -26,6 +26,40 @@ rewriting the binder.
 These gate labels are planning trackers only. They are not existing GOV gate
 identifiers, approvals, or delegated authority.
 
+## ConnectWerx Topic 05 Questions — Prepared, Not Yet Asked
+
+Cody provided the following questions for the November 19 ConnectWerx office
+hours. They are a planned discussion agenda, not evidence that they were asked
+or answered. The applicant, proposed research, and prior-work descriptions
+below are owner-provided framing and have not been independently validated.
+
+**Applicant:** Nunn Cloud LLC
+**Proposed research:** Human-Authorized Hydropower Decision-Support and Simulation
+
+1. **Topic 05 alignment:** Under Topic 05, particularly Hydropower and Pumped
+   Storage or Integrated Energy-Water Technology Solutions, would an innovative
+   decision-support system that models water-gate operating schedules,
+   energy-generation opportunities, environmental constraints, and human
+   authorization be considered within the intended scope if it does not
+   directly operate physical infrastructure?
+2. **Simulation and validation:** For a Phase I feasibility project, can a
+   reproducible, simulation-only demonstration using representative
+   hydrological conditions, operational limits, and established baseline
+   methods provide an acceptable initial technical foundation? What additional
+   validation, measurements, or evidence would reviewers expect?
+3. **Existing engineering evidence:** We have existing engineering work
+   involving deterministic decision governance, predictive scheduling, energy
+   modeling, and audit evidence. Can such prior work be used as preliminary
+   feasibility evidence in a Phase I pitch if the proposed hydropower
+   application introduces a distinct technical research question, new
+   validation milestones, and measurable outcomes?
+
+Record responses as guidance, not a scope determination, eligibility decision,
+award assurance, or DOE endorsement. Follow up on any uncertainty through the
+published solicitation and official DOE channels; do not treat these questions
+as authorization to apply, transfer data, control infrastructure, or claim
+measured outcomes.
+
 ## Queue Effect
 
 The five items above are added to the current Operations Register overlay as
