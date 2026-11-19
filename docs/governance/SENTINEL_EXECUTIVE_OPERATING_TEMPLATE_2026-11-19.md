@@ -45,7 +45,7 @@ operating_boundary:
 | Order | Workstream | Status | Next decision or evidence |
 | --- | --- | --- | --- |
 | 1 | Independent SentinelOS review of #51 and #71 | Pinned-head technical evidence refreshed; independent human review outstanding | Obtain an eligible independent human review and findings at the verified heads. |
-| 2 | DOE hydropower pathway | Topic and public timing verified; attendance, applicant eligibility, and project feasibility unconfirmed | Record the ConnectWerx attendance outcome; check applicant-specific eligibility before deciding whether to develop a pitch or simulation. |
+| 2 | DOE hydropower pathway | Topic and public timing verified; attendance planned, outcome pending; applicant eligibility and project feasibility unconfirmed | Attend the ConnectWerx office hours as planned, then record the actual outcome; check applicant-specific eligibility before deciding whether to develop a pitch or simulation. |
 | 3 | GPU/export-compliance checkpoint | Proposed; approval pending | Define applicable GPU partner and cross-border scenarios, propose a decision owner, and seek approval of the checkpoint before operating-procedure adoption. |
 | 4 | Bounded GPU validation | Planning only | Maintain Inception relationship and gather measured latency, energy, cost, reliability, and quality evidence under separately approved scope. |
 | 5 | OpenAI Partner Network | Assessment submitted; external review pending | Monitor portal/email; do not represent Services Partner approval. |
@@ -79,9 +79,11 @@ operating_boundary:
   and a 500-or-fewer employee limit including affiliates; Nunn-specific
   eligibility has not been established.
 - The ConnectWerx [office-hours listing](https://sbir-sttr.connectwerx.org/event/fy26-fall-opportunity-office-hours-pt-i/)
-  schedules November 19, 3–4 PM ET (1–2 PM Arizona); attendance remains
-  unreported. The proposed single-waterway simulation is a project-specific
-  evidence method, not an asserted Topic 05 mandate.
+  schedules November 19, 3–4 PM ET (1–2 PM Arizona). Cody reports plans to
+  attend at 1 PM Arizona and expects to be available again at noon; this is
+  planned attendance, not a record of attendance or participation. The proposed
+  single-waterway simulation is a project-specific evidence method, not an
+  asserted Topic 05 mandate.
 - The #51/#71 review must assess the combined behavior at pinned heads.
   Independent review evidence is distinct from automated CI and owner-authored
   findings. GOV-006 remains outstanding until independently established.
