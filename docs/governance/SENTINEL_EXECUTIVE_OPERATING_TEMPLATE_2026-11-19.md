@@ -56,6 +56,9 @@ operating_boundary:
   head and that issue #78 is open while Discussion #77 contains an owner
   request. Those remote states and exact commit identities were not refreshed
   as part of this template processing; verify them before reviewer handoff.
+- The ConnectWerx office-hours time was listed as November 19 at 1 PM Arizona.
+  Attendance was not reported during this processing; record the actual outcome
+  rather than inferring attendance or non-attendance.
 - The #51/#71 review must assess the combined behavior at pinned heads.
   Independent review evidence is distinct from automated CI and owner-authored
   findings. GOV-006 remains outstanding until independently established.

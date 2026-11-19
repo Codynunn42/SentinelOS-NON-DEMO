@@ -21,13 +21,13 @@ independently refreshed as part of this overlay.
 
 ## Current Queue
 
-| Priority | Workstream | Status | Accountable decision / next action | Completion evidence | Boundary |
+| Priority | Workstream | Status | Owner / assignment status | Accountable decision / next action | Completion evidence | Boundary |
 | --- | --- | --- | --- | --- | --- |
-| 1 | Independent SentinelOS acceptance evidence — PR #51/#71 | Outstanding | Recheck pinned heads and combined diff; obtain an eligible independent human review. | Review records exact heads/base, independence basis, evidence inspected, findings, limits, and verdict. | No merge, deployment, or GOV-006 closure by owner or automation. |
-| 2 | DOE hydropower opportunity and single-waterway simulation | Preparation; attendance and eligibility unverified | Record ConnectWerx attendance outcome; verify Topic 05 and the reported December 16 deadline against official requirements; define a reproducible read-only simulation. | Published requirements; approved protocol; same modeled constraints across baseline/alternative; operational/environmental constraints and uncertainty; modeled/measured separation. | No application, live control, data transfer, or savings claim. |
-| 3 | Export-compliance review checkpoint | Proposed; not approved as an operating requirement | Identify applicable GPU-partner/cross-border scenarios, designate a proposed decision owner, and seek approval. | Documented approval/revision, trigger criteria, evidence fields, escalation route, and ordinary-domestic-workload boundary. | No blanket assumption, classification, license determination, procedure change, or transfer. |
-| 4 | NVIDIA Inception relationship and bounded GPU validation | Ongoing preparation; no new run or commitment established | Monitor authoritative changes to developer resources, partner services, and platform support; maintain the bounded plan. | Source-dated change log and, if separately authorized, protocol/results for measured latency, hardware energy, cost, reliability, and quality. | No share-price-driven change, purchase, spend, service access, or unapproved workload execution. |
-| 5 | OpenAI Partner Network Services Track | Assessment submitted / external review pending per owner-reported November 19 portal summary | Monitor portal/email; consider a courteous status inquiry; review PartnerU foundational training only if accessible. | Retained portal/email evidence and dated status update; training status recorded separately from partner approval. | No Services Partner approval claim, payment, resubmission, customer access, or system access grant absent explicit evidence/authorization. |
+| 1 | Independent SentinelOS acceptance evidence — PR #51/#71 | Outstanding | Independent human reviewer: unassigned; Cody to confirm exact refs and reviewer eligibility. | Recheck pinned heads and combined diff; obtain an eligible independent human review. | Review records exact heads/base, independence basis, evidence inspected, findings, limits, and verdict. | No merge, deployment, or GOV-006 closure by owner or automation. |
+| 2 | DOE hydropower opportunity and single-waterway simulation | Preparation; attendance and eligibility unverified | Cody to confirm office-hours attendance outcome; no simulation operator assigned. | If attending, record actual attendance; verify Topic 05 and the reported December 16 deadline against official requirements; define a reproducible read-only simulation. | Published requirements; approved protocol; same modeled constraints across baseline/alternative; operational/environmental constraints and uncertainty; modeled/measured separation. | No application, live control, data transfer, or savings claim. |
+| 3 | Export-compliance review checkpoint | Proposed; not approved as an operating requirement | Cody to designate a proposed decision owner; no compliance owner assigned by this overlay. | Identify applicable GPU-partner/cross-border scenarios and seek approval. | Documented approval/revision, trigger criteria, evidence fields, escalation route, and ordinary-domestic-workload boundary. | No blanket assumption, classification, license determination, procedure change, or transfer. |
+| 4 | NVIDIA Inception relationship and bounded GPU validation | Ongoing preparation; no new run or commitment established | Cody to confirm program-resource changes and separately authorize scope/operator; no run owner assigned. | Monitor authoritative changes to developer resources, partner services, and platform support; maintain the bounded plan. | Source-dated change log and, if separately authorized, protocol/results for measured latency, hardware energy, cost, reliability, and quality. | No share-price-driven change, purchase, spend, service access, or unapproved workload execution. |
+| 5 | OpenAI Partner Network Services Track | Assessment submitted / external review pending per owner-reported November 19 portal summary | Cody to decide on any status inquiry; PartnerU access not confirmed. | Monitor portal/email; consider a courteous status inquiry; review PartnerU foundational training only if accessible. | Retained portal/email evidence and dated status update; training status recorded separately from partner approval. | No Services Partner approval claim, payment, resubmission, customer access, or system access grant absent explicit evidence/authorization. |
 
 ## Register Notes
 
@@ -44,6 +44,10 @@ independently refreshed as part of this overlay.
 - The OpenAI partner status is based on the owner-provided screenshot summary
   preserved in `docs/partners/openai/2026-11-19_OPENAI_PARTNER_NETWORK_STATUS.md`;
   it is not an independent OpenAI confirmation.
+- This overlay makes no work assignment. “Cody to” denotes an owner decision or
+  input identified for later confirmation, not a dispatch or completed action.
+- Queue items are supplemental priorities from the November 19 update; the
+  overlay does not imply they were already listed in the June 15 MOB queue.
 
 ## Non-Authorization
 
