@@ -18,6 +18,16 @@ assert.strictEqual(result.conclusion.discoveryAndQuestionnaire, 'authorized_to_p
 assert.strictEqual(result.conclusion.productionCustomerDealExecution, 'not_authorized_yet');
 assert.strictEqual(result.conclusion.livePaymentCollection, 'not_authorized');
 
+const doeResult = buildLightQuantitativeNextStepsResult({
+  mode: 'light',
+  focus: 'doe_sbirsttr'
+});
+const doeLane = doeResult.lanes.find((lane) => lane.lane === 'doe_sbirsttr_readiness');
+assert(doeLane);
+assert.strictEqual(doeLane.decision, 'prepare_owner_review_packet');
+assert.strictEqual(doeLane.output.externalExecution, 'not_authorized');
+assert(doeLane.output.preparationActions.includes('complete DOE Application Hub registration and retain confirmation'));
+
 const customerLane = result.lanes.find((lane) => lane.lane === 'customer_discovery_intake_and_risk');
 assert(customerLane);
 assert.strictEqual(customerLane.decision, 'authorize_questionnaire_preparation');

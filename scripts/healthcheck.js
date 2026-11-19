@@ -1,10 +1,11 @@
-const urls = ["http://127.0.0.1:3000/health", "http://localhost:3000/health"];
+const port = process.env.PORT || "80";
+const urls = [`http://127.0.0.1:${port}/health`, `http://localhost:${port}/health`];
 const attempts = 60;
 const delayMs = 1000;
 
-async function sleep(ms){ return new Promise(r => setTimeout(r, ms)); }
+async function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
-async function check(url){
+async function check(url) {
   const res = await fetch(url, { method: "GET" });
   if (!res.ok) throw new Error(`${url} -> ${res.status}`);
 }
