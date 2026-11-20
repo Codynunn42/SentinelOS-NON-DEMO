@@ -34,8 +34,9 @@ steps do not establish final track approval.
 3. A courteous inquiry about the expected review timeline may be considered.
    No inquiry is recorded as sent by this snapshot.
 4. No additional documentation, payment, or resubmission is indicated by the
-   reported portal state. Reassess only if OpenAI requests an action or the
-   portal status changes.
+   reported portal state. Reassess if OpenAI requests an action, the portal
+   status changes, or OpenAI sends a status email that reports or clarifies the
+   review outcome.
 
 ## Boundaries
 
