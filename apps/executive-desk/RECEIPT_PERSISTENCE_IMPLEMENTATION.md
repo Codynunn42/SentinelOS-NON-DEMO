@@ -29,6 +29,7 @@ Switch backends via `RECEIPT_LEDGER_BACKEND` environment variable.
 ### Configuration
 
 - `.env.example` — environment variable template
+- `EXECUTIVE_DESK_RECEIPT_HMAC_KEY` — required for authenticated PostgreSQL receipt signing
 
 ## Quick Start
 
@@ -107,9 +108,25 @@ Receipts are appended as JSON lines:
 | `payload` | JSONB | Command payload |
 | `authority_check_result` | JSONB | Authority check decision and reasons |
 | `risk_gate_outcome` | JSONB | Risk gate evaluation (decision, score, mitigations) |
-| `signature` | VARCHAR(64) | HMAC-SHA256 signature for audit verification |
+| `signature` | VARCHAR(64) | HMAC-SHA-256 for version 3; earlier versions are unsigned legacy digests |
+| `signature_version` | SMALLINT | Version 1/2 are labeled unsigned legacy; version 3 is HMAC-authenticated |
+| `principal_context` | JSONB | Authenticated authority context included in version 3 signatures |
+| `delegated_by` | VARCHAR(255) | Delegating principal included in version 3 signatures |
+| `delegation_expires_at` | TEXT | Delegation expiry included in version 3 signatures |
 | `reasons` | TEXT[] | Array of decision reasons |
 | `created_at` | TIMESTAMP | Auto-timestamp when inserted |
+
+### Signature key and legacy compatibility
+
+PostgreSQL writes require `EXECUTIVE_DESK_RECEIPT_HMAC_KEY` to contain at least
+32 UTF-8 bytes. Configure the same protected key for every process that signs
+or verifies these receipts; do not place the key in source control. New
+receipts use signature version 3 with HMAC-SHA-256. Versions 1 and 2 contain
+unkeyed digests: the ledger reports them as `unsigned_legacy`, never as
+authenticated, and does not rewrite or re-sign them. Without a configured key,
+version 3 verification reports `key_unavailable` and new receipt signing fails.
+Apply migration `004-receipt-authenticated-hmac-v3.sql` before using version 3
+on an existing database.
 
 ### Indexes
 
@@ -188,7 +205,7 @@ const executedCount = await ledger.countByStatus('executed');
 // Verify receipt signature
 const isValid = ledger.verify(receipt);
 
-// Export all receipts (streaming to prevent memory exhaustion)
+// Export all receipts from one stable, read-only snapshot
 const iterator = await ledger.exportAll();
 for await (const receipt of iterator) {
   console.log(receipt.id, receipt.status);
@@ -220,7 +237,7 @@ for await (const receipt of iterator) {
 - [x] PostgreSQL schema with ACID guarantees
 - [x] Indexes for common queries
 - [x] Append-only design (no UPDATE/DELETE allowed in theory)
-- [x] HMAC signature verification
+- [x] Version 3 HMAC signature verification (versions 1/2 remain unsigned legacy)
 - [x] Connection pooling (max 10 connections)
 - [x] Migration runner with tracking
 - [x] Audit export view for compliance
