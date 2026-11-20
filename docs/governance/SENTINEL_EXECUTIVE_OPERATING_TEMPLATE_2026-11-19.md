@@ -3,6 +3,7 @@
 **COMM:** Sentinel AI by Cody Nunn | Nunn Cloud  
 **Mode:** executive status and planning, review-held  
 **MOB Constant:** `docs/GBP/doctrine/NUNN_CORPORATION_MASTER_OPERATING_BINDER_2026-06-15.md`  
+**Historical Completion Queue:** `docs/GBP/assessments/MOB_COMPLETION_QUEUE_REFRESH_OVERLAY_2026-07-05.md`
 **Operations Register Overlay:** `docs/GBP/assessments/NUNN_CORPORATION_OPERATIONS_REGISTER_OVERLAY_2026-11-19.md`  
 **Next Steps Processing:** `docs/GBP/assessments/NOVEMBER_19_NEXT_STEPS_PROCESSING_RESULT_2026-11-19.md`  
 **External Use:** held  
@@ -101,6 +102,9 @@ operating_boundary:
 - The #51/#71 review must assess the combined behavior at pinned heads.
   Independent review evidence is distinct from automated CI and owner-authored
   findings. GOV-006 remains outstanding until independently established.
+- The July 5 completion-queue overlay and its gates remain historical evidence
+  to reverify when reconciling the current queue; this template does not close,
+  replace, or reorder those items.
 - PR #76's owner-authored verdict remains separate from independent acceptance.
   No merge or deployment authorization is created.
 - The Partner Network snapshot at
