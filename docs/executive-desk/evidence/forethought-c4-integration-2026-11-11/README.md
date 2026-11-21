@@ -1,6 +1,13 @@
 # Forethought Discovery Lens + C4 integration candidate
 
-Prepared November 11, 2026. Draft PR #73 is expanded at the user's explicit request to integrate the preserved C4 Advisory Job candidate with the revised Stage 3 Discovery Lens. This supersedes the earlier *relationship decision pending* posture for research-source integration only. It does not authorize merge, deployment, live adapters, spending, independent acceptance, or governance transitions.
+Prepared November 11, 2026 and updated November 21, 2026. PR #73 is expanded
+at the user's explicit request to integrate the preserved C4 Advisory Job
+candidate with the revised Stage 3 Discovery Lens. GitHub currently reports the
+PR as non-draft, contrary to older “draft” wording; the candidate remains a
+research HOLD and this statement does not change its draft state. This
+supersedes the earlier *relationship decision pending* posture for
+research-source integration only. It does not authorize merge, deployment,
+live adapters, spending, independent acceptance, or governance transitions.
 
 ## Source and provenance
 
@@ -72,6 +79,28 @@ conflicts, malformed excerpts, unverified aliases and foreign environments.
 PR #74 contains an overlapping shared-source implementation. Its continuation
 must consolidate these regressions rather than discard them or overwrite the
 published branches. Neither update is acceptance or operational authorization.
+
+## November 21 unresolved-thread remediation
+
+Local source commit `4b2b986a88278a9fa56adf447a80365051727178` merges the
+current `main` dependency pin and hardens the review boundary without adding a
+runtime route or actuator:
+
+- malformed scope-grant containers and blank entity tags now fail closed;
+- cross-release records are excluded before packet construction;
+- failed and unverified target records block prerequisite support;
+- omitted contrary target records and restricted applicable holds are
+  reconciled against the complete trusted snapshot without fetching restricted
+  payloads;
+- structured claim keys are unambiguous when fields contain delimiters, and
+  conflict grouping performs one pass over claims.
+
+Focused results are 40 isolated C4/bridge passes, 12 invariant-regression
+passes, and all 42 Stage 3 probes. Archive-intelligence docking, deployment
+contract/gate, and Executive Desk type checks also pass. The repository-wide
+suite reports 126 passing and 3 pending, plus two unrelated 404 assertions for
+Executive Desk explicit `index.html` serving; those remain outside this PR's
+scope. No later hosted CI or human sign-off is implied.
 
 ## Outstanding review
 

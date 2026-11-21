@@ -1,6 +1,11 @@
 # Forethought Discovery Lens + C4 — Independent Reviewer Handoff
 
-Updated November 12, 2026. Review is not independent acceptance. Draft PR #73 remains HOLD; no merge to main, deployment, live adapters, spending or governance transition is authorized.
+Updated November 21, 2026. Review is not independent acceptance. PR #73 is
+currently **non-draft on GitHub**, while its retained evidence describes it as
+draft; that metadata/documentation mismatch must remain visible rather than be
+silently treated as clearance. The PR remains a research HOLD. No merge to
+main, deployment, live adapters, spending, or governance transition is
+authorized, and no draft-state change is made by this remediation.
 
 ## Corrected shared-source candidate
 
@@ -19,6 +24,30 @@ required by the authorized process. No independent reviewer is assigned.
 PR #74 is a stacked research continuation, not a replacement for #73's review.
 Its domain findings and remediation require their own source identity and
 verification. Publication and branch consolidation do not advance any gate.
+
+## November 21 review-thread remediation
+
+Local remediation source `4b2b986a88278a9fa56adf447a80365051727178` incorporates
+current `main` and addresses the nine unresolved exact-head findings:
+non-array scope grants, empty hold tags, cross-release retrieval, failed-target
+conflicts, omitted contrary records, complete-snapshot hold validation, claim
+key ambiguity, and repeated full-array claim scans. The bridge still fetches
+only sensitivity-authorized records and suppresses denied payload details.
+
+Focused validation on that source:
+
+- isolated C4/bridge runner: 40 passing, 0 failing;
+- Lens invariant regressions: 12 passing, 0 failing;
+- Stage 3 acceptance/regression suite: all 42 probes passing;
+- archive-intelligence docking, deployment contract/gate, and Executive Desk
+  type checks passing.
+
+The broader repository run reached 126 passing and 3 pending, with two
+unrelated Executive Desk `sendFile` route assertions returning 404. Those
+failures are not caused by or remediated within PR #73's read-only advisory
+scope. This local result is not an exact-head hosted CI result; hosted checks
+must be rerun after the remediated head is published. The earlier hosted pass
+remains evidence for the earlier `39ee311...` head only.
 
 ## Current candidate and relationship decision
 
