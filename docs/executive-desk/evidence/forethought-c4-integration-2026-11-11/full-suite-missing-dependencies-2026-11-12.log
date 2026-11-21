@@ -1,0 +1,7 @@
+
+> sentinelos-non-demo@0.1.0 test /home/codespace/.copilot/session-state/940d5c75-dde1-416a-838b-719301222c82/files/forethought-review
+> mocha --require tsx "apps/executive-desk/**/__tests__/**/*.test.ts" "apps/executive-desk/**/*.test.ts" "apps/sentinel/**/__tests__/**/*.test.js" "apps/sentinel/**/*.test.js"
+
+sh: 1: mocha: not found
+ ELIFECYCLE  Test failed. See above for more details.
+ WARN   Local package.json exists, but node_modules missing, did you mean to install?

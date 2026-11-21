@@ -1,0 +1,6 @@
+commit=fd142a8af84e396d7fcd1584348b73f455dcf910
+branch=cadence/gov006-planning-2026-10-24
+node=v24.14.0
+pnpm=10.33.4
+git=git version 2.53.0
+platform=Linux codespaces-1041b3 6.8.0-1070-azure #78~22.04.1-Ubuntu SMP Thu Sep 24 18:46:45 UTC 2026 x86_64 x86_64 x86_64 GNU/Linux
