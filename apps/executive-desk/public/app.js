@@ -576,6 +576,14 @@ function renderBriefing() {
   const risk = state.risk;
   const stats = state.receiptStats;
 
+  items.push({
+    title: 'Executive Desk master posture',
+    severity: 'neutral',
+    summary: 'Current repository health, governance controls, and evidence-chain status have not been independently verified by this dashboard. Live environment execution and rollout controls remain to be evidenced.',
+    source: 'executive-template/master',
+    timestamp: new Date().toISOString()
+  });
+
   if (risk) {
     items.push({
       title: `Risk gate ${risk.decision}`,
@@ -599,7 +607,7 @@ function renderBriefing() {
   if (state.cadence.mode === 'weekly') {
     items.push({
       title: `Weekly closeout set for ${titleCase(state.cadence.weeklyDay)}`,
-      severity: state.cadence.weeklyDay === 'sunday' ? 'healthy' : 'warn',
+      severity: 'neutral',
       summary: `Weekly governance closeout cadence is configured for ${titleCase(state.cadence.weeklyDay)}.`,
       source: 'cadence/weekly',
       timestamp: new Date().toISOString()
@@ -614,19 +622,35 @@ function renderBriefing() {
     });
   } else {
     items.push({
-      title: 'Daily cadence active',
-      severity: 'healthy',
-      summary: 'Daily closeout briefing is active for every day.',
+      title: 'Daily cadence selected',
+      severity: 'neutral',
+      summary: 'Daily cadence is selected in configuration; execution and current health are not verified here.',
       source: 'cadence/daily',
       timestamp: new Date().toISOString()
     });
   }
 
   items.push({
+    title: 'Current posture: evidence refresh required',
+    severity: 'neutral',
+    summary: 'No current overall readiness verdict is available. Verify the live environment, governance controls, and evidence chain before reporting posture.',
+    source: 'executive-status',
+    timestamp: new Date().toISOString()
+  });
+
+  items.push({
+    title: 'Infrastructure evidence review required',
+    severity: 'warn',
+    summary: 'This dashboard render does not query Azure, database migrations, workload binding, gateway/WAF, or rollout status. Attach current dated evidence before reporting any of these as verified or blocked; the render timestamp is not an observation timestamp.',
+    source: 'evidence-review',
+    timestamp: new Date().toISOString()
+  });
+
+  items.push({
     title: 'GBP intake required',
-    severity: state.closeout.gbpAttached ? 'healthy' : 'warn',
+    severity: state.closeout.gbpAttached ? 'neutral' : 'warn',
     summary: state.closeout.gbpAttached
-      ? `Government Blueprint (GBP) attached${state.closeout.gbpReference ? ` as ${state.closeout.gbpReference}` : ''}.`
+      ? `Government Blueprint (GBP) is reported as attached${state.closeout.gbpReference ? ` as ${state.closeout.gbpReference}` : ''}; verify the artifact before treating it as evidence.`
       : 'Government Blueprint (GBP) artifact should be attached to the closeout package for this cycle.',
     source: 'governance/gbp',
     timestamp: new Date().toISOString()
@@ -640,14 +664,6 @@ function renderBriefing() {
       : 'Review MOB inputs and execute the executive template pass before final closeout sign-off.',
     source: 'governance/mob',
     timestamp: state.closeout.mobLastRunAt || new Date().toISOString()
-  });
-
-  items.push({
-    title: 'Gate 7 active',
-    severity: 'neutral',
-    summary: 'Frontend panels are connected to verified Gate 6 read APIs.',
-    source: 'executive-desk',
-    timestamp: new Date().toISOString()
   });
 
   el.briefingList.replaceChildren(...items.map((item) => {
