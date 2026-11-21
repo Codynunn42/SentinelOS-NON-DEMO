@@ -377,6 +377,19 @@ function validatePacketInvariants(packet, trustedContext, trustedCorpusSnapshot)
     }
   }
 
+  for (const tr of trustedCorpusSnapshot) {
+    if (tr.tenant_id === packet.tenant_id &&
+        tr.release_id === packet.release_id &&
+        (tr.environment === 'all' || tr.environment === packet.environment) &&
+        tr.entity_tag === targetTag &&
+        (tr.status === 'unverified' || tr.status === 'failed') &&
+        isValidCalendarDate(tr.observed_at) &&
+        new Date(tr.observed_at).getTime() <= cutoffTime &&
+        !validRecordIds.has(tr.record_id)) {
+      errors.push(`ERR_OMITTED_APPLICABLE_CONTRARY_RECORD_${tr.record_id}`);
+    }
+  }
+
   // Action review invariants
   if (packet.action_review && typeof packet.action_review === 'object' && !Array.isArray(packet.action_review)) {
     const ar = packet.action_review;

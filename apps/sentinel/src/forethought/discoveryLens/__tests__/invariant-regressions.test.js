@@ -117,6 +117,14 @@ describe('Discovery Lens Stage 3 invariant regressions', function () {
     );
   });
 
+  it('excludes records from a different release during direct retrieval', function () {
+    const foreignRecord = { ...makeRecord(), release_id: 'REL-2026-11', record_id: 'M2' };
+    const packet = prepareEvidence(context, 'migration v3.4', [foreignRecord]);
+
+    assert.equal(packet.records.length, 0);
+    assert.equal(packet.retrieval_status, 'insufficient');
+  });
+
   it('rejects a packet that includes a trusted record from another environment', function () {
     const stagingRecord = makeRecord();
     const productionRecord = { ...stagingRecord, environment: 'production' };
@@ -143,5 +151,35 @@ describe('Discovery Lens Stage 3 invariant regressions', function () {
 
     assert.equal(validation.valid, false);
     assert.ok(validation.errors.includes('ERR_SUPPORT_CITES_NON_VERIFIED_RECORD_M1'));
+  });
+
+  it('treats a failed target record as conflicting despite a valid support record', function () {
+    const passedRecord = makeRecord();
+    const failedRecord = { ...makeRecord(), record_id: 'M2', status: 'failed' };
+    const corpus = [passedRecord, failedRecord];
+    const packet = prepareEvidence(context, 'migration v3.4', corpus);
+
+    assert.equal(packet.action_review.verdict, 'BLOCKING_EVIDENCE_PRESENT');
+    assert.deepEqual(packet.action_review.supporting_ids, []);
+    assert.ok(packet.action_review.conflicting_ids.includes('M2'));
+  });
+
+  it('rejects packets that omit applicable contrary target records', function () {
+    for (const status of ['unverified', 'failed']) {
+      const passedRecord = makeRecord();
+      const contraryRecord = { ...makeRecord(), record_id: 'M2', status };
+      const packet = prepareEvidence(context, 'migration v3.4', [passedRecord, contraryRecord]);
+      packet.records = packet.records.filter((record) => record.record_id !== 'M2');
+      packet.action_review.verdict = 'EVIDENCE_SUPPORTS_PREREQUISITES';
+      packet.action_review.supporting_ids = ['M1'];
+      packet.action_review.blocking_ids = [];
+      packet.action_review.conflicting_ids = [];
+      packet.action_review.missing_requirements = [];
+
+      const validation = validatePacketInvariants(packet, context, [passedRecord, contraryRecord]);
+
+      assert.equal(validation.valid, false);
+      assert.ok(validation.errors.includes('ERR_OMITTED_APPLICABLE_CONTRARY_RECORD_M2'));
+    }
   });
 });

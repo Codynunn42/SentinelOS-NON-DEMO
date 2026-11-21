@@ -99,6 +99,48 @@ test('structured contradictions remain unresolved and missing required evidence 
   assert.equal(r.conclusions.length, 0); assert.deepEqual(r.gaps, ['review:owner']);
   assert(r.nextUsefulAction.includes('resolve'));
 });
+test('delimiter-bearing claim fields remain distinct structured keys', () => {
+  const documents = [
+    document({ id: 'tuple-a', content: 'A.', claims: [{ subject: 'a:b', predicate: 'c', value: 'left', line: 1, quote: 'A.' }] }),
+    document({ id: 'tuple-b', content: 'B.', claims: [{ subject: 'a', predicate: 'b:c', value: 'right', line: 1, quote: 'B.' }] })
+  ];
+  const f = fixture(documents);
+  f.request.requiredKeys = [['a:b', 'c'], ['a', 'b:c']];
+  const r = run(f);
+
+  assert.equal(r.conflicts.length, 0);
+  assert.equal(r.conclusions.length, 2);
+  assert.equal(r.gaps.length, 0);
+});
+test('claim conflict grouping does not rescan all claims for every distinct key', () => {
+  const documents = Array.from({ length: 1000 }, (_, index) => {
+    const content = `Claim ${index}.`;
+    return document({
+      id: `claim-${index}`,
+      content,
+      claims: [{ subject: 'item', predicate: String(index), value: String(index), line: 1, quote: content }]
+    });
+  });
+  const f = fixture(documents);
+  f.request.requiredKeys = [];
+  const originalFilter = Array.prototype.filter;
+  let predicateVisits = 0;
+  Array.prototype.filter = function countedFilter(callback, thisArg) {
+    return originalFilter.call(this, function countedCallback(...args) {
+      predicateVisits++;
+      return callback.apply(this, args);
+    }, thisArg);
+  };
+  let r;
+  try {
+    r = run(f);
+  } finally {
+    Array.prototype.filter = originalFilter;
+  }
+
+  assert.equal(r.conclusions.length, 1000);
+  assert(predicateVisits < 5000, `unexpected repeated claim scans: ${predicateVisits}`);
+});
 test('historical evidence remains visible but cannot support a current conclusion', () => {
   const r = run(cases()[1]); assert.equal(r.conclusions.length, 0);
   assert.equal(r.evidenceTable[0].slot, 'HISTORICAL_CONTEXT'); assert.equal(r.gaps.length, 1);

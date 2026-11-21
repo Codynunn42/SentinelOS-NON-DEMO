@@ -32,7 +32,8 @@ function runDiscoveryAdvisoryJob(request, deps) {
       if (typeof record?.record_id !== 'string' || !record.record_id || seen.has(record.record_id) ||
         typeof record.source_id !== 'string' || !record.source_id ||
         typeof record.source_version !== 'string' || !record.source_version ||
-        typeof record.entity_tag !== 'string' || typeof record.text !== 'string') blocked();
+        typeof record.entity_tag !== 'string' || !record.entity_tag.trim() ||
+        typeof record.text !== 'string') blocked();
       seen.add(record.record_id);
     }
     return clone;
@@ -46,9 +47,9 @@ function runDiscoveryAdvisoryJob(request, deps) {
     if (!verified || !context || verified.tenant !== context.tenant_id ||
       !Array.isArray(verified.allowedSensitivityTiers) ||
       [...context.allowed_sensitivity_tiers].some((tier) => !verified.allowedSensitivityTiers.includes(tier)) ||
-      !verified.allowedReleases?.includes(context.release_id) ||
-      !verified.allowedEnvironments?.includes(context.environment) ||
-      !verified.authorizedScopeIds?.includes(context.trusted_scope_id)) return null;
+      !Array.isArray(verified.allowedReleases) || !verified.allowedReleases.includes(context.release_id) ||
+      !Array.isArray(verified.allowedEnvironments) || !verified.allowedEnvironments.includes(context.environment) ||
+      !Array.isArray(verified.authorizedScopeIds) || !verified.authorizedScopeIds.includes(context.trusted_scope_id)) return null;
     return verified;
   };
 
@@ -97,7 +98,7 @@ function runDiscoveryAdvisoryJob(request, deps) {
       const checked = interpretEvidence({ learningState: {
         state: 'unknown', actionGate: 'human_review_required', requiresApproval: true,
         reason: 'Discovery evidence remains advisory.'
-      } }, {}, packet, evaluateForethought, context, records);
+      } }, {}, packet, evaluateForethought, context, boundSnapshot.records);
       if (checked.halted || !checked.evidenceReview) blocked();
       const selected = new Set(packet.records.map((r) => r.source_id));
       const evidence = ctx.evidence.filter((entry) => selected.has(entry.artifact.id));

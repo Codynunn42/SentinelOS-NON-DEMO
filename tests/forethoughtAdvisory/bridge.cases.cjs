@@ -49,6 +49,45 @@ test('missing/mismatched scope grant denies before payload retrieval', () => {
     assert(!JSON.stringify(r).includes('policy-a')); assert(!r.discoveryReview);
   }
 });
+test('malformed string scope grants fail closed instead of using substring membership', () => {
+  for (const [field, value] of [
+    ['allowedReleases', 'release-10'],
+    ['allowedEnvironments', 'test-other'],
+    ['authorizedScopeIds', 'scope-10']
+  ]) {
+    const f = bridgeFixture();
+    const original = f.deps.authenticate;
+    f.deps.authenticate = (caller) => ({ ...original(caller), [field]: value });
+    const r = run(f);
+    assert.equal(r.status, 'BLOCKED');
+    assert.equal(f.readCount(), 0);
+    assert(!r.discoveryReview);
+  }
+});
+test('empty Lens entity tags block before payload retrieval', () => {
+  for (const entityTag of ['', '   ']) {
+    const f = bridgeFixture();
+    f.records[0].entity_tag = entityTag;
+    const r = run(f);
+    assert.equal(r.status, 'BLOCKED');
+    assert.equal(f.readCount(), 0);
+  }
+});
+test('complete trusted snapshot preserves restricted applicable holds without fetching them', () => {
+  const f = bridgeFixture();
+  f.records.push({
+    ...f.records[0],
+    record_id: 'lens-restricted-hold',
+    status: 'held',
+    sensitivity_tier: 'restricted',
+    entity_tag: 'tag://governance/release-hold/release-1'
+  });
+  const r = run(f);
+  assert.equal(r.status, 'BLOCKED');
+  assert.equal(f.readCount(), 1);
+  assert(!JSON.stringify(r).includes('lens-restricted-hold'));
+  assert(!r.discoveryReview);
+});
 test('content/version/source identity mismatch halts instead of substituting evidence', () => {
   for (const change of [(f) => f.records[0].text = 'forged', (f) => f.records[0].source_version = 'v2', (f) => f.records[0].source_id = 'unknown']) {
     const f = bridgeFixture(); change(f); const r = run(f);

@@ -171,6 +171,7 @@ function prepareEvidence(trustedContext, query, corpusSnapshot) {
     }
 
     if (record.tenant_id !== tenant_id) continue;
+    if (record.release_id !== release_id) continue;
     if (record.environment !== environment && record.environment !== 'all') continue;
     if (!allowed_sensitivity_tiers.has(record.sensitivity_tier)) continue;
 
@@ -493,7 +494,9 @@ function evaluateProposedAction(action, scopeRelease, scopeEnv, records, holds, 
   const scopeBlockingIds = holds.map(h => h.record_id);
   const targetRecords = records.filter(r => r.entity_tag === action.target_tag && r.release_id === scopeRelease);
   const targetBlockingIds = targetRecords.filter(r => r.status === 'held').map(r => r.record_id);
-  const conflictingIds = targetRecords.filter(r => r.status === 'unverified').map(r => r.record_id);
+  const conflictingIds = targetRecords
+    .filter(r => r.status === 'unverified' || r.status === 'failed')
+    .map(r => r.record_id);
 
   const allBlockingIds = Array.from(new Set([...scopeBlockingIds, ...targetBlockingIds]));
 

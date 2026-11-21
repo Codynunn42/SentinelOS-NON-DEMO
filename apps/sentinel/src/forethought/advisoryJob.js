@@ -62,6 +62,18 @@ function cite(artifact, claim) {
     startLine: claim.line, endLine: claim.line, quote: claim.quote };
 }
 
+function claimKey(subject, predicate) {
+  return subject.includes(':') || predicate.includes(':')
+    ? JSON.stringify([subject, predicate])
+    : `${subject}:${predicate}`;
+}
+
+function normalizeRequiredKey(key) {
+  if (Array.isArray(key)) return claimKey(key[0], key[1]);
+  const separator = key.indexOf(':');
+  return separator > 0 ? claimKey(key.slice(0, separator), key.slice(separator + 1)) : key;
+}
+
 // Deliberately bounded synthesis: extracts declared, line-validated claims.
 // This is a deterministic adapter, not an LLM or natural-language contradiction engine.
 function synthesize(ctx) {
@@ -70,16 +82,28 @@ function synthesize(ctx) {
     if (typeof artifact.content !== 'string' || !Array.isArray(artifact.claims)) fail('INVALID_EVIDENCE');
     for (const claim of artifact.claims) {
       const citation = cite(artifact, claim);
-      if (evaluation.slot === 'CURRENT_AUTHORITY') claims.push({ ...claim, key: `${claim.subject}:${claim.predicate}`, citation });
+      if (evaluation.slot === 'CURRENT_AUTHORITY') claims.push({ ...claim, key: claimKey(claim.subject, claim.predicate), citation });
     }
   }
-  const keys = [...new Set(claims.map((c) => c.key))].sort();
-  const conflicts = keys.filter((key) => new Set(claims.filter((c) => c.key === key).map((c) => c.value)).size > 1)
-    .map((key) => ({ key, alternatives: claims.filter((c) => c.key === key).map((c) => ({ value: c.value, citation: c.citation })) }));
-  const conflictKeys = new Set(conflicts.map((c) => c.key));
-  const conclusions = claims.filter((c) => !conflictKeys.has(c.key))
-    .map((c) => ({ key: c.key, value: c.value, support: 'SOURCE_REPORTED', citation: c.citation }));
-  const gaps = (ctx.request.requiredKeys || []).filter((key) => !claims.some((c) => c.key === key));
+  const claimGroups = new Map();
+  for (const claim of claims) {
+    if (!claimGroups.has(claim.key)) claimGroups.set(claim.key, []);
+    claimGroups.get(claim.key).push(claim);
+  }
+  const conflicts = [];
+  const conclusions = [];
+  for (const key of [...claimGroups.keys()].sort()) {
+    const group = claimGroups.get(key);
+    if (new Set(group.map((claim) => claim.value)).size > 1) {
+      conflicts.push({ key, alternatives: group.map((claim) => ({ value: claim.value, citation: claim.citation })) });
+    } else {
+      conclusions.push(...group.map((claim) => ({
+        key, value: claim.value, support: 'SOURCE_REPORTED', citation: claim.citation
+      })));
+    }
+  }
+  const gaps = (ctx.request.requiredKeys || [])
+    .filter((key) => !claimGroups.has(normalizeRequiredKey(key)));
   const nextUsefulAction = conflicts.length ? 'Ask the accountable owner to resolve the cited conflicting claims.' :
     gaps.length ? 'Request current authorized evidence for the listed gaps.' :
     conclusions.length ? 'Ask the human reviewer to assess the cited conclusions.' : 'Request current authorized evidence before drawing a conclusion.';
@@ -146,7 +170,10 @@ function runAdvisoryJob(request, deps) {
   try {
     stage('lens', () => {
       if (!request || typeof request.id !== 'string' || typeof request.query !== 'string' || !request.query.trim() ||
-        (request.requiredKeys !== undefined && (!Array.isArray(request.requiredKeys) || !request.requiredKeys.every((k) => typeof k === 'string')))) fail('INVALID_REQUEST');
+        (request.requiredKeys !== undefined && (!Array.isArray(request.requiredKeys) ||
+          !request.requiredKeys.every((key) => typeof key === 'string' || (
+            Array.isArray(key) && key.length === 2 && key.every((part) => typeof part === 'string')
+          ))))) fail('INVALID_REQUEST');
       const initial = snapshot({ request });
       const candidates = deps.discoverCandidates
         ? deps.discoverCandidates(initial.request, deps.store)
