@@ -61,10 +61,14 @@ class InMemoryReceiptLedger implements IReceiptLedger {
 
     async record(entry: Omit<ReceiptEntry, 'id' | 'signature' | 'signatureVersion'>): Promise<ReceiptEntry> {
         const id = randomUUID();
-        const receipt: ReceiptEntry = {
+        const unsigned: Omit<ReceiptEntry, 'signature'> = {
             ...entry,
             id,
-            signature: this.sign({ ...entry, id }),
+            signatureVersion: 1,
+        };
+        const receipt: ReceiptEntry = {
+            ...unsigned,
+            signature: this.sign(unsigned),
         };
 
         this.entries.push(receipt);

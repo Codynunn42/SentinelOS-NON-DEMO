@@ -1,6 +1,7 @@
--- Preserve existing receipts as legacy version 1 and persist the authority
--- context covered by signatures written using version 2.
+-- Preserve existing receipts as legacy version 1 and persist prerequisite
+-- metadata for PR #51. PR #47 must not activate or authenticate version 2.
 ALTER TABLE receipts ADD COLUMN IF NOT EXISTS signature_version SMALLINT NOT NULL DEFAULT 1;
+ALTER TABLE receipts ADD COLUMN IF NOT EXISTS signature_payload_text TEXT;
 ALTER TABLE receipts ADD COLUMN IF NOT EXISTS timestamp_text TEXT;
 ALTER TABLE receipts ADD COLUMN IF NOT EXISTS principal_context JSONB;
 ALTER TABLE receipts ADD COLUMN IF NOT EXISTS delegated_by VARCHAR(255);

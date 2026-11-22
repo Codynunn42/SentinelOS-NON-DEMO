@@ -5,21 +5,8 @@ import { before, describe, it } from 'mocha';
 import { Pool } from 'pg';
 import { PostgresReceiptLedger, ReceiptEntry } from '../../services/receipt-ledger-pg';
 
-function canonicalize(value: unknown): unknown {
-    if (Array.isArray(value)) return value.map(canonicalize);
-    if (value && typeof value === 'object') {
-        return Object.fromEntries(
-            Object.entries(value as Record<string, unknown>)
-                .sort(([left], [right]) => left < right ? -1 : left > right ? 1 : 0)
-                .map(([key, item]) => [key, canonicalize(item)]),
-        );
-    }
-    return value;
-}
-
-function v2Digest(receipt: Omit<ReceiptEntry, 'signature'>): string {
+function legacyDigest(receipt: Omit<ReceiptEntry, 'signature'>): string {
     const payload = {
-        signatureVersion: 2,
         command: receipt.command,
         tenant: receipt.tenant,
         executor: receipt.executor,
@@ -29,13 +16,10 @@ function v2Digest(receipt: Omit<ReceiptEntry, 'signature'>): string {
         authorityCheckResult: receipt.authorityCheckResult,
         riskGateOutcome: receipt.riskGateOutcome,
         reasons: receipt.reasons ?? [],
-        principalContext: receipt.principalContext ?? null,
-        delegatedBy: receipt.delegatedBy ?? null,
-        delegationExpiresAt: receipt.delegationExpiresAt ?? null,
         id: receipt.id,
     };
     return createHash('sha256')
-        .update(JSON.stringify(canonicalize(payload)))
+        .update(JSON.stringify(payload))
         .digest('hex');
 }
 
@@ -55,11 +39,41 @@ const baseReceipt: ReceiptEntry = {
 };
 
 describe('PostgresReceiptLedger signatures', () => {
-    it('verifies the legacy serializer digest vector only when its JSONB values are reconstructible', async () => {
+    it('verifies the recovered v1 serializer for nested JSON values', async () => {
         const ledger = new PostgresReceiptLedger('postgres://localhost/unused_test');
+        const receiptWithoutSignature: Omit<ReceiptEntry, 'signature'> = {
+            ...baseReceipt,
+            payload: { nested: { value: 1 }, list: [null, { item: true }] },
+            authorityCheckResult: { allowed: true, checks: ['scope'] },
+            riskGateOutcome: { level: 'low', factors: { stale: false } },
+        };
         try {
             assert.equal(ledger.verify(baseReceipt), true);
-            assert.equal(ledger.verify({ ...baseReceipt, payload: { nested: { value: 1 } } }), false);
+            assert.equal(ledger.verify({
+                ...baseReceipt,
+                payload: receiptWithoutSignature.payload,
+                authorityCheckResult: receiptWithoutSignature.authorityCheckResult,
+                riskGateOutcome: receiptWithoutSignature.riskGateOutcome,
+                signature: legacyDigest(receiptWithoutSignature),
+            }), true);
+            assert.equal(ledger.verify({
+                ...baseReceipt,
+                payload: receiptWithoutSignature.payload,
+                authorityCheckResult: receiptWithoutSignature.authorityCheckResult,
+                riskGateOutcome: receiptWithoutSignature.riskGateOutcome,
+                signature: legacyDigest(receiptWithoutSignature).replace(/^./, '0'),
+            }), false);
+            assert.equal(ledger.verify({
+                ...baseReceipt,
+                payload: receiptWithoutSignature.payload,
+                authorityCheckResult: receiptWithoutSignature.authorityCheckResult,
+                riskGateOutcome: receiptWithoutSignature.riskGateOutcome,
+                signaturePayloadText: JSON.stringify({
+                    ...receiptWithoutSignature,
+                    command: 'different-command',
+                }),
+                signature: legacyDigest(receiptWithoutSignature),
+            }), false);
             assert.equal(ledger.verify({
                 ...baseReceipt,
                 principalContext: { id: 'operator' },
@@ -69,7 +83,7 @@ describe('PostgresReceiptLedger signatures', () => {
         }
     });
 
-    it('verifies version 2 and rejects authority tampering and unknown versions', async () => {
+    it('treats version 2 as non-authoritative pending PR 51', async () => {
         const ledger = new PostgresReceiptLedger('postgres://localhost/unused_test');
         const receiptWithoutSignature: Omit<ReceiptEntry, 'signature'> = {
             ...baseReceipt,
@@ -80,43 +94,31 @@ describe('PostgresReceiptLedger signatures', () => {
         };
         const receipt: ReceiptEntry = {
             ...receiptWithoutSignature,
-            signature: v2Digest(receiptWithoutSignature),
+            signature: legacyDigest(receiptWithoutSignature),
         };
 
         try {
-            assert.equal(ledger.verify(receipt), true);
-            assert.equal(ledger.verify({
-                ...receipt,
-                principalContext: { id: 'attacker', roles: ['reviewer'] },
-            }), false);
-            assert.equal(ledger.verify({ ...receipt, delegatedBy: 'attacker' }), false);
-            assert.equal(ledger.verify({
-                ...receipt,
-                delegationExpiresAt: '2027-02-01T00:00:00+00:00',
-            }), false);
-            const { delegatedBy, ...withoutDelegation } = receipt;
-            assert.equal(ledger.verify(withoutDelegation), false);
+            assert.equal(ledger.verify(receipt), false);
             assert.equal(ledger.verify({ ...receipt, signatureVersion: 3 }), false);
         } finally {
             await ledger.close();
         }
     });
 
-    it('uses the persisted JSON representation when calculating version 2 digests', async () => {
+    it('rejects authority-context record activation before PR 51', async () => {
         const ledger = new PostgresReceiptLedger('postgres://localhost/unused_test');
-        const normalized: Omit<ReceiptEntry, 'signature'> = {
-            ...baseReceipt,
-            signatureVersion: 2,
-            payload: { observedAt: '2026-01-01T00:00:00.000Z', values: [null] },
-        };
-        const signature = v2Digest(normalized);
         try {
-            assert.equal(ledger.verify({ ...normalized, signature }), true);
-            assert.equal(ledger.verify({
-                ...normalized,
-                payload: { observedAt: new Date('2026-01-01T00:00:00.000Z'), values: [undefined] },
-                signature,
-            }), true);
+            await assert.rejects(ledger.record({
+                command: 'blocked-before-pr51',
+                tenant: baseReceipt.tenant,
+                executor: baseReceipt.executor,
+                timestamp: baseReceipt.timestamp,
+                status: baseReceipt.status,
+                payload: baseReceipt.payload,
+                authorityCheckResult: baseReceipt.authorityCheckResult,
+                riskGateOutcome: baseReceipt.riskGateOutcome,
+                principalContext: { id: 'operator' },
+            }), /SIGNED_RECEIPT_ACTIVATION_REQUIRES_PR51/);
         } finally {
             await ledger.close();
         }
@@ -164,6 +166,7 @@ postgresDescribe('PostgresReceiptLedger isolated persistence round trip', () => 
                 signature: baseReceipt.signature,
                 payload: baseReceipt.payload,
                 signature_version: 1,
+                signature_payload_text: null,
                 timestamp_text: null,
                 principal_context: null,
                 delegated_by: null,
@@ -179,7 +182,7 @@ postgresDescribe('PostgresReceiptLedger isolated persistence round trip', () => 
         }
     });
 
-    it('persists and maps signature version and authority fields without changing signed bytes', async () => {
+    it('persists and maps v1 signed bytes with the exact timestamp text', async () => {
         const ledger = new PostgresReceiptLedger(testDatabaseUrl);
         try {
             await ledger.initialize();
@@ -193,54 +196,92 @@ postgresDescribe('PostgresReceiptLedger isolated persistence round trip', () => 
                 authorityCheckResult: { allowed: true },
                 riskGateOutcome: { level: 'low' },
                 reasons: ['isolated test'],
-                principalContext: { id: 'test-operator', roles: ['reviewer'] },
-                delegatedBy: 'test-admin',
-                delegationExpiresAt: '2026-02-01T00:00:00+00:00',
             });
             const loaded = await ledger.getById(recorded.id);
 
             assert.ok(loaded);
-            assert.equal(loaded.signatureVersion, 2);
-            assert.deepEqual(loaded.principalContext, recorded.principalContext);
-            assert.equal(loaded.delegatedBy, recorded.delegatedBy);
-            assert.equal(loaded.delegationExpiresAt, recorded.delegationExpiresAt);
+            assert.equal(loaded.signatureVersion, 1);
+            assert.equal(typeof loaded.signaturePayloadText, 'string');
+            assert.equal(loaded.principalContext, undefined);
+            assert.equal(loaded.delegatedBy, undefined);
+            assert.equal(loaded.delegationExpiresAt, undefined);
             assert.equal(loaded.timestamp, recorded.timestamp);
             assert.deepEqual(loaded.payload, recorded.payload);
             assert.equal(ledger.verify(loaded), true);
             assert.equal(ledger.verify({ ...loaded, delegatedBy: 'attacker' }), false);
-            assert.equal(ledger.verify({
-                ...loaded,
-                delegationExpiresAt: '2027-02-01T00:00:00+00:00',
-            }), false);
         } finally {
             await ledger.close();
         }
     });
 
-    it('preserves absent and empty delegation fields across reloads', async () => {
+    it('preserves authority metadata as non-authoritative prerequisite storage only', async () => {
         const ledger = new PostgresReceiptLedger(testDatabaseUrl);
         try {
             await ledger.initialize();
-            for (const delegation of [{}, { delegatedBy: '', delegationExpiresAt: '' }]) {
-                const recorded = await ledger.record({
-                    command: 'optional-delegation-round-trip',
-                    tenant: baseReceipt.tenant,
-                    executor: baseReceipt.executor,
-                    timestamp: baseReceipt.timestamp,
-                    status: baseReceipt.status,
-                    payload: baseReceipt.payload,
-                    authorityCheckResult: baseReceipt.authorityCheckResult,
-                    riskGateOutcome: baseReceipt.riskGateOutcome,
-                    ...delegation,
-                });
-                const loaded = await ledger.getById(recorded.id);
-                assert.ok(loaded);
-                assert.equal(loaded.delegatedBy, recorded.delegatedBy);
-                assert.equal(loaded.delegationExpiresAt, recorded.delegationExpiresAt);
-                assert.equal(ledger.verify(loaded), true);
-            }
+            const recorded = await ledger.record({
+                command: 'legacy-round-trip',
+                tenant: baseReceipt.tenant,
+                executor: baseReceipt.executor,
+                timestamp: baseReceipt.timestamp,
+                status: baseReceipt.status,
+                payload: baseReceipt.payload,
+                authorityCheckResult: baseReceipt.authorityCheckResult,
+                riskGateOutcome: baseReceipt.riskGateOutcome,
+            });
+            const loaded = await ledger.getById(recorded.id);
+            assert.ok(loaded);
+            assert.equal(loaded.signatureVersion, 1);
+            assert.equal(ledger.verify(loaded), true);
         } finally {
             await ledger.close();
+        }
+    });
+
+    it('exports every versioned signed-receipt field for compliance verification', async () => {
+        const pool = new Pool({ connectionString: testDatabaseUrl });
+        const ledger = new PostgresReceiptLedger(testDatabaseUrl);
+        try {
+            await ledger.initialize();
+            const recorded = await ledger.record({
+                command: `export-round-trip-${Date.now()}`,
+                tenant: 'test-tenant',
+                executor: 'test-operator',
+                timestamp: '2026-01-01T00:00:00.123+00:00',
+                status: 'executed',
+                payload: { values: [1, { key: 'value' }] },
+                authorityCheckResult: { allowed: true },
+                riskGateOutcome: { level: 'low' },
+                reasons: ['compliance export'],
+            });
+            const migration = await readFile(
+                'apps/executive-desk/db/migrations/001-receipt-ledger.sql', 'utf8',
+            );
+            await pool.query(migration);
+
+            const view = await pool.query(
+                'SELECT * FROM receipts_audit_export WHERE id = $1',
+                [recorded.id],
+            );
+            assert.equal(view.rows.length, 1);
+            assert.equal(view.rows[0].signature_version, 1);
+            assert.equal(view.rows[0].timestamp_text, recorded.timestamp);
+            assert.equal(view.rows[0].signature_payload_text, recorded.signaturePayloadText);
+            assert.deepEqual(view.rows[0].payload, recorded.payload);
+            assert.deepEqual(view.rows[0].authority_check_result, recorded.authorityCheckResult);
+            assert.deepEqual(view.rows[0].risk_gate_outcome, recorded.riskGateOutcome);
+
+            const exported = await pool.query(
+                'SELECT * FROM export_receipts_since($1::timestamp) WHERE id = $2',
+                ['2026-01-01T00:00:00.000', recorded.id],
+            );
+            assert.equal(exported.rows.length, 1);
+            assert.equal(exported.rows[0].signature, recorded.signature);
+            assert.equal(exported.rows[0].signature_version, 1);
+            assert.equal(exported.rows[0].signature_payload_text, recorded.signaturePayloadText);
+            assert.deepEqual(exported.rows[0].reasons, recorded.reasons);
+        } finally {
+            await ledger.close();
+            await pool.end();
         }
     });
 });
