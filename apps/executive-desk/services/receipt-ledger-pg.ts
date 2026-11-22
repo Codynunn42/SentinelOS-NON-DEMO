@@ -235,26 +235,24 @@ export class PostgresReceiptLedger {
                     reason: 'UNSIGNED_AUTHORITY_CONTEXT',
                 };
             }
-            const payloadText = receipt.signaturePayloadText ??
-                JSON.stringify(this.legacySignaturePayload(receipt));
-            if (receipt.signaturePayloadText !== undefined &&
-                !this.payloadMatchesReceipt(payloadText, receipt)) {
+            if (receipt.signaturePayloadText === undefined) {
+                return {
+                    verified: false,
+                    reason: 'LEGACY_SIGNED_BYTES_UNAVAILABLE',
+                };
+            }
+            const payloadText = receipt.signaturePayloadText;
+            if (!this.payloadMatchesReceipt(payloadText, receipt)) {
                 return {
                     verified: false,
                     reason: 'LEGACY_SIGNATURE_MISMATCH',
                 };
             }
             const verified = receipt.signature === this.signText(payloadText);
-            if (verified) {
-                return {
-                    verified: true,
-                    reason: 'LEGACY_DIGEST_MATCHED',
-                };
-            }
             return {
-                verified: false,
-                reason: receipt.signaturePayloadText === undefined
-                    ? 'LEGACY_SIGNED_BYTES_UNAVAILABLE'
+                verified,
+                reason: verified
+                    ? 'LEGACY_DIGEST_MATCHED'
                     : 'LEGACY_SIGNATURE_MISMATCH',
             };
         }

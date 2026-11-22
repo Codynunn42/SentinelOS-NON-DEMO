@@ -5,8 +5,8 @@ import { before, describe, it } from 'mocha';
 import { Pool } from 'pg';
 import { PostgresReceiptLedger, ReceiptEntry } from '../../services/receipt-ledger-pg';
 
-function legacyDigest(receipt: Omit<ReceiptEntry, 'signature'>): string {
-    const payload = {
+function legacyPayload(receipt: Omit<ReceiptEntry, 'signature'>): Record<string, unknown> {
+    return {
         command: receipt.command,
         tenant: receipt.tenant,
         executor: receipt.executor,
@@ -18,8 +18,11 @@ function legacyDigest(receipt: Omit<ReceiptEntry, 'signature'>): string {
         reasons: receipt.reasons ?? [],
         id: receipt.id,
     };
+}
+
+function legacyDigest(receipt: Omit<ReceiptEntry, 'signature'>): string {
     return createHash('sha256')
-        .update(JSON.stringify(payload))
+        .update(JSON.stringify(legacyPayload(receipt)))
         .digest('hex');
 }
 
@@ -47,31 +50,28 @@ describe('PostgresReceiptLedger signatures', () => {
             authorityCheckResult: { allowed: true, checks: ['scope'] },
             riskGateOutcome: { level: 'low', factors: { stale: false } },
         };
+        const exactLegacyReceipt: ReceiptEntry = {
+            ...receiptWithoutSignature,
+            signaturePayloadText: JSON.stringify(legacyPayload(receiptWithoutSignature)),
+            signature: legacyDigest(receiptWithoutSignature),
+        };
         try {
-            assert.equal(ledger.verify(baseReceipt), true);
+            assert.equal(ledger.verify(baseReceipt), false);
+            assert.deepEqual(ledger.verifyDetailed(baseReceipt), {
+                verified: false,
+                reason: 'LEGACY_SIGNED_BYTES_UNAVAILABLE',
+            });
+            assert.equal(ledger.verify(exactLegacyReceipt), true);
             assert.equal(ledger.verify({
-                ...baseReceipt,
-                payload: receiptWithoutSignature.payload,
-                authorityCheckResult: receiptWithoutSignature.authorityCheckResult,
-                riskGateOutcome: receiptWithoutSignature.riskGateOutcome,
-                signature: legacyDigest(receiptWithoutSignature),
-            }), true);
-            assert.equal(ledger.verify({
-                ...baseReceipt,
-                payload: receiptWithoutSignature.payload,
-                authorityCheckResult: receiptWithoutSignature.authorityCheckResult,
-                riskGateOutcome: receiptWithoutSignature.riskGateOutcome,
+                ...exactLegacyReceipt,
                 signature: legacyDigest(receiptWithoutSignature).replace(/^./, '0'),
             }), false);
             assert.deepEqual(ledger.verifyDetailed({
-                ...baseReceipt,
-                payload: receiptWithoutSignature.payload,
-                authorityCheckResult: receiptWithoutSignature.authorityCheckResult,
-                riskGateOutcome: receiptWithoutSignature.riskGateOutcome,
+                ...exactLegacyReceipt,
                 signature: legacyDigest(receiptWithoutSignature).replace(/^./, '0'),
             }), {
                 verified: false,
-                reason: 'LEGACY_SIGNED_BYTES_UNAVAILABLE',
+                reason: 'LEGACY_SIGNATURE_MISMATCH',
             });
             assert.equal(ledger.verify({
                 ...baseReceipt,
