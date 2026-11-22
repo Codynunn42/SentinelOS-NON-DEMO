@@ -1,12 +1,12 @@
 # Nunn Corporation Executive Operating Template — 2026-11-19
 
-**COMM:** Sentinel AI by Cody Nunn | Nunn Cloud  
-**Mode:** executive status and planning, review-held  
-**MOB Constant:** `docs/GBP/doctrine/NUNN_CORPORATION_MASTER_OPERATING_BINDER_2026-06-15.md`  
+**COMM:** Sentinel AI by Cody Nunn | Nunn Cloud
+**Mode:** executive status and planning, review-held
+**MOB Constant:** `docs/GBP/doctrine/NUNN_CORPORATION_MASTER_OPERATING_BINDER_2026-06-15.md`
 **Historical Completion Queue:** `docs/GBP/assessments/MOB_COMPLETION_QUEUE_REFRESH_OVERLAY_2026-07-05.md`
-**Operations Register Overlay:** `docs/GBP/assessments/NUNN_CORPORATION_OPERATIONS_REGISTER_OVERLAY_2026-11-19.md`  
-**Next Steps Processing:** `docs/GBP/assessments/NOVEMBER_19_NEXT_STEPS_PROCESSING_RESULT_2026-11-19.md`  
-**External Use:** held  
+**Operations Register Overlay:** `docs/GBP/assessments/NUNN_CORPORATION_OPERATIONS_REGISTER_OVERLAY_2026-11-19.md`
+**Next Steps Processing:** `docs/GBP/assessments/NOVEMBER_19_NEXT_STEPS_PROCESSING_RESULT_2026-11-19.md`
+**External Use:** held
 **Authority Created:** false
 
 ## Primary Objective

@@ -1,12 +1,12 @@
 # Nunn Corporation Operations Register — Current Queue Overlay
 
-**Recorded:** November 19, 2026  
-**Mode:** MOB-backed operations register overlay, review-held  
-**MOB Constant:** `docs/GBP/doctrine/NUNN_CORPORATION_MASTER_OPERATING_BINDER_2026-06-15.md`  
+**Recorded:** November 19, 2026
+**Mode:** MOB-backed operations register overlay, review-held
+**MOB Constant:** `docs/GBP/doctrine/NUNN_CORPORATION_MASTER_OPERATING_BINDER_2026-06-15.md`
 **Historical Completion Queue:** `docs/GBP/assessments/MOB_COMPLETION_QUEUE_REFRESH_OVERLAY_2026-07-05.md`
-**Executive Template:** `docs/governance/SENTINEL_EXECUTIVE_OPERATING_TEMPLATE_2026-11-19.md`  
-**Next Steps Processing:** `docs/GBP/assessments/NOVEMBER_19_NEXT_STEPS_PROCESSING_RESULT_2026-11-19.md`  
-**External Use:** held  
+**Executive Template:** `docs/governance/SENTINEL_EXECUTIVE_OPERATING_TEMPLATE_2026-11-19.md`
+**Next Steps Processing:** `docs/GBP/assessments/NOVEMBER_19_NEXT_STEPS_PROCESSING_RESULT_2026-11-19.md`
+**External Use:** held
 **Authority Created:** false
 
 ## Purpose and Control

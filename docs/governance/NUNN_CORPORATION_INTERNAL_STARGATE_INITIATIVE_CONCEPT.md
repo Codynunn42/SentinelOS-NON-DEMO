@@ -1,7 +1,7 @@
 # Nunn Corporation Internal Stargate Initiative — Working Concept
 
-**Status:** Internal discussion draft; not approved for execution or external representation  
-**Owner:** Nunn Corporation  
+**Status:** Internal discussion draft; not approved for execution or external representation
+**Owner:** Nunn Corporation
 **Scope:** Proposed read-only, human-authorized workload and energy evaluation
 
 ## Naming and relationship boundary

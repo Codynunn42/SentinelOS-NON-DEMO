@@ -1,8 +1,8 @@
 # OpenAI Partner Network — Status Snapshot
 
-**Recorded:** November 19, 2026  
-**Track:** Services Partner Track  
-**Executive status:** Assessment Submitted / External Review Pending  
+**Recorded:** November 19, 2026
+**Track:** Services Partner Track
+**Executive status:** Assessment Submitted / External Review Pending
 **Classification:** Internal partnership status record
 
 ## Status reported
