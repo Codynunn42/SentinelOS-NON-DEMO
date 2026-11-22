@@ -297,3 +297,26 @@ If switching backends later:
 ---
 
 **Status:** ✅ Gate 3 complete. Ready for Gate 4 (Authority Integration).
+
+## Migration rollback
+
+**Application prerequisite:** stop all receipt-producing processes before rolling back, and resume only an application release compatible with the target schema. Do not restart the current release against a rolled-back schema: its PostgreSQL ledger initializer recreates the removed columns and restores the version 3 constraint without updating `schema_migrations`.
+
+Migrations in `apps/executive-desk/db/migrations/` apply forward-only by default. Each migration from `003-receipt-signature-v2.sql` onward ships a matching down migration in `apps/executive-desk/db/migrations/down/`, and the runner can reverse them:
+
+```bash
+# Reverse the most recently applied migration
+npx tsx apps/executive-desk/db/setup.ts rollback
+
+# Reverse a named migration (only if it is the most recently applied)
+npx tsx apps/executive-desk/db/setup.ts rollback 003-receipt-signature-v2.sql
+```
+
+Rules the runner enforces:
+
+- Newest-first, one at a time. Rolling back an older migration while a newer one is still applied is refused, with the blocking migration named.
+- The down migration and the removal of its `schema_migrations` record commit in a single transaction: a failed rollback leaves the migration recorded as applied and the schema untouched.
+
+**Before any rollback, export.** Rolling back 003 drops the authority columns (`principal_context`, `delegated_by`, `delegation_expires_at`) and `signature_version` — that data is destroyed permanently. Export the `receipts` table first (for example `pg_dump --table=receipts`). Note: the audit export view does not yet expose the signature-version or authority fields, so a table-level export is the complete one.
+
+**Rollback vs forward-fix.** Rollback is the schema-recovery tool for a bad deploy before meaningful version 2 data exists. Once version 2 receipts and their authority data matter, do not roll back — write a new forward migration that corrects the state instead. Rolling back 004 additionally refuses while version 3 receipts exist, because the restored version check would be violated by those rows.
