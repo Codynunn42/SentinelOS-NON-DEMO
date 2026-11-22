@@ -33,6 +33,17 @@ export interface ReceiptEntry {
     delegationExpiresAt?: string;
 }
 
+export interface ReceiptVerification {
+    verified: boolean;
+    reason:
+        | 'LEGACY_DIGEST_MATCHED'
+        | 'LEGACY_SIGNED_BYTES_UNAVAILABLE'
+        | 'LEGACY_SIGNATURE_MISMATCH'
+        | 'UNSIGNED_AUTHORITY_CONTEXT'
+        | 'V2_ACTIVATION_REQUIRES_PR51'
+        | 'UNKNOWN_SIGNATURE_VERSION';
+}
+
 const LEGACY_SIGNATURE_VERSION = 1;
 const CURRENT_SIGNATURE_VERSION = 2;
 
@@ -212,20 +223,51 @@ export class PostgresReceiptLedger {
      * Verify receipt signature
      */
     verify(receipt: ReceiptEntry): boolean {
+        return this.verifyDetailed(receipt).verified;
+    }
+
+    verifyDetailed(receipt: ReceiptEntry): ReceiptVerification {
         if (receipt.signatureVersion === LEGACY_SIGNATURE_VERSION) {
             if (receipt.principalContext !== undefined || receipt.delegatedBy !== undefined ||
                 receipt.delegationExpiresAt !== undefined) {
-                return false;
+                return {
+                    verified: false,
+                    reason: 'UNSIGNED_AUTHORITY_CONTEXT',
+                };
             }
             const payloadText = receipt.signaturePayloadText ??
                 JSON.stringify(this.legacySignaturePayload(receipt));
             if (receipt.signaturePayloadText !== undefined &&
                 !this.payloadMatchesReceipt(payloadText, receipt)) {
-                return false;
+                return {
+                    verified: false,
+                    reason: 'LEGACY_SIGNATURE_MISMATCH',
+                };
             }
-            return receipt.signature === this.signText(payloadText);
+            const verified = receipt.signature === this.signText(payloadText);
+            if (verified) {
+                return {
+                    verified: true,
+                    reason: 'LEGACY_DIGEST_MATCHED',
+                };
+            }
+            return {
+                verified: false,
+                reason: receipt.signaturePayloadText === undefined
+                    ? 'LEGACY_SIGNED_BYTES_UNAVAILABLE'
+                    : 'LEGACY_SIGNATURE_MISMATCH',
+            };
         }
-        return false;
+        if (receipt.signatureVersion === CURRENT_SIGNATURE_VERSION) {
+            return {
+                verified: false,
+                reason: 'V2_ACTIVATION_REQUIRES_PR51',
+            };
+        }
+        return {
+            verified: false,
+            reason: 'UNKNOWN_SIGNATURE_VERSION',
+        };
     }
 
     /**

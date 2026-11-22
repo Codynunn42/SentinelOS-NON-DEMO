@@ -63,6 +63,16 @@ describe('PostgresReceiptLedger signatures', () => {
                 riskGateOutcome: receiptWithoutSignature.riskGateOutcome,
                 signature: legacyDigest(receiptWithoutSignature).replace(/^./, '0'),
             }), false);
+            assert.deepEqual(ledger.verifyDetailed({
+                ...baseReceipt,
+                payload: receiptWithoutSignature.payload,
+                authorityCheckResult: receiptWithoutSignature.authorityCheckResult,
+                riskGateOutcome: receiptWithoutSignature.riskGateOutcome,
+                signature: legacyDigest(receiptWithoutSignature).replace(/^./, '0'),
+            }), {
+                verified: false,
+                reason: 'LEGACY_SIGNED_BYTES_UNAVAILABLE',
+            });
             assert.equal(ledger.verify({
                 ...baseReceipt,
                 payload: receiptWithoutSignature.payload,
@@ -99,6 +109,10 @@ describe('PostgresReceiptLedger signatures', () => {
 
         try {
             assert.equal(ledger.verify(receipt), false);
+            assert.deepEqual(ledger.verifyDetailed(receipt), {
+                verified: false,
+                reason: 'V2_ACTIVATION_REQUIRES_PR51',
+            });
             assert.equal(ledger.verify({ ...receipt, signatureVersion: 3 }), false);
         } finally {
             await ledger.close();
@@ -147,20 +161,49 @@ postgresDescribe('PostgresReceiptLedger isolated persistence round trip', () => 
             await client.query(`
                 CREATE TEMP TABLE receipts (
                     id UUID PRIMARY KEY,
+                    command VARCHAR(255) NOT NULL,
+                    tenant VARCHAR(255) NOT NULL,
+                    executor VARCHAR(255) NOT NULL,
+                    "timestamp" TIMESTAMP NOT NULL,
+                    status VARCHAR(50) NOT NULL,
+                    payload JSONB NOT NULL,
+                    authority_check_result JSONB NOT NULL,
+                    risk_gate_outcome JSONB NOT NULL,
                     signature VARCHAR(64) NOT NULL,
-                    payload JSONB NOT NULL
+                    reasons TEXT[] DEFAULT '{}',
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 ) ON COMMIT DROP
             `);
             await client.query(
-                'INSERT INTO receipts (id, signature, payload) VALUES ($1, $2, $3)',
-                [baseReceipt.id, baseReceipt.signature, JSON.stringify(baseReceipt.payload)],
+                `INSERT INTO receipts (
+                    id, command, tenant, executor, "timestamp", status, payload,
+                    authority_check_result, risk_gate_outcome, signature, reasons
+                 ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
+                [
+                    baseReceipt.id,
+                    baseReceipt.command,
+                    baseReceipt.tenant,
+                    baseReceipt.executor,
+                    baseReceipt.timestamp,
+                    baseReceipt.status,
+                    JSON.stringify(baseReceipt.payload),
+                    JSON.stringify(baseReceipt.authorityCheckResult),
+                    JSON.stringify(baseReceipt.riskGateOutcome),
+                    baseReceipt.signature,
+                    baseReceipt.reasons,
+                ],
             );
             const migration = await readFile(
                 'apps/executive-desk/db/migrations/003-receipt-signature-v2.sql', 'utf8',
             );
             await client.query(migration);
             await client.query(migration);
-            const result = await client.query('SELECT * FROM receipts');
+            const result = await client.query(`
+                SELECT id, signature, payload, signature_version,
+                       signature_payload_text, timestamp_text,
+                       principal_context, delegated_by, delegation_expires_at
+                FROM receipts
+            `);
             assert.deepEqual(result.rows, [{
                 id: baseReceipt.id,
                 signature: baseReceipt.signature,
