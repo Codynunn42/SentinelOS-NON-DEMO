@@ -132,3 +132,74 @@ Only after separate identity, runtime, governance, policy and release gates are 
 5. Release authority: separately decide if any future implementation may merge, deploy or touch real systems.
 
 **Disposition:** Architecture proposal ready for review only. No production access, tool dispatch, write, merge, release or new authority granted.
+
+---
+
+## 11. Target outcome — shared XE docking into Sentinel AI (finalized product scope, implementation pending)
+
+**Founder-approved direction:** The existing SentinelOS XE Command System is reused by Sentinel AI. **Do not build a second XE.** The proposed Sentinel AI shortcut is `Ctrl+K` (`Cmd+K` on Mac), invoking a governed docking flow. Normal Sentinel AI conversations should continue to work without needing the shortcut. The SSAI Development Assistant is an engineering-specific consumer of the same XE foundation, with engineering-scoped authorization; the customer-facing Sentinel AI consumer has separate tenant, role, tools and policy constraints.
+
+### Outcome flow
+
+```mermaid
+flowchart TD
+    U["Authorized user in Sentinel AI"] --> K["Ctrl+K / Cmd+K: open XE palette"]
+    K --> D["Dock to the existing SentinelOS XE command surface"]
+    D --> I["Verify session identity, tenant, policy and capability grants"]
+    I --> J["Define job outcome, scope, time/budget limits and evidence"]
+    J --> H{"Human-authorized bounded job?"}
+    H -- No --> P["Pause: approval required or blocked"]
+    H -- Yes --> C["Quantitative capability matrix selects minimum sufficient services"]
+    C --> F["Forethought proposes next step; Lens/other modules support if needed"]
+    F --> G{"Fresh SentinelOS preflight: exact action within original grant?"}
+    G -- No --> P
+    G -- Yes --> A["Existing governed Control Plane handler executes permitted step"]
+    A --> R["Verify result and append audit receipt / checkpoint"]
+    R --> E{"Completion criteria satisfied?"}
+    E -- No, valid remaining work --> F
+    E -- Yes --> O["Complete: show outcome, evidence, actions and remaining gaps"]
+    P --> W["Human review; new scope requires separate approval"]
+    W -. "If approved in trusted authorization system" .-> G
+```
+
+**Responsibility boundaries:** The palette and docking layer collect requests and context. The capability matrix decides *which* internal intelligence to use; Forethought proposes *what next*; SentinelOS decides *whether a proposed action is permitted*; an existing governed handler performs an approved action. No direct XE, Atlas, Forethought or client-browser call may bypass the Control Plane, policy preflight, approved handler or receipt system.
+
+### Reuse evidence (historical, not current runtime proof)
+
+- `docs/governance/PROOF_CONTROL_PLANE_RELEASE_2026-05-07.md` documents an XE Command Plane overlay on Ctrl+K / Cmd+K, routing through the existing Control Plane handlers and `/api/control/execute`, not directly to `/v1/command`. Historical May 7 local and live proof exists, with noted logging limitations.
+- `docs/GBP/AI-Docking-and-Control-Surface.md` describes the command envelope, authority/risk context, governance preflight and receipt boundary.
+- Verify **current** XE source location, handler semantics, accessibility, keyboard shortcut behavior, caller/session binding, supported docking protocol and runtime identity before any integration implementation. A historical release note does not settle live compatibility.
+- Existing PR #73/C4 research and GOV-002/GOV-006 holds remain independent; don't convert their fixture adapters into live identity or permission claims.
+
+### User experience contract
+
+1. A customer or engineer invokes the same **XE system** via their applicable Sentinel AI or SentinelOS interface.
+2. XE shows a **scope card**: job objective, affected systems/data, allowed tools, allowed actions, budget/expiry, approval tier, completion tests and hard stops. The user can approve only what their trusted role permits.
+3. After actual authorization, XE can continue through bounded intermediate steps and approved retries without repeatedly asking for approval for an unchanged permitted step.
+4. Forethought proposes next steps. Every proposal is checked again against current authorization, constraints and relevant policy; it is never an implicit expansion.
+5. XE pauses on scope change, missing/expired permission, a new destination, unapproved side effects, cost/risk escalation, unknown runtime identity, revocation or missing trusted receipts.
+6. XE supports **pause, cancel, inspect activity and request human review** during a job.
+7. Completion requires a verified postcondition, full action/decision receipts and a plain-language result; a stopped or pending job is not labeled successfully completed.
+8. The development assistant may inspect, test and prepare scoped changes, but merges, deployments, production access, secret access and governance-gate advances need their own authority. Customer XE cannot inherit development permissions.
+9. Reopening XE reconnects only to a job through a verified job/session reference; no browser-only state or model memory grants continuity of authority.
+
+### First milestone: observable end-to-end proof
+
+**Scenario:** An engineer uses the existing XE command interface from Sentinel AI to request a read-only assessment of a known SentinelOS PR. XE docks into the existing governed surface, shows a proposed read-only scope, receives an explicit approval where required, selects evidence and analysis capabilities, gathers only permitted PR/CI metadata, allows Forethought to propose the next verification step, performs that read-only step within scope, and returns a cited blocker assessment with an immutable job receipt. No repository writes, test reruns, branch changes, review submissions, merge or deployment.
+
+**Pass criteria:**
+- Ctrl+K / Cmd+K opens the *existing* XE rather than a duplicate palette implementation, without breaking normal Sentinel AI conversation.
+- Identity/tenant/role/policy are verified by the trusted backend; development privileges are not conferred to customer accounts.
+- Exact approved scope, expiry and budgets are visible and enforced.
+- Multi-step continuation works within scope with durable, revocable job state and idempotent checkpoints.
+- Forethought next-step output cannot grant authorization or bypass a required gate.
+- Cancel, revoke, out-of-scope action, insufficient evidence, unavailable policy service and changed permissions produce safe stops and accurate statuses.
+- Every performed action has an auditable receipt and verified outcome; receipts and displayed reports correlate to the job and verified source versions.
+- Existing XE handler route is used; no direct browser-to-`/v1/command` execution path.
+- Reproducible negative-path tests and independent security/technical review are retained before any production proposal.
+
+### Delivery boundary / non-interruption principle
+
+This section **finalizes the intended product outcome**, not its implementation. Engineering may use it as a stable planning target and prepare independently scoped review work, but this document alone does not authorize autonomous build execution, merges, deployments or gate changes. Preserve GOV-001 Conditional, GOV-002 HOLD, GOV-006 outstanding and sovereign runtime identity HOLD; require a separate implementation authorization and normal review gates.
+
+**Roadmap ownership:** This shared-XE docking outcome becomes the first integrated demonstrator within Phase E, with prerequisite source verification in Phase A and isolated tests in Phases B–D. Avoid designing a parallel XE service. 
