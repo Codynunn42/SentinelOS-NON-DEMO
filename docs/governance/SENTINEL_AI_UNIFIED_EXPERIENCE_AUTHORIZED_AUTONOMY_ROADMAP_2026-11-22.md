@@ -203,3 +203,34 @@ flowchart TD
 This section **finalizes the intended product outcome**, not its implementation. Engineering may use it as a stable planning target and prepare independently scoped review work, but this document alone does not authorize autonomous build execution, merges, deployments or gate changes. Preserve GOV-001 Conditional, GOV-002 HOLD, GOV-006 outstanding and sovereign runtime identity HOLD; require a separate implementation authorization and normal review gates.
 
 **Roadmap ownership:** This shared-XE docking outcome becomes the first integrated demonstrator within Phase E, with prerequisite source verification in Phase A and isolated tests in Phases B–D. Avoid designing a parallel XE service. 
+
+---
+
+## 12. Current-build integration fit — November 22, 2026
+
+**Integration decision:** Extend the existing SentinelOS build. Do not fork the runtime, replace the Control Plane, or implement a parallel XE. The unified Sentinel AI experience is the customer-facing surface; XE is an optional advanced command and job-docking entry point; SentinelOS continues to own authorization and execution.
+
+| Reuse or proposed addition | Canonical current source / lane | Engineering fit | Verification gap |
+| --- | --- | --- | --- |
+| Existing XE palette | `docs/governance/PROOF_CONTROL_PLANE_RELEASE_2026-05-07.md` | Reuse Ctrl+K / Cmd+K invocation and existing command handler path via `/api/control/execute` | Historical 2026-05-07 proof is **not** current runtime proof; inspect source, session binding and serving revision |
+| Bounded execution doctrine | `docs/bounded-execution-model.md` and `docs/GBP/AI-Docking-and-Control-Surface.md` | Enforce policy before each action; AI proposes command envelopes but cannot execute directly or self-authorize | Current trust/approval/receipt wiring remains to be verified |
+| Forethought | `apps/sentinel/src/forethought/interpretation.js` | Preserve existing entry point; attach a versioned next-step *proposal* contract rather than permission side effects | This specific existing entry point delegates to `evaluateAnalysis`; richer planner behavior must be separately implemented/tested |
+| Discovery Lens / C4 | `docs/executive-desk/evidence/forethought-c4-integration-2026-11-11/README.md` (PR #73) | Reuse the candidate evidence/interpretation bridge; do not duplicate code or assume live adapters | Fixture-only identity/policy/store adapters; independent review and provenance disposition outstanding |
+| Atlas + quantitative capability routing | Proposed `IntentRequest`, capability matrix and routing-score contracts in this roadmap | Add inside the governed orchestration path; keep routing choices policy-bounded | Canonical deployed implementation and validated metrics not established |
+| Energy reader / SynapseEco | Proposed `EnergyDataset` / `ScenarioEvaluation` contracts | Optional internal capability, used only when job requires it | Runtime wiring and measured claims not established |
+| Job persistence + human checkpoints | Proposed `AuthorizedJobV1`, `ProposedNextStep`, `ActionReceipt` | Extend existing command-envelope/receipt boundaries with revocable continuity and end-state verification | Durable state, expiry/revocation, cancellation and recovery must be implemented and tested |
+| Light Mode UX | Proposed product efficiency policy | UX option using validated compute budgets *after* authorization constraints | Historical use of "Light Mode" also denotes a sovereign procurement review lane; naming and empirical savings claims need separate review |
+
+### Dependency order for the first build outcome
+
+1. Read-only inspect **current XE shortcut, docking, identity, Control Plane handlers and authoritative runtime**. Record exact commit/digest and unresolved gaps.
+2. Approve versioned **Sentinel AI-to-XE docking request** and scoped `AuthorizedJobV1` contract, including human checkpoints, tool restrictions, expiration and cancellation.
+3. Implement **isolated nonproduction** task continuation against approved read-only GitHub/CI metadata, with deterministic capability routing and Forethought next-step proposals.
+4. Demonstrate **allowed next step** versus **out-of-scope next step** using synthetic approvals. Show fail-closed behavior for revocation, missing identity, stale policy or missing evidence.
+5. Independently review test artifacts and authorization model. Only then request a separate decision about merge, deployment or live integration.
+
+### Build acceptance statement
+
+**Target:** From Sentinel AI, an authorized engineer invokes the existing XE using Ctrl+K / Cmd+K, docks with verified identity, approves an explicitly bounded read-only task, observes permitted multi-step continuation and Forethought proposals, and receives verified findings with receipts. Any new action outside scope pauses for human review. The default Sentinel AI experience remains conversational; no extra customer-facing intelligence modules are exposed.
+
+**Status at preparation:** Design specified and repository evidence linked; implementation/production integration **not verified or authorized**. Preserve PR #73 research HOLD and all existing governance/runtime holds. This appendix does not modify or supersede historical proof or grant engineering execution authority.
