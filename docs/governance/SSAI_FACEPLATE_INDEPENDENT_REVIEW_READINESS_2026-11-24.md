@@ -60,11 +60,18 @@ The previously described read-only `/health` and `/system/status` routes are
 reachability/status surfaces only. This packet did not call them, and they
 would not establish authorization to execute commands.
 
-## Evidence required before a reviewer can recommend any next step
+## Evidence for local review versus runtime review
 
-The independent reviewer should obtain or inspect evidence through an
-authorized, separately controlled process. Do not place secrets in this
-repository or review packet.
+An independent reviewer can begin the **local-only documentary review** using
+the exact repository snapshot above. Runtime canary identity is not required
+to assess the written Faceplate scope, but no conclusion about runtime
+behavior, connected-source access, or runtime readiness may be drawn from that
+review.
+
+The following evidence is required before any **runtime/canary review or
+expansion beyond local-only evaluation**. The reviewer should obtain or inspect
+it through an authorized, separately controlled process. Do not place secrets
+in this repository or review packet.
 
 1. **Canary identity and digest**
    - Authoritative source naming the exact SSAI canary/runtime instance,
@@ -108,11 +115,13 @@ repository or review packet.
 
 ## Stop conditions
 
-Stop and retain the current hold if identity or digest cannot be verified from
-an authoritative source; if the authorization cannot be tied to the exact
-current run; if the faceplate requires live-source or credential access; if
-any prohibited capability is reachable; if audit evidence is missing; or if
-scope, provenance, or reviewer independence is ambiguous.
+The documentary review may report findings and a decision limited to the local
+Faceplate specification and repository-only use. Stop any runtime/canary
+review or scope expansion if identity or digest cannot be verified from an
+authoritative source; if the authorization cannot be tied to the exact current
+run; if the faceplate requires live-source or credential access; if any
+prohibited capability is reachable; if audit evidence is missing; or if scope,
+provenance, or reviewer independence is ambiguous.
 
 Do not repair a missing identity or authorization record by generating one
 after the fact, inferring approval from this packet, or using public
@@ -140,8 +149,9 @@ Complete only after an eligible independent reviewer has performed the review:
 
 **Prepared for independent review; not yet independently reviewed.** The
 repository snapshot and Faceplate specification digest above are locally
-verified. Canary identity/digest and current-run-linked authorization remain
-unverified or unavailable. Runtime connection, live-source access,
+verified, so the documentary review can proceed on this local-only scope.
+Canary identity/digest and current-run-linked authorization remain unverified
+or unavailable, blocking any runtime/canary review or expansion. Runtime connection, live-source access,
 `/proxy/command`, production authentication, activation, and promotion remain
 held. Existing GOV-001 Conditional, GOV-002 HOLD, and GOV-006 independent
 verification outstanding dispositions are unchanged.
