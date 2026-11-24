@@ -245,7 +245,9 @@ function createAuditLogger({
       verifyPersistedEntry
     });
     chainAnchorHash = outbox.initialAnchorHash;
-    auditLog.push(...outbox.pendingEntries);
+    for (const entry of outbox.pendingEntries) {
+      auditLog.push(entry);
+    }
     initialized = true;
   }
 

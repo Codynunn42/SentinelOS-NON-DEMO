@@ -1,4 +1,5 @@
 const assert = require('assert/strict');
+const crypto = require('crypto');
 const fs = require('fs/promises');
 const os = require('os');
 const path = require('path');
@@ -128,7 +129,8 @@ describe('audit startup checkpoint recovery', () => {
     await recovering.close();
   });
 
-  it('recovers a backlog larger than the maximum spread argument count', async () => {
+  it('recovers a backlog larger than the maximum spread argument count', async function () {
+    this.timeout(15000);
     const entryCount = 130_000;
     const auditHash = 'a'.repeat(64);
     const fakeFiles = Array.from({ length: entryCount }, (_, index) => {
@@ -183,6 +185,101 @@ describe('audit startup checkpoint recovery', () => {
       fs.stat = originalStat;
       fs.readFile = originalReadFile;
       await outbox.close();
+    }
+  });
+
+  it('initializes the logger with a backlog larger than the maximum spread argument count', async function () {
+    this.timeout(15000);
+    const stableStringify = (value) => {
+      if (Array.isArray(value)) {
+        return `[${value.map(stableStringify).join(',')}]`;
+      }
+      if (value && typeof value === 'object') {
+        return `{${Object.keys(value)
+          .sort()
+          .map((key) => `${JSON.stringify(key)}:${stableStringify(value[key])}`)
+          .join(',')}}`;
+      }
+      return JSON.stringify(value);
+    };
+    const entryCount = 130_000;
+    const entries = [];
+    const fakeFiles = [];
+    let prevHash = null;
+
+    for (let index = 0; index < entryCount; index += 1) {
+      const sequence = index + 1;
+      const eventId = [
+        String(sequence).padStart(8, '0'),
+        '0000',
+        '4000',
+        '8000',
+        String(sequence).padStart(12, '0')
+      ].join('-');
+      const entry = {
+        eventId,
+        tenant: 'ownerfi',
+        command: 'review.large-backlog',
+        payload: {},
+        result: {},
+        actor: null,
+        timestamp: '2026-11-24T00:00:00.000Z',
+        prevHash
+      };
+      entry.auditHash = crypto
+        .createHash('sha256')
+        .update(stableStringify({
+          eventId: entry.eventId,
+          tenant: entry.tenant,
+          command: entry.command,
+          payload: entry.payload,
+          result: entry.result,
+          actor: entry.actor,
+          timestamp: entry.timestamp,
+          prevHash: entry.prevHash
+        }))
+        .digest('hex');
+      prevHash = entry.auditHash;
+      entries.push(entry);
+      fakeFiles.push({
+        name: `${String(sequence).padStart(20, '0')}-${eventId}.json`,
+        sequence,
+        isFile: () => true
+      });
+    }
+
+    const originalReaddir = fs.readdir;
+    const originalStat = fs.stat;
+    const originalReadFile = fs.readFile;
+    fs.readdir = async () => fakeFiles;
+    fs.stat = async () => ({ size: 500 });
+    fs.readFile = async (filePath) => {
+      if (path.basename(filePath) === 'state.json') {
+        const error = new Error('state not found');
+        error.code = 'ENOENT';
+        throw error;
+      }
+      const sequence = Number(path.basename(filePath).slice(0, 20));
+      return `${JSON.stringify({ sequence, entry: entries[sequence - 1] })}\n`;
+    };
+
+    const logger = createAuditLogger({
+      spoolDirectory: directory,
+      databaseStatus: () => 'disabled',
+      loadAnchor: async () => null,
+      maxSpoolBytes: entryCount * 500,
+      retryIntervalMs: 60000,
+      maxRetryIntervalMs: 60000
+    });
+    loggers.push(logger);
+    try {
+      await logger.initialize();
+      assert.equal(logger.getAll().length, entryCount);
+      assert.deepEqual(logger.verifyChain(), { valid: true, checked: entryCount });
+    } finally {
+      fs.readdir = originalReaddir;
+      fs.stat = originalStat;
+      fs.readFile = originalReadFile;
     }
   });
 
