@@ -1,0 +1,212 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nunncloud.local/schemas/stage0-canonical-dataset/v0.1",
+  "title": "Stage 0 Canonical Synthetic Hydropower Dataset v0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "datasetId",
+    "status",
+    "provenance",
+    "description",
+    "horizon",
+    "timeZone",
+    "water",
+    "energy",
+    "grid",
+    "forecast",
+    "evidence",
+    "baselineWindow",
+    "candidateWindows",
+    "defaultAlternativeIds",
+    "authorization",
+    "testMatrix",
+    "integrity"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "stage0-canonical-dataset/v0.1" },
+    "datasetId": { "type": "string", "minLength": 1 },
+    "status": { "const": "SIMULATION_ONLY" },
+    "provenance": { "const": "SYNTHETIC" },
+    "description": { "type": "string", "minLength": 1 },
+    "horizon": {
+      "type": "object",
+      "required": ["hours", "intervalMinutes", "boundaryConvention"],
+      "properties": {
+        "hours": { "const": 24 },
+        "intervalMinutes": { "const": 60 },
+        "boundaryConvention": { "type": "string", "minLength": 1 }
+      }
+    },
+    "timeZone": { "const": "America/Phoenix" },
+    "water": {
+      "type": "object",
+      "required": [
+        "startingStorageM3",
+        "minimumStorageM3",
+        "maximumStorageM3",
+        "targetEndingStorageM3",
+        "storageToleranceM3",
+        "requiredHourlyEnvironmentalBypassM3",
+        "hourlyInflowM3",
+        "hourlyEnvironmentalBypassM3",
+        "hourlySpillM3"
+      ],
+      "properties": {
+        "startingStorageM3": { "type": "number" },
+        "minimumStorageM3": { "type": "number" },
+        "maximumStorageM3": { "type": "number" },
+        "targetEndingStorageM3": { "type": "number" },
+        "storageToleranceM3": { "type": "number", "minimum": 0 },
+        "requiredHourlyEnvironmentalBypassM3": { "type": "number", "minimum": 0 },
+        "hourlyInflowM3": { "$ref": "#/$defs/hourlyNullableNumber24" },
+        "hourlyEnvironmentalBypassM3": { "$ref": "#/$defs/hourlyNullableNumber24" },
+        "hourlySpillM3": { "$ref": "#/$defs/hourlyNumber24" }
+      }
+    },
+    "energy": {
+      "type": "object",
+      "required": [
+        "turbineVolumeM3",
+        "modeledEnergyKWh",
+        "dailyEnergyTargetKWh",
+        "energyToleranceKWh",
+        "modeledConversionKWhPer1200M3"
+      ],
+      "properties": {
+        "turbineVolumeM3": { "type": "number", "minimum": 0 },
+        "modeledEnergyKWh": { "type": "number", "minimum": 0 },
+        "dailyEnergyTargetKWh": { "type": "number", "minimum": 0 },
+        "energyToleranceKWh": { "type": "number", "minimum": 0 },
+        "modeledConversionKWhPer1200M3": { "type": "number", "minimum": 0 }
+      }
+    },
+    "grid": {
+      "type": "object",
+      "required": [
+        "hourlyMarginalKgCO2ePerMWh",
+        "dataAgeMinutes",
+        "requiredCandidateFactorsMissing"
+      ],
+      "properties": {
+        "hourlyMarginalKgCO2ePerMWh": { "$ref": "#/$defs/hourlyNullableNumber24" },
+        "dataAgeMinutes": { "type": "number", "minimum": 0 },
+        "requiredCandidateFactorsMissing": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "forecast": {
+      "type": "object",
+      "required": ["modelId", "modelVersion", "uncertainty", "horizonHours"],
+      "properties": {
+        "modelId": { "type": "string" },
+        "modelVersion": { "type": "string" },
+        "uncertainty": { "type": "number", "minimum": 0, "maximum": 1 },
+        "horizonHours": { "const": 24 }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "required": [
+        "inputVersion",
+        "forecastVersion",
+        "maxGridDataAgeMinutes",
+        "maxForecastUncertainty"
+      ],
+      "properties": {
+        "inputVersion": { "type": "string", "minLength": 1 },
+        "forecastVersion": { "type": "string", "minLength": 1 },
+        "maxGridDataAgeMinutes": { "type": "number", "minimum": 0 },
+        "maxForecastUncertainty": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+    "baselineWindow": { "$ref": "#/$defs/window" },
+    "candidateWindows": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/candidateWindow" }
+    },
+    "defaultAlternativeIds": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "authorization": { "type": "object" },
+    "testMatrix": {
+      "type": "array",
+      "minItems": 25,
+      "items": {
+        "type": "object",
+        "required": ["id", "description", "candidateIds", "expected"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "description": { "type": "string", "minLength": 1 },
+          "candidateIds": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "expected": {
+            "type": "object",
+            "required": [
+              "synapseOutcome",
+              "sentinelDisposition",
+              "simulatedOtResponse",
+              "simulatedExecution",
+              "finalDisposition",
+              "rejectionCodes",
+              "receiptComplete"
+            ]
+          }
+        }
+      }
+    },
+    "integrity": {
+      "type": "object",
+      "required": ["datasetSha256"],
+      "properties": {
+        "datasetSha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "hourlyNumber24": {
+      "type": "array",
+      "minItems": 24,
+      "maxItems": 24,
+      "items": { "type": "number" }
+    },
+    "hourlyNullableNumber24": {
+      "type": "array",
+      "minItems": 24,
+      "maxItems": 24,
+      "items": { "type": ["number", "null"] }
+    },
+    "window": {
+      "type": "object",
+      "required": ["startHour", "endHour"],
+      "properties": {
+        "startHour": { "type": "integer", "minimum": 0, "maximum": 23 },
+        "endHour": { "type": "integer", "minimum": 1, "maximum": 24 }
+      }
+    },
+    "candidateWindow": {
+      "allOf": [
+        { "$ref": "#/$defs/window" },
+        {
+          "type": "object",
+          "required": ["id", "label", "modeledReboundCostKgCO2e"],
+          "properties": {
+            "id": { "type": "string", "minLength": 1 },
+            "label": { "type": "string", "minLength": 1 },
+            "modeledReboundCostKgCO2e": { "type": "number", "minimum": 0 }
+          }
+        }
+      ]
+    }
+  }
+}

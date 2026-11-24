@@ -1,0 +1,569 @@
+{
+  "schemaVersion": "stage0-canonical-dataset/v0.1",
+  "datasetId": "hydropower-stage0-synthetic-24h-001",
+  "status": "SIMULATION_ONLY",
+  "provenance": "SYNTHETIC",
+  "description": "One hypothetical 24-hour reservoir comparison for governed offline simulation. Not facility data and not an operating recommendation.",
+  "horizon": {
+    "hours": 24,
+    "intervalMinutes": 60,
+    "boundaryConvention": "Index 0 is start-of-day midnight; index 24 is the next midnight. Start is inclusive and end is exclusive."
+  },
+  "timeZone": "America/Phoenix",
+  "water": {
+    "startingStorageM3": 5000,
+    "minimumStorageM3": 3500,
+    "maximumStorageM3": 6500,
+    "targetEndingStorageM3": 5000,
+    "storageToleranceM3": 0.001,
+    "requiredHourlyEnvironmentalBypassM3": 50,
+    "hourlyInflowM3": [
+      150, 150, 150, 150, 150, 150, 150, 150, 150, 150, 150, 150,
+      150, 150, 150, 150, 150, 150, 150, 150, 150, 150, 150, 150
+    ],
+    "hourlyEnvironmentalBypassM3": [
+      50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50,
+      50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50
+    ],
+    "hourlySpillM3": [
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    ]
+  },
+  "energy": {
+    "turbineVolumeM3": 2400,
+    "modeledEnergyKWh": 200,
+    "dailyEnergyTargetKWh": 200,
+    "energyToleranceKWh": 0.001,
+    "modeledConversionKWhPer1200M3": 100
+  },
+  "grid": {
+    "hourlyMarginalKgCO2ePerMWh": [
+      100, 100, 100, 100, 100, 100, 100, 300, 100, 300, 100, 100,
+      100, 500, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100
+    ],
+    "dataAgeMinutes": 15,
+    "requiredCandidateFactorsMissing": []
+  },
+  "forecast": {
+    "modelId": "synthetic-forethought-stage0",
+    "modelVersion": "0.1",
+    "uncertainty": 0.1,
+    "horizonHours": 24
+  },
+  "evidence": {
+    "inputVersion": "stage0-inputs/v0.1",
+    "forecastVersion": "stage0-forecast/v0.1",
+    "maxGridDataAgeMinutes": 60,
+    "maxForecastUncertainty": 0.2
+  },
+  "baselineWindow": {
+    "startHour": 9,
+    "endHour": 10
+  },
+  "candidateWindows": [
+    {
+      "id": "candidate-09",
+      "label": "Same-window candidate: 09:00-10:00",
+      "startHour": 9,
+      "endHour": 10,
+      "modeledReboundCostKgCO2e": 0
+    },
+    {
+      "id": "candidate-13",
+      "label": "Afternoon candidate: 13:00-14:00",
+      "startHour": 13,
+      "endHour": 14,
+      "modeledReboundCostKgCO2e": 0
+    },
+    {
+      "id": "candidate-16",
+      "label": "Late candidate: 16:00-17:00",
+      "startHour": 16,
+      "endHour": 17,
+      "modeledReboundCostKgCO2e": 0
+    }
+  ],
+  "defaultAlternativeIds": [
+    "candidate-13"
+  ],
+  "authorization": {
+    "state": "NOT_PRESENT",
+    "humanDecision": "NOT_PROVIDED",
+    "authorizationId": null,
+    "windowStartHour": null,
+    "windowEndHour": null,
+    "evidenceVersion": "stage0-inputs/v0.1"
+  },
+  "testMatrix": [
+    {
+      "id": "A - shift helps",
+      "description": "DEC-011 regression: feasible afternoon shift improves modeled avoided emissions.",
+      "candidateIds": ["candidate-13"],
+      "expected": {
+        "synapseOutcome": "MODELED_IMPROVEMENT",
+        "sentinelDisposition": "OPERATOR_REVIEW_REQUIRED",
+        "simulatedOtResponse": "NOT_CALLED",
+        "simulatedExecution": false,
+        "finalDisposition": "MODELED_IMPROVEMENT_PENDING_AUTHORIZATION",
+        "rejectionCodes": [],
+        "receiptComplete": true
+      }
+    },
+    {
+      "id": "B - water constraint blocks the shift",
+      "description": "DEC-011 regression: lower maximum storage makes the late candidate infeasible before ranking.",
+      "candidateIds": ["candidate-13"],
+      "overrides": {
+        "water.maximumStorageM3": 6000
+      },
+      "expected": {
+        "synapseOutcome": "INFEASIBLE",
+        "sentinelDisposition": "HOLD",
+        "simulatedOtResponse": "NOT_CALLED",
+        "simulatedExecution": false,
+        "finalDisposition": "INFEASIBLE",
+        "rejectionCodes": ["MAX_STORAGE_EXCEEDED"],
+        "receiptComplete": true
+      }
+    },
+    {
+      "id": "C - required input missing",
+      "description": "DEC-011 regression: missing alternative emissions factor blocks ranking.",
+      "candidateIds": ["candidate-13"],
+      "overrides": {
+        "grid.requiredCandidateFactorsMissing": ["candidate-13"],
+        "grid.hourlyMarginalKgCO2ePerMWh": [
+          100, 100, 100, 100, 100, 100, 100, 300, 100, 300, 100, 100,
+          100, null, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100
+        ]
+      },
+      "expected": {
+        "synapseOutcome": "INSUFFICIENT_EVIDENCE",
+        "sentinelDisposition": "HOLD",
+        "simulatedOtResponse": "NOT_CALLED",
+        "simulatedExecution": false,
+        "finalDisposition": "INSUFFICIENT_EVIDENCE_HOLD",
+        "rejectionCodes": ["MISSING_REQUIRED_EMISSIONS_FACTOR"],
+        "receiptComplete": true
+      }
+    },
+    {
+      "id": "P-01",
+      "description": "Canonical baseline is water- and energy-feasible.",
+      "baselineOnly": true,
+      "candidateIds": [],
+      "expected": {
+        "synapseOutcome": "BASELINE_VALID",
+        "sentinelDisposition": "NO_ACTION",
+        "simulatedOtResponse": "NOT_CALLED",
+        "simulatedExecution": false,
+        "finalDisposition": "BASELINE_VERIFIED",
+        "rejectionCodes": [],
+        "receiptComplete": true
+      }
+    },
+    {
+      "id": "P-02",
+      "description": "A feasible alternative provides no material modeled improvement.",
+      "candidateIds": ["candidate-09"],
+      "expected": {
+        "synapseOutcome": "NO_IMPROVEMENT_FOUND",
+        "sentinelDisposition": "NO_ACTION",
+        "simulatedOtResponse": "NOT_CALLED",
+        "simulatedExecution": false,
+        "finalDisposition": "NO_IMPROVEMENT_FOUND",
+        "rejectionCodes": [],
+        "receiptComplete": true
+      }
+    },
+    {
+      "id": "P-03",
+      "description": "A compliant candidate produces a modeled emissions improvement.",
+      "candidateIds": ["candidate-13"],
+      "expected": {
+        "synapseOutcome": "MODELED_IMPROVEMENT",
+        "sentinelDisposition": "OPERATOR_REVIEW_REQUIRED",
+        "simulatedOtResponse": "NOT_CALLED",
+        "simulatedExecution": false,
+        "finalDisposition": "MODELED_IMPROVEMENT_PENDING_AUTHORIZATION",
+        "rejectionCodes": [],
+        "receiptComplete": true
+      }
+    },
+    {
+      "id": "P-04",
+      "description": "Valid human approval and independent OT acceptance permit simulated execution.",
+      "candidateIds": ["candidate-13"],
+      "authorization": {
+        "state": "VALID",
+        "humanDecision": "APPROVE"
+      },
+      "simulatedOt": {
+        "response": "ACCEPTED"
+      },
+      "expected": {
+        "synapseOutcome": "MODELED_IMPROVEMENT",
+        "sentinelDisposition": "RECOMMEND",
+        "simulatedOtResponse": "ACCEPTED",
+        "simulatedExecution": true,
+        "finalDisposition": "EXECUTED_VERIFIED",
+        "rejectionCodes": [],
+        "receiptComplete": true
+      }
+    },
+    {
+      "id": "P-05",
+      "description": "Multiple candidates are retained, including an infeasible candidate and the best feasible candidate.",
+      "candidateIds": ["candidate-09", "candidate-13", "candidate-16"],
+      "expected": {
+        "synapseOutcome": "MODELED_IMPROVEMENT",
+        "sentinelDisposition": "OPERATOR_REVIEW_REQUIRED",
+        "simulatedOtResponse": "NOT_CALLED",
+        "simulatedExecution": false,
+        "finalDisposition": "MODELED_IMPROVEMENT_PENDING_AUTHORIZATION",
+        "rejectionCodes": [],
+        "receiptComplete": true
+      }
+    },
+    {
+      "id": "F-01",
+      "description": "Missing inflow produces insufficient evidence.",
+      "candidateIds": ["candidate-13"],
+      "overrides": {
+        "water.hourlyInflowM3": [
+          150, 150, 150, 150, 150, 150, 150, 150, 150, 150, 150, 150,
+          150, 150, 150, 150, null, 150, 150, 150, 150, 150, 150, 150
+        ]
+      },
+      "expected": {
+        "synapseOutcome": "INSUFFICIENT_EVIDENCE",
+        "sentinelDisposition": "HOLD",
+        "simulatedOtResponse": "NOT_CALLED",
+        "simulatedExecution": false,
+        "finalDisposition": "INSUFFICIENT_EVIDENCE_HOLD",
+        "rejectionCodes": ["MISSING_INFLOW_DATA"],
+        "receiptComplete": true
+      }
+    },
+    {
+      "id": "F-02",
+      "description": "Stale grid data prevents unsupported green ranking.",
+      "candidateIds": ["candidate-13"],
+      "overrides": {
+        "grid.dataAgeMinutes": 61
+      },
+      "expected": {
+        "synapseOutcome": "INSUFFICIENT_EVIDENCE",
+        "sentinelDisposition": "HOLD",
+        "simulatedOtResponse": "NOT_CALLED",
+        "simulatedExecution": false,
+        "finalDisposition": "INSUFFICIENT_EVIDENCE_HOLD",
+        "rejectionCodes": ["STALE_GRID_DATA"],
+        "receiptComplete": true
+      }
+    },
+    {
+      "id": "F-03",
+      "description": "Minimum-storage violation makes the candidate infeasible.",
+      "candidateIds": ["candidate-09"],
+      "overrides": {
+        "water.minimumStorageM3": 3700
+      },
+      "expected": {
+        "synapseOutcome": "INFEASIBLE",
+        "sentinelDisposition": "HOLD",
+        "simulatedOtResponse": "NOT_CALLED",
+        "simulatedExecution": false,
+        "finalDisposition": "INFEASIBLE",
+        "rejectionCodes": ["MIN_STORAGE_EXCEEDED"],
+        "receiptComplete": true
+      }
+    },
+    {
+      "id": "F-04",
+      "description": "Maximum-storage violation blocks the late candidate.",
+      "candidateIds": ["candidate-16"],
+      "expected": {
+        "synapseOutcome": "INFEASIBLE",
+        "sentinelDisposition": "HOLD",
+        "simulatedOtResponse": "NOT_CALLED",
+        "simulatedExecution": false,
+        "finalDisposition": "INFEASIBLE",
+        "rejectionCodes": ["MAX_STORAGE_EXCEEDED"],
+        "receiptComplete": true
+      }
+    },
+    {
+      "id": "F-05",
+      "description": "Environmental-bypass violation is rejected regardless of green benefit.",
+      "candidateIds": ["candidate-13"],
+      "overrides": {
+        "water.hourlyInflowM3": [
+          140, 150, 150, 150, 150, 150, 150, 150, 150, 150, 150, 150,
+          150, 150, 150, 150, 150, 150, 150, 150, 150, 150, 150, 150
+        ],
+        "water.hourlyEnvironmentalBypassM3": [
+          40, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50,
+          50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50
+        ]
+      },
+      "expected": {
+        "synapseOutcome": "INFEASIBLE",
+        "sentinelDisposition": "HOLD",
+        "simulatedOtResponse": "NOT_CALLED",
+        "simulatedExecution": false,
+        "finalDisposition": "INFEASIBLE",
+        "rejectionCodes": ["ENVIRONMENTAL_BYPASS_VIOLATION"],
+        "receiptComplete": true
+      }
+    },
+    {
+      "id": "F-06",
+      "description": "Terminal-storage failure makes the candidate infeasible.",
+      "candidateIds": ["candidate-13"],
+      "overrides": {
+        "water.hourlyInflowM3": [
+          149, 150, 150, 150, 150, 150, 150, 150, 150, 150, 150, 150,
+          150, 150, 150, 150, 150, 150, 150, 150, 150, 150, 150, 150
+        ]
+      },
+      "expected": {
+        "synapseOutcome": "INFEASIBLE",
+        "sentinelDisposition": "HOLD",
+        "simulatedOtResponse": "NOT_CALLED",
+        "simulatedExecution": false,
+        "finalDisposition": "INFEASIBLE",
+        "rejectionCodes": ["TARGET_END_STORAGE_NOT_MET"],
+        "receiptComplete": true
+      }
+    },
+    {
+      "id": "F-07",
+      "description": "Expired authorization blocks execution.",
+      "candidateIds": ["candidate-13"],
+      "authorization": {
+        "state": "VALID",
+        "humanDecision": "APPROVE",
+        "expiresAfter": true
+      },
+      "simulatedOt": {
+        "response": "ACCEPTED"
+      },
+      "expected": {
+        "synapseOutcome": "MODELED_IMPROVEMENT",
+        "sentinelDisposition": "HOLD",
+        "simulatedOtResponse": "NOT_CALLED",
+        "simulatedExecution": false,
+        "finalDisposition": "HOLD",
+        "rejectionCodes": ["AUTHORIZATION_EXPIRED"],
+        "receiptComplete": true
+      }
+    },
+    {
+      "id": "F-08",
+      "description": "Evidence changed after approval invalidates authorization.",
+      "candidateIds": ["candidate-13"],
+      "authorization": {
+        "state": "VALID",
+        "humanDecision": "APPROVE",
+        "evidenceChangedAfterApproval": true
+      },
+      "simulatedOt": {
+        "response": "ACCEPTED"
+      },
+      "expected": {
+        "synapseOutcome": "MODELED_IMPROVEMENT",
+        "sentinelDisposition": "HOLD",
+        "simulatedOtResponse": "NOT_CALLED",
+        "simulatedExecution": false,
+        "finalDisposition": "HOLD",
+        "rejectionCodes": ["AUTHORIZATION_EVIDENCE_MISMATCH"],
+        "receiptComplete": true
+      }
+    },
+    {
+      "id": "F-09",
+      "description": "Simulated OT rejection cannot be overridden.",
+      "candidateIds": ["candidate-13"],
+      "authorization": {
+        "state": "VALID",
+        "humanDecision": "APPROVE"
+      },
+      "simulatedOt": {
+        "response": "REJECTED"
+      },
+      "expected": {
+        "synapseOutcome": "MODELED_IMPROVEMENT",
+        "sentinelDisposition": "HOLD",
+        "simulatedOtResponse": "REJECTED",
+        "simulatedExecution": false,
+        "finalDisposition": "HOLD",
+        "rejectionCodes": ["SIMULATED_OT_REJECTED"],
+        "receiptComplete": true
+      }
+    },
+    {
+      "id": "F-10",
+      "description": "Unavailable simulated OT produces HOLD and no execution.",
+      "candidateIds": ["candidate-13"],
+      "authorization": {
+        "state": "VALID",
+        "humanDecision": "APPROVE"
+      },
+      "simulatedOt": {
+        "response": "UNAVAILABLE"
+      },
+      "expected": {
+        "synapseOutcome": "MODELED_IMPROVEMENT",
+        "sentinelDisposition": "HOLD",
+        "simulatedOtResponse": "UNAVAILABLE",
+        "simulatedExecution": false,
+        "finalDisposition": "HOLD",
+        "rejectionCodes": ["SIMULATED_OT_UNAVAILABLE"],
+        "receiptComplete": true
+      }
+    },
+    {
+      "id": "F-11",
+      "description": "Forecast uncertainty above the configured maximum blocks comparison.",
+      "candidateIds": ["candidate-13"],
+      "overrides": {
+        "forecast.uncertainty": 0.21
+      },
+      "expected": {
+        "synapseOutcome": "INSUFFICIENT_EVIDENCE",
+        "sentinelDisposition": "HOLD",
+        "simulatedOtResponse": "NOT_CALLED",
+        "simulatedExecution": false,
+        "finalDisposition": "INSUFFICIENT_EVIDENCE_HOLD",
+        "rejectionCodes": ["FORECAST_UNCERTAINTY_TOO_HIGH"],
+        "receiptComplete": true
+      }
+    },
+    {
+      "id": "F-12",
+      "description": "Alternative has lower displaced-emissions value than baseline.",
+      "candidateIds": ["candidate-13"],
+      "overrides": {
+        "grid.hourlyMarginalKgCO2ePerMWh": [
+          100, 100, 100, 100, 100, 100, 100, 300, 100, 300, 100, 100,
+          100, 200, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100
+        ]
+      },
+      "expected": {
+        "synapseOutcome": "NO_IMPROVEMENT_FOUND",
+        "sentinelDisposition": "NO_ACTION",
+        "simulatedOtResponse": "NOT_CALLED",
+        "simulatedExecution": false,
+        "finalDisposition": "NO_IMPROVEMENT_FOUND",
+        "rejectionCodes": [],
+        "receiptComplete": true
+      }
+    },
+    {
+      "id": "F-13",
+      "description": "Modeled rebound cost removes the apparent emissions improvement.",
+      "candidateIds": ["candidate-13"],
+      "overrides": {
+        "candidateWindows.1.modeledReboundCostKgCO2e": 50
+      },
+      "expected": {
+        "synapseOutcome": "NO_IMPROVEMENT_FOUND",
+        "sentinelDisposition": "NO_ACTION",
+        "simulatedOtResponse": "NOT_CALLED",
+        "simulatedExecution": false,
+        "finalDisposition": "NO_IMPROVEMENT_FOUND",
+        "rejectionCodes": [],
+        "receiptComplete": true
+      }
+    },
+    {
+      "id": "F-14",
+      "description": "Human rejection prevents simulated execution.",
+      "candidateIds": ["candidate-13"],
+      "authorization": {
+        "state": "VALID",
+        "humanDecision": "REJECT"
+      },
+      "expected": {
+        "synapseOutcome": "MODELED_IMPROVEMENT",
+        "sentinelDisposition": "HUMAN_REJECTED",
+        "simulatedOtResponse": "NOT_CALLED",
+        "simulatedExecution": false,
+        "finalDisposition": "REJECTED_BY_HUMAN",
+        "rejectionCodes": [],
+        "receiptComplete": true
+      }
+    },
+    {
+      "id": "F-15",
+      "description": "Human abort invalidates further simulated execution.",
+      "candidateIds": ["candidate-13"],
+      "authorization": {
+        "state": "VALID",
+        "humanDecision": "ABORT"
+      },
+      "expected": {
+        "synapseOutcome": "MODELED_IMPROVEMENT",
+        "sentinelDisposition": "HUMAN_ABORTED",
+        "simulatedOtResponse": "NOT_CALLED",
+        "simulatedExecution": false,
+        "finalDisposition": "ABORTED_BY_HUMAN",
+        "rejectionCodes": [],
+        "receiptComplete": true
+      }
+    },
+    {
+      "id": "F-16",
+      "description": "Duplicate execution request is deterministically blocked.",
+      "candidateIds": ["candidate-13"],
+      "authorization": {
+        "state": "VALID",
+        "humanDecision": "APPROVE"
+      },
+      "simulatedOt": {
+        "response": "ACCEPTED"
+      },
+      "execution": {
+        "duplicate": true
+      },
+      "expected": {
+        "synapseOutcome": "MODELED_IMPROVEMENT",
+        "sentinelDisposition": "HOLD",
+        "simulatedOtResponse": "NOT_CALLED",
+        "simulatedExecution": false,
+        "finalDisposition": "HOLD",
+        "rejectionCodes": ["DUPLICATE_EXECUTION_BLOCKED"],
+        "receiptComplete": true
+      }
+    },
+    {
+      "id": "F-17",
+      "description": "A missing evidence-receipt component prevents evidence-complete status.",
+      "candidateIds": ["candidate-13"],
+      "authorization": {
+        "state": "VALID",
+        "humanDecision": "APPROVE"
+      },
+      "simulatedOt": {
+        "response": "ACCEPTED"
+      },
+      "receipt": {
+        "missingComponents": ["post_action_state"]
+      },
+      "expected": {
+        "synapseOutcome": "MODELED_IMPROVEMENT",
+        "sentinelDisposition": "RECOMMEND",
+        "simulatedOtResponse": "ACCEPTED",
+        "simulatedExecution": true,
+        "finalDisposition": "EVIDENCE_INCOMPLETE",
+        "rejectionCodes": ["EVIDENCE_RECEIPT_INCOMPLETE"],
+        "receiptComplete": false
+      }
+    }
+  ],
+  "integrity": {
+    "datasetSha256": "6584a4b40c6dfe1c312903e54b6004061cc1cc30622dfa2e87e21cde0af3f66f"
+  }
+}

@@ -1,0 +1,7 @@
+80eda59165dc9972a8b2a39267ba7510b36520f80f2161363edde679d6029b6b  ./README.md
+2c876b08aca3be2dd75c352df244e07d2751489a284535a3934096acc8a9428e  ./STAGE_0_CANONICAL_SYNTHETIC_DATASET_AND_DETERMINISTIC_TEST_MATRIX_v0.1.md
+35f42709b3d5e70eb5a955c0d7de3093ca31d9181eacb826e270fa7eef09d502  ./data/stage0-canonical-dataset-v0.1.json
+c6f41338fda8c74543eb1ed8d6442eda65977c41d4ecc14a8458c60345746c76  ./run-stage0-matrix.js
+e3f67521ee45e29096245abeaf11d1de9436d9e80d59cf5845c0197c228a62cb  ./schema/stage0-canonical-dataset.schema.json
+98b027233370aa69865bd82f410605c749774948d278fee81f59b1e95cfa839b  ./simulation/evaluate-stage0.js
+9a59de2dd6657a5076f000cb4fa19e1f3cf7a899757ef54cb2521735a8376bfd  ./tests/canonical-dataset.test.js
