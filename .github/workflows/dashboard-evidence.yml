@@ -1,0 +1,101 @@
+name: Dashboard GitHub evidence
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - .github/workflows/dashboard-evidence.yml
+
+permissions:
+  contents: read
+  pull-requests: read
+  actions: read
+
+jobs:
+  snapshot:
+    name: Read-only GitHub snapshot
+    if: github.repository == 'Codynunn42/SentinelOS-NON-DEMO' && (github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository)
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Summarize published refs and check records
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          import re
+          import urllib.request
+          from datetime import datetime, timezone
+          from functools import cache
+
+          REPO = 'Codynunn42/SentinelOS-NON-DEMO'
+          WEB = f'https://github.com/{REPO}'
+          SHA = re.compile(r'[0-9a-f]{40}')
+
+          @cache
+          def get(path):
+              request = urllib.request.Request(
+                  f'https://api.github.com/repos/{REPO}/{path}',
+                  headers={'Accept': 'application/vnd.github+json',
+                           'Authorization': 'Bearer ' + os.environ['GH_TOKEN'],
+                           'User-Agent': 'sentinelos-dashboard-evidence'},
+              )
+              with urllib.request.urlopen(request, timeout=8) as response:
+                  return json.load(response)
+
+          def sha(value):
+              if not isinstance(value, str) or not SHA.fullmatch(value):
+                  raise ValueError('Missing or invalid commit/tree SHA')
+              return value
+
+          def pin(value):
+              value = sha(value)
+              commit = get(f'git/commits/{value}')
+              if sha(commit['sha']) != value:
+                  raise ValueError('Commit response did not match pinned SHA')
+              return f'[`{value[:7]}`]({WEB}/commit/{value}) / `{sha(commit["tree"]["sha"])}`'
+
+          def run_summary(head):
+              runs = get(f'actions/runs?head_sha={head}&per_page=15')['workflow_runs']
+              results = []
+              allowed = {'success', 'failure', 'action_required', 'cancelled', 'neutral',
+                         'skipped', 'stale', 'timed_out', 'startup_failure'}
+              for run in runs:
+                  if run.get('head_sha') != head or run.get('name') != 'CI':
+                      continue
+                  run_id = run.get('id')
+                  if type(run_id) is not int or run_id < 1:
+                      raise ValueError('Invalid run ID')
+                  conclusion = run.get('conclusion')
+                  outcome = conclusion if conclusion in allowed else 'no recognized conclusion'
+                  results.append(f'[{run_id}]({WEB}/actions/runs/{run_id}): {outcome}')
+              return '<br>'.join(results[:3]) or 'No matching CI run returned'
+
+          main = pin(get('git/ref/heads/main')['object']['sha'])
+          rows = []
+          for number in (47, 50, 51, 71, 73, 74, 76, 79, 81):
+              pr = get(f'pulls/{number}')
+              if pr['number'] != number or pr['state'] not in {'open', 'closed'}:
+                  raise ValueError('Unexpected pull request record')
+              state = 'merged' if pr['merged'] else 'draft' if pr['draft'] else pr['state']
+              head = sha(pr['head']['sha'])
+              base = sha(pr['base']['sha'])
+              rows.append(f'| [#{number}]({WEB}/pull/{number}) | {state} | {pin(head)} | {pin(base)} | {run_summary(head)} |')
+          lines = [
+              '## Dashboard evidence snapshot (public GitHub metadata only)',
+              f'Observed {datetime.now(timezone.utc).isoformat(timespec="seconds")}',
+              f'Observed main commit / tree: {main}',
+              '',
+              '| PR | State | Head commit / tree | PR-reported base commit / tree | Head-associated CI |',
+              '|---|---|---|---|---|',
+              *rows,
+              '',
+              'Run association does not prove tested checkout, executed cases, independent review, runtime readiness, or authorization.',
+              'A missing run is not a pass. This workflow does not update a Site, approval, or register.',
+          ]
+          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a', encoding='utf-8') as report:
+              report.write('\n'.join(lines) + '\n')
+          PY
