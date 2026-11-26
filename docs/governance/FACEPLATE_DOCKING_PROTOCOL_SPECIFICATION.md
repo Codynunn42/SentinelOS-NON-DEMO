@@ -5,16 +5,20 @@
 ## Artifact Decision
 
 ```txt
-[HOLD:FACEPLATE-DOCKING-PROTOCOL-DRAFT]
+[APPROVED:LOCAL-READ-ONLY-EVALUATION]
 ```
 
 ## Purpose And Scope
 
-Define the draft protocol for docking contextual Faceplates into SentinelOS without redefining the OS Core.
+Define the protocol for docking contextual Faceplates into SentinelOS without redefining the OS Core.
 
 This specification preserves the separation between Faceplate business context, GaaS constraint interpretation, and OS Core deterministic enforcement.
 
-This document does not authorize runtime implementation, faceplate activation, tool grants, tenant activation, pilot activation, endpoint publication, deployment, external publication, held-standard promotion, or autonomous execution.
+Owner approval recorded 2026-11-24 is limited to use of the SSAI Read-Only Report Synthesis Faceplate for local, read-only evaluation of repository materials and preparation of report syntheses. It does not authorize changing repository materials through the Faceplate or publishing prepared syntheses.
+
+The current canary identity and digest have not been verified, and no authorization linked to a current run is retained. The runtime connection, live-source access, `/proxy/command`, and production authentication remain separately gated. Independent reviews remain outstanding.
+
+This approval does not establish that the Faceplate is implemented or connected to a runtime. It does not authorize runtime implementation, runtime connection, live-source access, tool grants, tenant activation, pilot activation, endpoint publication, deployment, external publication, held-standard promotion, or autonomous execution.
 
 ## Constitutional Inheritance
 
@@ -103,4 +107,4 @@ audit registration
 
 ## Non-Authorization Clause
 
-This specification is draft architecture only. It does not authorize runtime implementation, deployment, runtime mutation, direct env value restoration, secret access, external publication, endpoint release, pilot activation, tenant activation, held-standard promotion, push, tool grants, certification claims, autonomous execution, or destructive cleanup.
+The approval above is local and read-only only. It does not authorize runtime connection or activation, live-source or credential access, `/proxy/command` use, production authentication, repository mutation through the Faceplate, deployment, direct environment-value restoration, external publication, endpoint release, pilot or tenant activation, held-standard promotion, push, additional tool grants, certification claims, autonomous execution, or destructive cleanup.
