@@ -98,6 +98,18 @@ test('duplicate controlling Portfolio rows are rejected even with a matching dec
   assert.ok(!fs.existsSync(f.output));
 });
 
+test('rejects duplicate disposition IDs after trimming before writing reports', (context) => {
+  const f = fixture(context);
+  for (const id of ['DEMO-001', ' DEMO-001 ']) {
+    f.config.dispositions.push({ ...f.config.dispositions[0], id });
+    const result = f.run();
+    assert.notEqual(result.status, 0);
+    assert.match(result.stderr, /Duplicate disposition id: DEMO-001/);
+    assert.ok(!fs.existsSync(f.output));
+    f.config.dispositions.pop();
+  }
+});
+
 test('checks referencing an absent configured sheet are explicitly unverified', (context) => {
   const f = fixture(context);
   f.config.checks = [{
@@ -357,7 +369,7 @@ test('reporting wrapper rejects repository-writing escalation and ledger steps',
 
 function dateWorkbook(file, { serial = '47882', date1904 = '0', format = 'builtin', text = false,
   header = 'Work Item ID', formula = false, formulaColumn = 0, cached = false,
-  empty = false, duplicate = false } = {}) {
+  empty = false, duplicate = false, extraHeaders = [] } = {}) {
   const build = spawnSync('python3', ['-c', `
 import json, sys, zipfile
 from xml.sax.saxutils import escape, quoteattr
@@ -370,8 +382,8 @@ with zipfile.ZipFile(sys.argv[1], 'w') as z:
     numfmt = '14' if fmt == 'builtin' else '0' if fmt == 'general' else '164'
     custom = '<numFmts count="1"><numFmt numFmtId="164" formatCode='+quoteattr(fmt)+'/></numFmts>' if numfmt == '164' else ''
     z.writestr('xl/styles.xml', '<styleSheet xmlns="'+ns+'">'+custom+'<cellXfs count="2"><xf numFmtId="0"/><xf numFmtId="'+numfmt+'"/></cellXfs></styleSheet>')
-    headers = [data['header'], 'Status', 'Last Updated', 'Deadline / Review Date', 'Next Action']
-    values = ['DEMO-001', 'HOLD', '2031-02-03', '2031-02-03', '47882']
+    headers = [data['header'], 'Status', 'Last Updated', 'Deadline / Review Date', 'Next Action'] + data['extraHeaders']
+    values = ['DEMO-001', 'HOLD', '2031-02-03', '2031-02-03', '47882'] + ['conflicting'] * len(data['extraHeaders'])
     rows = []
     for r, row in enumerate([headers, values, values] if data['duplicate'] else [headers, values], 1):
         cells = []
@@ -388,7 +400,7 @@ with zipfile.ZipFile(sys.argv[1], 'w') as z:
 `, file], {
     encoding: 'utf8',
     input: JSON.stringify({ serial, date1904, format, text, header, formula, formulaColumn,
-      cached, empty, duplicate })
+      cached, empty, duplicate, extraHeaders })
   });
   passed(build);
 }
@@ -435,6 +447,7 @@ test('normalizes IDs consistently in disposition, control and predicate matching
   register.sheets.Portfolio[0]['Work Item ID'] = ' DEMO-001 ';
   register.sheets.Decisions[0]['Decision ID'] = ' CHOICE-001 ';
   fs.writeFileSync(file, JSON.stringify(register));
+  f.config.dispositions[0].id = ' DEMO-001 ';
   f.config.controls = [{
     disposition: 'DEMO-001', register: { sheet: 'Decisions', fields: ['Disposition'],
       pattern: 'HOLD', idField: 'Decision ID', id: ' CHOICE-001 ' },
@@ -447,9 +460,31 @@ test('normalizes IDs consistently in disposition, control and predicate matching
     message: 'Normalized predicate matched'
   }];
   passed(f.run());
-  assert.match(f.read(), /DEMO-001: Register-recorded: HOLD/);
+  assert.match(f.read(), /DEMO-001 : Register-recorded: HOLD/);
   assert.match(f.read(), /CONFLICT - Normalized predicate matched/);
   assert.doesNotMatch(f.read(), /CONFLICT - Unexpected control mismatch/);
+});
+
+for (const header of ['Status', ' Status ', ' Work Item ID ']) {
+  test(`rejects duplicate normalized XLSX header ${JSON.stringify(header)}`, (context) => {
+    const f = fixture(context);
+    const xlsx = path.join(f.dir, 'duplicate-headers.xlsx');
+    dateWorkbook(xlsx, { extraHeaders: [header] });
+    f.config.register = xlsx;
+    const result = f.run();
+    assert.notEqual(result.status, 0);
+    assert.match(result.stderr, new RegExp(`Duplicate worksheet header: ${header.trim()}`));
+    assert.ok(!fs.existsSync(f.output));
+  });
+}
+
+test('allows repeated empty XLSX headers', (context) => {
+  const f = fixture(context);
+  const xlsx = path.join(f.dir, 'empty-headers.xlsx');
+  dateWorkbook(xlsx, { extraHeaders: ['', ' '] });
+  f.config.register = xlsx;
+  passed(f.run());
+  assert.match(f.read(), /DEMO-001: Register-recorded: HOLD/);
 });
 
 for (const [label, options, expected] of [
@@ -530,6 +565,38 @@ global.Date = class extends RealDate {
   passed(result);
   assert.match(f.read(), /2031-02-03/);
   assert.ok(!fs.existsSync(path.join(f.output, 'EXECUTIVE_PACKET_2031-02-04.md')));
+});
+
+test('wrapper pins configured output when configuration changes before generation', (context) => {
+  const f = fixture(context);
+  f.config.outputDir = 'output';
+  passed(f.run());
+  const packet = path.join(f.output, `EXECUTIVE_PACKET_${date}.md`);
+  fs.appendFileSync(packet, '\nSTALE PACKET\n');
+  const otherOutput = path.join(f.dir, 'other-output');
+  const preload = path.join(f.dir, 'change-config.cjs');
+  fs.writeFileSync(preload, `
+const fs = require('fs');
+const original = fs.readFileSync;
+fs.readFileSync = function(file, ...args) {
+  const result = original.call(this, file, ...args);
+  if (process.argv[1].endsWith('run-governance-flow.js') && file === ${JSON.stringify(f.configPath)}) {
+    const config = JSON.parse(result);
+    config.outputDir = ${JSON.stringify(otherOutput)};
+    fs.writeFileSync(file, JSON.stringify(config));
+  }
+  return result;
+};
+`);
+  f.save();
+  const result = spawnSync(process.execPath, [path.join(root, wrapper),
+    `--config=${f.configPath}`, `--date=${date}`, '--skip-pre-escalation', '--skip-ledger'], {
+    cwd: f.dir, encoding: 'utf8', env: { ...process.env, NODE_OPTIONS: `--require=${preload}` }
+  });
+  passed(result);
+  assert.ok(result.stdout.includes(`packet: ${packet}`));
+  assert.doesNotMatch(fs.readFileSync(packet, 'utf8'), /STALE PACKET/);
+  assert.ok(!fs.existsSync(otherOutput));
 });
 
 for (const format of ['json', 'xlsx']) {
@@ -672,7 +739,24 @@ test('sprint plan file is read and focus line appears in NEXT_ACTIONS', (context
   const sprintFile = path.join(f.dir, 'sprint.md');
   fs.writeFileSync(sprintFile, '**Proposed first focus:** PR #47 — Sanitize reconciliation candidate\n');
   passed(f.run(['--skip-pre-escalation', '--skip-ledger', `--sprint-plan=${sprintFile}`], wrapper));
-  assert.match(f.read(), /Daily PR sprint focus \(user-supplied, unverified\): PR #47/);
+  assert.ok(f.read().includes('Daily PR sprint focus (user-supplied, unverified): PR \\#47'));
+});
+
+test('renders untrusted sprint focus and filename as plain Markdown text', (context) => {
+  const f = fixture(context);
+  const sprintFile = path.join(f.dir, 'sprint.md');
+  fs.writeFileSync(sprintFile, '**Proposed first focus:** <!-- *hidden* [link](https://example.invalid) --> &amp; \\\\ \u0000 end\n');
+  passed(f.run([`--sprint-plan=${sprintFile}`]));
+  const report = f.read();
+  assert.ok(report.includes('&lt;\\!\\-\\- \\*hidden\\* \\[link\\]\\(https://example\\.invalid\\) \\-\\-&gt; &amp;amp; \\\\\\\\   end'));
+  assert.ok(!report.includes('<!-- *hidden*'));
+  assert.ok(report.includes('retain the recorded disposition'));
+  assert.ok(report.includes('## 10. Supporting Evidence'));
+
+  const fallback = path.join(f.dir, '<!--fallback-->.md');
+  fs.writeFileSync(fallback, 'No focus line\n');
+  passed(f.run([`--sprint-plan=${fallback}`]));
+  assert.ok(f.read().includes('&lt;\\!\\-\\-fallback\\-\\-&gt;\\.md'));
 });
 
 test('missing sprint plan marks focus as UNVERIFIED in NEXT_ACTIONS', (context) => {

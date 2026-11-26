@@ -126,6 +126,13 @@ def records_for_sheet(rows):
         return []
 
     headers = {index: value.strip() for index, value in header_row.items()}
+    seen_headers = set()
+    for header in headers.values():
+        if not header:
+            continue
+        if header in seen_headers:
+            raise ValueError(f"Duplicate worksheet header: {header}")
+        seen_headers.add(header)
     records = []
     header_position = next(
         index for index, value in enumerate(rows) if value is header_row

@@ -145,12 +145,14 @@ const latestDate = dispositionSources.map((id) => source(id).date).sort().at(-1)
 const latestSources = dispositionSources.filter((id) => source(id).date === latestDate);
 const dispositionRules = list(config.dispositions, 'dispositions');
 if (!dispositionRules.length) fail('At least one disposition rule is required');
+const normalizedId = (value) => String(value ?? '').trim();
 const dispositionIds = new Set();
 for (const rule of dispositionRules) {
   if (!object(rule)) fail('Disposition rules must be objects');
   requiredString(rule.id, 'Disposition id');
-  if (dispositionIds.has(rule.id)) fail(`Duplicate disposition id: ${rule.id}`);
-  dispositionIds.add(rule.id);
+  const id = normalizedId(rule.id);
+  if (dispositionIds.has(id)) fail(`Duplicate disposition id: ${id}`);
+  dispositionIds.add(id);
   for (const assertion of list(rule.patterns, `Disposition ${rule.id} patterns`)) {
     requiredString(assertion.value, 'Assertion value');
     pattern(assertion.pattern);
@@ -163,7 +165,6 @@ for (const rule of dispositionRules) {
   }
 }
 
-const normalizedId = (value) => String(value ?? '').trim();
 let register = null;
 const registerOption = option('register') ?? config.register;
 if (registerOption !== undefined) {
@@ -296,8 +297,8 @@ for (const check of config.checks || []) {
 for (const control of config.controls || []) {
   requiredString(control.message, 'Control message');
   const requiredValue = requiredString(control.requiredValue, 'Required value');
-  if (!dispositionIds.has(control.disposition)) fail(`Unknown disposition in control: ${control.disposition}`);
-  const rule = dispositionRules.find((item) => item.id === control.disposition);
+  if (!dispositionIds.has(normalizedId(control.disposition))) fail(`Unknown disposition in control: ${control.disposition}`);
+  const rule = dispositionRules.find((item) => normalizedId(item.id) === normalizedId(control.disposition));
   const row = records('Portfolio').find((item) => normalizedId(item['Work Item ID']) === normalizedId(rule.id));
   if (predicateRows(control.register).length && (!row || registerValue(rule, row).toLowerCase() !== requiredValue.toLowerCase())) {
     conflicts.push(`CONFLICT - ${control.message}`);
@@ -327,6 +328,15 @@ function cell(value) {
     .replace(/\t/g, '    ')
     .replace(/\\/g, '\\\\')
     .replace(/\|/g, '\\|');
+}
+
+function plainText(value) {
+  return String(value).trim()
+    .replace(/[\u0000-\u001f\u007f-\u009f\u2028\u2029]/g, ' ')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/[\\`*{}\[\]()#+\-.!_|~]/g, '\\$&');
 }
 
 function table(headers, rows) {
@@ -431,8 +441,8 @@ const sprintPlanLines = (() => {
   }
   const focusMatch = content.match(/^\*\*Proposed first focus:\*\*(.+)$/m);
   const focusLine = focusMatch
-    ? `- Daily PR sprint focus (user-supplied, unverified): ${focusMatch[1].trim()}`
-    : `- Daily PR sprint plan supplied (user-supplied, unverified): ${path.basename(sprintPath)}`;
+    ? `- Daily PR sprint focus (user-supplied, unverified): ${plainText(focusMatch[1])}`
+    : `- Daily PR sprint plan supplied (user-supplied, unverified): ${plainText(path.basename(sprintPath))}`;
   return [focusLine];
 })();
 
