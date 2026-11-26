@@ -24,6 +24,7 @@ export interface PrincipalContext {
 
 export interface ReceiptEntry {
     id: string;
+    signatureVersion?: number;
     command: string;
     tenant: string;
     executor: string;
@@ -43,7 +44,7 @@ export interface ReceiptEntry {
 
 export interface IReceiptLedger {
     initialize?(): Promise<void>;
-    record(entry: Omit<ReceiptEntry, 'id' | 'signature'>): Promise<ReceiptEntry>;
+    record(entry: Omit<ReceiptEntry, 'id' | 'signature' | 'signatureVersion'>): Promise<ReceiptEntry>;
     queryByCommand(command: string, skip?: number, limit?: number): Promise<ReceiptEntry[]>;
     getById(id: string): Promise<ReceiptEntry | undefined>;
     list(skip?: number, limit?: number): Promise<ReceiptEntry[]>;
@@ -58,12 +59,16 @@ class InMemoryReceiptLedger implements IReceiptLedger {
     private entries: ReceiptEntry[] = [];
     private indexByCommand: Map<string, ReceiptEntry[]> = new Map();
 
-    async record(entry: Omit<ReceiptEntry, 'id' | 'signature'>): Promise<ReceiptEntry> {
+    async record(entry: Omit<ReceiptEntry, 'id' | 'signature' | 'signatureVersion'>): Promise<ReceiptEntry> {
         const id = randomUUID();
-        const receipt: ReceiptEntry = {
+        const unsigned: Omit<ReceiptEntry, 'signature'> = {
             ...entry,
             id,
-            signature: this.sign({ ...entry, id }),
+            signatureVersion: 1,
+        };
+        const receipt: ReceiptEntry = {
+            ...unsigned,
+            signature: this.sign(unsigned),
         };
 
         this.entries.push(receipt);
