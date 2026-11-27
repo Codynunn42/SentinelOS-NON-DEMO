@@ -1,0 +1,105 @@
+{
+  "schema": "sentinel.faceplane.pr-snapshot.v1",
+  "source": "github-pr-snapshot",
+  "repository": "Codynunn42/SentinelOS-NON-DEMO",
+  "pullRequest": {
+    "number": 101,
+    "title": "Add governed report-only status summary",
+    "body": "Adds a read-only status summary command. Validation, rollback, and scan evidence are recorded at the exact head below.",
+    "author": "Codynunn42",
+    "isDraft": false,
+    "headSha": "1111111111111111111111111111111111111111",
+    "baseSha": "2222222222222222222222222222222222222222",
+    "mergeStateStatus": "CLEAN",
+    "behindBy": 0
+  },
+  "files": [
+    {
+      "path": "apps/sentinel/src/commands/system/statusSummary.js",
+      "additions": 48,
+      "deletions": 2
+    },
+    {
+      "path": "tests/status-summary.test.js",
+      "additions": 40,
+      "deletions": 0
+    },
+    {
+      "path": "package.json",
+      "additions": 1,
+      "deletions": 0,
+      "dependencyChange": false
+    }
+  ],
+  "checks": [
+    {
+      "name": "validate",
+      "headSha": "1111111111111111111111111111111111111111",
+      "status": "COMPLETED",
+      "conclusion": "SUCCESS"
+    },
+    {
+      "name": "CodeQL",
+      "headSha": "1111111111111111111111111111111111111111",
+      "status": "COMPLETED",
+      "conclusion": "SUCCESS"
+    }
+  ],
+  "reviewThreads": [
+    {
+      "id": "thread-1",
+      "isResolved": true
+    }
+  ],
+  "reviews": [
+    {
+      "author": "independent-reviewer",
+      "authorType": "User",
+      "state": "APPROVED",
+      "commitId": "1111111111111111111111111111111111111111"
+    }
+  ],
+  "evidence": {
+    "validation": [
+      {
+        "command": "pnpm test",
+        "result": "pass",
+        "headSha": "1111111111111111111111111111111111111111"
+      }
+    ],
+    "secretScan": {
+      "tool": "gitleaks",
+      "headSha": "1111111111111111111111111111111111111111",
+      "result": "pass",
+      "findings": 0
+    },
+    "dependencyScan": {
+      "tool": "pnpm audit",
+      "headSha": "1111111111111111111111111111111111111111",
+      "result": "pass",
+      "findings": 0
+    },
+    "rollback": {
+      "plan": "Revert the merge commit; no data migration or deployment state is involved."
+    },
+    "policyDisposition": {
+      "status": "compliant",
+      "reference": "Sentinel command policy: repo:read scope, report-only"
+    },
+    "deploymentImpact": {
+      "disposition": "separate_governed_deployment",
+      "rationale": "Runtime code ships only through the governed deploy workflow after separate approval."
+    }
+  },
+  "policy": {
+    "requiredChecks": [
+      "validate",
+      "CodeQL"
+    ],
+    "minApprovals": 1,
+    "requireIndependentHumanReview": true,
+    "nonIndependentReviewers": [
+      "Codynunn42"
+    ]
+  }
+}
