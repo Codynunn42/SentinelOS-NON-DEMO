@@ -97,6 +97,8 @@ Stage 3 execution note (Day 7 hardening progress):
 - Local setup and smoke verification passed on 2026-08-27 against the Compose PostgreSQL service; both migrations and required tables were confirmed.
 - A durable receipt write/read/signature round trip also passed after correcting PostgreSQL timestamp parsing and deterministic signature verification.
 - Production smoke verification remains blocked until a managed live `DATABASE_URL` is provided.
+- Receipt signing remains at legacy version 1 for PR #47. Version 2 metadata is prerequisite-only and is not accepted as authenticated evidence; PR #51 must activate keyed signing and complete key-management validation before signed receipt promotion.
+- Hosted CI must execute PostgreSQL receipt migration and round-trip tests; skipped database tests do not close the receipt persistence gate.
 - Remaining for Stage 3 closure: turn on the production environment values, move receipts to postgres in the live deployment, and complete gateway/WAF deployment implementation in the live stack.
 
 Stage 3 Azure inventory note (2026-08-28 UTC):

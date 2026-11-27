@@ -1,0 +1,157 @@
+{
+  "requestId": "case-0",
+  "status": "REVIEW_REQUIRED",
+  "executionAllowed": false,
+  "summary": "1 supported source claims; 0 conflicts; 0 required evidence gaps.",
+  "conclusions": [
+    {
+      "key": "review:deadline",
+      "value": "Friday",
+      "support": "SOURCE_REPORTED",
+      "citation": {
+        "documentId": "policy-0",
+        "version": "v1",
+        "digest": "a184d70efe4e01767e42613d7e8fe92a0deb9eb500e72a2fa5422c1bfa1509e3",
+        "startLine": 1,
+        "endLine": 1,
+        "quote": "The review deadline is Friday."
+      }
+    }
+  ],
+  "conflicts": [],
+  "gaps": [],
+  "nextUsefulAction": "Submit for authorized review.",
+  "framing": {
+    "name": "Sentinel Analysis",
+    "systemGoal": "stability-first governed execution",
+    "alignmentScore": 0.9,
+    "riskLevel": "medium",
+    "requiresHumanReview": true,
+    "requiresApproval": true,
+    "actionGate": "human_review_required",
+    "framedSuggestion": "System behavior is stable. Recommended actions can proceed within policy limits.",
+    "explanation": "Deterministic source-claim extraction; factual confidence unassessed.",
+    "interpretation": "System state is stable with medium risk. Ask the human reviewer to assess the cited conclusions.",
+    "directive": "Proceed only with policy-approved actions and continue recording outcomes.",
+    "confidence": null,
+    "evidence": [
+      "policy-0"
+    ],
+    "security": null,
+    "originalSuggestions": []
+  },
+  "discoveryReview": {
+    "verdict": "EVIDENCE_SUPPORTS_PREREQUISITES",
+    "supporting_ids": [
+      "lens-policy-0"
+    ],
+    "blocking_ids": [],
+    "conflicting_ids": [],
+    "missing_requirements": [],
+    "rationale": "All declared action prerequisites satisfied by attributable fixture evidence.",
+    "next_evidence_request": "Submit for authorized review.",
+    "authorization_evidenced": false,
+    "execution_allowed": false
+  },
+  "evidenceTable": [
+    {
+      "id": "policy-0",
+      "version": "v1",
+      "title": "Sentinel review policy",
+      "provenance": {
+        "origin": "fixture_registry",
+        "authoredAt": "2026-11-01T00:00:00Z",
+        "ingestedAt": "2026-11-02T00:00:00Z",
+        "authorityLevel": 4
+      },
+      "lifecycle": {
+        "status": "ACTIVE",
+        "validUntil": "2026-12-01T00:00:00Z",
+        "supersededBy": null
+      },
+      "slot": "CURRENT_AUTHORITY",
+      "authorityLevel": 4,
+      "freshness": {
+        "score": 0.7055555555555556,
+        "rationale": "Remaining validity fraction; not factual confidence or permission."
+      },
+      "reasons": [],
+      "retentionHold": false
+    }
+  ],
+  "signOff": {
+    "required": true,
+    "status": "PENDING_HUMAN_REVIEW",
+    "grantsExecution": false
+  },
+  "telemetry": {
+    "totalWallMs": 0.47313099999996666,
+    "cpuUserUs": 365,
+    "cpuSystemUs": 105,
+    "rssDeltaBytes": 0,
+    "heapUsedDeltaBytes": 122944,
+    "sampledMaxRssBytes": 82468864,
+    "sampledMaxHeapUsedBytes": 20607320,
+    "processLifetimeMaxRssKiB": 83128,
+    "stages": [
+      {
+        "name": "lens",
+        "status": "OK",
+        "wallMs": 0.06078500000000986,
+        "cpuUserUs": 47,
+        "cpuSystemUs": 13,
+        "rssDeltaBytes": 0,
+        "heapUsedDeltaBytes": 7704,
+        "sampledRssBytes": 82468864,
+        "sampledHeapUsedBytes": 20492568
+      },
+      {
+        "name": "sentinel",
+        "status": "OK",
+        "wallMs": 0.1989579999999478,
+        "cpuUserUs": 154,
+        "cpuSystemUs": 45,
+        "rssDeltaBytes": 0,
+        "heapUsedDeltaBytes": 44528,
+        "sampledRssBytes": 82468864,
+        "sampledHeapUsedBytes": 20537976
+      },
+      {
+        "name": "forethought",
+        "status": "OK",
+        "wallMs": 0.03324600000007649,
+        "cpuUserUs": 25,
+        "cpuSystemUs": 7,
+        "rssDeltaBytes": 0,
+        "heapUsedDeltaBytes": 8504,
+        "sampledRssBytes": 82468864,
+        "sampledHeapUsedBytes": 20547152
+      },
+      {
+        "name": "desk",
+        "status": "OK",
+        "wallMs": 0.14409699999998793,
+        "cpuUserUs": 111,
+        "cpuSystemUs": 32,
+        "rssDeltaBytes": 0,
+        "heapUsedDeltaBytes": 58056,
+        "sampledRssBytes": 82468864,
+        "sampledHeapUsedBytes": 20605936
+      },
+      {
+        "name": "telemetry",
+        "status": "OK",
+        "wallMs": 0.006090999999969426,
+        "cpuUserUs": 4,
+        "cpuSystemUs": 1,
+        "rssDeltaBytes": 0,
+        "heapUsedDeltaBytes": 144,
+        "sampledRssBytes": 82468864,
+        "sampledHeapUsedBytes": 20606808
+      }
+    ],
+    "energyJ": null,
+    "carbonG": null,
+    "energyStatus": "UNKNOWN"
+  }
+}
