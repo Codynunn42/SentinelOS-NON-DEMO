@@ -400,11 +400,13 @@ test('preserves long cells and combined backslash/pipe escapes without truncatin
   const f = fixture(context);
   const file = path.join(f.dir, 'synthetic-register.json');
   const register = JSON.parse(fs.readFileSync(file, 'utf8'));
-  const text = `${'a'.repeat(3998)}\\|${'b'.repeat(500)} END-QUALIFICATION`;
+  const text = `${'a'.repeat(3998)}\\|${'b'.repeat(500)} <!-- END-QUALIFICATION --> &`;
   register.sheets.Portfolio[0]['Next Action'] = text;
   fs.writeFileSync(file, JSON.stringify(register));
   passed(f.run());
-  assert.ok(f.read().includes(text.replace(/\\/g, '\\\\').replace(/\|/g, '\\|')));
+  assert.ok(f.read().includes(text.replace(/&/g, '&amp;').replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;').replace(/\\/g, '\\\\').replace(/\|/g, '\\|')));
+  assert.doesNotMatch(f.read(), /<!-- END-QUALIFICATION -->/);
 });
 
 test('normalizes CR, LF and CRLF without allowing cells to create Markdown rows', (context) => {

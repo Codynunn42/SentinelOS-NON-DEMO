@@ -63,7 +63,8 @@ ID comparisons trim surrounding whitespace consistently for duplicate detection,
 dispositions, controls, and predicates. A missing register status remains
 UNVERIFIED rather than being inferred as a disagreement with a narrative.
 Rendered table cells preserve their full escaped values without a length cutoff.
-CR, LF, and CRLF become `<br>`; backslashes and pipes are escaped in that order.
+HTML-sensitive characters are escaped; CR, LF, and CRLF become `<br>`, and
+backslashes and pipes are escaped in that order.
 The reporting wrapper passes one resolved observation date and output directory
 to both generation and packet validation, including when `--date` is omitted
 across UTC midnight.

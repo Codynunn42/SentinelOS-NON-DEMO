@@ -325,6 +325,9 @@ function cell(value) {
 
   return text
     .replace(/\0/g, '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
     .replace(/\r\n|\r|\n/g, '<br>')
     .replace(/\t/g, '    ')
     .replace(/\\/g, '\\\\')
