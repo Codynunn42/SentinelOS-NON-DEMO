@@ -168,10 +168,33 @@ function positiveIntegerOr(value, fallback) {
 }
 
 function normalizePolicy(snapshotPolicy, options) {
+  // The caller's policy is authoritative. A snapshot-embedded policy may only tighten it:
+  // it can never lower minimums, raise limits, drop required checks, or swap the package manager.
+  const caller = { ...DEFAULT_POLICY, ...(isRecord(options.policy) ? options.policy : {}) };
+  const embedded = isRecord(snapshotPolicy) ? snapshotPolicy : {};
+  const pick = (key) => (caller[key] !== undefined && caller[key] !== null ? caller[key] : embedded[key]);
+  const listOf = (value) => (Array.isArray(value) ? value : []);
+  const stricterMin = (key) => {
+    const base = Number.isInteger(caller[key]) && caller[key] >= 0 ? caller[key] : DEFAULT_POLICY[key];
+    return Number.isInteger(embedded[key]) && embedded[key] > base ? embedded[key] : base;
+  };
+  const stricterMax = (key) => {
+    const base = positiveIntegerOr(caller[key], DEFAULT_POLICY[key]);
+    return Number.isInteger(embedded[key]) && embedded[key] > 0 && embedded[key] < base ? embedded[key] : base;
+  };
   const merged = {
-    ...DEFAULT_POLICY,
-    ...(isRecord(snapshotPolicy) ? snapshotPolicy : {}),
-    ...(isRecord(options.policy) ? options.policy : {})
+    expectedRepository: pick('expectedRepository'),
+    expectedPrNumber: pick('expectedPrNumber'),
+    expectedHeadSha: pick('expectedHeadSha'),
+    expectedBaseSha: pick('expectedBaseSha'),
+    requiredChecks: [...listOf(caller.requiredChecks), ...listOf(embedded.requiredChecks)],
+    minApprovals: stricterMin('minApprovals'),
+    requireIndependentHumanReview: caller.requireIndependentHumanReview === true || embedded.requireIndependentHumanReview === true,
+    nonIndependentReviewers: [...listOf(caller.nonIndependentReviewers), ...listOf(embedded.nonIndependentReviewers)],
+    maxChangedFiles: stricterMax('maxChangedFiles'),
+    maxChangedLines: stricterMax('maxChangedLines'),
+    minDescriptionLength: stricterMin('minDescriptionLength'),
+    packageManager: caller.packageManager
   };
 
   return {
@@ -295,6 +318,10 @@ function evaluateIdentity(c, pr, snapshot, policy) {
 
     if (!hasText(pr.title)) {
       c.fail('pr_identity', 'PR_TITLE_MISSING', 'Pull request title is missing.', 'pullRequest.title');
+    }
+
+    if (!hasText(pr.author)) {
+      c.fail('pr_identity', 'PR_AUTHOR_MISSING', 'Pull request author is missing; self-approval cannot be excluded.', 'pullRequest.author (login)');
     }
   }
 
@@ -493,7 +520,7 @@ function evaluateReviews(c, reviews, pr, head, policy) {
 
   const approvals = latest.filter((review) => review.state === 'APPROVED');
   const selfApprovals = approvals.filter((review) => prAuthor && review.author === prAuthor);
-  const nonAuthorApprovals = approvals.filter((review) => !prAuthor || review.author !== prAuthor);
+  const nonAuthorApprovals = prAuthor ? approvals.filter((review) => review.author !== prAuthor) : [];
   const headApprovals = nonAuthorApprovals.filter((review) => isExactSha(head) && review.commitId === head);
   const staleApprovals = nonAuthorApprovals.length - headApprovals.length;
 
@@ -501,6 +528,7 @@ function evaluateReviews(c, reviews, pr, head, policy) {
     const notes = [];
     if (staleApprovals) notes.push(`${staleApprovals} approval(s) on a non-head commit`);
     if (selfApprovals.length) notes.push('author self-approval not counted');
+    if (!prAuthor && approvals.length) notes.push('approvals not counted while the PR author is unknown');
     c.fail('approvals', 'APPROVALS_INSUFFICIENT', `${headApprovals.length} approval(s) at exact head; ${policy.minApprovals} required${notes.length ? ` (${notes.join('; ')})` : ''}.`, `${policy.minApprovals} approval(s) with commitId = ${headLabel(head)} from non-author reviewers`);
   }
 

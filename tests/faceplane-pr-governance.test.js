@@ -132,6 +132,32 @@ test('evidence blockers: secret scan, rollback, validation, dispositions, author
   assert.equal(docsOnly.controls.find((control) => control.id === 'dependency_scan').status, 'not_applicable');
 });
 
+test('missing PR author blocks and never lets approvals count', () => {
+  const report = evaluate((s) => {
+    delete s.pullRequest.author;
+    s.policy.requireIndependentHumanReview = false;
+    s.reviews = [{ author: 'Codynunn42', authorType: 'User', state: 'APPROVED', commitId: HEAD }];
+  });
+  assertBlocked(report, 'pr_identity:PR_AUTHOR_MISSING');
+  assertBlocked(report, 'approvals:APPROVALS_INSUFFICIENT');
+});
+
+test('snapshot-embedded policy can only tighten the caller policy', () => {
+  const loosened = evaluate((s) => {
+    s.reviews = [];
+    s.policy = { minApprovals: 0, requiredChecks: ['validate'], maxChangedFiles: 500, packageManager: 'npm' };
+  }, { policy: { requiredChecks: ['validate', 'CodeQL'] } });
+  assertBlocked(loosened, 'approvals:APPROVALS_INSUFFICIENT');
+  assert.equal(loosened.policy.minApprovals, 1);
+  assert.equal(loosened.policy.maxChangedFiles, 50);
+  assert.equal(loosened.policy.packageManager, 'pnpm');
+  assert.deepEqual(loosened.policy.requiredChecks, ['validate', 'CodeQL']);
+
+  const tightened = evaluate((s) => { s.policy.minApprovals = 2; }, { policy: { minApprovals: 1 } });
+  assertBlocked(tightened, 'approvals:APPROVALS_INSUFFICIENT');
+  assert.equal(tightened.policy.minApprovals, 2);
+});
+
 test('bounded scope limits are enforced', () => {
   assertBlocked(evaluate(null, { policy: { maxChangedFiles: 2 } }), 'bounded_scope:TOO_MANY_FILES');
   assertBlocked(evaluate(null, { policy: { maxChangedLines: 10 } }), 'bounded_scope:TOO_MANY_LINES');
