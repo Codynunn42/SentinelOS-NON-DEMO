@@ -49,6 +49,32 @@ scope. This local result is not an exact-head hosted CI result; hosted checks
 must be rerun after the remediated head is published. The earlier hosted pass
 remains evidence for the earlier `39ee311...` head only.
 
+## November 12 PR #74 continuation (historical)
+
+The November 12 PR #74 correction consolidates #73 without rewriting history.
+See `../synapseeco-state-pinning-2026-11-12/README.md` and its source manifest
+for the combined candidate, **150 repository passes, 3 pending tests**, **37
+C4/bridge cases**, and **25 SynapseEco tests**. Review the first-authorized-read
+digest/snapshot/principal/policy pins and the separation between the fixed
+simulation anchor and live expiry/revocation checks. These are engineering
+regressions and AI-assisted verification, not independent human acceptance.
+
+## Main-aligned PR #74 replacement candidate
+
+PR #73 was subsequently merged into main; its record above is historical.
+This draft continuation is based on main `691f342071740f0bc23b2c83232735026c928e6e`
+and requires separate human review and exact-head hosted checks. On Node
+`v22.23.5` and pnpm `10.33.4`, frozen install, 42 isolated C4/bridge cases,
+all 42 Stage 3 probes, 25 SynapseEco tests, Executive Desk TypeScript, the
+deployment gate and evidence packet checksums passed. The full suite reported
+160 passing and 7 pending; the two previously reported Executive Desk 404
+failures did not reproduce. The pending database tests were not run.
+
+The retained November 12 source manifests describe their original snapshots,
+not the current candidate. This is synthetic, advisory-only research; neither
+these results nor the historical records authorize deployment, production
+enforcement, physical control, governance changes or measured-facility claims.
+
 ## Current candidate and relationship decision
 
 At the user's explicit request, PR #73 now expands the Stage 3 Discovery Lens with the C4 Advisory Job. These previously separate research candidates are integrated through an explicit bridge; neither is silently treated as the other. Review the current PR head and the source hashes in `../forethought-c4-integration-2026-11-11/source-sha256.txt`. The integration parent is `9d95b5b2028c72849b8f3deb12e81332f13481d6`, on `review/forethought-stage3-revised-2026-11-11`.
