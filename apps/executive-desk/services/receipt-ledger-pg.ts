@@ -85,7 +85,7 @@ export class PostgresReceiptLedger {
           payload JSONB NOT NULL,
           authority_check_result JSONB NOT NULL,
           risk_gate_outcome JSONB NOT NULL,
-          signature VARCHAR(64) NOT NULL,
+          signature VARCHAR NOT NULL,
           signature_version SMALLINT NOT NULL DEFAULT 1 CHECK (signature_version IN (1, 2)),
           signature_payload_text TEXT,
           reasons TEXT[] DEFAULT '{}',
@@ -101,9 +101,49 @@ export class PostgresReceiptLedger {
         ALTER TABLE receipts ADD COLUMN IF NOT EXISTS principal_context JSONB;
         ALTER TABLE receipts ADD COLUMN IF NOT EXISTS delegated_by VARCHAR(255);
         ALTER TABLE receipts ADD COLUMN IF NOT EXISTS delegation_expires_at TEXT;
+        DO $$
+        BEGIN
+          IF EXISTS (
+            SELECT 1
+            FROM information_schema.columns
+            WHERE table_schema = current_schema()
+              AND table_name = 'receipts'
+              AND column_name = 'signature'
+              AND character_maximum_length IS NOT NULL
+          ) THEN
+            DROP VIEW IF EXISTS receipts_audit_export;
+            ALTER TABLE receipts ALTER COLUMN signature TYPE VARCHAR;
+          END IF;
+        END
+        $$;
         ALTER TABLE receipts DROP CONSTRAINT IF EXISTS receipts_signature_version_check;
         ALTER TABLE receipts ADD CONSTRAINT receipts_signature_version_check
           CHECK (signature_version IN (1, 2));
+
+        CREATE OR REPLACE VIEW receipts_audit_export AS
+        SELECT
+          id,
+          command,
+          tenant,
+          executor,
+          "timestamp",
+          timestamp_text,
+          status,
+          payload,
+          authority_check_result,
+          risk_gate_outcome,
+          signature,
+          signature_version,
+          signature_payload_text,
+          reasons,
+          principal_context,
+          delegated_by,
+          delegation_expires_at,
+          created_at,
+          (payload ->> 'principalId')::VARCHAR(255) as principal,
+          (payload ->> 'repository')::VARCHAR(255) as repository
+        FROM receipts
+        ORDER BY created_at DESC;
 
         CREATE INDEX IF NOT EXISTS idx_receipts_command ON receipts(command);
         CREATE INDEX IF NOT EXISTS idx_receipts_executor ON receipts(executor);

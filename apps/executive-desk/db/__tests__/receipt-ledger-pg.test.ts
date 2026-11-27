@@ -153,6 +153,37 @@ postgresDescribe('PostgresReceiptLedger isolated persistence round trip', () => 
         }
     });
 
+    it('supports long prerequisite signatures on a fresh schema and in compliance exports', async () => {
+        const pool = new Pool({ connectionString: testDatabaseUrl });
+        const client = await pool.connect();
+        try {
+            await client.query('BEGIN');
+            await client.query('CREATE SCHEMA receipt_fresh_schema_test');
+            await client.query('SET LOCAL search_path TO receipt_fresh_schema_test');
+            const migration = await readFile(
+                'apps/executive-desk/db/migrations/001-receipt-ledger.sql', 'utf8',
+            );
+            await client.query(migration);
+            await client.query(`
+                INSERT INTO receipts
+                  (id, command, tenant, executor, "timestamp", status, payload,
+                   authority_check_result, risk_gate_outcome, signature)
+                VALUES ($1, 'test', 'test-tenant', 'test-operator', '2026-01-01',
+                        'executed', '{}', '{}', '{}', $2)
+            `, [baseReceipt.id, 'a'.repeat(100)]);
+            const stored = await client.query('SELECT signature_version FROM receipts');
+            assert.equal(stored.rows[0].signature_version, 1);
+            const exported = await client.query(
+                "SELECT signature FROM export_receipts_since('2025-01-01')",
+            );
+            assert.deepEqual(exported.rows, [{ signature: 'a'.repeat(100) }]);
+        } finally {
+            await client.query('ROLLBACK');
+            client.release();
+            await pool.end();
+        }
+    });
+
     it('adds version metadata without rewriting a synthetic legacy row', async () => {
         const pool = new Pool({ connectionString: testDatabaseUrl });
         const client = await pool.connect();
@@ -198,6 +229,10 @@ postgresDescribe('PostgresReceiptLedger isolated persistence round trip', () => 
             );
             await client.query(migration);
             await client.query(migration);
+            await client.query(
+                "UPDATE receipts SET signature = $1 WHERE id = $2",
+                ['b'.repeat(100), baseReceipt.id],
+            );
             const result = await client.query(`
                 SELECT id, signature, payload, signature_version,
                        signature_payload_text, timestamp_text,
@@ -206,7 +241,7 @@ postgresDescribe('PostgresReceiptLedger isolated persistence round trip', () => 
             `);
             assert.deepEqual(result.rows, [{
                 id: baseReceipt.id,
-                signature: baseReceipt.signature,
+                signature: 'b'.repeat(100),
                 payload: baseReceipt.payload,
                 signature_version: 1,
                 signature_payload_text: null,

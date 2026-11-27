@@ -7,11 +7,13 @@ ALTER TABLE receipts ADD COLUMN IF NOT EXISTS principal_context JSONB;
 ALTER TABLE receipts ADD COLUMN IF NOT EXISTS delegated_by VARCHAR(255);
 ALTER TABLE receipts ADD COLUMN IF NOT EXISTS delegation_expires_at TEXT;
 
+DROP VIEW IF EXISTS receipts_audit_export;
+ALTER TABLE receipts ALTER COLUMN signature TYPE VARCHAR;
+
 ALTER TABLE receipts DROP CONSTRAINT IF EXISTS receipts_signature_version_check;
 ALTER TABLE receipts ADD CONSTRAINT receipts_signature_version_check
   CHECK (signature_version IN (1, 2));
 
-DROP VIEW IF EXISTS receipts_audit_export;
 CREATE OR REPLACE VIEW receipts_audit_export AS
 SELECT
   id,

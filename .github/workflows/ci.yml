@@ -10,24 +10,9 @@ on:
 jobs:
   sentinel-api:
     runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:16-alpine
-        env:
-          POSTGRES_USER: sentinel
-          POSTGRES_PASSWORD: sentinel-ci-only
-          POSTGRES_DB: sentinel_test
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd "pg_isready -U sentinel -d sentinel_test"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
     env:
       PORT: 3000
       SENTINEL_HMAC_SECRET: ci-test-hmac-secret
-      RECEIPT_LEDGER_TEST_DATABASE_URL: postgres://sentinel:sentinel-ci-only@127.0.0.1:5432/sentinel_test
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -40,7 +25,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: pnpm
 
       - name: Install dependencies
