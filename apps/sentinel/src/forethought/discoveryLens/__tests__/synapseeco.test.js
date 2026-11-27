@@ -108,10 +108,16 @@ describe('SynapseEco through Discovery Lens and C4', function () {
       assert.equal(r.status, 'BLOCKED'); assert.equal(r.evaluation, undefined);
     }
   });
-  it('drops domain output if the docking grant is revoked before release', function () {
-    const f = jobFixture(); let count = 0;
-    f.deps.resolveDockingGrant = () => { if (++count === 2) f.grant.revoked = true; return f.grant; };
-    const r = runSynapseEcoJob(f.request, f.deps); assert.equal(r.status, 'BLOCKED'); assert.equal(r.evaluation, undefined);
+  it('drops domain output if the docking grant changes before release', function () {
+    for (const change of [(grant) => { grant.revoked = true; },
+      (grant) => { grant.expiresAt = '2026-12-02T00:00:00Z'; },
+      (grant) => { grant.facilityIds.push('another-facility'); }]) {
+      const f = jobFixture(); let count = 0;
+      f.deps.resolveDockingGrant = () => { if (++count === 2) change(f.grant); return f.grant; };
+      const r = runSynapseEcoJob(f.request, f.deps);
+      assert.equal(r.status, 'BLOCKED'); assert.equal(r.code, 'STATE_CHANGED_BEFORE_RELEASE');
+      assert.equal(r.evaluation, undefined); assert.equal(r.citations, undefined);
+    }
   });
   it('drops domain output when source contents change during evaluation', function () {
     const f = jobFixture(); let calls = 0; const read = f.deps.store.readVersion;

@@ -1,5 +1,6 @@
 'use strict';
 const fs = require('node:fs');
+const os = require('node:os');
 const path = require('node:path');
 const { performance } = require('node:perf_hooks');
 const { createHash } = require('node:crypto');
@@ -7,8 +8,7 @@ const { jobFixture } = require('../tests/forethoughtAdvisory/synapseEcoFixtures'
 const { artifactDigest } = require('../apps/sentinel/src/archiveIntelligence/artifactPolicy');
 const { runSynapseEcoJob, EVALUATOR_SHA256 } = require('../apps/sentinel/src/forethought/evaluators/synapseEcoJob');
 
-const out = path.join(__dirname, '../docs/executive-desk/evidence/synapseeco-docked-research-2026-11-11');
-fs.mkdirSync(out, { recursive: true });
+const out = fs.mkdtempSync(path.join(os.tmpdir(), 'synapseeco-research-'));
 const fixtures = Array.from({ length: 100 }, (_, index) => {
   const f = jobFixture(); f.request.id = `research-${index}`;
   f.input.payload.forecast.intervals.forEach((s, hour) => {
@@ -53,7 +53,7 @@ for (let repeat = 0; repeat < 5; repeat++) for (const f of fixtures) {
 }
 const q = (values, p) => { const a = [...values].sort((a, b) => a - b); return a[Math.ceil(a.length * p) - 1] ?? null; };
 const complete = samples.filter((s) => s.status === 'REVIEW_REQUIRED');
-const summary = { generatedAt: new Date().toISOString(), base: '51490c22c9091f95d92da312e73c9cf246e17578', evaluatorSha256: EVALUATOR_SHA256,
+const summary = { generatedAt: new Date().toISOString(), evaluatorSha256: EVALUATOR_SHA256,
   node: process.version, platform: process.platform, cases: 100, repeats: 5, measuredCalls: samples.length,
   statuses: samples.reduce((m, s) => { const key = s.domainStatus || s.status; m[key] = (m[key] || 0) + 1; return m; }, {}),
   completePacketLatencyMs: { p50: q(complete.map((s) => s.elapsedMs), .5), p95: q(complete.map((s) => s.elapsedMs), .95), p99: q(complete.map((s) => s.elapsedMs), .99) },
@@ -67,3 +67,4 @@ const f = jobFixture();
 const packet = runSynapseEcoJob(f.request, f.deps);
 fs.writeFileSync(path.join(out, 'sample-review-packet.json'), JSON.stringify(packet, null, 2) + '\n');
 console.log(JSON.stringify(summary, null, 2));
+console.log(`Research output: ${out}`);

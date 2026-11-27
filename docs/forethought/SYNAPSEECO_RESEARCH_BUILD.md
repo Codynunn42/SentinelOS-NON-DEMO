@@ -29,6 +29,11 @@ Cody's requirements define the product: finish the useful job, preserve human au
 
 The authorized artifact is `{config, payload}` JSON. It must be selected by Lens, current in C4, and bound to the requested facility. Payload units are explicitly degC, kW_electric, gCO2/kWh and USD/kWh. The simulation is 24 hourly intervals starting exactly at the trusted clock sampled at job intake, not at a later pipeline-stage clock sample. Latest telemetry is assumed unchanged until start; this assumption is disclosed and must be assessed against facility evidence. R/C, constant COP, operating limits, weather/internal gains and carbon forecasts remain provisional.
 
+Exact millisecond alignment is a synthetic-fixture constraint: a prebuilt
+forecast cannot reliably predict an advancing intake clock. A usable live-data
+alignment policy and any telemetry-to-start modeling require separate research;
+this candidate does not infer a live facility capability.
+
 The November 12 correction pins the authenticated principal, complete Lens
 snapshot, per-source policy, and exact artifact digest/content at first authorized
 intake across both bridge calls. Each check still re-fetches live adapter state,
@@ -39,7 +44,8 @@ Detected drift returns `status: BLOCKED`, `domainStatus: INSUFFICIENT_EVIDENCE`
 and `code: STATE_CHANGED_BEFORE_RELEASE`, without metrics or citations.
 
 Only simulation math uses the fixed intake anchor. C4 freshness and docking
-expiry/revocation continue to use live trusted clocks at release. The synchronous
+expiry/revocation continue to use live trusted clocks at release. The initially
+authorized docking grant is also pinned and compared at release. The synchronous
 adapter checks do not establish atomic transactions or detect unobserved
 change-and-revert (ABA) between checks; production transaction semantics remain
 outstanding.
@@ -101,4 +107,7 @@ pnpm run check:synapseeco-research
 pnpm run benchmark:synapseeco-research
 ```
 
-Use the declared pnpm 10.33.4. Benchmark output is synthetic and local. The generated sample review packet demonstrates the operator artifact; no browser/UI or deployment is required.
+Use the declared pnpm 10.33.4. Benchmark output is synthetic and local; each run
+writes to a new temporary directory printed by the command, leaving historical
+evidence unchanged. The generated sample review packet demonstrates the operator
+artifact; no browser/UI or deployment is required.

@@ -53,8 +53,14 @@ function runSynapseEcoJob(request, deps) {
         }
       }
     };
-    const authorize = () => authorizeAdvisoryDock(MANIFEST, boundDeps.authenticate(request.caller),
-      deps.resolveDockingGrant(MANIFEST.adapterId), { currentTime: deps.clock(), codeSha256: EVALUATOR_SHA256, facilityId: request.facilityId });
+    const authorize = () => {
+      const principal = boundDeps.authenticate(request.caller);
+      const grant = snapshot(deps.resolveDockingGrant(MANIFEST.adapterId));
+      const decision = authorizeAdvisoryDock(MANIFEST, principal, grant,
+        { currentTime: deps.clock(), codeSha256: EVALUATOR_SHA256, facilityId: request.facilityId });
+      if (decision.allowed) pin('dockingGrant', grant);
+      return decision;
+    };
     const admission = authorize();
     if (!admission.allowed) return blocked(request.id, admission.code);
     const run = () => runDiscoveryAdvisoryJob(request, boundDeps);
