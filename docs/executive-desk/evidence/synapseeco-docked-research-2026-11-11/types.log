@@ -1,0 +1,5 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> sentinelos-non-demo@0.1.0 check:executive-desk:types /workspace/scratch/ea27dac3fd2b/synapseeco-build
+> tsc --noEmit --skipLibCheck --module esnext --target es2022 --moduleResolution bundler --esModuleInterop --types mocha,node apps/executive-desk/server.ts apps/executive-desk/api/express-adapter.ts apps/executive-desk/api/receipt-queries.ts apps/executive-desk/api/delegation-queries.ts apps/executive-desk/api/risk-api.ts apps/executive-desk/api/__tests__/routes.test.ts apps/executive-desk/proxy/command-handler.ts apps/executive-desk/proxy/test-handler.ts
+

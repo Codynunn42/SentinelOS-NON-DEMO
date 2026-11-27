@@ -1,0 +1,40 @@
+
+> sentinelos-non-demo@0.1.0 check:synapseeco-research /home/codespace/forethought-pr74-review
+> mocha apps/sentinel/src/forethought/discoveryLens/__tests__/synapseeco.test.js
+
+
+
+  SynapseEco research evaluator
+    ✔ reconciles the model, exact schedules and terminal states
+    ✔ freezes results and configuration without mutating inputs
+    ✔ rejects all displaced horizons, including a one-hour offset
+    ✔ rejects malformed IDs and non-string or rollover dates without throwing
+    ✔ rejects non-finite and numeric-string configuration
+    ✔ requires 24 dense contiguous hourly intervals and declared units
+    ✔ rejects stale/future telemetry and missing forecast provenance
+    ✔ classifies cost and thermal arithmetic overflow as insufficient evidence
+    ✔ returns physical and heuristic failures as different outcomes
+    ✔ handles null and invalid options and JSON-shaped malformed payloads
+
+  Restrictive advisory docking profile
+    ✔ admits an explicitly granted adapter and labels its unsigned local receipt
+    ✔ denies unsupported versions, unknown capabilities and all actuator writes
+    ✔ denies self-requested tiers without an independent matching grant
+    ✔ denies expired, cross-tenant, wrong-code and cross-facility grants
+
+  SynapseEco through Discovery Lens and C4
+    ✔ produces a cited, pending-review domain packet through the real bridge
+    ✔ does not fetch evidence on denied docking admission
+    ✔ blocks stale authority, denied evidence and read holds without domain metrics
+    ✔ drops domain output if the docking grant is revoked before release
+    ✔ drops domain output when source contents change during evaluation
+    ✔ pins first authorized content even when the source and trusted bindings change together
+    ✔ pins the Lens snapshot across both complete bridge calls
+    ✔ does not combine independently valid principals across bridge calls
+    ✔ pins domain time at intake while the trusted clock advances by 1ms per call
+    ✔ still expires the docking lease at release instead of freezing its clock
+    ✔ still checks evidence expiry against live time in the final bridge
+
+
+  25 passing (64ms)
+
