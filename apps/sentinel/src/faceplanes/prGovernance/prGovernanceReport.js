@@ -4,6 +4,7 @@
 function cell(value) {
   return String(value === undefined || value === null || value === '' ? '-' : value)
     .replace(/\r?\n/g, ' ')
+    .replace(/\\/g, '\\\\')
     .replace(/\|/g, '\\|');
 }
 

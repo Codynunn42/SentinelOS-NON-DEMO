@@ -208,4 +208,4 @@ Usage:
 - `pnpm check:faceplane-pr -- --local-git --base origin/main` — LOCAL-ONLY GIT PREFLIGHT: derived from the local checkout only; it carries no GitHub check, review, or scan evidence and always reports `BLOCKED`.
 - `pnpm test:faceplane-pr`
 
-Exit codes: `0` READY, `1` BLOCKED (use `--exit-zero` for report-only pipelines), `2` usage/input error. Report output (Markdown or JSON) includes readiness, score, findings with the exact missing evidence, controls, and the authority boundary. See `fixtures/faceplanes/pr-governance-ready-snapshot.json` for the snapshot shape.
+Exit codes: `0` READY, `1` BLOCKED (use `--exit-zero` for report-only pipelines), `2` usage/input error. Report output (Markdown or JSON) includes readiness, score, findings with the exact missing evidence, controls, and the authority boundary. See `fixtures/faceplanes/pr-governance-ready-snapshot.json` for the snapshot shape. Caller policy (`--policy`, flags, or the command `policy` field) is authoritative; a `policy` embedded in the snapshot can only tighten it, never relax it.

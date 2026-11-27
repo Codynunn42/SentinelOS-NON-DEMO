@@ -163,6 +163,16 @@ function dirname(filePath) {
   return index === -1 ? '' : filePath.slice(0, index);
 }
 
+function stripHtmlComments(text) {
+  let previous;
+  let current = text;
+  do {
+    previous = current;
+    current = current.replace(/<!--[\s\S]*?-->/g, '');
+  } while (current !== previous);
+  return current.replace(/<!--[\s\S]*$/, '');
+}
+
 function positiveIntegerOr(value, fallback) {
   return Number.isInteger(value) && value > 0 ? value : fallback;
 }
@@ -393,7 +403,7 @@ function evaluatePullRequestState(c, pr, policy) {
     c.detail('base_current', '0 commits behind base');
   }
 
-  const body = typeof prRecord.body === 'string' ? prRecord.body.replace(/<!--[\s\S]*?-->/g, '').trim() : '';
+  const body = typeof prRecord.body === 'string' ? stripHtmlComments(prRecord.body).trim() : '';
   if (!body) {
     c.fail('description', 'DESCRIPTION_MISSING', 'Pull request description is empty.', 'pullRequest.body (non-empty description)');
   } else if (body.length < policy.minDescriptionLength) {
