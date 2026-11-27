@@ -193,3 +193,19 @@ Generated report targets:
 - `docs/executive-desk/government-readiness/YYYY-MM-DD.md`
 - `docs/executive-desk/evidence/YYYY-MM-DD-evidence-index.json`
 - `docs/executive-desk/evidence/YYYY-MM-DD-evidence-summary.md`
+
+PR Governance FacePlane (read-only)
+
+- Evaluator: `apps/sentinel/src/faceplanes/prGovernance/prGovernanceEvaluator.js` (CommonJS, reusable). It reports exact missing governance/compliance evidence per control and never grants merge, approval, deployment, thread-resolution, issue/PR closure, or governance-status authority. `READY` means no evidence is missing; it is not an approval.
+- Manifest: `apps/sentinel/src/faceplanes/prGovernance/prGovernanceFacePlane.manifest.json` requests only `FACEPLANE_READ` and `READ_STATUS` with `approvalModel: read_only`; GAAS policy pack `gaas.pr.governance.v1` is evaluate-only.
+- Governed command: `faceplane.pr.audit` (tenant `nunncloud`, requires `repo:read`). Payload: `{ snapshot, policy?, format?: "json" | "markdown" }`. It never runs Git or calls GitHub.
+- Controls: PR identity and exact 40-char head/base pins, repository identity, non-draft, clean merge state, zero commits behind base, description, exact-head check inventory and required checks, unresolved review threads, exact-head approvals, optional independent human review, authority boundary, bounded scope, rollback evidence for runtime changes, validation records, exact-head secret scan, exact-head dependency scan for dependency-manifest changes, policy disposition, deployment-impact disposition, restricted generated/runtime/secret paths, and package/lockfile alignment.
+
+Usage:
+
+- `pnpm check:faceplane-pr -- --snapshot fixtures/faceplanes/pr-governance-ready-snapshot.json`
+- `pnpm check:faceplane-pr -- --snapshot pr.json --format json --out pr-governance.json --require-check validate --require-independent-review --expect-head <40-char sha>`
+- `pnpm check:faceplane-pr -- --local-git --base origin/main` — LOCAL-ONLY GIT PREFLIGHT: derived from the local checkout only; it carries no GitHub check, review, or scan evidence and always reports `BLOCKED`.
+- `pnpm test:faceplane-pr`
+
+Exit codes: `0` READY, `1` BLOCKED (use `--exit-zero` for report-only pipelines), `2` usage/input error. Report output (Markdown or JSON) includes readiness, score, findings with the exact missing evidence, controls, and the authority boundary. See `fixtures/faceplanes/pr-governance-ready-snapshot.json` for the snapshot shape. Caller policy (`--policy`, flags, or the command `policy` field) is authoritative; a `policy` embedded in the snapshot can only tighten it, never relax it.

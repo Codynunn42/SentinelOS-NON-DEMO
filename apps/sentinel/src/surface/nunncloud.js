@@ -12,6 +12,7 @@ const {
   handleRepoWorkflowDiagnose,
   handleRepoWorkflowRetry
 } = require('../commands/repo/control');
+const { handleFaceplanePrAudit } = require('../commands/faceplane/prAudit');
 const { handleRepoRead } = require('../commands/repo/read');
 const { handleRepoUpdate } = require('../commands/repo/updateStructure');
 const { handleProductReframe } = require('../commands/system/productReframe');
@@ -38,6 +39,7 @@ async function evaluateCdnluxToken(payload = {}) {
 const nunncloudHandlers = {
   'system.reframe.product': handleProductReframe,
   'repo.read': handleRepoRead,
+  'faceplane.pr.audit': handleFaceplanePrAudit,
   'repo.update.structure': handleRepoUpdate,
   'repo.control.workflow.diagnose': handleRepoWorkflowDiagnose,
   'repo.control.workflow.retry': handleRepoWorkflowRetry,

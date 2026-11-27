@@ -1,0 +1,64 @@
+{
+  "facePlaneId": "pr-governance",
+  "tenantId": "nunncloud",
+  "name": "PR Governance Face Plane",
+  "purpose": "Read-only evaluation of pull request governance and compliance evidence; reports exact missing evidence and grants no merge, approval, deployment, or thread-resolution authority.",
+  "owner": "Nunn Cloud",
+  "gaasPolicyPack": "gaas.pr.governance.v1",
+  "requestedCapabilities": [
+    "FACEPLANE_READ",
+    "READ_STATUS"
+  ],
+  "approvalModel": "read_only",
+  "telemetryMode": "OFF",
+  "dataClasses": [
+    "pull_request_metadata",
+    "check_status",
+    "review_status",
+    "governance_evidence"
+  ],
+  "evidence": [
+    "exact_head_check_inventory",
+    "review_thread_state",
+    "approval_state",
+    "validation_records",
+    "secret_scan_record",
+    "dependency_scan_record",
+    "rollback_evidence",
+    "policy_disposition",
+    "deployment_impact_disposition"
+  ],
+  "complianceMandates": [
+    "internal_governance",
+    "operator_rbac"
+  ],
+  "routes": [],
+  "controls": [
+    "report_only",
+    "no_merge_authority",
+    "no_approval_authority",
+    "no_deployment_authority",
+    "no_thread_resolution_authority",
+    "no_issue_or_pr_closure",
+    "no_governance_status_change",
+    "exact_head_evidence_required"
+  ],
+  "metadata": {
+    "commands": [
+      "faceplane.pr.audit"
+    ],
+    "requiredScope": "repo:read",
+    "executionMode": "report_only",
+    "gaasMode": "evaluate_only",
+    "prohibitedActions": [
+      "merge",
+      "approve",
+      "deploy",
+      "resolve_threads",
+      "close_issue",
+      "close_pr",
+      "change_governance_status"
+    ]
+  },
+  "createdAt": "2026-11-27T00:00:00.000Z"
+}
