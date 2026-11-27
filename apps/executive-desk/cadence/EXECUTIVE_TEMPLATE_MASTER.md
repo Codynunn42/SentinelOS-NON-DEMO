@@ -127,3 +127,49 @@ Do not infer current health or readiness from this template. Report verified obs
 Use this phrasing for final executive reporting and board communications:
 
 > Overall posture is unverified until current repository, governance, and live-environment evidence has been reviewed. Do not present artifact presence as proof of behavior or readiness.
+
+## Reporting snapshot — {{DATE}}
+
+**Generated UTC:** {{GENERATED_AT}}
+
+{{EXECUTIVE_SUMMARY}}
+
+Governance packet: [generated compact packet]({{GOVERNANCE_PACKET}})
+
+### Governance source reconciliation
+
+{{GOVERNANCE_INPUT}}
+
+### Operating queue
+
+{{QUEUE_SOURCE_NOTE}}
+
+{{OPERATING_QUEUE}}
+
+### Portfolio
+
+{{PORTFOLIO}}
+
+### Personnel and access
+
+{{PERSONNEL_ACCESS}}
+
+### Decisions and approvals
+
+{{DECISIONS}}
+
+### VR workforce
+
+{{WORKFORCE}}
+
+### Risks and open conditions
+
+{{RISKS}}
+
+### Next actions
+
+{{NEXT_ACTIONS}}
+
+### Supporting evidence
+
+{{EVIDENCE_INDEX}}
